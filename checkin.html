@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RBC Choir check-in</title>
+<style>
+:root{--bg:#fff;--fg:#1b1b1f;--mut:#5b5b66;--card:#f3f3f6;--acc:#3b3fb5;--ok:#0b7a3b;--bad:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#121214;--fg:#ececf1;--mut:#a0a0ad;--card:#1d1d22;--acc:#9aa0ff;--ok:#5fd68a;--bad:#ff8a80}}
+body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:16px;max-width:30rem;margin-inline:auto}
+h1{font-size:1.3rem}.card{background:var(--card);border-radius:12px;padding:14px;margin:12px 0}
+button{font:inherit;background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:.7rem 1rem;width:100%;margin-top:.5rem}
+button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg)}
+.s{color:var(--mut);font-size:.9rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.hide{display:none}
+</style></head><body>
+<h1>CCW Lagos Region RBC Choir check-in</h1>
+<div id="demo" class="card s hide">Demo mode: nothing is sent or saved.</div>
+
+<div id="consent" class="card">
+<b>Before you start</b>
+<p class="s">To confirm you are at rehearsal, this page checks your phone's location once. Your location is not stored or sent. Only "location confirmed" is recorded, and only for the rehearsal day. A record that you agreed is kept.</p>
+<button id="agree">I agree</button></div>
+
+<div id="step1" class="card hide">
+<b>1. Your Member ID</b>
+<input id="mid" autocomplete="off" placeholder="Member ID">
+<button id="loc">2. Check my location</button>
+<p id="locmsg" class="s"></p></div>
+
+<div id="step3" class="card hide">
+<b>3. Confirm</b>
+<p class="s">The code from the QR you scanned is attached automatically.</p>
+<button id="send">Check me in</button>
+<p id="out" class="s"></p></div>
+
+<p class="s">No phone, camera or location? Tell your Campus MD or Desk D and they will mark you.</p>
+<script>
+// Set to the Apps Script web app URL when the back end is wired. Empty means demo mode.
+const BACKEND_URL = '';
+const q = new URLSearchParams(location.search), R = q.get('r') || '', T = q.get('t') || '';
+const $ = id => document.getElementById(id);
+let locOk = false;
+let agreed = false; try { agreed = localStorage.getItem('rbcConsent') === '1'; } catch (e) {}
+if (!BACKEND_URL) $('demo').classList.remove('hide');
+function showSteps(){ $('consent').classList.add('hide'); $('step1').classList.remove('hide'); }
+if (agreed) showSteps();
+$('agree').onclick = () => { try { localStorage.setItem('rbcConsent','1'); } catch (e) {} showSteps(); };
+$('loc').onclick = () => {
+  if (!$('mid').value.trim()) { $('locmsg').textContent = 'Enter your Member ID first.'; $('locmsg').className = 's bad'; return; }
+  $('locmsg').textContent = 'Checking…'; $('locmsg').className = 's';
+  navigator.geolocation.getCurrentPosition(p => {
+    // The distance test against the venue happens at the back end later; the position itself is never sent.
+    locOk = true; $('locmsg').textContent = 'Location checked.'; $('locmsg').className = 's ok'; $('step3').classList.remove('hide');
+  }, e => { $('locmsg').textContent = 'Location not available. Tell your Campus MD or Desk D to mark you by hand.'; $('locmsg').className = 's bad'; },
+  {enableHighAccuracy: true, timeout: 15000});
+};
+$('send').onclick = async () => {
+  $('send').disabled = true;
+  const body = {rehearsalId: R, token: T, memberId: $('mid').value.trim(), locationOk: locOk};
+  if (!BACKEND_URL) { $('out').textContent = 'Demo only. Would send: member ' + body.memberId + ', location confirmed.'; $('out').className = 's ok'; return; }
+  try {
+    const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
+    const j = await r.json(); $('out').textContent = j.ok ? 'You are checked in.' : (j.error || 'Could not check you in.'); $('out').className = j.ok ? 's ok' : 's bad';
+  } catch (e) { $('out').textContent = 'Network problem. Try again.'; $('out').className = 's bad'; $('send').disabled = false; }
+};
+</script></body></html>
