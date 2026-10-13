@@ -102,16 +102,21 @@ $('verify').onclick = async () => {
 };
 $('back').onclick = () => show('s1');
 $('out').onclick = () => { token = ''; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); };
+let runId = 0;
 async function start() {
+  const me = ++runId;
   show('s3'); clearTimeout(timer);
+  const stamp = () => new Date().toLocaleTimeString();
   try {
     const j = await call({action: 'qr', token});
-    if (j.signedOut) { token = ''; show('s1'); return; }
-    if (!j.ok) { say('m3', j.error || 'Not available.', 'bad'); $('q').innerHTML = ''; timer = setTimeout(start, 30000); return; }
+    if (me !== runId) return;
+    if (j.signedOut) { token = ''; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} show('s1'); return; }
+    if (!j.ok) { say('m3', 'At ' + stamp() + ': ' + (j.error || 'Not available.') + ' Trying again in 10 seconds. (The old code may no longer work.)', 'bad'); timer = setTimeout(start, 10000); return; }
     $('q').innerHTML = ''; new QRCode($('q'), {text: j.url, width: 260, height: 260});
-    say('m3', 'Renews automatically. Do not share a photo of this screen.');
-    timer = setTimeout(start, Math.max(5000, j.renewInMs + 1000));
-  } catch (e) { say('m3', 'Network problem. Retrying…', 'bad'); timer = setTimeout(start, 15000); }
+    const wait = Math.min(300000, Math.max(5000, Number(j.renewInMs) + 1000 || 60000));
+    say('m3', 'Updated at ' + stamp() + '. Renews in about ' + Math.round(wait / 1000) + ' seconds. Do not share a photo of this screen.');
+    timer = setTimeout(start, wait);
+  } catch (e) { if (me !== runId) return; say('m3', 'At ' + stamp() + ': network problem (' + (e && e.message ? e.message : 'unknown') + '). Trying again in 10 seconds.', 'bad'); timer = setTimeout(start, 10000); }
 }
 if (token) start();
 </script></body></html>
