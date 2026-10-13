@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RBC Choir staff</title>
+<style>
+:root{--bg:#fff;--fg:#1b1b1f;--mut:#5b5b66;--card:#f3f3f6;--acc:#3b3fb5;--ok:#0b7a3b;--bad:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#121214;--fg:#ececf1;--mut:#a0a0ad;--card:#1d1d22;--acc:#9aa0ff;--ok:#5fd68a;--bad:#ff8a80}}
+body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:16px;max-width:30rem;margin-inline:auto}
+h1{font-size:1.3rem}.card{background:var(--card);border-radius:12px;padding:14px;margin:12px 0}
+button{font:inherit;background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:.7rem 1rem;width:100%;margin-top:.5rem}
+input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem}
+.s{color:var(--mut);font-size:.9rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.hide{display:none}
+#q{display:inline-block;padding:12px;background:#fff;margin-top:8px}
+</style></head><body>
+<h1>RBC Choir staff</h1>
+
+<div id="s1" class="card"><b>Sign in</b>
+<input id="mid" autocomplete="off" placeholder="Member ID">
+<button id="send">Email me a code</button><p id="m1" class="s"></p></div>
+
+<div id="s2" class="card hide"><b>Enter the code</b>
+<input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code">
+<button id="verify">Sign in</button><p id="m2" class="s"></p></div>
+
+<div id="s3" class="card hide" style="text-align:center"><b>Scan to check in</b>
+<div id="q"></div><p id="m3" class="s"></p><button id="out">Sign out</button></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyKQlMqQIQ2DiMSp5bEMV_KITJyrOsR8DtPGIRvaMyCxCqGtuxfAJA6DN36fD0txUB6/exec';
+const $ = id => document.getElementById(id);
+let token = '', timer = null;
+try { token = sessionStorage.getItem('rbcTok') || ''; } catch (e) {}
+async function call(body) {
+  const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
+  return r.json();
+}
+function show(id) { for (const x of ['s1','s2','s3']) $(x).classList.toggle('hide', x !== id); }
+function say(id, text, cls) { $(id).textContent = text; $(id).className = 's ' + (cls || ''); }
+$('send').onclick = async () => {
+  if (!$('mid').value.trim()) return say('m1', 'Enter your Member ID.', 'bad');
+  say('m1', 'Sending…');
+  try { const j = await call({action: 'signin.start', memberId: $('mid').value.trim()}); say('m1', j.message || 'Done.', 'ok'); show('s2'); }
+  catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
+};
+$('verify').onclick = async () => {
+  say('m2', 'Checking…');
+  try {
+    const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
+    if (!j.ok) return say('m2', j.error || 'Could not sign in.', 'bad');
+    token = j.token; try { sessionStorage.setItem('rbcTok', token); } catch (e) {}
+    start();
+  } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
+};
+$('out').onclick = () => { token = ''; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); };
+async function start() {
+  show('s3'); clearTimeout(timer);
+  try {
+    const j = await call({action: 'qr', token});
+    if (j.signedOut) { token = ''; show('s1'); return; }
+    if (!j.ok) { say('m3', j.error || 'Not available.', 'bad'); $('q').innerHTML = ''; timer = setTimeout(start, 30000); return; }
+    $('q').innerHTML = ''; new QRCode($('q'), {text: j.url, width: 260, height: 260});
+    say('m3', 'Renews automatically. Do not share a photo of this screen.');
+    timer = setTimeout(start, Math.max(5000, j.renewInMs + 1000));
+  } catch (e) { say('m3', 'Network problem. Retrying…', 'bad'); timer = setTimeout(start, 15000); }
+}
+if (token) start();
+</script></body></html>
