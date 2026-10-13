@@ -18,8 +18,10 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <button id="send">Email me a code</button><p id="m1" class="s"></p></div>
 
 <div id="s2" class="card hide"><b>Enter the code</b>
+<p class="s">Use the newest email. Asking again is possible after the countdown on the first step.</p>
 <input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code">
-<button id="verify">Sign in</button><p id="m2" class="s"></p></div>
+<button id="verify">Sign in</button><p id="m2" class="s"></p>
+<button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
 <div id="s3" class="card hide" style="text-align:center"><b>Scan to check in</b>
 <div id="q"></div><p id="m3" class="s"></p><button id="out">Sign out</button></div>
@@ -36,10 +38,18 @@ async function call(body) {
 }
 function show(id) { for (const x of ['s1','s2','s3']) $(x).classList.toggle('hide', x !== id); }
 function say(id, text, cls) { $(id).textContent = text; $(id).className = 's ' + (cls || ''); }
+let cd = null;
+function cool(ms) {
+  clearInterval(cd);
+  const end = Date.now() + ms, b = $('send');
+  b.disabled = true;
+  const tick = () => { const left = Math.ceil((end - Date.now()) / 1000); if (left <= 0) { clearInterval(cd); b.disabled = false; b.textContent = 'Email me a new code'; } else b.textContent = 'Ask again in ' + Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0'); };
+  tick(); cd = setInterval(tick, 500);
+}
 $('send').onclick = async () => {
   if (!$('mid').value.trim()) return say('m1', 'Enter your Member ID.', 'bad');
   say('m1', 'Sending…');
-  try { const j = await call({action: 'signin.start', memberId: $('mid').value.trim()}); if (!j.ok) return say('m1', (j.error || 'Could not send a code.') + ' (the back end could not send the email; it may need email permission or a new version)', 'bad'); say('m1', j.message || 'Done.', 'ok'); show('s2'); }
+  try { const j = await call({action: 'signin.start', memberId: $('mid').value.trim()}); if (!j.ok) return say('m1', (j.error || 'Could not send a code.') + ' (the back end could not send the email; it may need email permission or a new version)', 'bad'); say('m1', j.message || 'Done.', 'ok'); if (j.waitMs) cool(j.waitMs); show('s2'); }
   catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
 };
 $('verify').onclick = async () => {
@@ -51,6 +61,7 @@ $('verify').onclick = async () => {
     start();
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 };
+$('back').onclick = () => show('s1');
 $('out').onclick = () => { token = ''; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); };
 async function start() {
   show('s3'); clearTimeout(timer);
