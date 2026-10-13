@@ -15,7 +15,7 @@ button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;
 
 <div id="consent" class="card">
 <b>Before you start</b>
-<p class="s">To confirm you are at rehearsal, this page checks your phone's location once. Your location is not stored or sent. Only "location confirmed" is recorded, and only for the rehearsal day. A record that you agreed is kept.</p>
+<p class="s">To confirm you are at rehearsal, this page checks your phone's location once. Your location is sent once to confirm you are at the venue, then thrown away. It is never stored. Only "location confirmed" is recorded, and only for the rehearsal day. A record that you agreed is kept.</p>
 <button id="agree">I agree</button></div>
 
 <div id="step1" class="card hide">
@@ -36,7 +36,7 @@ button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;
 const BACKEND_URL = '';
 const q = new URLSearchParams(location.search), R = q.get('r') || '', T = q.get('t') || '';
 const $ = id => document.getElementById(id);
-let locOk = false;
+let locOk = false, reading = null;
 let agreed = false; try { agreed = localStorage.getItem('rbcConsent') === '1'; } catch (e) {}
 if (!BACKEND_URL) $('demo').classList.remove('hide');
 function showSteps(){ $('consent').classList.add('hide'); $('step1').classList.remove('hide'); }
@@ -46,15 +46,16 @@ $('loc').onclick = () => {
   if (!$('mid').value.trim()) { $('locmsg').textContent = 'Enter your Member ID first.'; $('locmsg').className = 's bad'; return; }
   $('locmsg').textContent = 'Checking…'; $('locmsg').className = 's';
   navigator.geolocation.getCurrentPosition(p => {
-    // The distance test against the venue happens at the back end later; the position itself is never sent.
+    // Sent once to the back end for the venue check, never stored there.
+    reading = {lat: p.coords.latitude, lon: p.coords.longitude, accuracyM: p.coords.accuracy};
     locOk = true; $('locmsg').textContent = 'Location checked.'; $('locmsg').className = 's ok'; $('step3').classList.remove('hide');
   }, e => { $('locmsg').textContent = 'Location not available. Tell your Campus MD or Desk D to mark you by hand.'; $('locmsg').className = 's bad'; },
   {enableHighAccuracy: true, timeout: 15000});
 };
 $('send').onclick = async () => {
   $('send').disabled = true;
-  const body = {rehearsalId: R, token: T, memberId: $('mid').value.trim(), locationOk: locOk};
-  if (!BACKEND_URL) { $('out').textContent = 'Demo only. Would send: member ' + body.memberId + ', location confirmed.'; $('out').className = 's ok'; return; }
+  const body = {rehearsalId: R, token: T, memberId: $('mid').value.trim(), reading: reading};
+  if (!BACKEND_URL) { $('out').textContent = 'Demo only. Would send: member ' + body.memberId + ', location reading (not stored).'; $('out').className = 's ok'; return; }
   try {
     const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
     const j = await r.json(); $('out').textContent = j.ok ? 'You are checked in.' : (j.error || 'Could not check you in.'); $('out').className = j.ok ? 's ok' : 's bad';
