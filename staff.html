@@ -41,11 +41,16 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <button id="rsend">Request absence</button></div>
 <p id="m6" class="s"></p><div id="rmine"></div></div>
 
+<div id="s7" class="card hide"><b style="display:block">Requests waiting for you</b>
+<p class="s">Campus MDs validate. Deciders approve or reject. The member's reason is shown here only so you can decide.</p>
+<div id="qrows"></div><p id="m7" class="s"></p></div>
+
 <div id="tabs" class="card hide" style="display:flex;gap:6px;flex-wrap:wrap">
 <button class="tab" data-v="s3" style="width:auto;flex:1">QR</button>
 <button class="tab" data-v="s4" style="width:auto;flex:1">Check-ins</button>
 <button class="tab" data-v="s5" style="width:auto;flex:1">By hand</button>
-<button class="tab" data-v="s6" style="width:auto;flex:1">Absence</button></div>
+<button class="tab" data-v="s6" style="width:auto;flex:1">Absence</button>
+<button class="tab" data-v="s7" style="width:auto;flex:1">Requests</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyKQlMqQIQ2DiMSp5bEMV_KITJyrOsR8DtPGIRvaMyCxCqGtuxfAJA6DN36fD0txUB6/exec';
@@ -56,9 +61,9 @@ async function call(body) {
   const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
   return r.json();
 }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6'].indexOf(id) !== -1; $('tabs').classList.toggle('hide', !signed); $('tabs').style.display = signed ? 'flex' : 'none'; }
-document.querySelectorAll('.tab').forEach(b => b.onclick = () => { const v = b.dataset.v; if (v === 's3') start(); else { clearTimeout(timer); show(v); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); } });
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7'].indexOf(id) !== -1; $('tabs').classList.toggle('hide', !signed); $('tabs').style.display = signed ? 'flex' : 'none'; }
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => { const v = b.dataset.v; if (v === 's3') start(); else { clearTimeout(timer); show(v); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); } });
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 async function loadRows() {
   say('m4', 'Loading…');
@@ -89,9 +94,29 @@ async function loadAbsence() {
     $('rinfo').textContent = rh ? 'Next rehearsal: ' + new Date(rh.startMs).toLocaleString() + '. Requests ' + (rh.open ? 'are open until ' + new Date(rh.closeMs).toLocaleString() + '.' : 'are closed. Please contact the Global Admin or Assistant Global Admin.') : 'No rehearsal is open for requests yet.';
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
     say('m6', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
-    $('rmine').innerHTML = j.mine.length ? '<b>Your requests</b>' + j.mine.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.status) + '</b> <span class="s">' + new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' + (r.canWithdraw ? '<br><button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + '</div>').join('') : '';
-    $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => { const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m6', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadAbsence(); });
+    $('rmine').innerHTML = j.mine.length ? '<b>Your requests</b>' + j.mine.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.status) + '</b> <span class="s">' + new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' + (r.canWithdraw ? '<br><button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + (r.canAppeal ? '<br><button data-ap="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Appeal</button>' : '') + '</div>').join('') : '';
+    $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => {
+      if (b.dataset.ap) { const why = prompt('Why should this be looked at again? (10 to 300 characters)'); if (!why) return; const a = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m6', a.ok ? 'Appeal sent.' : (a.error || 'Could not appeal.'), a.ok ? 'ok' : 'bad'); loadAbsence(); return; }
+      const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m6', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadAbsence(); });
   } catch (e) { say('m6', 'Network problem. Try again.', 'bad'); }
+}
+const OPLABEL = {validate: 'Validate', approve: 'Approve', reject: 'Reject', 'appeal-approve': 'Approve appeal', 'appeal-reject': 'Reject appeal'};
+async function loadQueue() {
+  say('m7', 'Loading…');
+  try {
+    const j = await call({action: 'absence.queue', token});
+    if (j.signedOut) { token = ''; show('s1'); return; }
+    if (!j.ok) { $('qrows').innerHTML = ''; return say('m7', j.error || 'Not available.', 'bad'); }
+    say('m7', j.items.length ? '' : 'Nothing is waiting for you.');
+    $('qrows').innerHTML = j.items.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.name || 'Member') + '</b> <span class="s">' + esc(r.campus) + ' · ' + esc(r.status) + (r.late ? ' · late route' : '') + (r.flagged ? ' · flagged' : '') + ' · ' + new Date(r.rehearsalStartMs).toLocaleString() + '</span><br><span class="s">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span><br>' +
+      r.ops.map(o => '<button data-id="' + esc(r.requestId) + '" data-op="' + o + '" style="width:auto;padding:.4rem .8rem;margin-right:6px' + (/reject/.test(o) ? ';background:none;color:var(--bad);border:1px solid var(--bad)' : '') + '">' + OPLABEL[o] + '</button>').join('') + '</div>').join('');
+    $('qrows').querySelectorAll('button').forEach(b => b.onclick = async () => {
+      let reason = '';
+      if (/reject/.test(b.dataset.op) || (b.dataset.op === 'validate' && b.closest('div').textContent.indexOf('flagged') !== -1)) { reason = prompt('Reason (10 to 300 characters):'); if (!reason) return; }
+      const k = await call({action: 'absence.act', token, requestId: b.dataset.id, op: b.dataset.op, reason});
+      say('m7', k.ok ? 'Saved: ' + k.status : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); if (k.ok) loadQueue();
+    });
+  } catch (e) { say('m7', 'Network problem. Try again.', 'bad'); }
 }
 $('rsend').onclick = async () => {
   $('rsend').disabled = true;
