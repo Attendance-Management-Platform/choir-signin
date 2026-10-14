@@ -35,10 +35,17 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <p class="s">For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.</p>
 <input id="hid" autocomplete="off" placeholder="Member ID"><button id="hmark">Mark present</button><p id="m5" class="s"></p></div>
 
+<div id="s6" class="card hide"><b style="display:block">Absence request</b>
+<p id="rinfo" class="s"></p>
+<div id="rform" class="hide"><textarea id="rreason" rows="3" maxlength="300" placeholder="Your reason (10 to 300 characters). Only you and the people who decide can see it." style="font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem"></textarea>
+<button id="rsend">Request absence</button></div>
+<p id="m6" class="s"></p><div id="rmine"></div></div>
+
 <div id="tabs" class="card hide" style="display:flex;gap:6px;flex-wrap:wrap">
 <button class="tab" data-v="s3" style="width:auto;flex:1">QR</button>
 <button class="tab" data-v="s4" style="width:auto;flex:1">Check-ins</button>
-<button class="tab" data-v="s5" style="width:auto;flex:1">By hand</button></div>
+<button class="tab" data-v="s5" style="width:auto;flex:1">By hand</button>
+<button class="tab" data-v="s6" style="width:auto;flex:1">Absence</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyKQlMqQIQ2DiMSp5bEMV_KITJyrOsR8DtPGIRvaMyCxCqGtuxfAJA6DN36fD0txUB6/exec';
@@ -49,9 +56,9 @@ async function call(body) {
   const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
   return r.json();
 }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5'].indexOf(id) !== -1; $('tabs').classList.toggle('hide', !signed); $('tabs').style.display = signed ? 'flex' : 'none'; }
-document.querySelectorAll('.tab').forEach(b => b.onclick = () => { const v = b.dataset.v; if (v === 's3') start(); else { clearTimeout(timer); show(v); if (v === 's4') loadRows(); } });
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6'].indexOf(id) !== -1; $('tabs').classList.toggle('hide', !signed); $('tabs').style.display = signed ? 'flex' : 'none'; }
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => { const v = b.dataset.v; if (v === 's3') start(); else { clearTimeout(timer); show(v); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); } });
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 async function loadRows() {
   say('m4', 'Loading…');
@@ -71,6 +78,27 @@ async function loadRows() {
     });
   } catch (e) { say('m4', 'Network problem. Try again.', 'bad'); }
 }
+async function loadAbsence() {
+  say('m6', 'Loading…'); $('rform').classList.add('hide');
+  try {
+    const j = await call({action: 'absence.state', token});
+    if (j.signedOut) { token = ''; show('s1'); return; }
+    if (!j.ok) { $('rmine').innerHTML = ''; return say('m6', j.error || 'Not available.', 'bad'); }
+    const rh = j.rehearsal;
+    const live = j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
+    $('rinfo').textContent = rh ? 'Next rehearsal: ' + new Date(rh.startMs).toLocaleString() + '. Requests ' + (rh.open ? 'are open until ' + new Date(rh.closeMs).toLocaleString() + '.' : 'are closed. Please contact the Global Admin or Assistant Global Admin.') : 'No rehearsal is open for requests yet.';
+    $('rform').classList.toggle('hide', !(rh && rh.open && !live));
+    say('m6', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
+    $('rmine').innerHTML = j.mine.length ? '<b>Your requests</b>' + j.mine.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.status) + '</b> <span class="s">' + new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' + (r.canWithdraw ? '<br><button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + '</div>').join('') : '';
+    $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => { const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m6', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadAbsence(); });
+  } catch (e) { say('m6', 'Network problem. Try again.', 'bad'); }
+}
+$('rsend').onclick = async () => {
+  $('rsend').disabled = true;
+  try { const k = await call({action: 'absence.submit', token, reason: $('rreason').value.trim()}); say('m6', k.ok ? 'Request sent.' : (k.error || 'Could not send.'), k.ok ? 'ok' : 'bad'); if (k.ok) { $('rreason').value = ''; loadAbsence(); } }
+  catch (e) { say('m6', 'Network problem. Try again.', 'bad'); }
+  $('rsend').disabled = false;
+};
 $('hmark').onclick = async () => {
   if (!$('hid').value.trim()) return say('m5', 'Enter the Member ID.', 'bad');
   try { const k = await call({action: 'handmark', token, memberId: $('hid').value.trim()}); say('m5', k.ok ? 'Marked present (by hand).' : (k.error || 'Could not mark.'), k.ok ? 'ok' : 'bad'); if (k.ok) $('hid').value = ''; }
@@ -111,6 +139,7 @@ async function start() {
     const j = await call({action: 'qr', token});
     if (me !== runId) return;
     if (j.signedOut) { token = ''; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} show('s1'); return; }
+    if (!j.ok && /cannot show/i.test(j.error || '')) { show('s6'); loadAbsence(); return; }
     if (!j.ok) { say('m3', 'At ' + stamp() + ': ' + (j.error || 'Not available.') + ' Trying again in 10 seconds. (The old code may no longer work.)', 'bad'); timer = setTimeout(start, 10000); return; }
     $('q').innerHTML = ''; new QRCode($('q'), {text: j.url, width: 260, height: 260});
     const wait = Math.min(300000, Math.max(5000, Number(j.renewInMs) + 1000 || 60000));
