@@ -13,6 +13,11 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 </style></head><body>
 <h1>RBC Choir staff</h1>
 
+<div id="bar" class="card hide" style="display:none;align-items:center;justify-content:space-between;gap:10px">
+<span id="who" class="s" style="min-width:0"></span>
+<button id="out" style="width:auto;margin:0;padding:.4rem .9rem;background:none;color:var(--acc);border:1px solid var(--acc)">Sign out</button></div>
+<div id="busy" class="s hide" style="text-align:center">Working…</div>
+
 <div id="s1" class="card"><b>Sign in</b>
 <input id="mid" autocomplete="off" placeholder="Member ID">
 <button id="send">Email me a code</button><p id="m1" class="s"></p></div>
@@ -24,7 +29,7 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
 <div id="s3" class="card hide" style="text-align:center"><b style="display:block">Scan to check in</b>
-<div id="q"></div><p id="m3" class="s"></p><button id="out">Sign out</button></div>
+<div id="q"></div><p id="m3" class="s"></p></div>
 
 
 <div id="s4" class="card hide"><b style="display:block">Today's check-ins</b>
@@ -45,31 +50,48 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <p class="s">Campus MDs validate. Deciders approve or reject. The member's reason is shown here only so you can decide.</p>
 <div id="qrows"></div><p id="m7" class="s"></p></div>
 
-<div id="tabs" class="card hide" style="display:flex;gap:6px;flex-wrap:wrap">
-<button class="tab" data-v="s3" style="width:auto;flex:1">QR</button>
-<button class="tab" data-v="s4" style="width:auto;flex:1">Check-ins</button>
-<button class="tab" data-v="s5" style="width:auto;flex:1">By hand</button>
-<button class="tab" data-v="s6" style="width:auto;flex:1">Absence</button>
-<button class="tab" data-v="s7" style="width:auto;flex:1">Requests</button></div>
+<div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyKQlMqQIQ2DiMSp5bEMV_KITJyrOsR8DtPGIRvaMyCxCqGtuxfAJA6DN36fD0txUB6/exec';
 const $ = id => document.getElementById(id);
 let token = '', timer = null;
 try { token = sessionStorage.getItem('rbcTok') || ''; } catch (e) {}
+let pending = 0, busyT = null;
 async function call(body) {
-  const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
-  return r.json();
+  if (++pending === 1) busyT = setTimeout(() => $('busy').classList.remove('hide'), 400);
+  try {
+    const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
+    return await r.json();
+  } finally {
+    if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
+  }
 }
+const TABDEF = {qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests']};
+const LANDING = ['qr', 'checkins', 'requests', 'absence'];
+let myTabs = [], myName = '';
+function drawTabs() {
+  $('tabs').innerHTML = myTabs.map(k => '<button class="tab" data-v="' + TABDEF[k][0] + '" style="width:auto;flex:1">' + TABDEF[k][1] + '</button>').join('');
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => go(b.dataset.v));
+  $('who').textContent = myName ? 'Signed in: ' + myName : 'Signed in';
+}
+function go(v) {
+  clearTimeout(timer);
+  if (v === 's3') return start();
+  show(v); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue();
+}
+function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
+function signedOutNow() { token = ''; myTabs = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
 function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7'].indexOf(id) !== -1; $('tabs').classList.toggle('hide', !signed); $('tabs').style.display = signed ? 'flex' : 'none'; }
-document.querySelectorAll('.tab').forEach(b => b.onclick = () => { const v = b.dataset.v; if (v === 's3') start(); else { clearTimeout(timer); show(v); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); } });
+  const signed = ['s3','s4','s5','s6','s7'].indexOf(id) !== -1;
+  for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
+  document.querySelectorAll('.tab').forEach(b => { b.style.opacity = b.dataset.v === id ? '1' : '.65'; }); }
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 async function loadRows() {
   say('m4', 'Loading…');
   try {
     const j = await call({action: 'validate.list', token});
-    if (j.signedOut) { token = ''; show('s1'); return; }
+    if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('rows').innerHTML = ''; return say('m4', j.error || 'Not available.', 'bad'); }
     say('m4', j.rows.length ? '' : 'No check-ins yet.');
     $('rows').innerHTML = j.rows.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.memberId) + '</b> <span class="s">' + new Date(r.time).toLocaleTimeString() + (r.tags.length ? ' · ' + esc(r.tags.join(', ')) : '') + (r.validatedBy ? ' · checked' : '') + '</span><br>' +
@@ -87,7 +109,7 @@ async function loadAbsence() {
   say('m6', 'Loading…'); $('rform').classList.add('hide');
   try {
     const j = await call({action: 'absence.state', token});
-    if (j.signedOut) { token = ''; show('s1'); return; }
+    if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('rmine').innerHTML = ''; return say('m6', j.error || 'Not available.', 'bad'); }
     const rh = j.rehearsal;
     const live = j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
@@ -105,7 +127,7 @@ async function loadQueue() {
   say('m7', 'Loading…');
   try {
     const j = await call({action: 'absence.queue', token});
-    if (j.signedOut) { token = ''; show('s1'); return; }
+    if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('qrows').innerHTML = ''; return say('m7', j.error || 'Not available.', 'bad'); }
     say('m7', j.items.length ? '' : 'Nothing is waiting for you.');
     $('qrows').innerHTML = j.items.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.name || 'Member') + '</b> <span class="s">' + esc(r.campus) + ' · ' + esc(r.status) + (r.late ? ' · late route' : '') + (r.flagged ? ' · flagged' : '') + ' · ' + new Date(r.rehearsalStartMs).toLocaleString() + '</span><br><span class="s">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span><br>' +
@@ -150,11 +172,11 @@ $('verify').onclick = async () => {
     const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
     if (!j.ok) return say('m2', j.error || 'Could not sign in.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); } catch (e) {}
-    start();
+    myTabs = j.tabs || ['absence']; myName = j.name || ''; drawTabs(); land();
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 };
 $('back').onclick = () => show('s1');
-$('out').onclick = () => { token = ''; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); };
+$('out').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
 let runId = 0;
 async function start() {
   const me = ++runId;
@@ -163,8 +185,7 @@ async function start() {
   try {
     const j = await call({action: 'qr', token});
     if (me !== runId) return;
-    if (j.signedOut) { token = ''; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} show('s1'); return; }
-    if (!j.ok && /cannot show/i.test(j.error || '')) { show('s6'); loadAbsence(); return; }
+    if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { say('m3', 'At ' + stamp() + ': ' + (j.error || 'Not available.') + ' Trying again in 10 seconds. (The old code may no longer work.)', 'bad'); timer = setTimeout(start, 10000); return; }
     $('q').innerHTML = ''; new QRCode($('q'), {text: j.url, width: 260, height: 260});
     const wait = Math.min(300000, Math.max(5000, Number(j.renewInMs) + 1000 || 60000));
@@ -172,5 +193,5 @@ async function start() {
     timer = setTimeout(start, wait);
   } catch (e) { if (me !== runId) return; say('m3', 'At ' + stamp() + ': network problem (' + (e && e.message ? e.message : 'unknown') + '). Trying again in 10 seconds.', 'bad'); timer = setTimeout(start, 10000); }
 }
-if (token) start();
+if (token) call({action: 'me', token}).then(j => { if (j.ok) { myTabs = j.tabs; myName = j.name; drawTabs(); land(); } else signedOutNow(); }).catch(() => signedOutNow());
 </script></body></html>
