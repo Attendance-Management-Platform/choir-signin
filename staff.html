@@ -44,7 +44,12 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <p id="rinfo" class="s"></p>
 <div id="rform" class="hide"><textarea id="rreason" rows="3" maxlength="300" placeholder="Your reason (10 to 300 characters). Only you and the people who decide can see it." style="font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem"></textarea>
 <button id="rsend">Request absence</button></div>
-<p id="m6" class="s"></p><div id="rmine"></div></div>
+<p id="m6" class="s"></p><div id="rmine"></div>
+<div id="rfor" class="hide" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b>Submit for a member</b>
+<p class="s">Late route for the Global Admin or Assistant Global Admin. Use it when a member could not ask before the cut-off.</p>
+<input id="rfid" autocomplete="off" placeholder="Member ID">
+<textarea id="rfreason" rows="2" maxlength="300" placeholder="Reason (10 to 300 characters)" style="font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem"></textarea>
+<button id="rfsend">Submit for this member</button><p id="m6b" class="s"></p></div></div>
 
 <div id="s7" class="card hide"><b style="display:block">Requests waiting for you</b>
 <p class="s">Campus MDs validate. Deciders approve or reject. The member's reason is shown here only so you can decide.</p>
@@ -115,6 +120,7 @@ async function loadAbsence() {
     const live = j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
     $('rinfo').textContent = rh ? 'Next rehearsal: ' + new Date(rh.startMs).toLocaleString() + '. Requests ' + (rh.open ? 'are open until ' + new Date(rh.closeMs).toLocaleString() + '.' : 'are closed. Please contact the Global Admin or Assistant Global Admin.') : 'No rehearsal is open for requests yet.';
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
+    $('rfor').classList.toggle('hide', !j.canSubmitFor);
     say('m6', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
     $('rmine').innerHTML = j.mine.length ? '<b>Your requests</b>' + j.mine.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.status) + '</b> <span class="s">' + new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' + (r.canWithdraw ? '<br><button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + (r.canAppeal ? '<br><button data-ap="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Appeal</button>' : '') + '</div>').join('') : '';
     $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => {
@@ -122,7 +128,7 @@ async function loadAbsence() {
       const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m6', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadAbsence(); });
   } catch (e) { say('m6', 'Network problem. Try again.', 'bad'); }
 }
-const OPLABEL = {validate: 'Validate', approve: 'Approve', reject: 'Reject', 'appeal-approve': 'Approve appeal', 'appeal-reject': 'Reject appeal'};
+const OPLABEL = {validate: 'Validate', approve: 'Approve', reject: 'Reject', delegate: 'Hand to a Campus MD', 'appeal-approve': 'Approve appeal', 'appeal-reject': 'Reject appeal'};
 async function loadQueue() {
   say('m7', 'Loading…');
   try {
@@ -130,16 +136,24 @@ async function loadQueue() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('qrows').innerHTML = ''; return say('m7', j.error || 'Not available.', 'bad'); }
     say('m7', j.items.length ? '' : 'Nothing is waiting for you.');
-    $('qrows').innerHTML = j.items.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.name || 'Member') + '</b> <span class="s">' + esc(r.campus) + ' · ' + esc(r.status) + (r.late ? ' · late route' : '') + (r.flagged ? ' · flagged' : '') + ' · ' + new Date(r.rehearsalStartMs).toLocaleString() + '</span><br><span class="s">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span><br>' +
+    $('qrows').innerHTML = j.items.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.name || 'Member') + '</b> <span class="s">' + esc(r.campus) + ' · ' + esc(r.status) + (r.late ? ' · late route' : '') + (r.flagged ? ' · flagged' : '') + (r.handedToCampusMd ? ' · handed to a Campus MD' : '') + ' · ' + new Date(r.rehearsalStartMs).toLocaleString() + '</span><br><span class="s">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span><br>' +
       r.ops.map(o => '<button data-id="' + esc(r.requestId) + '" data-op="' + o + '" style="width:auto;padding:.4rem .8rem;margin-right:6px' + (/reject/.test(o) ? ';background:none;color:var(--bad);border:1px solid var(--bad)' : '') + '">' + OPLABEL[o] + '</button>').join('') + '</div>').join('');
     $('qrows').querySelectorAll('button').forEach(b => b.onclick = async () => {
-      let reason = '';
+      let reason = '', delegateMemberId = '';
+      if (b.dataset.op === 'delegate') { delegateMemberId = prompt('Member ID of the Campus MD to hand this to (same campus as the member):'); if (!delegateMemberId) return; }
       if (/reject/.test(b.dataset.op) || (b.dataset.op === 'validate' && b.closest('div').textContent.indexOf('flagged') !== -1)) { reason = prompt('Reason (10 to 300 characters):'); if (!reason) return; }
-      const k = await call({action: 'absence.act', token, requestId: b.dataset.id, op: b.dataset.op, reason});
+      const k = await call({action: 'absence.act', token, requestId: b.dataset.id, op: b.dataset.op, reason, delegateMemberId});
       say('m7', k.ok ? 'Saved: ' + k.status : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); if (k.ok) loadQueue();
     });
   } catch (e) { say('m7', 'Network problem. Try again.', 'bad'); }
 }
+$('rfsend').onclick = async () => {
+  $('rfsend').disabled = true;
+  try { const k = await call({action: 'absence.submitFor', token, memberId: $('rfid').value.trim(), reason: $('rfreason').value.trim()});
+    say('m6b', k.ok ? 'Submitted for the member' + (k.late ? ' (late route).' : '.') : (k.error || 'Could not submit.'), k.ok ? 'ok' : 'bad'); if (k.ok) { $('rfid').value = ''; $('rfreason').value = ''; } }
+  catch (e) { say('m6b', 'Network problem. Try again.', 'bad'); }
+  $('rfsend').disabled = false;
+};
 $('rsend').onclick = async () => {
   $('rsend').disabled = true;
   try { const k = await call({action: 'absence.submit', token, reason: $('rreason').value.trim()}); say('m6', k.ok ? 'Request sent.' : (k.error || 'Could not send.'), k.ok ? 'ok' : 'bad'); if (k.ok) { $('rreason').value = ''; loadAbsence(); } }
