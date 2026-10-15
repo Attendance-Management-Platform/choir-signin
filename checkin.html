@@ -81,4 +81,10 @@ $('send').onclick = async () => {
     }
   }
 };
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+  const card = e.target.closest('.card') || document.body;
+  const after = [...card.querySelectorAll('button')].find(b => !b.disabled && b.offsetParent && (e.target.compareDocumentPosition(b) & 4));
+  if (after) { e.preventDefault(); after.click(); }
+});
 </script></body></html>
