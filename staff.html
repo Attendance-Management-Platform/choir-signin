@@ -33,7 +33,9 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 
 
 <div id="s4" class="card hide"><b style="display:block">Today's check-ins</b>
-<p class="s">Tick off each one you have checked. Late and hand-marked entries are labelled.</p>
+<p class="s">Flagged ones (late, hand-marked) come first with a red edge. Check them one by one, tick several, or validate all the clean ones at once. Any validation can be undone with a reason.</p>
+<p id="vsum" class="s"></p>
+<div id="vbar" class="hide"><button id="vall" style="width:auto;padding:.5rem .9rem">Validate all clean</button> <button id="vtick" style="width:auto;padding:.5rem .9rem;background:none;color:var(--acc);border:1px solid var(--acc)">Validate ticked (0)</button></div>
 <div id="rows"></div><p id="m4" class="s"></p></div>
 
 <div id="s5" class="card hide"><b>Mark a member by hand</b>
@@ -97,17 +99,42 @@ async function loadRows() {
   try {
     const j = await call({action: 'validate.list', token});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('rows').innerHTML = ''; return say('m4', j.error || 'Not available.', 'bad'); }
+    if (!j.ok) { $('rows').innerHTML = ''; $('vbar').classList.add('hide'); return say('m4', j.error || 'Not available.', 'bad'); }
+    const c = j.counts || {waiting: 0, clean: 0, flagged: 0, validated: 0};
     say('m4', j.rows.length ? '' : 'No check-ins yet.');
-    $('rows').innerHTML = j.rows.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.memberId) + '</b> <span class="s">' + new Date(r.time).toLocaleTimeString() + (r.tags.length ? ' · ' + esc(r.tags.join(', ')) : '') + (r.validatedBy ? ' · checked' : '') + '</span><br>' +
+    $('vsum').textContent = c.waiting + ' waiting (' + c.clean + ' clean, ' + c.flagged + ' flagged) · ' + c.validated + ' checked';
+    $('vbar').classList.toggle('hide', !j.rows.length);
+    $('vall').textContent = 'Validate all clean (' + c.clean + ')';
+    $('vall').disabled = c.clean === 0;
+    $('rows').innerHTML = j.rows.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0' + (r.flagged && !r.validatedBy ? ';border-left:4px solid var(--bad);padding-left:8px' : '') + '">' +
+      (r.canValidate ? '<input type="checkbox" class="tick" data-id="' + esc(r.memberId) + '" style="width:auto;margin:0 8px 0 0;vertical-align:middle"> ' : '') +
+      '<b>' + esc(r.memberId) + '</b> <span class="s">' + new Date(r.time).toLocaleTimeString() + (r.tags.length ? ' · ' + esc(r.tags.join(', ')) : '') + (r.validatedBy ? ' · checked' : '') + '</span><br>' +
       (r.canValidate ? '<button data-act="v" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem">Checked</button> ' : '') +
+      (r.canUndo ? '<button data-act="u" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--bad);border:1px solid var(--bad)">Undo</button> ' : '') +
       (!r.lateCorrected ? '<button data-act="l" data-late="' + (r.late ? '0' : '1') + '" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">' + (r.late ? 'Was on time' : 'Mark late') + '</button>' : '') + '</div>').join('');
+    const ticks = () => Array.from($('rows').querySelectorAll('.tick:checked')).map(x => x.dataset.id);
+    const upd = () => { const n = ticks().length; $('vtick').textContent = 'Validate ticked (' + n + ')'; $('vtick').disabled = n === 0; };
+    $('rows').querySelectorAll('.tick').forEach(x => x.onchange = upd);
+    upd();
     $('rows').querySelectorAll('button').forEach(b => b.onclick = async () => {
       let body;
       if (b.dataset.act === 'v') body = {action: 'validate.mark', token, memberId: b.dataset.id};
+      else if (b.dataset.act === 'u') { const reason = prompt('Why are you undoing this validation? (5 to 200 characters)'); if (!reason) return; body = {action: 'validate.undo', token, memberId: b.dataset.id, reason}; }
       else { const reason = prompt('Reason for the change (required):'); if (!reason) return; body = {action: 'late.correct', token, memberId: b.dataset.id, newLate: b.dataset.late === '1', reason}; }
       const k = await call(body); say('m4', k.ok ? 'Saved.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); if (k.ok) loadRows();
     });
+    $('vtick').onclick = async () => {
+      const ids = ticks(); if (!ids.length) return;
+      const k = await call({action: 'validate.markMany', token, memberIds: ids});
+      say('m4', k.ok ? (k.done + ' checked' + (k.skipped.length ? ', ' + k.skipped.length + ' not allowed (' + k.skipped.map(x => x.memberId).join(', ') + ')' : '') + '.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+      loadRows();
+    };
+    $('vall').onclick = async () => {
+      if (!confirm('Validate all ' + c.clean + ' clean check-ins? Flagged ones stay for you to check one by one. You can undo any of them afterwards.')) return;
+      const k = await call({action: 'validate.markAllClean', token});
+      say('m4', k.ok ? (k.done + ' checked' + (k.skipped.length ? ', ' + k.skipped.length + ' not allowed' : '') + '.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+      loadRows();
+    };
   } catch (e) { say('m4', 'Network problem. Try again.', 'bad'); }
 }
 async function loadAbsence() {
