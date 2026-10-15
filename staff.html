@@ -34,6 +34,7 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 
 <div id="s4" class="card hide"><b style="display:block">Today's check-ins</b>
 <p class="s">Flagged ones (late, hand-marked) come first with a red edge. Check them one by one, tick several, or validate all the clean ones at once. Any validation can be undone with a reason.</p>
+<div id="ckpick" class="hide"><label class="s">Rehearsal</label><select id="ckrid"></select></div>
 <p id="vsum" class="s"></p>
 <div id="vbar" class="hide"><button id="vall" style="width:auto;padding:.5rem .9rem">Validate all clean</button> <button id="vtick" style="width:auto;padding:.5rem .9rem;background:none;color:var(--acc);border:1px solid var(--acc)">Validate ticked (0)</button></div>
 <div id="rows"></div><p id="m4" class="s"></p></div>
@@ -53,15 +54,16 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <textarea id="rfreason" rows="2" maxlength="300" placeholder="Reason (10 to 300 characters)" style="font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem"></textarea>
 <button id="rfsend">Submit for this member</button><p id="m6b" class="s"></p></div></div>
 
-<div id="s8" class="card hide"><b style="display:block">Rehearsal</b>
-<p id="rhinfo" class="s"></p>
+<div id="s8" class="card hide"><b style="display:block">Rehearsals</b>
+<p id="rhcount" class="s"></p>
+<div id="rhlist"></div>
 <div id="rhbtns"></div>
-<div id="rhmenu" class="hide" style="margin-top:12px"><button id="rhmake" type="button" data-noenter="1">Make a rehearsal</button> <button id="rhedit" type="button" data-noenter="1">Edit or cancel a rehearsal</button><p id="rhhint" class="s"></p></div>
+<div id="rhmenu" class="hide" style="margin-top:12px"><button id="rhmake" type="button" data-noenter="1">Make a rehearsal</button><p id="rhhint" class="s"></p></div>
 <div id="rhvbox" class="hide" style="margin-top:10px"><p id="rhvinfo" class="s"></p>
 <button id="rhgeo" type="button" data-noenter="1">Confirm the venue position from this phone</button>
 <p class="s">Do this at the venue shortly before the rehearsal. Anyone from Desk B, Desk D or the admins can do it. If nobody does, the position found from the address is used.</p></div>
-<div id="rhform" class="hide" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b id="rhtitle">Set up a rehearsal</b>
-<p class="s">Times are Lagos time. Check-in can open from one hour before the start and closes at the finish time.</p>
+<div id="rhform" class="hide" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b id="rhtitle">Make a rehearsal</b>
+<p class="s">Times are Lagos time. Check-in can open from one hour before the start and closes at the finish time. At most three rehearsals can be planned at once; the next upcoming one is the one members check in to and are told about.</p>
 <label class="s">Date</label><input id="rhdate" type="date">
 <label class="s">Start time</label><input id="rhstart" type="time">
 <label class="s">Finish time</label><input id="rhfinish" type="time">
@@ -72,7 +74,9 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <p class="s">In Google Maps press and hold the venue and tap the two numbers; you can paste "6.5244, 3.3792" into the first box.</p>
 <label class="s">Venue latitude</label><input id="rhlat" autocomplete="off" placeholder="e.g. 6.5244">
 <label class="s">Venue longitude</label><input id="rhlon" autocomplete="off" placeholder="e.g. 3.3792"></details>
-<button id="rhsave">Save</button> <button id="rhcancel" type="button" data-noenter="1" class="hide" style="background:none;color:var(--bad);border:1px solid var(--bad)">Cancel this rehearsal</button> <button id="rhback" type="button" data-noenter="1" style="background:none;border:1px solid var(--mut);color:inherit">Back</button><p id="m8" class="s"></p></div></div>
+<div id="rhreasonbox" class="hide"><label class="s">Reason for the change (needed when the rehearsal is less than 36 hours away)</label><input id="rhreason" autocomplete="off" maxlength="200" placeholder="Why is it changing?"></div>
+<button id="rhsave">Save</button> <button id="rhcancel" type="button" data-noenter="1" class="hide" style="background:none;color:var(--bad);border:1px solid var(--bad)">Cancel this rehearsal</button> <button id="rhback" type="button" data-noenter="1" style="background:none;border:1px solid var(--mut);color:inherit">Back</button></div>
+<p id="m8" class="s"></p></div>
 
 <div id="s7" class="card hide"><b style="display:block">Requests waiting for you</b>
 <p class="s">Campus MDs validate. Deciders approve or reject. The member's reason is shown here only so you can decide.</p>
@@ -87,7 +91,9 @@ const $ = id => document.getElementById(id);
 let token = '', timer = null;
 try { token = sessionStorage.getItem('rbcTok') || ''; } catch (e) {}
 let pending = 0, busyT = null;
+let ckRid = '';
 async function call(body) {
+  if (ckRid && /^(validate\.|late\.|handmark)/.test(String(body.action))) body.rehearsalId = ckRid;
   if (++pending === 1) busyT = setTimeout(() => $('busy').classList.remove('hide'), 400);
   try {
     const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
@@ -122,6 +128,10 @@ async function loadRows() {
     const j = await call({action: 'validate.list', token});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('rows').innerHTML = ''; $('vbar').classList.add('hide'); return say('m4', j.error || 'Not available.', 'bad'); }
+    const choices = j.rehearsals || [];
+    $('ckpick').classList.toggle('hide', choices.length < 2);
+    $('ckrid').innerHTML = choices.map(x => '<option value="' + esc(x.id) + '"' + (x.id === j.rehearsalId ? ' selected' : '') + '>' + esc(x.id) + ' · ' + esc(new Date(x.startMs).toLocaleDateString('en-GB')) + (x.finished ? ' (finished)' : '') + '</option>').join('');
+    $('ckrid').onchange = () => { ckRid = $('ckrid').value; loadRows(); };
     const c = j.counts || {waiting: 0, clean: 0, flagged: 0, validated: 0};
     say('m4', j.rows.length ? '' : 'No check-ins yet.');
     $('vsum').textContent = c.waiting + ' waiting (' + c.clean + ' clean, ' + c.flagged + ' flagged) · ' + c.validated + ' checked';
@@ -159,60 +169,66 @@ async function loadRows() {
     };
   } catch (e) { say('m4', 'Network problem. Try again.', 'bad'); }
 }
-let rhState = null;
+let rhState = null, rhEditing = null;
 const lagos = ms => new Date(ms).toLocaleString('en-GB', {timeZone: 'Africa/Lagos', dateStyle: 'medium', timeStyle: 'short'});
+const rhLive = r => !r.cancelled && !r.finished;
 async function loadRehearsal() {
   say('m8', 'Loading…');
   try {
     const j = await call({action: 'rehearsal.state', token});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('rhinfo').textContent = ''; $('rhbtns').innerHTML = ''; return say('m8', j.error || 'Not available.', 'bad'); }
+    if (!j.ok) { $('rhlist').innerHTML = ''; $('rhbtns').innerHTML = ''; $('rhcount').textContent = ''; return say('m8', j.error || 'Not available.', 'bad'); }
     say('m8', '');
     rhState = j;
     $('rhform').classList.add('hide'); $('rhmenu').classList.toggle('hide', !j.canEdit);
-    const r = j.rehearsal;
-    const live = r && !r.cancelled && !r.finished;
-    $('rhinfo').textContent = !r ? 'No rehearsal is set up yet.' : (r.id + ': ' + lagos(r.startMs) + ' to ' + lagos(r.finishMs) + ' · ' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.checkInOpen ? 'check-in OPEN' : 'check-in closed') + (r.openedBy ? ' · opened by ' + r.openedBy : ''));
-    $('rhbtns').innerHTML = live ? (r.checkInOpen ? '<button data-op="close">Close check-in</button>' : '<button data-op="open">Open check-in</button>') : '';
-        $('rhhint').textContent = live ? (r.id + ' is the current rehearsal. To make a new one, finish or cancel it first.') : 'Make a rehearsal to start.';
-    $('rhvbox').classList.toggle('hide', !live || !r.venue);
-    if (live && r.venue) $('rhvinfo').textContent = 'Venue: ' + (r.venue.name || '(no name)') + ' · position ' + (r.venue.confirmed ? 'confirmed on site by ' + r.venue.confirmedBy : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site');
+    const list = j.rehearsals || [];
+    const cur = list.filter(r => r.isCurrent)[0] || null;
+    $('rhcount').textContent = j.liveCount + ' of ' + j.max + ' places used. The next upcoming rehearsal is the current one.';
+    $('rhlist').innerHTML = list.length ? list.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.id) + '</b> · ' + esc(lagos(r.startMs)) + ' to ' + esc(lagos(r.finishMs).slice(-5)) +
+      ' <span class="s">· ' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.isCurrent ? 'CURRENT · check-in ' + (r.checkInOpen ? 'OPEN' : 'closed') : 'scheduled ahead') + (r.urgent && rhLive(r) ? ' · urgent' : '') + '</span><br>' +
+      '<span class="s">' + esc(r.venue ? r.venue.name || '(no name)' : '(no venue)') + (rhLive(r) && r.venue ? ' · position ' + (r.venue.confirmed ? 'confirmed on site by ' + esc(r.venue.confirmedBy) : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site') : '') +
+      (r.editedBy ? ' · last edited by ' + esc(r.editedByRole) : '') + '</span>' +
+      (r.log && r.log.length ? '<details><summary class="s">Changes</summary>' + r.log.map(l => '<div class="s">' + esc(lagos(l.t)) + ' · ' + esc(l.by) + ' · ' + esc(l.w) + '</div>').join('') + '</details>' : '') +
+      (j.canEdit && rhLive(r) ? '<br><button data-edit="' + esc(r.id) + '" type="button" data-noenter="1" style="width:auto;padding:.4rem .8rem">Edit or cancel</button>' : '') + '</div>').join('') : '<p class="s">No rehearsal is set up yet.</p>';
+    $('rhbtns').innerHTML = cur && rhLive(cur) ? (cur.checkInOpen ? '<button data-op="close">Close check-in (' + esc(cur.id) + ')</button>' : '<button data-op="open">Open check-in (' + esc(cur.id) + ')</button>') : '';
+    $('rhhint').textContent = j.liveCount >= j.max ? 'Three rehearsals are planned. Finish or cancel one to make another.' : 'The next one will be ' + j.nextId + '.';
+    $('rhvbox').classList.toggle('hide', !cur || !rhLive(cur) || !cur.venue);
+    if (cur && cur.venue) $('rhvinfo').textContent = 'Current rehearsal ' + cur.id + ' venue: ' + (cur.venue.name || '(no name)') + ' · position ' + (cur.venue.confirmed ? 'confirmed on site by ' + cur.venue.confirmedBy : 'not yet confirmed on site');
+    $('rhlist').querySelectorAll('button[data-edit]').forEach(b => b.onclick = () => rhOpenForm('edit', b.dataset.edit));
     $('rhbtns').querySelectorAll('button').forEach(b => b.onclick = async () => {
       const k = await call({action: 'rehearsal.' + b.dataset.op, token});
-      say('m8', k.ok ? 'Done.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); loadRehearsal();
+      await loadRehearsal();
+      say('m8', k.ok ? 'Done.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
     });
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
 }
-let rhMode = 'make';
-function rhOpenForm(mode) {
-  const r = rhState && rhState.rehearsal; rhMode = mode;
-  $('rhtitle').textContent = mode === 'edit' ? 'Edit ' + r.id : 'Make rehearsal ' + rhState.nextId;
-  $('rhcancel').classList.toggle('hide', mode !== 'edit');
-  if (mode === 'edit') {
+function rhOpenForm(mode, id) {
+  const r = mode === 'edit' ? ((rhState.rehearsals || []).filter(x => x.id === id)[0] || null) : null;
+  if (mode === 'edit' && !r) return say('m8', 'That rehearsal was not found. Reload.', 'bad');
+  rhEditing = r;
+  $('rhtitle').textContent = r ? 'Edit ' + r.id : 'Make rehearsal ' + rhState.nextId;
+  $('rhcancel').classList.toggle('hide', !r);
+  $('rhreasonbox').classList.toggle('hide', !r); $('rhreason').value = '';
+  if (r) {
     const iso = new Date(r.startMs + 3600000).toISOString(), fin = new Date(r.finishMs + 3600000).toISOString();
     $('rhdate').value = iso.slice(0, 10); $('rhstart').value = iso.slice(11, 16); $('rhfinish').value = fin.slice(11, 16);
     $('rhlate').value = r.lateAfterMin; $('rhvenue').value = r.venue ? r.venue.name : '';
-    $('rhsave').disabled = !!r.checkInOpen; say('m8', r.checkInOpen ? 'Close check-in before changing this rehearsal.' : '');
+    $('rhsave').disabled = !!r.checkInOpen; say('m8', r.checkInOpen ? 'Close check-in before changing this rehearsal.' : (r.editedBy ? 'Last edited by the ' + r.editedByRole + '. Only that role or higher can change it now.' : ''));
   } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; $('rhvenue').value = ''; $('rhsave').disabled = false; say('m8', ''); }
   $('rhlat').value = ''; $('rhlon').value = '';
   $('rhform').classList.remove('hide'); $('rhmenu').classList.add('hide');
 }
 $('rhmake').onclick = () => {
-  const r = rhState && rhState.rehearsal;
   if (!rhState) return say('m8', 'Still loading. Try again in a moment.', 'bad');
-  if (r && !r.cancelled && !r.finished) return say('m8', r.id + ' is already the current rehearsal (' + lagos(r.startMs) + '). Use "Edit or cancel a rehearsal" to change or cancel it, then make a new one.', 'bad');
+  if (rhState.liveCount >= rhState.max) return say('m8', 'Three rehearsals are already planned. Finish or cancel one before making another.', 'bad');
   rhOpenForm('make');
-};
-$('rhedit').onclick = () => {
-  const r = rhState && rhState.rehearsal;
-  if (!r || r.cancelled || r.finished) return say('m8', 'There is no current rehearsal to edit. Use "Make a rehearsal".', 'bad');
-  rhOpenForm('edit');
 };
 $('rhback').onclick = () => { $('rhform').classList.add('hide'); $('rhmenu').classList.remove('hide'); say('m8', ''); };
 $('rhcancel').onclick = async () => {
-  const reason = prompt('Why is this rehearsal cancelled? (5 to 200 characters)'); if (!reason) return;
-  try { const k = await call({action: 'rehearsal.cancel', token, reason});
-    if (k.ok) { await loadRehearsal(); say('m8', 'Rehearsal cancelled.', 'ok'); } else say('m8', k.error || 'Could not cancel.', 'bad');
+  if (!rhEditing) return;
+  const reason = prompt('Cancel ' + rhEditing.id + ' (' + lagos(rhEditing.startMs) + ')? Why? (5 to 200 characters)'); if (!reason) return;
+  try { const k = await call({action: 'rehearsal.cancel', token, id: rhEditing.id, rev: rhEditing.rev, reason});
+    await loadRehearsal(); say('m8', k.ok ? 'Rehearsal cancelled.' : (k.error || 'Could not cancel.'), k.ok ? 'ok' : 'bad');
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
 };
 $('rhgeo').onclick = () => {
@@ -235,13 +251,13 @@ document.addEventListener('keydown', e => {
 });
 $('rhsave').onclick = async () => {
   if (!rhState) return;
-  const r = rhState.rehearsal, live = rhMode === 'edit' && r && !r.cancelled && !r.finished;
   $('rhsave').disabled = true;
   try {
-    const k = await call({action: 'rehearsal.save', token, id: live ? r.id : rhState.nextId, date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
+    const k = await call({action: 'rehearsal.save', token, id: rhEditing ? rhEditing.id : '', rev: rhEditing ? rhEditing.rev : undefined, reason: $('rhreason').value.trim(),
+      date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
       lateAfterMin: $('rhlate').value, venueName: $('rhvenue').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim()});
     if (k.ok) await loadRehearsal();
-    say('m8', k.ok ? 'Saved. Check-in can be opened from the button above.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+    say('m8', k.ok ? 'Saved.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
   $('rhsave').disabled = false;
 };
