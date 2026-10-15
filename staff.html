@@ -55,6 +55,7 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 
 <div id="s7" class="card hide"><b style="display:block">Requests waiting for you</b>
 <p class="s">Campus MDs validate. Deciders approve or reject. The member's reason is shown here only so you can decide.</p>
+<div id="qbar" class="hide"><button id="qvtick" style="width:auto;padding:.5rem .9rem">Validate ticked (0)</button> <button id="qatick" style="width:auto;padding:.5rem .9rem">Approve ticked (0)</button><p class="s">Tick the ones you have read. Reject, appeals, flagged requests and handing on are done one at a time.</p></div>
 <div id="qrows"></div><p id="m7" class="s"></p></div>
 
 <div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
@@ -163,8 +164,28 @@ async function loadQueue() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('qrows').innerHTML = ''; return say('m7', j.error || 'Not available.', 'bad'); }
     say('m7', j.items.length ? '' : 'Nothing is waiting for you.');
-    $('qrows').innerHTML = j.items.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.name || 'Member') + '</b> <span class="s">' + esc(r.campus) + ' · ' + esc(r.status) + (r.late ? ' · late route' : '') + (r.flagged ? ' · flagged' : '') + (r.handedToCampusMd ? ' · handed to a Campus MD' : '') + ' · ' + new Date(r.rehearsalStartMs).toLocaleString() + '</span><br><span class="s">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span><br>' +
+    const batchable = r => !r.flagged && (r.ops.indexOf('validate') !== -1 || r.ops.indexOf('approve') !== -1);
+    $('qrows').innerHTML = j.items.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0">' + (batchable(r) ? '<input type="checkbox" class="qtick" data-id="' + esc(r.requestId) + '" data-v="' + (r.ops.indexOf('validate') !== -1 ? '1' : '') + '" data-a="' + (r.ops.indexOf('approve') !== -1 ? '1' : '') + '" style="width:auto;margin:0 8px 0 0;vertical-align:middle">' : '') + '<b>' + esc(r.name || 'Member') + '</b> <span class="s">' + esc(r.campus) + ' · ' + esc(r.status) + (r.late ? ' · late route' : '') + (r.flagged ? ' · flagged' : '') + (r.handedToCampusMd ? ' · handed to a Campus MD' : '') + ' · ' + new Date(r.rehearsalStartMs).toLocaleString() + '</span><br><span class="s">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span><br>' +
       r.ops.map(o => '<button data-id="' + esc(r.requestId) + '" data-op="' + o + '" style="width:auto;padding:.4rem .8rem;margin-right:6px' + (/reject/.test(o) ? ';background:none;color:var(--bad);border:1px solid var(--bad)' : '') + '">' + OPLABEL[o] + '</button>').join('') + '</div>').join('');
+    const ticked = () => Array.from($('qrows').querySelectorAll('.qtick:checked'));
+    const upd = () => {
+      const t = ticked(), v = t.filter(x => x.dataset.v).length, a = t.filter(x => x.dataset.a).length;
+      $('qvtick').textContent = 'Validate ticked (' + v + ')'; $('qvtick').disabled = v === 0;
+      $('qatick').textContent = 'Approve ticked (' + a + ')'; $('qatick').disabled = a === 0;
+      $('qbar').classList.toggle('hide', !$('qrows').querySelector('.qtick'));
+    };
+    $('qrows').querySelectorAll('.qtick').forEach(x => x.onchange = upd);
+    upd();
+    const batch = async (op, attr) => {
+      const ids = ticked().filter(x => x.dataset[attr]).map(x => x.dataset.id);
+      if (!ids.length) return;
+      if (!confirm((op === 'validate' ? 'Validate ' : 'Approve ') + ids.length + ' request' + (ids.length === 1 ? '' : 's') + '? Reject, appeals and flagged requests are not included.')) return;
+      const k = await call({action: 'absence.actMany', token, op, requestIds: ids});
+      say('m7', k.ok ? (k.done + ' done' + (k.skipped.length ? ', ' + k.skipped.length + ' not allowed (' + k.skipped.map(x => x.error).filter((e, i, a) => a.indexOf(e) === i).join('; ') + ')' : '') + '.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+      loadQueue();
+    };
+    $('qvtick').onclick = () => batch('validate', 'v');
+    $('qatick').onclick = () => batch('approve', 'a');
     $('qrows').querySelectorAll('button').forEach(b => b.onclick = async () => {
       let reason = '', delegateMemberId = '';
       if (b.dataset.op === 'delegate') { delegateMemberId = prompt('Member ID of the Campus MD to hand this to (same campus as the member):'); if (!delegateMemberId) return; }
