@@ -53,6 +53,19 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <textarea id="rfreason" rows="2" maxlength="300" placeholder="Reason (10 to 300 characters)" style="font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem"></textarea>
 <button id="rfsend">Submit for this member</button><p id="m6b" class="s"></p></div></div>
 
+<div id="s8" class="card hide"><b style="display:block">Rehearsal</b>
+<p id="rhinfo" class="s"></p>
+<div id="rhbtns"></div>
+<div style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b id="rhtitle">Set up a rehearsal</b>
+<p class="s">Times are Lagos time. Check-in can open from one hour before the start and closes at the finish time.</p>
+<label class="s">Date</label><input id="rhdate" type="date">
+<label class="s">Start time</label><input id="rhstart" type="time">
+<label class="s">Finish time</label><input id="rhfinish" type="time">
+<label class="s">Late after (minutes after check-in opens)</label><input id="rhlate" type="number" min="0" max="180" value="30">
+<label class="s">Venue latitude</label><input id="rhlat" autocomplete="off" placeholder="e.g. 6.5244">
+<label class="s">Venue longitude</label><input id="rhlon" autocomplete="off" placeholder="e.g. 3.3792">
+<button id="rhsave">Save rehearsal</button><p id="m8" class="s"></p></div></div>
+
 <div id="s7" class="card hide"><b style="display:block">Requests waiting for you</b>
 <p class="s">Campus MDs validate. Deciders approve or reject. The member's reason is shown here only so you can decide.</p>
 <div id="qbar" class="hide"><button id="qvtick" style="width:auto;padding:.5rem .9rem">Validate ticked (0)</button> <button id="qatick" style="width:auto;padding:.5rem .9rem">Approve ticked (0)</button><p class="s">Tick the ones you have read. Reject, appeals, flagged requests and handing on are done one at a time.</p></div>
@@ -75,8 +88,8 @@ async function call(body) {
     if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
-const TABDEF = {qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests']};
-const LANDING = ['qr', 'checkins', 'requests', 'absence'];
+const TABDEF = {qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal']};
+const LANDING = ['qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '';
 function drawTabs() {
   $('tabs').innerHTML = myTabs.map(k => '<button class="tab" data-v="' + TABDEF[k][0] + '" style="width:auto;flex:1">' + TABDEF[k][1] + '</button>').join('');
@@ -86,12 +99,12 @@ function drawTabs() {
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue();
+  show(v); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7'].indexOf(id) !== -1;
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8'].indexOf(id) !== -1;
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
   document.querySelectorAll('.tab').forEach(b => { b.style.opacity = b.dataset.v === id ? '1' : '.65'; }); }
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -112,7 +125,7 @@ async function loadRows() {
       '<b>' + esc(r.memberId) + '</b> <span class="s">' + new Date(r.time).toLocaleTimeString() + (r.tags.length ? ' · ' + esc(r.tags.join(', ')) : '') + (r.validatedBy ? ' · checked' : '') + '</span><br>' +
       (r.canValidate ? '<button data-act="v" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem">Checked</button> ' : '') +
       (r.canUndo ? '<button data-act="u" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--bad);border:1px solid var(--bad)">Undo</button> ' : '') +
-      (!r.lateCorrected ? '<button data-act="l" data-late="' + (r.late ? '0' : '1') + '" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">' + (r.late ? 'Was on time' : 'Mark late') + '</button>' : '') + '</div>').join('');
+      (r.canCorrectLate ? '<button data-act="l" data-late="' + (r.late ? '0' : '1') + '" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">' + (r.late ? 'Was on time' : 'Mark late') + '</button>' : '') + '</div>').join('');
     const ticks = () => Array.from($('rows').querySelectorAll('.tick:checked')).map(x => x.dataset.id);
     const upd = () => { const n = ticks().length; $('vtick').textContent = 'Validate ticked (' + n + ')'; $('vtick').disabled = n === 0; };
     $('rows').querySelectorAll('.tick').forEach(x => x.onchange = upd);
@@ -138,6 +151,48 @@ async function loadRows() {
     };
   } catch (e) { say('m4', 'Network problem. Try again.', 'bad'); }
 }
+let rhState = null;
+const lagos = ms => new Date(ms).toLocaleString('en-GB', {timeZone: 'Africa/Lagos', dateStyle: 'medium', timeStyle: 'short'});
+async function loadRehearsal() {
+  say('m8', 'Loading…');
+  try {
+    const j = await call({action: 'rehearsal.state', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('rhinfo').textContent = ''; $('rhbtns').innerHTML = ''; return say('m8', j.error || 'Not available.', 'bad'); }
+    say('m8', '');
+    rhState = j;
+    const r = j.rehearsal;
+    const live = r && !r.cancelled && !r.finished;
+    $('rhinfo').textContent = !r ? 'No rehearsal is set up yet.' : (r.id + ': ' + lagos(r.startMs) + ' to ' + lagos(r.finishMs) + ' · ' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.checkInOpen ? 'check-in OPEN' : 'check-in closed') + (r.openedBy ? ' · opened by ' + r.openedBy : ''));
+    $('rhbtns').innerHTML = live ? (r.checkInOpen ? '<button data-op="close">Close check-in</button>' : '<button data-op="open">Open check-in</button>') + '<button data-op="cancel" style="background:none;color:var(--bad);border:1px solid var(--bad)">Cancel rehearsal</button>' : '';
+    $('rhtitle').textContent = live ? 'Edit ' + r.id : 'Set up ' + j.nextId;
+    if (live) {
+      const iso = new Date(r.startMs + 3600000).toISOString(), fin = new Date(r.finishMs + 3600000).toISOString();
+      $('rhdate').value = iso.slice(0, 10); $('rhstart').value = iso.slice(11, 16); $('rhfinish').value = fin.slice(11, 16);
+      $('rhlate').value = r.lateAfterMin;
+    } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; }
+    $('rhlat').value = r && r.venue ? r.venue.lat : ''; $('rhlon').value = r && r.venue ? r.venue.lon : '';
+    $('rhsave').disabled = !!(live && r.checkInOpen);
+    $('rhbtns').querySelectorAll('button').forEach(b => b.onclick = async () => {
+      let reason = '';
+      if (b.dataset.op === 'cancel') { reason = prompt('Why is this rehearsal cancelled? (5 to 200 characters)'); if (!reason) return; }
+      const k = await call({action: 'rehearsal.' + b.dataset.op, token, reason});
+      say('m8', k.ok ? 'Done.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); loadRehearsal();
+    });
+  } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
+}
+$('rhsave').onclick = async () => {
+  if (!rhState) return;
+  const r = rhState.rehearsal, live = r && !r.cancelled && !r.finished;
+  $('rhsave').disabled = true;
+  try {
+    const k = await call({action: 'rehearsal.save', token, id: live ? r.id : rhState.nextId, date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
+      lateAfterMin: $('rhlate').value, lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim()});
+    say('m8', k.ok ? 'Saved.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+    if (k.ok) loadRehearsal();
+  } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
+  $('rhsave').disabled = false;
+};
 async function loadAbsence() {
   say('m6', 'Loading…'); $('rform').classList.add('hide');
   try {
