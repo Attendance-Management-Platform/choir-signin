@@ -56,10 +56,11 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <div id="s8" class="card hide"><b style="display:block">Rehearsal</b>
 <p id="rhinfo" class="s"></p>
 <div id="rhbtns"></div>
+<div id="rhmenu" class="hide" style="margin-top:12px"><button id="rhmake" type="button" data-noenter="1">Make a rehearsal</button> <button id="rhedit" type="button" data-noenter="1">Edit or cancel a rehearsal</button><p id="rhhint" class="s"></p></div>
 <div id="rhvbox" class="hide" style="margin-top:10px"><p id="rhvinfo" class="s"></p>
 <button id="rhgeo" type="button" data-noenter="1">Confirm the venue position from this phone</button>
 <p class="s">Do this at the venue shortly before the rehearsal. Anyone from Desk B, Desk D or the admins can do it. If nobody does, the position found from the address is used.</p></div>
-<div id="rhform" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b id="rhtitle">Set up a rehearsal</b>
+<div id="rhform" class="hide" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b id="rhtitle">Set up a rehearsal</b>
 <p class="s">Times are Lagos time. Check-in can open from one hour before the start and closes at the finish time.</p>
 <label class="s">Date</label><input id="rhdate" type="date">
 <label class="s">Start time</label><input id="rhstart" type="time">
@@ -71,7 +72,7 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <p class="s">In Google Maps press and hold the venue and tap the two numbers; you can paste "6.5244, 3.3792" into the first box.</p>
 <label class="s">Venue latitude</label><input id="rhlat" autocomplete="off" placeholder="e.g. 6.5244">
 <label class="s">Venue longitude</label><input id="rhlon" autocomplete="off" placeholder="e.g. 3.3792"></details>
-<button id="rhsave">Save rehearsal</button><p id="m8" class="s"></p></div></div>
+<button id="rhsave">Save</button> <button id="rhcancel" type="button" data-noenter="1" class="hide" style="background:none;color:var(--bad);border:1px solid var(--bad)">Cancel this rehearsal</button> <button id="rhback" type="button" data-noenter="1" style="background:none;border:1px solid var(--mut);color:inherit">Back</button><p id="m8" class="s"></p></div></div>
 
 <div id="s7" class="card hide"><b style="display:block">Requests waiting for you</b>
 <p class="s">Campus MDs validate. Deciders approve or reject. The member's reason is shown here only so you can decide.</p>
@@ -168,29 +169,44 @@ async function loadRehearsal() {
     if (!j.ok) { $('rhinfo').textContent = ''; $('rhbtns').innerHTML = ''; return say('m8', j.error || 'Not available.', 'bad'); }
     say('m8', '');
     rhState = j;
-    $('rhform').classList.toggle('hide', !j.canEdit);
+    $('rhform').classList.add('hide'); $('rhmenu').classList.toggle('hide', !j.canEdit);
     const r = j.rehearsal;
     const live = r && !r.cancelled && !r.finished;
     $('rhinfo').textContent = !r ? 'No rehearsal is set up yet.' : (r.id + ': ' + lagos(r.startMs) + ' to ' + lagos(r.finishMs) + ' · ' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.checkInOpen ? 'check-in OPEN' : 'check-in closed') + (r.openedBy ? ' · opened by ' + r.openedBy : ''));
-    $('rhbtns').innerHTML = live ? (r.checkInOpen ? '<button data-op="close">Close check-in</button>' : '<button data-op="open">Open check-in</button>') + '<button data-op="cancel" style="background:none;color:var(--bad);border:1px solid var(--bad)">Cancel rehearsal</button>' : '';
-    $('rhtitle').textContent = live ? 'Edit ' + r.id : 'Set up ' + j.nextId;
-    if (live) {
-      const iso = new Date(r.startMs + 3600000).toISOString(), fin = new Date(r.finishMs + 3600000).toISOString();
-      $('rhdate').value = iso.slice(0, 10); $('rhstart').value = iso.slice(11, 16); $('rhfinish').value = fin.slice(11, 16);
-      $('rhlate').value = r.lateAfterMin;
-    } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; }
-    $('rhvenue').value = r && r.venue ? r.venue.name : ''; $('rhlat').value = ''; $('rhlon').value = '';
+    $('rhbtns').innerHTML = live ? (r.checkInOpen ? '<button data-op="close">Close check-in</button>' : '<button data-op="open">Open check-in</button>') : '';
+    $('rhmake').disabled = !!live; $('rhedit').disabled = !live;
+    $('rhhint').textContent = live ? (r.id + ' is the current rehearsal. To make a new one, finish or cancel it first.') : 'Make a rehearsal to start.';
     $('rhvbox').classList.toggle('hide', !live || !r.venue);
     if (live && r.venue) $('rhvinfo').textContent = 'Venue: ' + (r.venue.name || '(no name)') + ' · position ' + (r.venue.confirmed ? 'confirmed on site by ' + r.venue.confirmedBy : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site');
-    $('rhsave').disabled = !!(live && r.checkInOpen);
     $('rhbtns').querySelectorAll('button').forEach(b => b.onclick = async () => {
-      let reason = '';
-      if (b.dataset.op === 'cancel') { reason = prompt('Why is this rehearsal cancelled? (5 to 200 characters)'); if (!reason) return; }
-      const k = await call({action: 'rehearsal.' + b.dataset.op, token, reason});
+      const k = await call({action: 'rehearsal.' + b.dataset.op, token});
       say('m8', k.ok ? 'Done.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); loadRehearsal();
     });
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
 }
+let rhMode = 'make';
+function rhOpenForm(mode) {
+  const r = rhState && rhState.rehearsal; rhMode = mode;
+  $('rhtitle').textContent = mode === 'edit' ? 'Edit ' + r.id : 'Make rehearsal ' + rhState.nextId;
+  $('rhcancel').classList.toggle('hide', mode !== 'edit');
+  if (mode === 'edit') {
+    const iso = new Date(r.startMs + 3600000).toISOString(), fin = new Date(r.finishMs + 3600000).toISOString();
+    $('rhdate').value = iso.slice(0, 10); $('rhstart').value = iso.slice(11, 16); $('rhfinish').value = fin.slice(11, 16);
+    $('rhlate').value = r.lateAfterMin; $('rhvenue').value = r.venue ? r.venue.name : '';
+    $('rhsave').disabled = !!r.checkInOpen; say('m8', r.checkInOpen ? 'Close check-in before changing this rehearsal.' : '');
+  } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; $('rhvenue').value = ''; $('rhsave').disabled = false; say('m8', ''); }
+  $('rhlat').value = ''; $('rhlon').value = '';
+  $('rhform').classList.remove('hide'); $('rhmenu').classList.add('hide');
+}
+$('rhmake').onclick = () => rhOpenForm('make');
+$('rhedit').onclick = () => rhOpenForm('edit');
+$('rhback').onclick = () => { $('rhform').classList.add('hide'); $('rhmenu').classList.remove('hide'); say('m8', ''); };
+$('rhcancel').onclick = async () => {
+  const reason = prompt('Why is this rehearsal cancelled? (5 to 200 characters)'); if (!reason) return;
+  try { const k = await call({action: 'rehearsal.cancel', token, reason});
+    if (k.ok) { await loadRehearsal(); say('m8', 'Rehearsal cancelled.', 'ok'); } else say('m8', k.error || 'Could not cancel.', 'bad');
+  } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
+};
 $('rhgeo').onclick = () => {
   if (!navigator.geolocation) return say('m8', 'This phone cannot share its location.', 'bad');
   say('m8', 'Finding your location…');
@@ -211,7 +227,7 @@ document.addEventListener('keydown', e => {
 });
 $('rhsave').onclick = async () => {
   if (!rhState) return;
-  const r = rhState.rehearsal, live = r && !r.cancelled && !r.finished;
+  const r = rhState.rehearsal, live = rhMode === 'edit' && r && !r.cancelled && !r.finished;
   $('rhsave').disabled = true;
   try {
     const k = await call({action: 'rehearsal.save', token, id: live ? r.id : rhState.nextId, date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
