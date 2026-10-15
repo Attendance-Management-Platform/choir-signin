@@ -56,16 +56,21 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <div id="s8" class="card hide"><b style="display:block">Rehearsal</b>
 <p id="rhinfo" class="s"></p>
 <div id="rhbtns"></div>
-<div style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b id="rhtitle">Set up a rehearsal</b>
+<div id="rhvbox" class="hide" style="margin-top:10px"><p id="rhvinfo" class="s"></p>
+<button id="rhgeo" type="button" data-noenter="1">Confirm the venue position from this phone</button>
+<p class="s">Do this at the venue shortly before the rehearsal. Anyone from Desk B, Desk D or the admins can do it. If nobody does, the position found from the address is used.</p></div>
+<div id="rhform" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b id="rhtitle">Set up a rehearsal</b>
 <p class="s">Times are Lagos time. Check-in can open from one hour before the start and closes at the finish time.</p>
 <label class="s">Date</label><input id="rhdate" type="date">
 <label class="s">Start time</label><input id="rhstart" type="time">
 <label class="s">Finish time</label><input id="rhfinish" type="time">
 <label class="s">Late after (minutes after check-in opens)</label><input id="rhlate" type="number" min="0" max="180" value="30">
-<p class="s">Venue position: stand at the venue and press the button, or in Google Maps right-click (or press and hold) the venue, tap the two numbers shown, then paste them below (you can paste "6.5244, 3.3792" into the first box).</p>
-<button id="rhgeo" type="button" data-noenter="1">Use my current location</button>
+<label class="s">Venue (write it as people would read it, e.g. "CCW Main Auditorium, 12 Example Road, Ikeja, Lagos")</label><input id="rhvenue" autocomplete="off" maxlength="150" placeholder="Venue name, street, area, city">
+<p class="s">This text goes in notices. The system finds its map position from it.</p>
+<details><summary class="s">Position typed by hand (only if the address is not found)</summary>
+<p class="s">In Google Maps press and hold the venue and tap the two numbers; you can paste "6.5244, 3.3792" into the first box.</p>
 <label class="s">Venue latitude</label><input id="rhlat" autocomplete="off" placeholder="e.g. 6.5244">
-<label class="s">Venue longitude</label><input id="rhlon" autocomplete="off" placeholder="e.g. 3.3792">
+<label class="s">Venue longitude</label><input id="rhlon" autocomplete="off" placeholder="e.g. 3.3792"></details>
 <button id="rhsave">Save rehearsal</button><p id="m8" class="s"></p></div></div>
 
 <div id="s7" class="card hide"><b style="display:block">Requests waiting for you</b>
@@ -163,6 +168,7 @@ async function loadRehearsal() {
     if (!j.ok) { $('rhinfo').textContent = ''; $('rhbtns').innerHTML = ''; return say('m8', j.error || 'Not available.', 'bad'); }
     say('m8', '');
     rhState = j;
+    $('rhform').classList.toggle('hide', !j.canEdit);
     const r = j.rehearsal;
     const live = r && !r.cancelled && !r.finished;
     $('rhinfo').textContent = !r ? 'No rehearsal is set up yet.' : (r.id + ': ' + lagos(r.startMs) + ' to ' + lagos(r.finishMs) + ' · ' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.checkInOpen ? 'check-in OPEN' : 'check-in closed') + (r.openedBy ? ' · opened by ' + r.openedBy : ''));
@@ -173,7 +179,9 @@ async function loadRehearsal() {
       $('rhdate').value = iso.slice(0, 10); $('rhstart').value = iso.slice(11, 16); $('rhfinish').value = fin.slice(11, 16);
       $('rhlate').value = r.lateAfterMin;
     } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; }
-    $('rhlat').value = r && r.venue ? r.venue.lat : ''; $('rhlon').value = r && r.venue ? r.venue.lon : '';
+    $('rhvenue').value = r && r.venue ? r.venue.name : ''; $('rhlat').value = ''; $('rhlon').value = '';
+    $('rhvbox').classList.toggle('hide', !live || !r.venue);
+    if (live && r.venue) $('rhvinfo').textContent = 'Venue: ' + (r.venue.name || '(no name)') + ' · position ' + (r.venue.confirmed ? 'confirmed on site by ' + r.venue.confirmedBy : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site');
     $('rhsave').disabled = !!(live && r.checkInOpen);
     $('rhbtns').querySelectorAll('button').forEach(b => b.onclick = async () => {
       let reason = '';
@@ -184,10 +192,15 @@ async function loadRehearsal() {
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
 }
 $('rhgeo').onclick = () => {
-  if (!navigator.geolocation) return say('m8', 'This phone cannot share its location. Type the numbers instead.', 'bad');
+  if (!navigator.geolocation) return say('m8', 'This phone cannot share its location.', 'bad');
   say('m8', 'Finding your location…');
-  navigator.geolocation.getCurrentPosition(p => { $('rhlat').value = p.coords.latitude.toFixed(5); $('rhlon').value = p.coords.longitude.toFixed(5); say('m8', 'Location filled in. Check it, then save.', 'ok'); },
-    () => say('m8', 'Location was blocked. Allow location for this page, or type the numbers.', 'bad'), {enableHighAccuracy: true, timeout: 15000});
+  navigator.geolocation.getCurrentPosition(async p => {
+    try {
+      let k = await call({action: 'rehearsal.confirmVenue', token, lat: p.coords.latitude, lon: p.coords.longitude});
+      if (k.tooFar && confirm(k.error + ' Press OK only if you are really at the venue.')) k = await call({action: 'rehearsal.confirmVenue', token, lat: p.coords.latitude, lon: p.coords.longitude, force: true});
+      if (k.ok) { await loadRehearsal(); say('m8', 'Venue position confirmed from this phone.', 'ok'); } else say('m8', k.error || 'Could not confirm.', 'bad');
+    } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
+  }, () => say('m8', 'Location was blocked. Allow location for this page and try again.', 'bad'), {enableHighAccuracy: true, timeout: 15000});
 };
 $('rhlat').addEventListener('input', () => { const m = $('rhlat').value.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*$/); if (m) { $('rhlat').value = m[1]; $('rhlon').value = m[2]; } });
 document.addEventListener('keydown', e => {
@@ -202,7 +215,7 @@ $('rhsave').onclick = async () => {
   $('rhsave').disabled = true;
   try {
     const k = await call({action: 'rehearsal.save', token, id: live ? r.id : rhState.nextId, date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
-      lateAfterMin: $('rhlate').value, lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim()});
+      lateAfterMin: $('rhlate').value, venueName: $('rhvenue').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim()});
     if (k.ok) await loadRehearsal();
     say('m8', k.ok ? 'Saved. Check-in can be opened from the button above.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
