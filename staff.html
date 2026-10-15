@@ -174,8 +174,7 @@ async function loadRehearsal() {
     const live = r && !r.cancelled && !r.finished;
     $('rhinfo').textContent = !r ? 'No rehearsal is set up yet.' : (r.id + ': ' + lagos(r.startMs) + ' to ' + lagos(r.finishMs) + ' · ' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.checkInOpen ? 'check-in OPEN' : 'check-in closed') + (r.openedBy ? ' · opened by ' + r.openedBy : ''));
     $('rhbtns').innerHTML = live ? (r.checkInOpen ? '<button data-op="close">Close check-in</button>' : '<button data-op="open">Open check-in</button>') : '';
-    $('rhmake').disabled = !!live; $('rhedit').disabled = !live;
-    $('rhhint').textContent = live ? (r.id + ' is the current rehearsal. To make a new one, finish or cancel it first.') : 'Make a rehearsal to start.';
+        $('rhhint').textContent = live ? (r.id + ' is the current rehearsal. To make a new one, finish or cancel it first.') : 'Make a rehearsal to start.';
     $('rhvbox').classList.toggle('hide', !live || !r.venue);
     if (live && r.venue) $('rhvinfo').textContent = 'Venue: ' + (r.venue.name || '(no name)') + ' · position ' + (r.venue.confirmed ? 'confirmed on site by ' + r.venue.confirmedBy : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site');
     $('rhbtns').querySelectorAll('button').forEach(b => b.onclick = async () => {
@@ -198,8 +197,17 @@ function rhOpenForm(mode) {
   $('rhlat').value = ''; $('rhlon').value = '';
   $('rhform').classList.remove('hide'); $('rhmenu').classList.add('hide');
 }
-$('rhmake').onclick = () => rhOpenForm('make');
-$('rhedit').onclick = () => rhOpenForm('edit');
+$('rhmake').onclick = () => {
+  const r = rhState && rhState.rehearsal;
+  if (!rhState) return say('m8', 'Still loading. Try again in a moment.', 'bad');
+  if (r && !r.cancelled && !r.finished) return say('m8', r.id + ' is already the current rehearsal (' + lagos(r.startMs) + '). Use "Edit or cancel a rehearsal" to change or cancel it, then make a new one.', 'bad');
+  rhOpenForm('make');
+};
+$('rhedit').onclick = () => {
+  const r = rhState && rhState.rehearsal;
+  if (!r || r.cancelled || r.finished) return say('m8', 'There is no current rehearsal to edit. Use "Make a rehearsal".', 'bad');
+  rhOpenForm('edit');
+};
 $('rhback').onclick = () => { $('rhform').classList.add('hide'); $('rhmenu').classList.remove('hide'); say('m8', ''); };
 $('rhcancel').onclick = async () => {
   const reason = prompt('Why is this rehearsal cancelled? (5 to 200 characters)'); if (!reason) return;
