@@ -19,7 +19,8 @@ button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;
 <button id="agree">I agree</button></div>
 
 <div id="step1" class="card hide">
-<b>1. Your Member ID</b>
+<b>1. Who are you?</b>
+<div id="gwrap" class="hide"><div id="gbtn" style="margin:.4rem 0"></div><p id="gmsg" class="s"></p><p class="s" style="margin:.2rem 0">Or type your Member ID:</p></div>
 <input id="mid" autocomplete="off" placeholder="Member ID">
 <button id="loc">2. Check my location</button>
 <p id="locmsg" class="s"></p></div>
@@ -37,13 +38,32 @@ const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyKQlMqQIQ2DiMSp5bE
 const q = new URLSearchParams(location.search), R = q.get('r') || '', T = q.get('t') || '';
 const $ = id => document.getElementById(id);
 let locOk = false, reading = null;
+// Sign in with Google (optional: shown only when a Google client ID is set). Typing the Member ID still works.
+const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.googleusercontent.com';
+let gTok = '', gAt = 0;
+function googleDone(resp) {
+  gTok = resp.credential; gAt = Date.now();
+  $('gmsg').textContent = 'Signed in with Google. Now check your location.'; $('gmsg').className = 's ok';
+}
+if (GOOGLE_CLIENT_ID) {
+  const gs = document.createElement('script');
+  gs.src = 'https://accounts.google.com/gsi/client'; gs.async = true;
+  gs.onload = () => {
+    try {
+      google.accounts.id.initialize({client_id: GOOGLE_CLIENT_ID, callback: googleDone, auto_select: false});
+      google.accounts.id.renderButton($('gbtn'), {theme: 'outline', size: 'large', text: 'signin_with', width: 280});
+      $('gwrap').classList.remove('hide');
+    } catch (e) { /* typing the Member ID still works */ }
+  };
+  document.head.appendChild(gs);
+}
 let agreed = false; try { agreed = localStorage.getItem('rbcConsent') === '1'; } catch (e) {}
 if (!BACKEND_URL) $('demo').classList.remove('hide');
 function showSteps(){ $('consent').classList.add('hide'); $('step1').classList.remove('hide'); }
 if (agreed) showSteps();
 $('agree').onclick = () => { try { localStorage.setItem('rbcConsent','1'); } catch (e) {} showSteps(); };
 $('loc').onclick = () => {
-  if (!$('mid').value.trim()) { $('locmsg').textContent = 'Enter your Member ID first.'; $('locmsg').className = 's bad'; return; }
+  if (!gTok && !$('mid').value.trim()) { $('locmsg').textContent = 'Sign in with Google or enter your Member ID first.'; $('locmsg').className = 's bad'; return; }
   $('locmsg').textContent = 'Checking…'; $('locmsg').className = 's';
   navigator.geolocation.getCurrentPosition(p => {
     // Sent once to the back end for the venue check, never stored there.
@@ -64,6 +84,11 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 $('send').onclick = async () => {
   $('send').disabled = true;
   const body = {rehearsalId: R, token: T, memberId: $('mid').value.trim(), reading: reading, deviceId: deviceId()};
+  if (gTok) {
+    // Google's proof is only good for a few minutes; if it is old, ask for a fresh one.
+    if (Date.now() - gAt > 8 * 60 * 1000) { gTok = ''; $('gmsg').textContent = 'Please press Sign in with Google again.'; $('gmsg').className = 's bad'; $('out').textContent = 'Please press Sign in with Google again, then check in.'; $('out').className = 's bad'; $('send').disabled = false; return; }
+    body.idToken = gTok;
+  }
   if (!BACKEND_URL) { $('out').textContent = 'Demo only. Would send: member ' + body.memberId + ', location reading (not stored).'; $('out').className = 's ok'; return; }
   // If the system is busy (many people at once), try again a few times. A repeat is safe: nobody is checked in twice.
   for (let attempt = 0; attempt < 4; attempt++) {

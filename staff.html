@@ -20,6 +20,7 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 
 <div id="s1" class="card"><b>Sign in</b>
 <input id="mid" autocomplete="off" placeholder="Member ID">
+<div id="gwrap" class="hide"><div id="gbtn" style="margin:.4rem 0"></div><p class="s" style="margin:.2rem 0 .6rem">If more than one member uses your email, type your Member ID first.</p><p class="s" style="margin:.2rem 0">Or use an email code:</p></div>
 <button id="send">Email me a code</button><p id="m1" class="s"></p></div>
 
 <div id="s2" class="card hide"><b>Enter the code</b>
@@ -361,6 +362,29 @@ $('verify').onclick = async () => {
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 };
 $('back').onclick = () => show('s1');
+// Sign in with Google (optional: shown only when a Google client ID is set). The email code above stays as the backup.
+const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.googleusercontent.com';
+async function googleDone(resp) {
+  say('m1', 'Checking with Google…');
+  try {
+    const j = await call({action: 'signin.google', idToken: resp.credential, memberId: $('mid').value.trim()});
+    if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
+    token = j.token; try { sessionStorage.setItem('rbcTok', token); } catch (e) {}
+    myTabs = j.tabs || ['absence']; myName = j.name || ''; drawTabs(); land();
+  } catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
+}
+if (GOOGLE_CLIENT_ID) {
+  const gs = document.createElement('script');
+  gs.src = 'https://accounts.google.com/gsi/client'; gs.async = true;
+  gs.onload = () => {
+    try {
+      google.accounts.id.initialize({client_id: GOOGLE_CLIENT_ID, callback: googleDone, auto_select: false});
+      google.accounts.id.renderButton($('gbtn'), {theme: 'outline', size: 'large', text: 'signin_with', width: 280});
+      $('gwrap').classList.remove('hide');
+    } catch (e) { /* the email code still works */ }
+  };
+  document.head.appendChild(gs);
+}
 $('out').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
 let runId = 0;
 async function start() {
