@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RBC Choir staff</title>
+<style>
+:root{--bg:#fff;--fg:#1b1b1f;--mut:#5b5b66;--card:#f3f3f6;--acc:#3b3fb5;--ok:#0b7a3b;--bad:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#121214;--fg:#ececf1;--mut:#a0a0ad;--card:#1d1d22;--acc:#9aa0ff;--ok:#5fd68a;--bad:#ff8a80}}
+body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:16px;max-width:30rem;margin-inline:auto}
+h1{font-size:1.3rem}.card{background:var(--card);border-radius:12px;padding:14px;margin:12px 0}
+button{font:inherit;background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:.7rem 1rem;width:100%;margin-top:.5rem}
+input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem}
+.s{color:var(--mut);font-size:.9rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.hide{display:none}
+#q{display:inline-block;padding:12px;background:#fff;margin-top:8px}
+</style></head><body>
+<h1>RBC Choir staff</h1>
+<p id="notconn" class="hide" style="background:#fdecea;color:#8a1c14;padding:10px;border-radius:8px">This page is not connected to the production system yet.</p>
+
+<div id="bar" class="card hide" style="display:none;align-items:center;justify-content:space-between;gap:10px">
+<span id="who" class="s" style="min-width:0"></span>
+<button id="out" style="width:auto;margin:0;padding:.4rem .9rem;background:none;color:var(--acc);border:1px solid var(--acc)">Sign out</button></div>
+<div id="busy" class="s hide" style="text-align:center">Working…</div>
+
+<div id="s1" class="card"><b>Sign in</b>
+<input id="mid" autocomplete="off" placeholder="Member ID">
+<div id="gwrap" class="hide"><div id="gbtn" style="margin:.4rem 0"></div><p class="s" style="margin:.2rem 0 .6rem">If more than one member uses your email, type your Member ID first.</p><p class="s" style="margin:.2rem 0">Or use an email code:</p></div>
+<button id="send">Email me a code</button><p id="m1" class="s"></p></div>
+
+<div id="s2" class="card hide"><b>Enter the code</b>
+<p class="s">Use the newest email. Asking again is possible after the countdown on the first step.</p>
+<input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code">
+<button id="verify">Sign in</button><p id="m2" class="s"></p>
+<button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
+
+<div id="s3" class="card hide" style="text-align:center"><b style="display:block">Scan to check in</b>
+<div id="q"></div><p id="m3" class="s"></p></div>
+
+
+<div id="s4" class="card hide"><b style="display:block">Today's check-ins</b>
+<p class="s">Flagged ones (late, hand-marked) come first with a red edge. Check them one by one, tick several, or validate all the clean ones at once. Any validation can be undone with a reason.</p>
+<div id="ckpick" class="hide"><label class="s">Rehearsal</label><select id="ckrid"></select></div>
+<p id="vsum" class="s"></p>
+<div id="vbar" class="hide"><button id="vall" style="width:auto;padding:.5rem .9rem">Validate all clean</button> <button id="vtick" style="width:auto;padding:.5rem .9rem;background:none;color:var(--acc);border:1px solid var(--acc)">Validate ticked (0)</button></div>
+<div id="rows"></div><p id="m4" class="s"></p></div>
+
+<div id="s5" class="card hide"><b>Mark a member by hand</b>
+<p class="s">For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.</p>
+<input id="hid" autocomplete="off" placeholder="Member ID"><button id="hmark">Mark present</button><p id="m5" class="s"></p></div>
+
+<div id="s6" class="card hide"><b style="display:block">Absence request</b>
+<p id="rinfo" class="s"></p>
+<div id="rform" class="hide"><textarea id="rreason" rows="3" maxlength="300" placeholder="Your reason (10 to 300 characters). Only you and the people who decide can see it." style="font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem"></textarea>
+<button id="rsend">Request absence</button></div>
+<p id="m6" class="s"></p><div id="rmine"></div>
+<div id="rfor" class="hide" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b>Submit for a member</b>
+<p class="s">Late route for the Global Admin or Assistant Global Admin. Use it when a member could not ask before the cut-off.</p>
+<input id="rfid" autocomplete="off" placeholder="Member ID">
+<textarea id="rfreason" rows="2" maxlength="300" placeholder="Reason (10 to 300 characters)" style="font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem"></textarea>
+<button id="rfsend">Submit for this member</button><p id="m6b" class="s"></p></div></div>
+
+<div id="s8" class="card hide"><b style="display:block">Rehearsals</b>
+<p id="rhcount" class="s"></p>
+<div id="rhlist"></div>
+<div id="rhbtns"></div>
+<div id="rhmenu" class="hide" style="margin-top:12px"><button id="rhmake" type="button" data-noenter="1">Make a rehearsal</button><p id="rhhint" class="s"></p></div>
+<div id="rhvbox" class="hide" style="margin-top:10px"><p id="rhvinfo" class="s"></p>
+<button id="rhgeo" type="button" data-noenter="1">Confirm the venue position from this phone</button>
+<p class="s">Do this at the venue shortly before the rehearsal. Anyone from Desk B, Desk D or the admins can do it. If nobody does, the position found from the address is used.</p></div>
+<div id="rhform" class="hide" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b id="rhtitle">Make a rehearsal</b>
+<p class="s">Times are Lagos time. Check-in can open from one hour before the start and closes at the finish time. At most three rehearsals can be planned at once; the next upcoming one is the one members check in to and are told about.</p>
+<label class="s">Date</label><input id="rhdate" type="date">
+<label class="s">Start time</label><input id="rhstart" type="time">
+<label class="s">Finish time</label><input id="rhfinish" type="time">
+<label class="s">Late after (minutes after check-in opens)</label><input id="rhlate" type="number" min="0" max="180" value="30">
+<label class="s">Venue (write it as people would read it, e.g. "CCW Main Auditorium, 12 Example Road, Ikeja, Lagos")</label><input id="rhvenue" autocomplete="off" maxlength="150" placeholder="Venue name, street, area, city">
+<p class="s">This text goes in notices. The system finds its map position from it.</p>
+<details><summary class="s">Position typed by hand (only if the address is not found)</summary>
+<p class="s">In Google Maps press and hold the venue and tap the two numbers; you can paste "6.5244, 3.3792" into the first box.</p>
+<label class="s">Venue latitude</label><input id="rhlat" autocomplete="off" placeholder="e.g. 6.5244">
+<label class="s">Venue longitude</label><input id="rhlon" autocomplete="off" placeholder="e.g. 3.3792"></details>
+<div id="rhreasonbox" class="hide"><label class="s">Reason for the change (needed when the rehearsal is less than 36 hours away)</label><input id="rhreason" autocomplete="off" maxlength="200" placeholder="Why is it changing?"></div>
+<button id="rhsave">Save</button> <button id="rhcancel" type="button" data-noenter="1" class="hide" style="background:none;color:var(--bad);border:1px solid var(--bad)">Cancel this rehearsal</button> <button id="rhback" type="button" data-noenter="1" style="background:none;border:1px solid var(--mut);color:inherit">Back</button></div>
+<p id="m8" class="s"></p></div>
+
+<div id="s7" class="card hide"><b style="display:block">Requests waiting for you</b>
+<p class="s">Campus MDs validate. Deciders approve or reject. The member's reason is shown here only so you can decide.</p>
+<div id="qbar" class="hide"><button id="qvtick" style="width:auto;padding:.5rem .9rem">Validate ticked (0)</button> <button id="qatick" style="width:auto;padding:.5rem .9rem">Approve ticked (0)</button><p class="s">Tick the ones you have read. Reject, appeals, flagged requests and handing on are done one at a time.</p></div>
+<div id="qrows"></div><p id="m7" class="s"></p></div>
+
+<div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const BACKEND_URL = ''; // PRODUCTION COPY: paste the production web app address here (ends in /exec)
+if (!BACKEND_URL) setTimeout(() => { const n = document.getElementById('notconn'); if (n) n.classList.remove('hide'); }, 0);
+const $ = id => document.getElementById(id);
+let token = '', timer = null;
+try { token = sessionStorage.getItem('rbcTok') || ''; } catch (e) {}
+let pending = 0, busyT = null;
+let ckRid = '';
+async function call(body) {
+  if (ckRid && /^(validate\.|late\.|handmark)/.test(String(body.action))) body.rehearsalId = ckRid;
+  if (++pending === 1) busyT = setTimeout(() => $('busy').classList.remove('hide'), 400);
+  try {
+    const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
+    return await r.json();
+  } finally {
+    if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
+  }
+}
+const TABDEF = {qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal']};
+const LANDING = ['qr', 'rehearsal', 'checkins', 'requests', 'absence'];
+let myTabs = [], myName = '';
+function drawTabs() {
+  $('tabs').innerHTML = myTabs.map(k => '<button class="tab" data-v="' + TABDEF[k][0] + '" style="width:auto;flex:1">' + TABDEF[k][1] + '</button>').join('');
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => go(b.dataset.v));
+  $('who').textContent = myName ? 'Signed in: ' + myName : 'Signed in';
+}
+function go(v) {
+  clearTimeout(timer);
+  if (v === 's3') return start();
+  show(v); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+}
+function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
+function signedOutNow() { token = ''; myTabs = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8'].indexOf(id) !== -1;
+  for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
+  document.querySelectorAll('.tab').forEach(b => { b.style.opacity = b.dataset.v === id ? '1' : '.65'; }); }
+function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function loadRows() {
+  say('m4', 'Loading…');
+  try {
+    const j = await call({action: 'validate.list', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('rows').innerHTML = ''; $('vbar').classList.add('hide'); return say('m4', j.error || 'Not available.', 'bad'); }
+    const choices = j.rehearsals || [];
+    $('ckpick').classList.toggle('hide', choices.length < 2);
+    $('ckrid').innerHTML = choices.map(x => '<option value="' + esc(x.id) + '"' + (x.id === j.rehearsalId ? ' selected' : '') + '>' + esc(x.id) + ' · ' + esc(new Date(x.startMs).toLocaleDateString('en-GB')) + (x.finished ? ' (finished)' : '') + '</option>').join('');
+    $('ckrid').onchange = () => { ckRid = $('ckrid').value; loadRows(); };
+    const c = j.counts || {waiting: 0, clean: 0, flagged: 0, validated: 0};
+    say('m4', j.rows.length ? '' : 'No check-ins yet.');
+    $('vsum').textContent = c.waiting + ' waiting (' + c.clean + ' clean, ' + c.flagged + ' flagged) · ' + c.validated + ' checked';
+    $('vbar').classList.toggle('hide', !j.rows.length);
+    $('vall').textContent = 'Validate all clean (' + c.clean + ')';
+    $('vall').disabled = c.clean === 0;
+    $('rows').innerHTML = j.rows.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0' + (r.flagged && !r.validatedBy ? ';border-left:4px solid var(--bad);padding-left:8px' : '') + '">' +
+      (r.canValidate ? '<input type="checkbox" class="tick" data-id="' + esc(r.memberId) + '" style="width:auto;margin:0 8px 0 0;vertical-align:middle"> ' : '') +
+      '<b>' + esc(r.memberId) + '</b> <span class="s">' + new Date(r.time).toLocaleTimeString() + (r.tags.length ? ' · ' + esc(r.tags.join(', ')) : '') + (r.validatedBy ? ' · checked' : '') + '</span><br>' +
+      (r.canValidate ? '<button data-act="v" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem">Checked</button> ' : '') +
+      (r.canUndo ? '<button data-act="u" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--bad);border:1px solid var(--bad)">Undo</button> ' : '') +
+      (r.canCorrectLate ? '<button data-act="l" data-late="' + (r.late ? '0' : '1') + '" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">' + (r.late ? 'Was on time' : 'Mark late') + '</button>' : '') + '</div>').join('');
+    const ticks = () => Array.from($('rows').querySelectorAll('.tick:checked')).map(x => x.dataset.id);
+    const upd = () => { const n = ticks().length; $('vtick').textContent = 'Validate ticked (' + n + ')'; $('vtick').disabled = n === 0; };
+    $('rows').querySelectorAll('.tick').forEach(x => x.onchange = upd);
+    upd();
+    $('rows').querySelectorAll('button').forEach(b => b.onclick = async () => {
+      let body;
+      if (b.dataset.act === 'v') body = {action: 'validate.mark', token, memberId: b.dataset.id};
+      else if (b.dataset.act === 'u') { const reason = prompt('Why are you undoing this validation? (5 to 200 characters)'); if (!reason) return; body = {action: 'validate.undo', token, memberId: b.dataset.id, reason}; }
+      else { const reason = prompt('Reason for the change (required):'); if (!reason) return; body = {action: 'late.correct', token, memberId: b.dataset.id, newLate: b.dataset.late === '1', reason}; }
+      const k = await call(body); say('m4', k.ok ? 'Saved.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); if (k.ok) loadRows();
+    });
+    $('vtick').onclick = async () => {
+      const ids = ticks(); if (!ids.length) return;
+      const k = await call({action: 'validate.markMany', token, memberIds: ids});
+      say('m4', k.ok ? (k.done + ' checked' + (k.skipped.length ? ', ' + k.skipped.length + ' not allowed (' + k.skipped.map(x => x.memberId).join(', ') + ')' : '') + '.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+      loadRows();
+    };
+    $('vall').onclick = async () => {
+      if (!confirm('Validate all ' + c.clean + ' clean check-ins? Flagged ones stay for you to check one by one. You can undo any of them afterwards.')) return;
+      const k = await call({action: 'validate.markAllClean', token});
+      say('m4', k.ok ? (k.done + ' checked' + (k.skipped.length ? ', ' + k.skipped.length + ' not allowed' : '') + '.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+      loadRows();
+    };
+  } catch (e) { say('m4', 'Network problem. Try again.', 'bad'); }
+}
+let rhState = null, rhEditing = null;
+const lagos = ms => new Date(ms).toLocaleString('en-GB', {timeZone: 'Africa/Lagos', dateStyle: 'medium', timeStyle: 'short'});
+const rhLive = r => !r.cancelled && !r.finished;
+async function loadRehearsal() {
+  say('m8', 'Loading…');
+  try {
+    const j = await call({action: 'rehearsal.state', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('rhlist').innerHTML = ''; $('rhbtns').innerHTML = ''; $('rhcount').textContent = ''; return say('m8', j.error || 'Not available.', 'bad'); }
+    say('m8', '');
+    rhState = j;
+    $('rhform').classList.add('hide'); $('rhmenu').classList.toggle('hide', !j.canEdit);
+    const list = j.rehearsals || [];
+    const cur = list.filter(r => r.isCurrent)[0] || null;
+    $('rhcount').textContent = j.liveCount + ' of ' + j.max + ' places used. The next upcoming rehearsal is the current one.';
+    $('rhlist').innerHTML = list.length ? list.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.id) + '</b> · ' + esc(lagos(r.startMs)) + ' to ' + esc(lagos(r.finishMs).slice(-5)) +
+      ' <span class="s">· ' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.isCurrent ? 'CURRENT · check-in ' + (r.checkInOpen ? 'OPEN' : 'closed') : 'scheduled ahead') + (r.urgent && rhLive(r) ? ' · urgent' : '') + '</span><br>' +
+      '<span class="s">' + esc(r.venue ? r.venue.name || '(no name)' : '(no venue)') + (rhLive(r) && r.venue ? ' · position ' + (r.venue.confirmed ? 'confirmed on site by ' + esc(r.venue.confirmedBy) : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site') : '') +
+      (r.editedBy ? ' · last edited by ' + esc(r.editedByRole) : '') + '</span>' +
+      (r.log && r.log.length ? '<details><summary class="s">Changes</summary>' + r.log.map(l => '<div class="s">' + esc(lagos(l.t)) + ' · ' + esc(l.by) + ' · ' + esc(l.w) + '</div>').join('') + '</details>' : '') +
+      (j.canEdit && rhLive(r) ? '<br><button data-edit="' + esc(r.id) + '" type="button" data-noenter="1" style="width:auto;padding:.4rem .8rem">Edit or cancel</button>' : '') + '</div>').join('') : '<p class="s">No rehearsal is set up yet.</p>';
+    $('rhbtns').innerHTML = cur && rhLive(cur) ? (cur.checkInOpen ? '<button data-op="close">Close check-in (' + esc(cur.id) + ')</button>' : '<button data-op="open">Open check-in (' + esc(cur.id) + ')</button>') : '';
+    $('rhhint').textContent = j.liveCount >= j.max ? 'Three rehearsals are planned. Finish or cancel one to make another.' : 'The next one will be ' + j.nextId + '.';
+    $('rhvbox').classList.toggle('hide', !cur || !rhLive(cur) || !cur.venue);
+    if (cur && cur.venue) $('rhvinfo').textContent = 'Current rehearsal ' + cur.id + ' venue: ' + (cur.venue.name || '(no name)') + ' · position ' + (cur.venue.confirmed ? 'confirmed on site by ' + cur.venue.confirmedBy : 'not yet confirmed on site');
+    $('rhlist').querySelectorAll('button[data-edit]').forEach(b => b.onclick = () => rhOpenForm('edit', b.dataset.edit));
+    $('rhbtns').querySelectorAll('button').forEach(b => b.onclick = async () => {
+      const k = await call({action: 'rehearsal.' + b.dataset.op, token});
+      await loadRehearsal();
+      say('m8', k.ok ? 'Done.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+    });
+  } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
+}
+function rhOpenForm(mode, id) {
+  const r = mode === 'edit' ? ((rhState.rehearsals || []).filter(x => x.id === id)[0] || null) : null;
+  if (mode === 'edit' && !r) return say('m8', 'That rehearsal was not found. Reload.', 'bad');
+  rhEditing = r;
+  $('rhtitle').textContent = r ? 'Edit ' + r.id : 'Make rehearsal ' + rhState.nextId;
+  $('rhcancel').classList.toggle('hide', !r);
+  $('rhreasonbox').classList.toggle('hide', !r); $('rhreason').value = '';
+  if (r) {
+    const iso = new Date(r.startMs + 3600000).toISOString(), fin = new Date(r.finishMs + 3600000).toISOString();
+    $('rhdate').value = iso.slice(0, 10); $('rhstart').value = iso.slice(11, 16); $('rhfinish').value = fin.slice(11, 16);
+    $('rhlate').value = r.lateAfterMin; $('rhvenue').value = r.venue ? r.venue.name : '';
+    $('rhsave').disabled = !!r.checkInOpen; say('m8', r.checkInOpen ? 'Close check-in before changing this rehearsal.' : (r.editedBy ? 'Last edited by the ' + r.editedByRole + '. Only that role or higher can change it now.' : ''));
+  } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; $('rhvenue').value = ''; $('rhsave').disabled = false; say('m8', ''); }
+  $('rhlat').value = ''; $('rhlon').value = '';
+  $('rhform').classList.remove('hide'); $('rhmenu').classList.add('hide');
+}
+$('rhmake').onclick = () => {
+  if (!rhState) return say('m8', 'Still loading. Try again in a moment.', 'bad');
+  if (rhState.liveCount >= rhState.max) return say('m8', 'Three rehearsals are already planned. Finish or cancel one before making another.', 'bad');
+  rhOpenForm('make');
+};
+$('rhback').onclick = () => { $('rhform').classList.add('hide'); $('rhmenu').classList.remove('hide'); say('m8', ''); };
+$('rhcancel').onclick = async () => {
+  if (!rhEditing) return;
+  const reason = prompt('Cancel ' + rhEditing.id + ' (' + lagos(rhEditing.startMs) + ')? Why? (5 to 200 characters)'); if (!reason) return;
+  try { const k = await call({action: 'rehearsal.cancel', token, id: rhEditing.id, rev: rhEditing.rev, reason});
+    await loadRehearsal(); say('m8', k.ok ? 'Rehearsal cancelled.' + (k.sheetNote ? ' Note: ' + k.sheetNote : '') : (k.error || 'Could not cancel.'), k.ok ? 'ok' : 'bad');
+  } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
+};
+$('rhgeo').onclick = () => {
+  if (!navigator.geolocation) return say('m8', 'This phone cannot share its location.', 'bad');
+  say('m8', 'Finding your location…');
+  navigator.geolocation.getCurrentPosition(async p => {
+    try {
+      let k = await call({action: 'rehearsal.confirmVenue', token, lat: p.coords.latitude, lon: p.coords.longitude});
+      if (k.tooFar && confirm(k.error + ' Press OK only if you are really at the venue.')) k = await call({action: 'rehearsal.confirmVenue', token, lat: p.coords.latitude, lon: p.coords.longitude, force: true});
+      if (k.ok) { await loadRehearsal(); say('m8', 'Venue position confirmed from this phone.', 'ok'); } else say('m8', k.error || 'Could not confirm.', 'bad');
+    } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
+  }, () => say('m8', 'Location was blocked. Allow location for this page and try again.', 'bad'), {enableHighAccuracy: true, timeout: 15000});
+};
+$('rhlat').addEventListener('input', () => { const m = $('rhlat').value.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*$/); if (m) { $('rhlat').value = m[1]; $('rhlon').value = m[2]; } });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+  const card = e.target.closest('.card'); if (!card) return;
+  const after = [...card.querySelectorAll('button')].find(b => !b.disabled && !b.dataset.noenter && b.offsetParent && (e.target.compareDocumentPosition(b) & 4));
+  if (after) { e.preventDefault(); after.click(); }
+});
+$('rhsave').onclick = async () => {
+  if (!rhState) return;
+  $('rhsave').disabled = true;
+  try {
+    const k = await call({action: 'rehearsal.save', token, id: rhEditing ? rhEditing.id : '', rev: rhEditing ? rhEditing.rev : undefined, reason: $('rhreason').value.trim(),
+      date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
+      lateAfterMin: $('rhlate').value, venueName: $('rhvenue').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim()});
+    if (k.ok) await loadRehearsal();
+    say('m8', k.ok ? 'Saved.' + (k.sheetNote ? ' Note: ' + k.sheetNote : '') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+  } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
+  $('rhsave').disabled = false;
+};
+async function loadAbsence() {
+  say('m6', 'Loading…'); $('rform').classList.add('hide');
+  try {
+    const j = await call({action: 'absence.state', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('rmine').innerHTML = ''; return say('m6', j.error || 'Not available.', 'bad'); }
+    const rh = j.rehearsal;
+    const live = j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
+    $('rinfo').textContent = rh ? 'Next rehearsal: ' + new Date(rh.startMs).toLocaleString() + '. Requests ' + (rh.open ? 'are open until ' + new Date(rh.closeMs).toLocaleString() + '.' : 'are closed. Please contact the Global Admin or Assistant Global Admin.') : 'No rehearsal is open for requests yet.';
+    $('rform').classList.toggle('hide', !(rh && rh.open && !live));
+    $('rfor').classList.toggle('hide', !j.canSubmitFor);
+    say('m6', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
+    $('rmine').innerHTML = j.mine.length ? '<b>Your requests</b>' + j.mine.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0"><b>' + esc(r.status) + '</b> <span class="s">' + new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' + (r.canWithdraw ? '<br><button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + (r.canAppeal ? '<br><button data-ap="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Appeal</button>' : '') + '</div>').join('') : '';
+    $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => {
+      if (b.dataset.ap) { const why = prompt('Why should this be looked at again? (10 to 300 characters)'); if (!why) return; const a = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m6', a.ok ? 'Appeal sent.' : (a.error || 'Could not appeal.'), a.ok ? 'ok' : 'bad'); loadAbsence(); return; }
+      const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m6', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadAbsence(); });
+  } catch (e) { say('m6', 'Network problem. Try again.', 'bad'); }
+}
+const OPLABEL = {validate: 'Validate', approve: 'Approve', reject: 'Reject', delegate: 'Hand to a Campus MD', 'appeal-approve': 'Approve appeal', 'appeal-reject': 'Reject appeal'};
+async function loadQueue() {
+  say('m7', 'Loading…');
+  try {
+    const j = await call({action: 'absence.queue', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('qrows').innerHTML = ''; return say('m7', j.error || 'Not available.', 'bad'); }
+    say('m7', j.items.length ? '' : 'Nothing is waiting for you.');
+    const batchable = r => !r.flagged && (r.ops.indexOf('validate') !== -1 || r.ops.indexOf('approve') !== -1);
+    $('qrows').innerHTML = j.items.map(r => '<div style="border-top:1px solid var(--mut);padding:8px 0">' + (batchable(r) ? '<input type="checkbox" class="qtick" data-id="' + esc(r.requestId) + '" data-v="' + (r.ops.indexOf('validate') !== -1 ? '1' : '') + '" data-a="' + (r.ops.indexOf('approve') !== -1 ? '1' : '') + '" style="width:auto;margin:0 8px 0 0;vertical-align:middle">' : '') + '<b>' + esc(r.name || 'Member') + '</b> <span class="s">' + esc(r.campus) + ' · ' + esc(r.status) + (r.late ? ' · late route' : '') + (r.flagged ? ' · flagged' : '') + (r.handedToCampusMd ? ' · handed to a Campus MD' : '') + ' · ' + new Date(r.rehearsalStartMs).toLocaleString() + '</span><br><span class="s">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span><br>' +
+      r.ops.map(o => '<button data-id="' + esc(r.requestId) + '" data-op="' + o + '" style="width:auto;padding:.4rem .8rem;margin-right:6px' + (/reject/.test(o) ? ';background:none;color:var(--bad);border:1px solid var(--bad)' : '') + '">' + OPLABEL[o] + '</button>').join('') + '</div>').join('');
+    const ticked = () => Array.from($('qrows').querySelectorAll('.qtick:checked'));
+    const upd = () => {
+      const t = ticked(), v = t.filter(x => x.dataset.v).length, a = t.filter(x => x.dataset.a).length;
+      $('qvtick').textContent = 'Validate ticked (' + v + ')'; $('qvtick').disabled = v === 0;
+      $('qatick').textContent = 'Approve ticked (' + a + ')'; $('qatick').disabled = a === 0;
+      $('qbar').classList.toggle('hide', !$('qrows').querySelector('.qtick'));
+    };
+    $('qrows').querySelectorAll('.qtick').forEach(x => x.onchange = upd);
+    upd();
+    const batch = async (op, attr) => {
+      const ids = ticked().filter(x => x.dataset[attr]).map(x => x.dataset.id);
+      if (!ids.length) return;
+      if (!confirm((op === 'validate' ? 'Validate ' : 'Approve ') + ids.length + ' request' + (ids.length === 1 ? '' : 's') + '? Reject, appeals and flagged requests are not included.')) return;
+      const k = await call({action: 'absence.actMany', token, op, requestIds: ids});
+      say('m7', k.ok ? (k.done + ' done' + (k.skipped.length ? ', ' + k.skipped.length + ' not allowed (' + k.skipped.map(x => x.error).filter((e, i, a) => a.indexOf(e) === i).join('; ') + ')' : '') + '.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+      loadQueue();
+    };
+    $('qvtick').onclick = () => batch('validate', 'v');
+    $('qatick').onclick = () => batch('approve', 'a');
+    $('qrows').querySelectorAll('button').forEach(b => b.onclick = async () => {
+      let reason = '', delegateMemberId = '';
+      if (b.dataset.op === 'delegate') { delegateMemberId = prompt('Member ID of the Campus MD to hand this to (same campus as the member):'); if (!delegateMemberId) return; }
+      if (/reject/.test(b.dataset.op) || (b.dataset.op === 'validate' && b.closest('div').textContent.indexOf('flagged') !== -1)) { reason = prompt('Reason (10 to 300 characters):'); if (!reason) return; }
+      const k = await call({action: 'absence.act', token, requestId: b.dataset.id, op: b.dataset.op, reason, delegateMemberId});
+      say('m7', k.ok ? 'Saved: ' + k.status : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); if (k.ok) loadQueue();
+    });
+  } catch (e) { say('m7', 'Network problem. Try again.', 'bad'); }
+}
+$('rfsend').onclick = async () => {
+  $('rfsend').disabled = true;
+  try { const k = await call({action: 'absence.submitFor', token, memberId: $('rfid').value.trim(), reason: $('rfreason').value.trim()});
+    say('m6b', k.ok ? 'Submitted for the member' + (k.late ? ' (late route).' : '.') : (k.error || 'Could not submit.'), k.ok ? 'ok' : 'bad'); if (k.ok) { $('rfid').value = ''; $('rfreason').value = ''; } }
+  catch (e) { say('m6b', 'Network problem. Try again.', 'bad'); }
+  $('rfsend').disabled = false;
+};
+$('rsend').onclick = async () => {
+  $('rsend').disabled = true;
+  try { const k = await call({action: 'absence.submit', token, reason: $('rreason').value.trim()}); say('m6', k.ok ? 'Request sent.' : (k.error || 'Could not send.'), k.ok ? 'ok' : 'bad'); if (k.ok) { $('rreason').value = ''; loadAbsence(); } }
+  catch (e) { say('m6', 'Network problem. Try again.', 'bad'); }
+  $('rsend').disabled = false;
+};
+$('hmark').onclick = async () => {
+  if (!$('hid').value.trim()) return say('m5', 'Enter the Member ID.', 'bad');
+  try { const k = await call({action: 'handmark', token, memberId: $('hid').value.trim()}); say('m5', k.ok ? 'Marked present (by hand).' : (k.error || 'Could not mark.'), k.ok ? 'ok' : 'bad'); if (k.ok) $('hid').value = ''; }
+  catch (e) { say('m5', 'Network problem. Try again.', 'bad'); }
+};
+function say(id, text, cls) { $(id).textContent = text; $(id).className = 's ' + (cls || ''); }
+let cd = null;
+function cool(ms) {
+  clearInterval(cd);
+  const end = Date.now() + ms, b = $('send');
+  b.disabled = true;
+  const tick = () => { const left = Math.ceil((end - Date.now()) / 1000); if (left <= 0) { clearInterval(cd); b.disabled = false; b.textContent = 'Email me a new code'; } else b.textContent = 'Ask again in ' + Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0'); };
+  tick(); cd = setInterval(tick, 500);
+}
+$('send').onclick = async () => {
+  if (!$('mid').value.trim()) return say('m1', 'Enter your Member ID.', 'bad');
+  say('m1', 'Sending…');
+  try { const j = await call({action: 'signin.start', memberId: $('mid').value.trim()}); if (!j.ok) return say('m1', (j.error || 'Could not send a code.') + ' (the back end could not send the email; it may need email permission or a new version)', 'bad'); say('m1', j.message || 'Done.', 'ok'); if (j.waitMs) cool(j.waitMs); show('s2'); }
+  catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
+};
+$('verify').onclick = async () => {
+  say('m2', 'Checking…');
+  try {
+    const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
+    if (!j.ok) return say('m2', j.error || 'Could not sign in.', 'bad');
+    token = j.token; try { sessionStorage.setItem('rbcTok', token); } catch (e) {}
+    myTabs = j.tabs || ['absence']; myName = j.name || ''; drawTabs(); land();
+  } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
+};
+$('back').onclick = () => show('s1');
+// Sign in with Google (optional: shown only when a Google client ID is set). The email code above stays as the backup.
+const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.googleusercontent.com';
+async function googleDone(resp) {
+  say('m1', 'Checking with Google…');
+  try {
+    const j = await call({action: 'signin.google', idToken: resp.credential, memberId: $('mid').value.trim()});
+    if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
+    token = j.token; try { sessionStorage.setItem('rbcTok', token); } catch (e) {}
+    myTabs = j.tabs || ['absence']; myName = j.name || ''; drawTabs(); land();
+  } catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
+}
+if (GOOGLE_CLIENT_ID) {
+  const gs = document.createElement('script');
+  gs.src = 'https://accounts.google.com/gsi/client'; gs.async = true;
+  gs.onload = () => {
+    try {
+      google.accounts.id.initialize({client_id: GOOGLE_CLIENT_ID, callback: googleDone, auto_select: false});
+      google.accounts.id.renderButton($('gbtn'), {theme: 'outline', size: 'large', text: 'signin_with', width: 280});
+      $('gwrap').classList.remove('hide');
+    } catch (e) { /* the email code still works */ }
+  };
+  document.head.appendChild(gs);
+}
+$('out').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
+let runId = 0;
+async function start() {
+  const me = ++runId;
+  show('s3'); clearTimeout(timer);
+  const stamp = () => new Date().toLocaleTimeString();
+  try {
+    const j = await call({action: 'qr', token});
+    if (me !== runId) return;
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { say('m3', 'At ' + stamp() + ': ' + (j.error || 'Not available.') + ' Trying again in 10 seconds. (The old code may no longer work.)', 'bad'); timer = setTimeout(start, 10000); return; }
+    $('q').innerHTML = ''; new QRCode($('q'), {text: j.url, width: 260, height: 260});
+    const wait = Math.min(300000, Math.max(5000, Number(j.renewInMs) + 1000 || 60000));
+    say('m3', 'Updated at ' + stamp() + '. Renews in about ' + Math.round(wait / 1000) + ' seconds. Do not share a photo of this screen.');
+    timer = setTimeout(start, wait);
+  } catch (e) { if (me !== runId) return; say('m3', 'At ' + stamp() + ': network problem (' + (e && e.message ? e.message : 'unknown') + '). Trying again in 10 seconds.', 'bad'); timer = setTimeout(start, 10000); }
+}
+if (token) call({action: 'me', token}).then(j => { if (j.ok) { myTabs = j.tabs; myName = j.name; drawTabs(); land(); } else signedOutNow(); }).catch(() => signedOutNow());
+</script></body></html>
