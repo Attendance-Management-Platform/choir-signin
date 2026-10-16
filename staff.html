@@ -229,7 +229,7 @@ $('rhcancel').onclick = async () => {
   if (!rhEditing) return;
   const reason = prompt('Cancel ' + rhEditing.id + ' (' + lagos(rhEditing.startMs) + ')? Why? (5 to 200 characters)'); if (!reason) return;
   try { const k = await call({action: 'rehearsal.cancel', token, id: rhEditing.id, rev: rhEditing.rev, reason});
-    await loadRehearsal(); say('m8', k.ok ? 'Rehearsal cancelled.' : (k.error || 'Could not cancel.'), k.ok ? 'ok' : 'bad');
+    await loadRehearsal(); say('m8', k.ok ? 'Rehearsal cancelled.' + (k.sheetNote ? ' Note: ' + k.sheetNote : '') : (k.error || 'Could not cancel.'), k.ok ? 'ok' : 'bad');
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
 };
 $('rhgeo').onclick = () => {
@@ -258,7 +258,7 @@ $('rhsave').onclick = async () => {
       date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
       lateAfterMin: $('rhlate').value, venueName: $('rhvenue').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim()});
     if (k.ok) await loadRehearsal();
-    say('m8', k.ok ? 'Saved.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+    say('m8', k.ok ? 'Saved.' + (k.sheetNote ? ' Note: ' + k.sheetNote : '') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
   $('rhsave').disabled = false;
 };
