@@ -20,7 +20,7 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <div id="busy" class="s hide" style="text-align:center">Working…</div>
 
 <div id="s1" class="card"><b>Sign in</b>
-<input id="mid" autocomplete="off" placeholder="Member ID">
+<input id="mid" autocomplete="off" placeholder="Member ID (staff who are not choir members: your email)">
 <div id="gwrap" class="hide"><div id="gbtn" style="margin:.4rem 0"></div><p class="s" style="margin:.2rem 0 .6rem">If more than one member uses your email, type your Member ID first.</p><p class="s" style="margin:.2rem 0">Or use an email code:</p></div>
 <button id="send">Email me a code</button><p id="m1" class="s"></p></div>
 
@@ -349,7 +349,7 @@ function cool(ms) {
   tick(); cd = setInterval(tick, 500);
 }
 $('send').onclick = async () => {
-  if (!$('mid').value.trim()) return say('m1', 'Enter your Member ID.', 'bad');
+  if (!$('mid').value.trim()) return say('m1', 'Enter your Member ID, or your email if you are staff but not a choir member.', 'bad');
   say('m1', 'Sending…');
   try { const j = await call({action: 'signin.start', memberId: $('mid').value.trim()}); if (!j.ok) return say('m1', (j.error || 'Could not send a code.') + ' (the back end could not send the email; it may need email permission or a new version)', 'bad'); say('m1', j.message || 'Done.', 'ok'); if (j.waitMs) cool(j.waitMs); show('s2'); }
   catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
