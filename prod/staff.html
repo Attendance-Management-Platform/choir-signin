@@ -123,6 +123,8 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .g.flag{box-shadow:inset 4px 0 0 #B6000A}
 .g .who b{font-weight:900}.g .who .s{display:block;font-size:13px}
 .gv{grid-template-columns:36px 1.1fr 1.7fr 1.5fr}
+.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}.calh{font-size:12px;font-weight:700;color:#5E6A7E;text-align:center}.calc{min-height:64px;border:1px solid #E5E8EE;border-radius:8px;background:#fff;color:#172039;box-shadow:none;transform:none;padding:4px;text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;overflow:hidden;width:auto}.calc:hover{background:#FFF7F7}.calx{border:0;background:none;cursor:default}.cald{font-size:12px;font-weight:700;color:#172039}.caltoday{border-color:#B3262F}.calp{font-size:10px;line-height:1.2;border-radius:6px;padding:1px 4px;background:#EEF1F6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
 .note{background:#EDF3FB;color:#2F4F7E;border-radius:10px;padding:10px 12px;font-size:14px}
@@ -239,6 +241,12 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <p id="m11" class="s"></p>
 </div>
 
+<div id="s14" class="pg hide">
+<div class="card pad rise"><div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><button class="btn line sm" type="button" id="calprev">&larr; Earlier</button><div id="caltitle" class="ct" style="margin:0"></div><button class="btn line sm" type="button" id="calnext">Later &rarr;</button></div>
+<div id="calgrid" class="calgrid"></div><div id="calday"></div></div>
+<p id="m14" class="s"></p>
+</div>
+
 <div id="s13" class="pg hide">
 <div class="card pad rise"><div class="ct">Who checked in</div>
 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
@@ -252,6 +260,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s12" class="pg hide">
+<div id="paw"></div>
 <div id="pwait"></div>
 <div id="pready"></div>
 <div class="card pad rise"><div class="ct">Ask for a change</div>
@@ -329,6 +338,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <label for="rhdate" class="lb">Rehearsal date</label><input id="rhdate" class="in" type="date">
 <div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 140px"><label for="rhstart" class="lb">Start time</label><input id="rhstart" class="in" type="time"></div><div style="flex:1 1 140px"><label for="rhfinish" class="lb">Finish time</label><input id="rhfinish" class="in" type="time"></div><div style="flex:1 1 140px"><label for="rhlate" class="lb">Late after (minutes)</label><input id="rhlate" class="in" type="number" min="0" max="180" value="30"></div></div>
 <label for="rhvenue" class="lb">Venue, written as people read it</label><input id="rhvenue" class="in" autocomplete="off" maxlength="150" placeholder="Venue name, street, area, city">
+<label for="rhdesc" class="lb">Description (optional)</label><input id="rhdesc" class="in" autocomplete="off" maxlength="200" placeholder="For example: bring black shoes; full dress rehearsal">
 <p class="sub">This text goes in notices. The system finds the map position from it. Check-in can open from one hour before the start and closes at the finish time. At most three rehearsals can be planned at once.</p>
 <details><summary class="sub" style="cursor:pointer;font-weight:700">Position typed by hand (only if the address is not found)</summary>
 <p class="sub">In Google Maps press and hold the venue and tap the two numbers; you can paste "6.5244, 3.3792" into the first box.</p>
@@ -388,12 +398,13 @@ async function call(body) {
     if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
-const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People'], records: ['s13', 'Records'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
+const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People'], records: ['s13', 'Records'], calendar: ['s14', 'Calendar'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
 const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myName = j.name || ''; myRoles = j.roles || []; }
 const ICON = {
   reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 14h2M12 14h2M16 14h2"/>',
   records: '<path d="M4 4h12l4 4v12H4z"/><path d="M16 4v4h4M8 12h8M8 16h8"/>',
   people: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M16 6a3 3 0 010 6M18 14c2 .8 3 2.800 3 6"/>',
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
@@ -406,6 +417,7 @@ const ICON = {
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17h.01"/>'
 };
 const PAGEHEAD = {
+  s14: ['Calendar', 'Rehearsals by month. Senior roles also see who is away and who is covering.'],
   s13: ['Attendance records', 'Who checked in for each rehearsal, and one member\'s record. Check-ins received, not official attendance.'],
   s12: ['People and access', 'Ask for a change, say yes to a request, and see what is waiting. Every step is recorded.'],
   s11: ['Reports', 'Check-ins received, by rehearsal, month or campus. Not official attendance yet.'],
@@ -432,12 +444,12 @@ try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   const ph = PAGEHEAD[id]; $('ph').classList.toggle('hide', !ph); if (ph) $('ph').innerHTML = '<div class="t">' + ph[0] + '</div><div class="d">' + ph[1] + '</div>';
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
   document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); }
@@ -525,6 +537,36 @@ $('rccamp').addEventListener('change', showRecords);
 $('rcq').addEventListener('input', () => { clearTimeout(rcT); rcT = setTimeout(findMember, 300); });
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-rcm]'); if (b) showMember(b.dataset.rcm); });
 
+// ---- Calendar ----
+let calMonth = '';
+const CALSTAT = {Planned: 'p-pend', Open: 'p-ok', Held: 'p-val', Cancelled: 'p-no'};
+async function loadCalendar(m) {
+  say('m14', 'Loading…');
+  try {
+    const j = await call({action: 'calendar.state', token, month: m || calMonth || ''});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) return say('m14', j.error || 'Not available.', 'bad');
+    calMonth = j.month; say('m14', '');
+    const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    let h = names.map(n => '<div class="calh">' + n + '</div>').join('');
+    for (let i = 0; i < j.firstWeekday; i++) h += '<div class="calc calx"></div>';
+    for (let d = 1; d <= j.days; d++) {
+      const day = j.month + '-' + String(d).padStart(2, '0'), es = j.entries[day] || [];
+      h += '<button type="button" class="calc' + (day === j.today ? ' caltoday' : '') + '" data-cal="' + day + '"><span class="cald">' + d + '</span>' + es.slice(0, 3).map(e => '<span class="calp ' + (e.type === 'rehearsal' ? (CALSTAT[e.status] || '') : 'p-pend') + '">' + esc(e.type === 'rehearsal' ? e.id : (e.type === 'away' ? 'Away' : e.type === 'cover' ? 'Cover' : 'Opened')) + '</span>').join('') + (es.length > 3 ? '<span class="calp">+' + (es.length - 3) + '</span>' : '') + '</button>';
+    }
+    $('calgrid').innerHTML = h; $('caltitle').textContent = j.month; $('calday').innerHTML = '';
+    window.__cal = j;
+    document.querySelectorAll('[data-cal]').forEach(b => b.onclick = () => {
+      const es = (j.entries[b.dataset.cal] || []);
+      $('calday').innerHTML = '<div class="ct" style="margin-top:14px">' + esc(b.dataset.cal) + '</div>' + (es.length ? es.map(e => e.type === 'rehearsal'
+        ? '<p class="sub" style="margin:6px 0 0"><b>' + esc(e.id) + '</b> · ' + esc(e.status) + (e.startMs ? ' · ' + esc(new Date(e.startMs).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})) : '') + (e.venue ? ' · ' + esc(e.venue) : '') + (e.description ? ' · ' + esc(e.description) : '') + '</p>'
+        : '<p class="sub" style="margin:6px 0 0">' + esc(e.label) + '</p>').join('') : '<p class="sub">Nothing on this day.</p>');
+    });
+  } catch (e) { say('m14', 'Network problem. Try again.', 'bad'); }
+}
+function calShift(n) { const [y, m] = (calMonth || new Date().toISOString().slice(0, 7)).split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); loadCalendar(d.toISOString().slice(0, 7)); }
+$('calprev').onclick = () => calShift(-1); $('calnext').onclick = () => calShift(1);
+
 // ---- People and access ----
 const PKIND_HELP = {
   member: 'Add, edit, deactivate or reactivate a choir member. Desk A makes the change after a yes.',
@@ -534,6 +576,7 @@ const PKIND_HELP = {
   top_role: 'Give, change or end a senior role: Global Admin, Global Music Director, Pastor in Charge or System Administrator.',
   desk_cover: 'Another desk holder covers a desk that is away. Up to 14 days, no more than 2 desks away at once.',
   cancel_held: 'Cancel a rehearsal that has already been held (within 36 hours). The Global Music Director and the Pastor in Charge must both say yes.',
+  emergency_open: 'Only while the Global Admin and the Assistant Global Admin are both away. Opens one function to one named person for up to 7 days. The Global Music Director or the Pastor in Charge says yes. It ends by itself.',
   download: 'Ask for the names and counts of your own campus for one rehearsal or one month. The Assistant Global Admin or Global Admin says yes. You can download once, within 7 days of the yes.'
 };
 let pState = null;
@@ -549,12 +592,13 @@ function drawPForm() {
   } else if (k === 'desk_cover') {
     g.push(pField('pdesk', 'Which desk is away?', pSelect('pdesk', [['A', 'Desk A'], ['B', 'Desk B'], ['C', 'Desk C'], ['D', 'Desk D']])), pField('pawayemail', 'Email of the person who is away', pInput('pawayemail', 'name@example.com', 'email')),
       pField('pcoveremail', 'Email of the person who will cover', pInput('pcoveremail', 'name@example.com', 'email')), pField('pstart', 'First day', pInput('pstart', '', 'date')), pField('pend', 'Last day', pInput('pend', '', 'date')));
-    if ((myRoles || []).indexOf('Global Admin') !== -1) g.push('<label class="lb" style="display:flex;gap:10px;align-items:center"><input id="paway" type="checkbox" style="width:auto"> The Assistant Global Admin is away, so I am asking</label>');
+  } else if (k === 'emergency_open') {
+    g.push(pField('pfn', 'Which function?', pSelect('pfn', [['rehearsal', 'Set up rehearsals'], ['qr', 'Show the QR'], ['records', 'See attendance records']])), pField('pemail', 'Email of the person it is for', pInput('pemail', 'name@example.com', 'email')), pField('puntil', 'Last day it stays open (7 days at most)', pInput('puntil', '', 'date')));
   } else if (k === 'download') {
     g.push(pField('pscope', 'What do you need?', pSelect('pscope', [['rehearsal', 'One rehearsal'], ['month', 'One month']])), pField('pkey', 'Which one? (a rehearsal ID such as R004, or a month such as 2026-10)', pInput('pkey', 'R004')));
   } else if (k === 'cancel_held') {
     g.push(pField('prid', 'Rehearsal ID', pInput('prid', 'e.g. R005')));
-    if ((myRoles || []).indexOf('Global Admin') === -1) g.push('<label class="lb" style="display:flex;gap:10px;align-items:center"><input id="paway" type="checkbox" style="width:auto"> The Global Admin is away, so I am asking on their behalf</label>');
+    if ((myRoles || []).indexOf('Global Admin') === -1) g.push('<p class="sub">You can ask only while the Global Admin has an away notice in force (see "Being away" above).</p>');
   } else {
     g.push(pField('pemail', 'Email of the person this is about', pInput('pemail', 'name@example.com', 'email')), pField('pchange', 'What should change?', change));
     if (k === 'desk_staff') g.push(pField('pdesk', 'Desk', pSelect('pdesk', [['A', 'Desk A'], ['B', 'Desk B'], ['C', 'Desk C'], ['D', 'Desk D']])));
@@ -569,8 +613,9 @@ async function sendRequest() {
   const k = $('pkind').value; if (!k) return;
   const b = {action: 'access.ask', token, kind: k, reason: pv('preason')};
   if (k === 'member') Object.assign(b, {change: pv('pchange'), subjectName: pv('pname'), subjectEmail: pv('pemail'), campus: pv('pcampus'), memberId: pv('pmid')});
-  else if (k === 'desk_cover') Object.assign(b, {awayDesk: pv('pdesk'), awayEmail: pv('pawayemail'), coverEmail: pv('pcoveremail'), start: pv('pstart'), end: pv('pend'), assistantAway: pv('paway') === true});
-  else if (k === 'cancel_held') Object.assign(b, {rehearsalId: pv('prid'), globalAdminAway: pv('paway') === true});
+  else if (k === 'desk_cover') Object.assign(b, {awayDesk: pv('pdesk'), awayEmail: pv('pawayemail'), coverEmail: pv('pcoveremail'), start: pv('pstart'), end: pv('pend')});
+  else if (k === 'cancel_held') Object.assign(b, {rehearsalId: pv('prid')});
+  else if (k === 'emergency_open') Object.assign(b, {fn: pv('pfn'), forEmail: pv('pemail'), until: pv('puntil')});
   else if (k === 'download') Object.assign(b, {scope: pv('pscope'), key: pv('pkey')});
   else { Object.assign(b, {subjectEmail: pv('pemail'), change: pv('pchange')}); if (k === 'desk_staff') { b.desk = pv('pdesk'); b.role = 'Admin Team Member'; } if (k === 'campus_md') { b.campus = pv('pcampus'); b.role = 'Campus Music Director'; } if (k === 'top_role') b.role = pv('prole'); if (k === 'assistant_ga') b.role = 'Assistant Global Admin'; }
   say('m12b', 'Sending…');
@@ -586,6 +631,7 @@ function pDetail(r) {
   const d = r.details || {}, bits = [];
   if (r.kind === 'download') bits.push((d.scope === 'month' ? 'Month ' : 'Rehearsal ') + (d.key || '') + ' · ' + (d.campus || ''));
   else if (r.kind === 'desk_cover') bits.push('Desk ' + d.awayDesk + ' · covered by ' + (r.subjectName || r.subjectEmail) + ' · ' + d.start + ' to ' + d.end);
+  else if (r.kind === 'emergency_open') bits.push((d.fnName || d.fn) + ' · for ' + (r.subjectName || r.subjectEmail) + ' · ' + d.start + ' to ' + d.until);
   else if (r.kind === 'cancel_held') bits.push('Rehearsal ' + r.target + (d.onBehalf ? ' · asked on behalf of the Global Admin' : '') + ' · yes so far: ' + ((d.yes || []).map(y => y.role).join(', ') || 'none'));
   else { bits.push((d.change || '') + (r.subjectName ? ' · ' + r.subjectName : '') + (r.subjectEmail ? ' (' + r.subjectEmail + ')' : '')); if (d.role) bits.push(d.role + (d.desk ? ' Desk ' + d.desk : '') + (d.campus ? ' · ' + d.campus : '')); }
   return bits.filter(Boolean).join(' · ');
@@ -608,14 +654,32 @@ async function loadPeople(keepMsg) {
     if (cur && j.kinds.some(k => k.kind === cur)) $('pkind').value = cur;
     if (!$('pform').innerHTML) drawPForm();
     $('pwait').innerHTML = '<div class="card pad rise"><div class="ct">Waiting for your answer</div>' + (j.waiting.length ? j.waiting.map(r => pCard(r,
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center"><button class="btn red sm" type="button" data-yes="' + esc(r.id) + '">Yes</button>' +
+      (r.standIn ? '<p class="sub" style="margin:4px 0 0"><b>You are the stand-in for this one request</b> (the ' + esc(r.standInFor || 'usual approver') + ' is away or has not answered in 48 hours). Your answer is recorded as a stand-in answer.</p>' : '') + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center"><button class="btn red sm" type="button" data-yes="' + esc(r.id) + '">Yes</button>' +
       '<input class="in" style="flex:1 1 200px;max-width:340px" placeholder="Reason, if you say no" data-why="' + esc(r.id) + '"><button class="btn warn sm" type="button" data-no="' + esc(r.id) + '">Say no</button></div>')).join('') : '<p class="sub">Nothing is waiting for you.</p>') + '</div>';
     $('pready').innerHTML = j.ready.length ? '<div class="card pad rise"><div class="ct">Approved and ready to carry out</div><p class="sub">Carrying out changes the real list. It is checked first and recorded.</p>' +
       j.ready.map(r => pCard(r, '<p class="sub" style="margin:4px 0 0">You carry this out as: ' + esc(r.as || '') + '</p><div style="margin-top:12px">' + (r.download ? '<button class="btn red sm" type="button" data-dl="' + esc(r.id) + '">Download (once)</button>' : '<button class="btn red sm" type="button" data-carry="' + esc(r.id) + '">Carry out</button>') + '</div>')).join('') + '</div>' : '';
+    loadAway();
     $('pmine').innerHTML = '<div class="card pad rise"><div class="ct">Requests you asked for</div>' + (j.mine.length ? j.mine.map(r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : '')).join('') : '<p class="sub">You have not asked for anything yet.</p>') + '</div>';
   } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); }
 }
+async function loadAway() {
+  try {
+    const j = await call({action: 'away.state', token});
+    if (!j.ok || !j.canSet) { $('paw').innerHTML = ''; return; }
+    const who = Object.keys(j.away || {}).filter(r => j.away[r]);
+    const mine = (j.mine || []).map(n => '<p class="sub" style="margin:6px 0 0">You are away ' + esc(n.start) + ' to ' + esc(n.end) + ' (' + esc(n.reason) + ') <button class="btn line sm" type="button" data-awayend="1">I am back</button></p>').join('');
+    $('paw').innerHTML = '<div class="card pad rise"><div class="ct">Being away</div><p class="sub">If you will be away for days, put in a short notice so others can act in the right order. A day or two with nothing due needs no notice. It ends by itself.' + (who.length ? ' <b>Away now: ' + esc(who.join(', ')) + '.</b>' : '') + '</p>' + mine +
+      (j.saving ? '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px"><div style="flex:1 1 140px"><label class="lb" for="awstart" style="margin-top:0">First day</label><input id="awstart" class="in" type="date"></div><div style="flex:1 1 140px"><label class="lb" for="awend" style="margin-top:0">Last day</label><input id="awend" class="in" type="date"></div><div style="flex:2 1 200px"><label class="lb" for="awwhy" style="margin-top:0">Reason</label><input id="awwhy" class="in" maxlength="200"></div><button class="btn red sm" type="button" id="awgo">Put in notice</button></div>' : '') + '</div>';
+  } catch (e) { $('paw').innerHTML = ''; }
+}
 document.addEventListener('click', async ev => {
+  const ae = ev.target.closest && ev.target.closest('#awgo,[data-awayend]');
+  if (ae) {
+    const b = ae.id === 'awgo' ? {action: 'away.set', token, start: pv('awstart'), end: pv('awend'), reason: pv('awwhy')} : {action: 'away.end', token};
+    ae.disabled = true;
+    try { const j = await call(b); if (j.signedOut) { signedOutNow(); return; } say('m12', j.ok ? 'Saved.' : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); loadPeople(true); } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); ae.disabled = false; }
+    return;
+  }
   const dl = ev.target.closest && ev.target.closest('[data-dl]');
   if (dl) {
     dl.disabled = true;
@@ -711,6 +775,8 @@ async function loadHome() {
     if (t.checkins) h += link('checkins', tile('Check-ins to validate', t.checkins.waiting, '<span class="pill p-pend">' + t.checkins.flagged + ' flagged</span><span class="pill p-val">' + t.checkins.validated + ' checked</span>', '#20775A'));
     if (t.requests) h += link('requests', tile('Requests waiting', t.requests.waiting, '<span class="pill p-pend">' + t.requests.late + ' late</span>' + (t.requests.flagged ? '<span class="pill p-no">' + t.requests.flagged + ' flagged</span>' : ''), '#95621D'));
     if (t.access) h += link('people', tile('People and access', t.access.waiting, '<span class="pill p-pend">' + t.access.waiting + ' for your answer</span><span class="pill p-val">' + t.access.ready + ' ready to carry out</span>', '#2F4F7E'));
+    if (t.appeals) h += link('requests', tile('Appeals waiting for you', t.appeals.waiting, '', '#95621D'));
+    if (t.email) h += '<div class="card stat">' + tile('Emails left today', t.email.left, '<span class="s">' + t.email.reserve + ' are kept for sign-in codes</span>', '#2F4F7E') + '</div>';
     if (t.counts) h += '<div class="card stat">' + tile('Active members', t.counts.members, '<span class="pill p-val">' + t.counts.campuses + ' campuses</span>', '#2F4F7E') + '</div>';
     $('hgrid').innerHTML = h || '<div class="card pad"><div class="ct">Welcome</div><p class="sub">Nothing is waiting for you here. Use the menu for your tabs.</p></div>';
     document.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
@@ -718,7 +784,11 @@ async function loadHome() {
     const crh = cr ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + esc(cr.id) + (cr.kind === 'last' ? '' : ' held as planned?') + '</div><p class="sub">' +
       (cr.kind === 'last' ? 'A held rehearsal can be cancelled only within 36 hours of its end. About ' + cr.hoursLeft + ' hour(s) are left. After that it cannot be cancelled.' : 'If ' + esc(cr.id) + ' must be cancelled, do it now. A held rehearsal can be cancelled only within 36 hours of its end, and the Global Music Director and the Pastor in Charge must both say yes.') +
       '</p>' + (has('people') ? '<div class="actions"><button class="btn line" type="button" data-go="s12">Open People and access</button></div>' : '') + '</div>' : '';
-    $('hcharts').innerHTML = crh + homeCharts(t.charts, has('reports'));
+    const awl = t.away ? Object.keys(t.away.away || {}).filter(r => t.away.away[r]) : [];
+    const FN = {rehearsal: 'Set up rehearsals', qr: 'Show the QR', records: 'See attendance records'};
+    const awh = (awl.length ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Away now: ' + esc(awl.join(', ')) + '</div><p class="sub">If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.</p></div>' : '') +
+      ((j.openFunctions || []).length ? '<div class="card pad rise" style="background:#E6F2EC;border-color:#CBE2D6"><div class="ct">Opened to you for a short time</div><p class="sub">' + esc(j.openFunctions.map(f => FN[f] || f).join(', ')) + '. It ends by itself.</p></div>' : '');
+    $('hcharts').innerHTML = awh + crh + homeCharts(t.charts, has('reports'));
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
     // the QR stand-in
@@ -765,7 +835,7 @@ async function loadRows() {
     $('vall').disabled = c.clean === 0;
     const tm = r => new Date(r.time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
     const rowHtml = r => '<div class="g gv row' + (r.flagged && !r.validatedBy ? ' flag' : '') + '"><div>' + (r.canValidate ? '<input type="checkbox" class="tick" data-id="' + esc(r.memberId) + '" aria-label="Tick ' + esc(r.memberId) + '">' : '') + '</div>' +
-      '<div class="who"><b>' + esc(r.memberId) + '</b><span class="s">' + tm(r) + '</span></div>' +
+      '<div class="who"><b>' + esc(r.name || r.memberId) + '</b><span class="s">' + esc(r.memberId) + (r.campus ? ' · ' + esc(r.campus) : '') + ' · ' + tm(r) + '</span></div>' +
       '<div>' + ((r.tags || []).map(t => '<span class="pill ' + (/outside|venue/i.test(t) ? 'p-no' : 'p-pend') + '">' + esc(t) + '</span>').join('') || '<span class="pill p-ok">All ok</span>') + (r.validatedBy ? '<span class="pill p-ok">Checked</span>' : '') + '</div>' +
       '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
       (r.canValidate ? '<button class="btn red sm" type="button" data-act="v" data-id="' + esc(r.memberId) + '">Validate</button>' : '') +
@@ -849,9 +919,9 @@ function rhOpenForm(mode, id) {
   if (r) {
     const iso = new Date(r.startMs + 3600000).toISOString(), fin = new Date(r.finishMs + 3600000).toISOString();
     $('rhdate').value = iso.slice(0, 10); $('rhstart').value = iso.slice(11, 16); $('rhfinish').value = fin.slice(11, 16);
-    $('rhlate').value = r.lateAfterMin; $('rhvenue').value = r.venue ? r.venue.name : '';
+    $('rhlate').value = r.lateAfterMin; $('rhvenue').value = r.venue ? r.venue.name : ''; $('rhdesc').value = r.description || '';
     $('rhsave').disabled = !!r.checkInOpen; say('m8', r.checkInOpen ? 'Close check-in before changing this rehearsal.' : (r.editedBy ? 'Last edited by the ' + r.editedByRole + '. Only that role or higher can change it now.' : ''));
-  } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; $('rhvenue').value = ''; $('rhsave').disabled = false; say('m8', ''); }
+  } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; $('rhvenue').value = ''; $('rhdesc').value = ''; $('rhsave').disabled = false; say('m8', ''); }
   $('rhlat').value = ''; $('rhlon').value = '';
   $('rhform').classList.remove('hide'); $('rhprev').classList.remove('hide'); rhPreview();
   if (!r && rhState.liveCount >= rhState.max) { $('rhsave').disabled = true; say('m8', 'Three rehearsals are already planned. Finish or cancel one before making another.', 'bad'); }
@@ -908,7 +978,7 @@ $('rhsave').onclick = async () => {
   try {
     const k = await call({action: 'rehearsal.save', token, id: rhEditing ? rhEditing.id : '', rev: rhEditing ? rhEditing.rev : undefined, reason: $('rhreason').value.trim(),
       date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
-      lateAfterMin: $('rhlate').value, venueName: $('rhvenue').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim()});
+      lateAfterMin: $('rhlate').value, venueName: $('rhvenue').value.trim(), description: $('rhdesc').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim()});
     if (k.ok) await loadRehearsal();
     say('m8', k.ok ? 'Saved.' + (k.sheetNote ? ' Note: ' + k.sheetNote : '') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
@@ -1016,6 +1086,7 @@ $('verify').onclick = async () => {
 $('back').onclick = () => show('s1');
 // ---- Help and the once-a-day welcome (text is built from the tabs the server gave this person) ----
 const TABHELP = {
+  calendar: ['See the calendar', 'See rehearsals by month (planned, open, held, cancelled). The Global Admin, Assistant Global Admin, Global Music Director and Pastor in Charge also see away notices and desk cover. It only shows; nothing is changed here.'],
   qr: ['Show the QR', 'Show the check-in QR code of the open rehearsal so members can scan it. Campus Music Directors do this for their own campus. Desk D, the Assistant Global Admin and the Global Admin can after the Global Admin or Assistant Global Admin switches on "Campus Music Director is away" on the Home page.'],
   checkins: ['Check the check-ins', 'See who has checked in and mark each check-in as checked. Late and hand-marked ones come first. Some roles can only look. Nobody checks their own.'],
   hand: ['Mark a member by hand', 'For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.'],
@@ -1027,6 +1098,7 @@ const TABHELP = {
   requests: ['Handle absence requests', 'Campus Music Directors validate requests. People who decide approve or reject. The reason is shown only so you can decide.']
 };
 const NOTHAVE = {
+  calendar: 'See the calendar',
   qr: 'Show the QR (that is for Campus Music Directors, and others only when the Campus Music Director is not available)',
   checkins: 'Check other people\'s check-ins',
   hand: 'Mark members by hand',
