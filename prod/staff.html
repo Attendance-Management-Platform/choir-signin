@@ -2,17 +2,30 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RBC Choir staff</title>
 <style>
-:root{--bg:#fff;--fg:#1b1b1f;--mut:#5b5b66;--card:#f3f3f6;--acc:#3b3fb5;--ok:#0b7a3b;--bad:#b3261e}
-@media(prefers-color-scheme:dark){:root{--bg:#121214;--fg:#ececf1;--mut:#a0a0ad;--card:#1d1d22;--acc:#9aa0ff;--ok:#5fd68a;--bad:#ff8a80}}
-body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0;padding:16px;max-width:30rem;margin-inline:auto}
-h1{font-size:1.3rem}.card{background:var(--card);border-radius:12px;padding:14px;margin:12px 0}
-button{font:inherit;background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:.7rem 1rem;width:100%;margin-top:.5rem}
-input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem}
+:root{--bg:#fff;--page:#F7F9FC;--fg:#172039;--mut:#5E6A7E;--card:#fff;--acc:#B6000A;--ok:#20775A;--bad:#AE2D37;--line:#E6E9EF;--rose:#FFF0F1}
+*{box-sizing:border-box}
+body{font:16px/1.5 Lato,system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0 auto;padding:0 16px 28px;max-width:30rem;min-height:100vh;background:radial-gradient(420px 260px at 100% 0,#FFE4E6 0,transparent 65%),var(--page)}
+header.top{margin:0 -16px 14px;padding:20px 20px 22px;background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;border-radius:0 0 28px 28px}
+.brand{display:flex;align-items:center;gap:12px}
+.tile{background:#fff;border-radius:14px;padding:6px 8px;display:flex}
+.tile img{height:40px;width:auto;display:block}
+.b1{font-weight:900;font-size:15px;line-height:1.2}.b2{font-size:11px;letter-spacing:.14em;font-weight:700;color:#FFD9DC}
+header.top h1{font-size:25px;font-weight:900;margin:16px 0 0;line-height:1.15}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(20,35,61,.05);padding:18px;margin:12px 0}
+.card>b:first-child{font-size:12px;font-weight:900;letter-spacing:.08em;color:var(--acc);text-transform:uppercase}
+button{font:inherit;font-weight:700;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;border:0;border-radius:12px;padding:.75rem 1rem;width:100%;margin-top:.6rem;min-height:46px;cursor:pointer;box-shadow:0 4px 12px rgba(182,0,10,.25);transition:transform .2s,box-shadow .2s}
+button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(182,0,10,.3)}
+button:active{transform:scale(.98)}
+button[disabled]{opacity:.5;cursor:default;transform:none}
+input,select,textarea{font:inherit;width:100%;padding:.7rem .75rem;border-radius:12px;border:1px solid #D5DAE3;background:#fff;color:var(--fg);margin-top:.4rem;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(182,0,10,.12);outline:0}
+:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px}
 .s{color:var(--mut);font-size:.9rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.hide{display:none}
+button[style*="background:none"]{box-shadow:none}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 #q{display:inline-block;padding:12px;background:#fff;margin-top:8px}
 </style></head><body>
-<img src="../logo.png" alt="CCW logo" style="height:44px;width:auto;display:block;margin:0 0 10px">
-<h1>RBC Choir staff</h1>
+<header class="top"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>Staff</h1></header>
 <p id="notconn" class="hide" style="background:#fdecea;color:#8a1c14;padding:10px;border-radius:8px">This page is not connected to the production system yet.</p>
 
 <div id="bar" class="card hide" style="display:none;align-items:center;justify-content:space-between;gap:10px">
@@ -21,7 +34,7 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <div id="busy" class="s hide" style="text-align:center">Working…</div>
 
 <div id="s1" class="card"><b>Sign in</b>
-<input id="mid" autocomplete="off" placeholder="Member ID (staff who are not choir members: your email)">
+<input id="mid" autocomplete="off" placeholder="Member ID or email"><p class="s" style="margin:.3rem 0 0">Staff who are not choir members: type your email.</p>
 <div id="gwrap" class="hide"><div id="gbtn" style="margin:.4rem 0"></div><p class="s" style="margin:.2rem 0 .6rem">If more than one member uses your email, type your Member ID first.</p><p class="s" style="margin:.2rem 0">Or use an email code:</p></div>
 <button id="send">Email me a code</button><p id="m1" class="s"></p></div>
 
