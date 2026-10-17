@@ -88,7 +88,7 @@ input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:
 <div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-const BACKEND_URL = ''; // PRODUCTION COPY: paste the production web app address here (ends in /exec)
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxbedyyXRi_q3oatiJx6m-2mdCkrOxU07IQfVTLamrwGwZNAecCf27GM1ABY2tW5m35-Q/exec'; // PRODUCTION COPY web app
 if (!BACKEND_URL) setTimeout(() => { const n = document.getElementById('notconn'); if (n) n.classList.remove('hide'); }, 0);
 const $ = id => document.getElementById(id);
 let token = '', timer = null;

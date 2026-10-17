@@ -34,7 +34,7 @@ button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;
 <p class="s">No phone, camera or location? Tell your Campus MD or Desk D and they will mark you.</p>
 <script>
 // Set to the Apps Script web app URL when the back end is wired. Empty means demo mode.
-const BACKEND_URL = ''; // PRODUCTION COPY: paste the production web app address here (ends in /exec)
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxbedyyXRi_q3oatiJx6m-2mdCkrOxU07IQfVTLamrwGwZNAecCf27GM1ABY2tW5m35-Q/exec'; // PRODUCTION COPY web app
 const q = new URLSearchParams(location.search), R = q.get('r') || '', T = q.get('t') || '';
 const $ = id => document.getElementById(id);
 let locOk = false, reading = null;
