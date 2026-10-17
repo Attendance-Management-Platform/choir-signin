@@ -567,8 +567,8 @@ function rhPreview() {
   if (!d || !st) { $('pvdate').textContent = '-'; $('pvclose').textContent = '-'; $('pvnotice').textContent = '-'; $('pvnotice').className = 'pill p-pend'; return; }
   const startMs = Date.parse(d + 'T' + st + ':00+01:00');
   $('pvdate').textContent = new Date(startMs).toLocaleDateString('en-GB', {timeZone: 'Africa/Lagos', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
-  $('pvclose').textContent = lagos(startMs - 36 * 3600000);
   const hrs = (startMs - Date.now()) / 3600000;
+  $('pvclose').textContent = lagos(hrs < 36 ? Math.min(startMs, Math.max(startMs - 6 * 3600000, Date.now() + 2 * 3600000)) : startMs - 36 * 3600000);
   const lvl = hrs < 36 ? ['Urgent', 'p-no'] : hrs < 168 ? ['Short notice', 'p-pend'] : ['7 days+ · Normal', 'p-ok'];
   $('pvnotice').textContent = lvl[0]; $('pvnotice').className = 'pill ' + lvl[1];
 }
