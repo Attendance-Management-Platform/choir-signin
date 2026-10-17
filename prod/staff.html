@@ -114,6 +114,7 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .stat{flex:1 1 150px;padding:14px 18px;margin:0}
 .stat .k{font-size:13px;font-weight:700}.stat .v{font-size:30px;font-weight:900;line-height:1.2}
 .tblc{padding:0;overflow:hidden}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl th{text-align:left;padding:8px 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5E6A7E;border-bottom:1px solid #E6E9EF}.tbl td{padding:8px 10px;border-bottom:1px solid #F0F2F6;vertical-align:top}
 .tblh{padding:14px 20px;font-size:17px;font-weight:900;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .tblh small{font-size:13px;font-weight:400;color:var(--mut)}
 .g{display:grid;gap:12px;padding:12px 20px;align-items:center;border-top:1px solid var(--line);font-size:14px}
@@ -239,6 +240,13 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div id="rpdl" class="hide"><button id="rpcsv" class="btn red" type="button">Download CSV</button></div></div></div>
 <div id="rpout"></div>
 <p id="m11" class="s"></p>
+</div>
+
+<div id="s15" class="pg hide">
+<div class="card pad rise"><div class="ct">Process attendance</div>
+<p class="sub" id="prnote"></p><div id="prlist"></div></div>
+<div id="prdetail"></div>
+<p id="m15" class="s"></p>
 </div>
 
 <div id="s14" class="pg hide">
@@ -398,12 +406,13 @@ async function call(body) {
     if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
-const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People'], records: ['s13', 'Records'], calendar: ['s14', 'Calendar'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
+const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People'], records: ['s13', 'Records'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
 const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myName = j.name || ''; myRoles = j.roles || []; }
 const ICON = {
   reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  process: '<path d="M9 11l3 3 8-8"/><path d="M4 6h9M4 12h3M4 18h9"/>',
   calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 14h2M12 14h2M16 14h2"/>',
   records: '<path d="M4 4h12l4 4v12H4z"/><path d="M16 4v4h4M8 12h8M8 16h8"/>',
   people: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M16 6a3 3 0 010 6M18 14c2 .8 3 2.800 3 6"/>',
@@ -417,6 +426,7 @@ const ICON = {
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17h.01"/>'
 };
 const PAGEHEAD = {
+  s15: ['Process attendance', 'Turn the checked check-ins and approved absences of a held rehearsal into Present, Excused and Absent.'],
   s14: ['Calendar', 'Rehearsals by month. Senior roles also see who is away and who is covering.'],
   s13: ['Attendance records', 'Who checked in for each rehearsal, and one member\'s record. Check-ins received, not official attendance.'],
   s12: ['People and access', 'Ask for a change, say yes to a request, and see what is waiting. Every step is recorded.'],
@@ -444,12 +454,12 @@ try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   const ph = PAGEHEAD[id]; $('ph').classList.toggle('hide', !ph); if (ph) $('ph').innerHTML = '<div class="t">' + ph[0] + '</div><div class="d">' + ph[1] + '</div>';
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
   document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); }
@@ -536,6 +546,64 @@ $('rcrid').addEventListener('change', showRecords);
 $('rccamp').addEventListener('change', showRecords);
 $('rcq').addEventListener('input', () => { clearTimeout(rcT); rcT = setTimeout(findMember, 300); });
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-rcm]'); if (b) showMember(b.dataset.rcm); });
+
+// ---- Process attendance ----
+let prState = null;
+const SPILL = {Present: 'p-ok', Excused: 'p-pend', Absent: 'p-no'};
+async function loadProcess() {
+  say('m15', 'Loading…'); $('prdetail').innerHTML = '';
+  try {
+    const j = await call({action: 'process.state', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) return say('m15', j.error || 'Not available.', 'bad');
+    prState = j; say('m15', j.saving ? '' : 'Saving is switched off, so nothing can be processed now.', j.saving ? '' : 'bad');
+    $('prnote').textContent = j.note || '';
+    $('prlist').innerHTML = j.rehearsals.length ? j.rehearsals.map(r => '<div class="card pad" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b>' + esc(r.id) + ' · ' + esc(r.date) + '</b>' +
+      (r.processed ? '<span class="pill p-ok">Processed</span>' : (r.blocked ? '<span class="pill p-pend">Not ready</span>' : '<span class="pill p-val">Ready</span>')) + '</div>' +
+      (r.counts ? '<p class="sub" style="margin:6px 0 0">' + r.counts.present + ' present · ' + r.counts.excused + ' excused · ' + r.counts.absent + ' absent · ' + r.counts.late + ' late</p>' : '') +
+      (r.blocked ? '<p class="sub" style="margin:6px 0 0">' + esc(r.blocked) + '</p>' : '') +
+      '<div style="margin-top:10px"><button class="btn ' + (r.processed ? 'line' : 'red') + ' sm" type="button" data-pr="' + esc(r.id) + '" data-prdone="' + (r.processed ? '1' : '0') + '">' + (r.processed ? 'See the result' : 'Preview') + '</button></div></div>').join('') : '<p class="sub">No rehearsal has been held yet.</p>';
+  } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
+}
+function prTable(rows, canFix) {
+  return '<div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Name</th><th>Campus</th><th>Status</th><th>How</th>' + (canFix ? '<th></th>' : '') + '</tr></thead><tbody>' + rows.map(r => '<tr><td>' + esc(r.name) + '<div class="s">' + esc(r.memberId) + '</div></td><td>' + esc(r.campus) + '</td><td><span class="pill ' + (SPILL[r.status] || '') + '">' + esc(r.status) + '</span>' + (r.late ? ' <span class="pill p-pend">Late</span>' : '') + (r.corrected ? ' <span class="s">was ' + esc(r.previous) + '</span>' : '') + '</td><td>' + esc(r.source) + '</td>' +
+    (canFix ? '<td><button class="btn line sm" type="button" data-prfix="' + esc(r.memberId) + '" data-prcur="' + esc(r.status) + '">Correct</button></td>' : '') + '</tr>').join('') + '</tbody></table></div>';
+}
+async function prOpen(id, done) {
+  say('m15', 'Loading…');
+  try {
+    const j = await call({action: done ? 'process.rows' : 'process.preview', token, rehearsalId: id});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('prdetail').innerHTML = ''; return say('m15', j.error || 'Not available.', 'bad'); }
+    say('m15', '');
+    const c = j.counts;
+    $('prdetail').innerHTML = '<div class="card pad rise"><div class="ct">' + esc(j.id) + ' · ' + esc(j.date) + (done ? ' · processed' : ' · preview') + '</div>' + (c ? '<p class="sub">' + c.present + ' present · ' + c.excused + ' excused · ' + c.absent + ' absent · ' + c.late + ' late · ' + c.total + ' people</p>' : '') +
+      (done ? '' : '<div class="actions"><button class="btn red" type="button" data-prgo="' + esc(j.id) + '"' + (prState && prState.saving ? '' : ' disabled') + '>Process ' + esc(j.id) + '</button></div><p class="sub">This writes a new sheet for ' + esc(j.id) + ' and locks the day. Changes after that need a correction with a reason.</p>') +
+      prTable(j.rows, done && j.canCorrect) + '</div>';
+    $('prdetail').dataset.id = j.id;
+  } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
+}
+document.addEventListener('click', async ev => {
+  const o = ev.target.closest && ev.target.closest('[data-pr]');
+  if (o) { prOpen(o.dataset.pr, o.dataset.prdone === '1'); return; }
+  const g = ev.target.closest && ev.target.closest('[data-prgo]');
+  if (g) {
+    if (!confirm('Process ' + g.dataset.prgo + ' now? This writes its attendance sheet and locks the day.')) return;
+    g.disabled = true;
+    try { const j = await call({action: 'process.publish', token, rehearsalId: g.dataset.prgo}); if (j.signedOut) { signedOutNow(); return; }
+      if (!j.ok) { g.disabled = false; return say('m15', j.error || 'Could not process.', 'bad'); }
+      await loadProcess(); await prOpen(g.dataset.prgo, true); say('m15', 'Done: ' + j.summary + '.', 'ok'); } catch (e) { g.disabled = false; say('m15', 'Network problem. Try again.', 'bad'); }
+    return;
+  }
+  const f = ev.target.closest && ev.target.closest('[data-prfix]');
+  if (f) {
+    const to = prompt('Change ' + f.dataset.prfix + ' from ' + f.dataset.prcur + ' to which status? Type Present, Excused or Absent.'); if (!to) return;
+    const reason = prompt('Why is this being corrected? (5 to 200 characters)'); if (!reason) return;
+    try { const j = await call({action: 'process.correct', token, rehearsalId: $('prdetail').dataset.id, memberId: f.dataset.prfix, status: to.trim().replace(/^./, c => c.toUpperCase()).toLowerCase().replace(/^./, c => c.toUpperCase()), reason: reason});
+      if (j.signedOut) { signedOutNow(); return; }
+      say('m15', j.ok ? 'Done: ' + j.summary + '.' : (j.error || 'Could not correct.'), j.ok ? 'ok' : 'bad'); if (j.ok) prOpen($('prdetail').dataset.id, true); } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
+  }
+});
 
 // ---- Calendar ----
 let calMonth = '';
@@ -1086,6 +1154,7 @@ $('verify').onclick = async () => {
 $('back').onclick = () => show('s1');
 // ---- Help and the once-a-day welcome (text is built from the tabs the server gave this person) ----
 const TABHELP = {
+  process: ['Process attendance', 'After a rehearsal, turn the checked check-ins and approved absences into Present, Excused and Absent. It makes its own sheet for that rehearsal. The Google Form still makes the official log during the pilot. The Global Admin and the Assistant Global Admin can correct one person later, with a reason.'],
   calendar: ['See the calendar', 'See rehearsals by month (planned, open, held, cancelled). The Global Admin, Assistant Global Admin, Global Music Director and Pastor in Charge also see away notices and desk cover. It only shows; nothing is changed here.'],
   qr: ['Show the QR', 'Show the check-in QR code of the open rehearsal so members can scan it. Campus Music Directors do this for their own campus. Desk D, the Assistant Global Admin and the Global Admin can after the Global Admin or Assistant Global Admin switches on "Campus Music Director is away" on the Home page.'],
   checkins: ['Check the check-ins', 'See who has checked in and mark each check-in as checked. Late and hand-marked ones come first. Some roles can only look. Nobody checks their own.'],
@@ -1098,6 +1167,7 @@ const TABHELP = {
   requests: ['Handle absence requests', 'Campus Music Directors validate requests. People who decide approve or reject. The reason is shown only so you can decide.']
 };
 const NOTHAVE = {
+  process: 'Process attendance',
   calendar: 'See the calendar',
   qr: 'Show the QR (that is for Campus Music Directors, and others only when the Campus Music Director is not available)',
   checkins: 'Check other people\'s check-ins',
