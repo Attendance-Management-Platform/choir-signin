@@ -2,30 +2,65 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Celebration Church Worship Choir Portal</title>
 <style>
-:root{--page:#F7F9FC;--fg:#172039;--mut:#5E6A7E;--acc:#B6000A;--deep:#8E0008;--line:#E6E9EF;--rose:#FFF0F1}
+:root{--page:#F7F9FC;--fg:#172039;--mut:#5E6A7E;--acc:#B6000A;--deep:#8E0008;--line:#E6E9EF;--rose:#FFF0F1;--ease:cubic-bezier(.2,.7,.2,1)}
 *{box-sizing:border-box}
-body{font:16px/1.5 Lato,system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0;min-height:100vh;background:radial-gradient(520px 320px at 100% 100%,#FFE4E6 0,transparent 65%),var(--page);display:flex;flex-direction:column}
-.top{padding:22px 20px 26px;background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;border-radius:0 0 28px 28px}
-.brand{display:flex;align-items:center;gap:12px;max-width:44rem;margin:0 auto}
-.tile{background:#fff;border-radius:14px;padding:6px 8px;display:flex}.tile img{height:44px;width:auto;display:block}
+html{-webkit-text-size-adjust:100%}
+body{font:16px/1.5 Lato,system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0;min-height:100vh;background:var(--page);-webkit-tap-highlight-color:rgba(182,0,10,.12)}
+.shell{min-height:100vh;display:flex;flex-direction:column}
+.hero{position:relative;overflow:hidden;color:#fff;padding:22px 22px 54px;background:radial-gradient(420px 260px at 92% 0,rgba(255,255,255,.16) 0,transparent 65%),linear-gradient(160deg,#C8101B,#8E0008);border-radius:0 0 34px 34px}
+.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.16);pointer-events:none}
+.hero:before{width:260px;height:260px;right:-90px;top:60px}
+.hero:after{width:420px;height:420px;right:-190px;top:10px}
+.brand{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.tile{background:#fff;border-radius:16px;padding:8px 10px;display:flex;box-shadow:0 8px 22px rgba(0,0,0,.18)}.tile img{height:46px;width:auto;display:block}
 .b1{font-weight:900;font-size:15px;line-height:1.2}.b2{font-size:11px;letter-spacing:.14em;font-weight:700;color:#FFD9DC}
-h1{max-width:44rem;margin:18px auto 0;font-size:28px;font-weight:900;line-height:1.15}
-main{width:100%;max-width:44rem;margin:0 auto;padding:18px 16px 28px;display:grid;gap:14px;flex:1}
-.card{display:block;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 18px rgba(20,35,61,.05);padding:20px;color:inherit;text-decoration:none;transition:transform .2s,box-shadow .2s,border-color .2s}
-a.card:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(142,0,8,.12);border-color:#E9A9AE}
+.lead{position:relative;z-index:1;margin-top:34px;max-width:30rem}
+.lead h1{margin:0;font-size:32px;font-weight:900;line-height:1.1;letter-spacing:-.01em}
+.lead p{margin:12px 0 0;color:#FFE9EA;font-size:16px}
+.tag{display:none}
+main{flex:1;width:100%;max-width:40rem;margin:-30px auto 0;padding:0 16px 20px;display:grid;gap:14px;align-content:start;position:relative;z-index:2}
+.card{position:relative;display:flex;gap:16px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 30px rgba(20,35,61,.08);padding:20px;color:inherit;text-decoration:none;transition:transform .25s var(--ease),box-shadow .25s var(--ease),border-color .25s;animation:rise .6s var(--ease) both}
+.card:nth-child(2){animation-delay:.08s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.ico{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--rose);color:var(--acc);transition:background-color .25s,color .25s,transform .25s var(--ease)}
+.ico svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card h2{margin:0;font-size:20px;font-weight:900;color:var(--deep)}
+.card p{margin:4px 0 0;color:var(--mut);font-size:15px}
+.go{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;font-weight:700;border-radius:12px;padding:.7rem 1.2rem;box-shadow:0 4px 12px rgba(182,0,10,.25);transition:box-shadow .25s,transform .25s var(--ease)}
+.go svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s var(--ease)}
+.soon{display:inline-block;margin-top:12px;font-size:13px;font-weight:700;color:#95621D;background:#FFF4DF;border-radius:999px;padding:4px 12px}
 a.card:active{transform:scale(.99)}
-.card b{display:block;font-size:20px;font-weight:900;color:var(--deep)}
-.card span{display:block;color:var(--mut);margin-top:4px}
-.go{display:inline-block;margin-top:12px;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;font-weight:700;border-radius:12px;padding:.65rem 1.1rem}
-.note{background:var(--rose);border-color:#F3C9CC}
-footer{padding:0 16px 24px;text-align:center;color:var(--mut);font-size:14px}footer a{color:var(--acc)}
-@media(min-width:800px){main{grid-template-columns:1fr 1fr;align-content:start;padding-top:32px}.note{grid-column:1/-1}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (hover:hover){
+  a.card:hover{transform:translateY(-4px);box-shadow:0 20px 44px rgba(142,0,8,.16);border-color:#E9A9AE}
+  a.card:hover .ico{background:var(--acc);color:#fff;transform:rotate(-6deg) scale(1.05)}
+  a.card:hover .go{box-shadow:0 10px 22px rgba(182,0,10,.35)}
+  a.card:hover .go svg{transform:translateX(4px)}
+}
+.how{background:none;border:1px dashed #E9A9AE;box-shadow:none;color:var(--mut);font-size:15px;display:block;padding:16px 18px}
+.how b{color:var(--deep)}
+footer{padding:6px 16px 26px;text-align:center;color:var(--mut);font-size:14px}footer a{color:var(--acc);text-decoration:none}footer a:hover{text-decoration:underline}
+:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px}
+@media(min-width:900px){
+  .shell{display:grid;grid-template-columns:minmax(340px,5fr) 7fr}
+  .hero{border-radius:0;padding:48px 56px;min-height:100vh;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+  .lead{margin-top:auto;margin-bottom:8vh;max-width:30rem}
+  .lead h1{font-size:44px}.lead p{font-size:18px}
+  .shell>.right{display:flex;flex-direction:column;justify-content:center;min-height:100vh;background:radial-gradient(520px 320px at 100% 100%,#FFE4E6 0,transparent 65%),var(--page)}
+  main{margin:0 auto;padding:40px 40px 12px;flex:0 0 auto}
+  .card{padding:26px}.ico{width:60px;height:60px}
+  footer{padding-bottom:40px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
-<div class="top"><div class="brand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>Celebration Church Worship Choir Portal</h1></div>
+<div class="shell">
+<header class="hero"><div class="brand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
+<div class="lead"><h1>Celebration Church Worship Choir Portal</h1><p>Attendance, requests and rehearsals in one place. Choose where you are going.</p></div></header>
+<div class="right">
 <main>
-<a class="card" href="prod/staff.html"><b>CCW Choir Staff</b><span>For Campus Music Directors, desks and admins. Sign in with Google to see the tabs for your role.</span><span class="go">Staff sign in</span></a>
-<div class="card note"><b>CCW Choir Members</b><span>At rehearsal, scan the QR code shown by your Campus Music Director with your phone camera. It opens your check-in page. No QR or phone? A Desk can mark you by hand.</span></div>
+<a class="card" href="prod/staff.html"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><div><h2>CCW Choir Staff</h2><p>For Campus Music Directors, desks and admins. Sign in to see the tabs for your role.</p><span class="go">Staff sign in <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></a>
+<div class="card"><div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></div><div><h2>CCW Choir Members</h2><p>At rehearsal, scan the QR code shown by your Campus Music Director with your phone camera. It opens your check-in page.</p><span class="soon">Member home with requests and updates: coming soon</span></div></div>
+<div class="card how"><b>No phone, camera or location?</b> Tell your Campus Music Director or Desk D and they will mark you by hand.</div>
 </main>
-<footer><a href="about.html">About</a> &middot; <a href="privacy.html">Privacy notice</a></footer>
+<footer><a href="about.html">About</a> &nbsp;&middot;&nbsp; <a href="privacy.html">Privacy notice</a></footer>
+</div></div>
 </body></html>
