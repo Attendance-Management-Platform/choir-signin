@@ -197,6 +197,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
   #ph{padding-right:150px;min-height:62px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.drill:hover{opacity:.85}.drill:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px;border-radius:8px}
 </style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -239,8 +240,8 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s10" class="pg hide">
-<div id="hgrid" class="stats rise"></div>
 <div id="hcharts"></div>
+<div id="hgrid" class="stats rise"></div>
 <div id="hqr"></div>
 <p id="m10" class="s"></p>
 </div>
@@ -419,7 +420,7 @@ function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&l
 function tm(ms) { return lagos(ms); }
 
 // ---- Charts (plain SVG, no outside code) and the Reports page ----
-function lineChart(series) {
+function lineChart(series, drill) {
   if (!series.length) return '<p class="sub">No check-ins to chart yet.</p>';
   const W = 440, H = 190, L = 40, R = 16, T = 24, B = 34, max = Math.ceil(Math.max(10, ...series.map(x => x.present)) * 1.25 / 10) * 10;
   const x = i => series.length === 1 ? (L + W - R) / 2 : L + i * (W - L - R) / (series.length - 1), y = v => T + (H - T - B) * (1 - v / max);
@@ -429,19 +430,20 @@ function lineChart(series) {
     '<polyline points="' + pts + '" fill="none" stroke="#8E0008" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
     series.map((p, i) => '<circle cx="' + x(i) + '" cy="' + y(p.present) + '" r="' + (i === series.length - 1 ? 6 : 5) + '" fill="' + (i === series.length - 1 ? '#8E0008' : '#fff') + '" stroke="#8E0008" stroke-width="3"/>' +
       '<text x="' + x(i) + '" y="' + (y(p.present) - 10) + '" font-size="12" font-weight="900" fill="#8E0008" text-anchor="middle">' + p.present + '</text>' +
-      '<text x="' + x(i) + '" y="' + (H - 12) + '" font-size="11" fill="#5E6A7E" text-anchor="middle">' + esc(p.id) + '</text>').join('') + '</svg>';
+      '<text x="' + x(i) + '" y="' + (H - 12) + '" font-size="11" fill="#5E6A7E" text-anchor="middle"' + (drill ? ' class="drill" data-sc="rehearsal" data-key="' + esc(p.id) + '" style="cursor:pointer;text-decoration:underline"' : '') + '>' + esc(p.id) + '</text>').join('') + '</svg>';
 }
-function bars(rows) {
-  return rows.map(r => '<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>' + esc(r.campus) + '</span><b>' + r.present + ' of ' + r.active + ' · ' + r.rate + '%</b></div>' +
+function bars(rows, drill) {
+  return rows.map(r => '<div style="margin:8px 0"' + (drill ? ' class="drill" role="button" tabindex="0" data-sc="campus" data-key="' + esc(r.campus) + '" title="Open the ' + esc(r.campus) + ' report"' : '') + '><div style="display:flex;justify-content:space-between;font-size:14px"><span>' + esc(r.campus) + '</span><b>' + r.present + ' of ' + r.active + ' · ' + r.rate + '%</b></div>' +
     '<div style="background:#EEF1F6;border-radius:99px;height:10px"><div style="width:' + Math.min(100, r.rate) + '%;height:10px;border-radius:99px;background:' + (r.rate >= 70 ? '#20775A' : '#95621D') + '"></div></div></div>').join('') || '<p class="sub">No campus figures yet.</p>';
 }
-function homeCharts(c) {
+function homeCharts(c, drill) {
   if (!c) return '';
-  return '<div class="stats rise"><div class="card pad" style="flex:1 1 320px"><div class="ct">Check-ins received, last ' + c.series.length + ' rehearsals</div>' + lineChart(c.series) + '</div>' +
-    '<div class="card pad" style="flex:1 1 320px"><div class="ct">' + (c.last ? 'Last rehearsal by campus (' + esc(c.last.id) + ')' : 'By campus') + '</div>' + bars(c.campuses) +
+  return '<div class="stats rise"><div class="card pad" style="flex:1 1 320px"><div class="ct">Check-ins received, last ' + c.series.length + ' rehearsals</div>' + lineChart(c.series, drill) + '</div>' +
+    '<div class="card pad" style="flex:1 1 320px"><div class="ct">' + (c.last ? 'Last rehearsal by campus (' + esc(c.last.id) + ')' : 'By campus') + '</div>' + bars(c.campuses, drill) +
     '<p class="sub" style="margin-top:8px">Counted from the old form and the new check-in page, out of members who are Active today. Not official attendance.</p></div></div>';
 }
-let rpState = null;
+let rpState = null, rpPick = null;
+function drillTo(scope, key) { rpPick = {scope, key}; go('s11'); }
 async function loadReports() {
   say('m11', 'Loading…');
   try {
@@ -449,7 +451,9 @@ async function loadReports() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) return say('m11', j.error || 'Not available.', 'bad');
     rpState = j; $('rpdl').classList.toggle('hide', !j.canDownload); say('m11', '');
-    fillKeys(); showReport();
+    if (rpPick) { $('rpscope').value = rpPick.scope; }
+    fillKeys(); if (rpPick) { $('rpkey').value = rpPick.key; rpPick = null; }
+    showReport();
   } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
 }
 function fillKeys() {
@@ -472,6 +476,10 @@ async function showReport() {
     $('rpout').innerHTML = '<div class="card pad rise"><div class="ct">' + esc(s.title) + '</div><div class="stats" style="margin-top:10px">' +
       s.tiles.map(t => '<div class="card stat" style="margin:0"><div class="k" style="color:#2F4F7E">' + esc(t[0]) + '</div><div class="v">' + esc(t[1]) + '</div></div>').join('') + '</div></div>' +
       '<div class="card pad rise">' + table(s.columns, s.rows) + (s.rows2 ? '<div style="margin-top:14px"></div>' + table(s.columns2, s.rows2) : '') + '<p class="sub" style="margin-top:10px">' + esc(s.note) + '</p></div>';
+    // drill down: a campus name opens that campus; a rehearsal id opens that rehearsal
+    const sc = $('rpscope').value, first = document.querySelector('#rpout table tbody');
+    if (first) first.querySelectorAll('tr').forEach(tr => { const td = tr.firstChild, v = td.textContent; const to = sc === 'rehearsal' ? 'campus' : 'rehearsal';
+      if (v) { td.className = 'drill'; td.style.cssText += ';cursor:pointer;color:#8E0008;font-weight:700;text-decoration:underline'; td.title = 'Open ' + v; td.onclick = () => { $('rpscope').value = to; fillKeys(); $('rpkey').value = v; showReport(); }; } });
     say('m11', '');
   } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
 }
@@ -506,7 +514,8 @@ async function loadHome() {
     if (t.counts) h += '<div class="card stat">' + tile('Active members', t.counts.members, '<span class="pill p-val">' + t.counts.campuses + ' campuses</span>', '#2F4F7E') + '</div>';
     $('hgrid').innerHTML = h || '<div class="card pad"><div class="ct">Welcome</div><p class="sub">Nothing is waiting for you here. Use the menu for your tabs.</p></div>';
     document.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
-    $('hcharts').innerHTML = homeCharts(t.charts);
+    $('hcharts').innerHTML = homeCharts(t.charts, has('reports'));
+    document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
     // the QR stand-in
     const q = t.qr || {}, sd = q.standin;
     let qh = '';
@@ -896,7 +905,7 @@ async function start() {
     if (!j.ok) { say('m3', 'At ' + stamp() + ': ' + (j.error || 'Not available.') + ' Trying again in 10 seconds. (The old code may no longer work.)', 'bad'); timer = setTimeout(start, 10000); return; }
     $('q').innerHTML = ''; new QRCode($('q'), {text: j.url, width: 260, height: 260});
     const wait = Math.min(300000, Math.max(5000, Number(j.renewInMs) + 1000 || 60000));
-    say('m3', 'Updated at ' + stamp() + '. Renews in about ' + Math.round(wait / 1000) + ' seconds. Do not share a photo of this screen.');
+    say('m3', 'This QR renews itself every 5 minutes. Do not share a photo of this screen.');
     timer = setTimeout(start, wait);
   } catch (e) { if (me !== runId) return; say('m3', 'At ' + stamp() + ': network problem (' + (e && e.message ? e.message : 'unknown') + '). Trying again in 10 seconds.', 'bad'); timer = setTimeout(start, 10000); }
 }
