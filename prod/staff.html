@@ -239,6 +239,18 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <p id="m11" class="s"></p>
 </div>
 
+<div id="s12" class="pg hide">
+<div id="pwait"></div>
+<div id="pready"></div>
+<div class="card pad rise"><div class="ct">Ask for a change</div>
+<label for="pkind" class="lb">What is it about?</label><select id="pkind" class="in"></select>
+<div id="pform"></div>
+<div style="margin-top:14px"><button id="psend" class="btn red" type="button">Send request</button></div>
+<p id="m12b" class="s"></p></div>
+<div id="pmine"></div>
+<p id="m12" class="s"></p>
+</div>
+
 <div id="s10" class="pg hide">
 <div id="hcharts"></div>
 <div id="hgrid" class="stats rise"></div>
@@ -364,12 +376,13 @@ async function call(body) {
     if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
-const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
+const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
 const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myName = j.name || ''; myRoles = j.roles || []; }
 const ICON = {
   reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
+  people: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M16 6a3 3 0 010 6M18 14c2 .8 3 2.800 3 6"/>',
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
   qr: '<path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/>',
   checkins: '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/>',
@@ -380,6 +393,7 @@ const ICON = {
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17h.01"/>'
 };
 const PAGEHEAD = {
+  s12: ['People and access', 'Ask for a change, say yes to a request, and see what is waiting. Every step is recorded.'],
   s11: ['Reports', 'Check-ins received, by rehearsal, month or campus. Not official attendance yet.'],
   s10: ['Staff home', 'Your day at a glance. You see only what your role can use.'],
   s3: ['Rehearsal QR', 'Show this to members so they can check in. It renews every few minutes.'],
@@ -404,12 +418,12 @@ try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's11') loadReports(); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   const ph = PAGEHEAD[id]; $('ph').classList.toggle('hide', !ph); if (ph) $('ph').innerHTML = '<div class="t">' + ph[0] + '</div><div class="d">' + ph[1] + '</div>';
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
   document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); }
@@ -444,6 +458,107 @@ function homeCharts(c, drill) {
 }
 let rpState = null, rpPick = null;
 function drillTo(scope, key) { rpPick = {scope, key}; go('s11'); }
+
+// ---- People and access ----
+const PKIND_HELP = {
+  member: 'Add, edit, deactivate or reactivate a choir member. Desk A makes the change after a yes.',
+  campus_md: 'Give, change or end a Campus Music Director role. The System Administrator makes the change after a yes.',
+  desk_staff: 'Give, change or end a desk (A to D). The System Administrator makes the change after a yes.',
+  assistant_ga: 'Give, change or end the Assistant Global Admin role.',
+  top_role: 'Give, change or end a senior role: Global Admin, Global Music Director, Pastor in Charge or System Administrator.',
+  desk_cover: 'Another desk holder covers a desk that is away. Up to 14 days, no more than 2 desks away at once.',
+  cancel_held: 'Cancel a rehearsal that has already been held (within 36 hours). The Global Music Director and the Pastor in Charge must both say yes.'
+};
+let pState = null;
+function pField(id, label, html) { return '<label for="' + id + '" class="lb">' + esc(label) + '</label>' + html; }
+function pInput(id, ph, type) { return '<input id="' + id + '" class="in" type="' + (type || 'text') + '" placeholder="' + esc(ph || '') + '" autocomplete="off">'; }
+function pSelect(id, opts) { return '<select id="' + id + '" class="in">' + opts.map(o => '<option value="' + esc(o[0]) + '">' + esc(o[1]) + '</option>').join('') + '</select>'; }
+function drawPForm() {
+  const k = $('pkind').value, g = [];
+  const change = pSelect('pchange', k === 'member' ? [['add', 'Add a member'], ['edit', 'Edit a member'], ['deactivate', 'Deactivate a member'], ['reactivate', 'Reactivate a member']] : [['grant', 'Give the role'], ['change', 'Change the role'], ['end', 'End the role']]);
+  if (k === 'member') {
+    g.push(pField('pchange', 'What should change?', change), pField('pname', 'Member name', pInput('pname', 'Full name')), pField('pemail', 'Member email (if known)', pInput('pemail', 'name@example.com', 'email')),
+      pField('pcampus', 'Campus', pInput('pcampus', 'Campus name')), pField('pmid', 'Member ID (for edit, deactivate or reactivate)', pInput('pmid', 'e.g. the member ID')));
+  } else if (k === 'desk_cover') {
+    g.push(pField('pdesk', 'Which desk is away?', pSelect('pdesk', [['A', 'Desk A'], ['B', 'Desk B'], ['C', 'Desk C'], ['D', 'Desk D']])), pField('pawayemail', 'Email of the person who is away', pInput('pawayemail', 'name@example.com', 'email')),
+      pField('pcoveremail', 'Email of the person who will cover', pInput('pcoveremail', 'name@example.com', 'email')), pField('pstart', 'First day', pInput('pstart', '', 'date')), pField('pend', 'Last day', pInput('pend', '', 'date')));
+    if ((myRoles || []).indexOf('Global Admin') !== -1) g.push('<label class="lb" style="display:flex;gap:10px;align-items:center"><input id="paway" type="checkbox" style="width:auto"> The Assistant Global Admin is away, so I am asking</label>');
+  } else if (k === 'cancel_held') {
+    g.push(pField('prid', 'Rehearsal ID', pInput('prid', 'e.g. R005')));
+    if ((myRoles || []).indexOf('Global Admin') === -1) g.push('<label class="lb" style="display:flex;gap:10px;align-items:center"><input id="paway" type="checkbox" style="width:auto"> The Global Admin is away, so I am asking on their behalf</label>');
+  } else {
+    g.push(pField('pemail', 'Email of the person this is about', pInput('pemail', 'name@example.com', 'email')), pField('pchange', 'What should change?', change));
+    if (k === 'desk_staff') g.push(pField('pdesk', 'Desk', pSelect('pdesk', [['A', 'Desk A'], ['B', 'Desk B'], ['C', 'Desk C'], ['D', 'Desk D']])));
+    if (k === 'campus_md') g.push(pField('pcampus', 'Campus', pInput('pcampus', 'Campus name')));
+    if (k === 'top_role') g.push(pField('prole', 'Role', pSelect('prole', [['Global Admin', 'Global Admin'], ['Global Music Director', 'Global Music Director'], ['Pastor in Charge', 'Pastor in Charge'], ['System Administrator', 'System Administrator']])));
+  }
+  g.push(pField('preason', 'Reason', '<textarea id="preason" class="in" rows="2" maxlength="500" placeholder="Why is this needed?"></textarea>'));
+  $('pform').innerHTML = '<p class="sub" style="margin-top:8px">' + esc(PKIND_HELP[k] || '') + '</p>' + g.join('');
+}
+const pv = id => { const e = $(id); return e ? (e.type === 'checkbox' ? e.checked : e.value.trim()) : ''; };
+async function sendRequest() {
+  const k = $('pkind').value; if (!k) return;
+  const b = {action: 'access.ask', token, kind: k, reason: pv('preason')};
+  if (k === 'member') Object.assign(b, {change: pv('pchange'), subjectName: pv('pname'), subjectEmail: pv('pemail'), campus: pv('pcampus'), memberId: pv('pmid')});
+  else if (k === 'desk_cover') Object.assign(b, {awayDesk: pv('pdesk'), awayEmail: pv('pawayemail'), coverEmail: pv('pcoveremail'), start: pv('pstart'), end: pv('pend'), assistantAway: pv('paway') === true});
+  else if (k === 'cancel_held') Object.assign(b, {rehearsalId: pv('prid'), globalAdminAway: pv('paway') === true});
+  else { Object.assign(b, {subjectEmail: pv('pemail'), change: pv('pchange')}); if (k === 'desk_staff') { b.desk = pv('pdesk'); b.role = 'Admin Team Member'; } if (k === 'campus_md') { b.campus = pv('pcampus'); b.role = 'Campus Music Director'; } if (k === 'top_role') b.role = pv('prole'); if (k === 'assistant_ga') b.role = 'Assistant Global Admin'; }
+  say('m12b', 'Sending…');
+  try {
+    const j = await call(b);
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) return say('m12b', j.error || 'Could not send.', 'bad');
+    say('m12b', 'Request ' + j.id + ' sent.', 'ok'); loadPeople(true);
+  } catch (e) { say('m12b', 'Network problem. Try again.', 'bad'); }
+}
+function pWhen(t) { return t ? String(t).replace('T', ' ').replace('Z', ' UTC') : ''; }
+function pDetail(r) {
+  const d = r.details || {}, bits = [];
+  if (r.kind === 'desk_cover') bits.push('Desk ' + d.awayDesk + ' · covered by ' + (r.subjectName || r.subjectEmail) + ' · ' + d.start + ' to ' + d.end);
+  else if (r.kind === 'cancel_held') bits.push('Rehearsal ' + r.target + (d.onBehalf ? ' · asked on behalf of the Global Admin' : '') + ' · yes so far: ' + ((d.yes || []).map(y => y.role).join(', ') || 'none'));
+  else { bits.push((d.change || '') + (r.subjectName ? ' · ' + r.subjectName : '') + (r.subjectEmail ? ' (' + r.subjectEmail + ')' : '')); if (d.role) bits.push(d.role + (d.desk ? ' Desk ' + d.desk : '') + (d.campus ? ' · ' + d.campus : '')); }
+  return bits.filter(Boolean).join(' · ');
+}
+function pCard(r, extra) {
+  return '<div class="card pad" style="margin-top:12px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b>' + esc(r.id) + ' · ' + esc(r.kindName) + '</b>' + stPill(r.status) + '</div>' +
+    '<p class="sub" style="margin:6px 0 0">' + esc(pDetail(r)) + '</p><p class="sub" style="margin:4px 0 0">Asked by ' + esc(r.askedBy) + ' (' + esc(r.askedByRole) + ') · ' + esc(pWhen(r.raisedAt)) + '</p>' +
+    '<p class="sub" style="margin:4px 0 0">Reason: ' + esc(r.reason) + '</p>' + (extra || '') + '</div>';
+}
+async function loadPeople(keepMsg) {
+  if (!keepMsg) say('m12b', '');
+  say('m12', 'Loading…');
+  try {
+    const j = await call({action: 'access.state', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) return say('m12', j.error || 'Not available.', 'bad');
+    pState = j; say('m12', j.available ? (j.saving ? '' : 'Saving is switched off, so nothing new can be sent now.') : 'People and access is not available yet.', j.saving ? '' : 'bad');
+    const cur = $('pkind').value;
+    $('pkind').innerHTML = j.kinds.map(k => '<option value="' + esc(k.kind) + '">' + esc(k.name) + '</option>').join('') || '<option value="">Nothing you can ask for</option>';
+    if (cur && j.kinds.some(k => k.kind === cur)) $('pkind').value = cur;
+    if (!$('pform').innerHTML) drawPForm();
+    $('pwait').innerHTML = '<div class="card pad rise"><div class="ct">Waiting for your answer</div>' + (j.waiting.length ? j.waiting.map(r => pCard(r,
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center"><button class="btn red sm" type="button" data-yes="' + esc(r.id) + '">Yes</button>' +
+      '<input class="in" style="flex:1 1 200px;max-width:340px" placeholder="Reason, if you say no" data-why="' + esc(r.id) + '"><button class="btn warn sm" type="button" data-no="' + esc(r.id) + '">Say no</button></div>')).join('') : '<p class="sub">Nothing is waiting for you.</p>') + '</div>';
+    $('pready').innerHTML = j.ready.length ? '<div class="card pad rise"><div class="ct">Approved and ready to carry out</div><p class="sub">Carrying out is switched on in a later step. Until then, nothing in the member list or the access sheet changes.</p>' +
+      j.ready.map(r => pCard(r, '<p class="sub" style="margin:4px 0 0">You would carry this out as: ' + esc(r.as) + '</p>')).join('') + '</div>' : '';
+    $('pmine').innerHTML = '<div class="card pad rise"><div class="ct">Requests you asked for</div>' + (j.mine.length ? j.mine.map(r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : '')).join('') : '<p class="sub">You have not asked for anything yet.</p>') + '</div>';
+  } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); }
+}
+document.addEventListener('click', async ev => {
+  const t = ev.target.closest && ev.target.closest('[data-yes],[data-no],[data-back]'); if (!t) return;
+  const id = t.dataset.yes || t.dataset.no || t.dataset.back;
+  const b = {token, id, action: t.dataset.yes ? 'access.yes' : t.dataset.no ? 'access.decline' : 'access.withdraw'};
+  if (t.dataset.no) { const w = document.querySelector('[data-why="' + id + '"]'); b.reason = w ? w.value.trim() : ''; if (!b.reason) return say('m12', 'Type a reason before you say no.', 'bad'); }
+  t.disabled = true;
+  try {
+    const j = await call(b);
+    if (j.signedOut) { signedOutNow(); return; }
+    say('m12', j.ok ? 'Done.' : (j.error || 'Could not do that.'), j.ok ? 'ok' : 'bad'); loadPeople(true);
+  } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); t.disabled = false; }
+});
+$('pkind').addEventListener('change', drawPForm);
+$('psend').addEventListener('click', sendRequest);
+
 async function loadReports() {
   say('m11', 'Loading…');
   try {
@@ -814,6 +929,7 @@ const TABHELP = {
   qr: ['Show the QR', 'Show the check-in QR code of the open rehearsal so members can scan it. Campus Music Directors do this for their own campus. Desk D, the Assistant Global Admin and the Global Admin can after the Global Admin or Assistant Global Admin switches on "Campus Music Director is away" on the Home page.'],
   checkins: ['Check the check-ins', 'See who has checked in and mark each check-in as checked. Late and hand-marked ones come first. Some roles can only look. Nobody checks their own.'],
   hand: ['Mark a member by hand', 'For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.'],
+  people: ['Ask for changes to people and access', 'Ask for a change to the choir list or to who holds a role, say yes to a request, and arrange cover for a desk that is away. Nobody says yes to their own request. Each request is recorded.'],
   reports: ['See reports', 'See check-in summaries by rehearsal, month or campus, with charts. The Global Admin and the Assistant Global Admin can download them; every download is recorded.'],
   rehearsal: ['Run rehearsals', 'Make, change or cancel a rehearsal, set the venue, and open check-in. Times are Lagos time. At most three rehearsals can be planned at once.'],
   absence: ['Send your absence request', 'If you are a choir member, ask to be excused before the cut-off, 36 hours before the rehearsal.'],
@@ -825,7 +941,8 @@ const NOTHAVE = {
   hand: 'Mark members by hand',
   rehearsal: 'Make or change rehearsals',
   requests: 'Decide absence requests',
-  reports: 'See or download reports'
+  reports: 'See or download reports',
+  people: 'Ask for or answer changes to people and access'
 };
 const LADDER = [
   ['Pastor in Charge', 'the Global Music Director'],
