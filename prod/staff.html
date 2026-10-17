@@ -43,9 +43,45 @@ button[style*="background:none"]{box-shadow:none}
   .shell>.side{grid-column:1}.shell>.wrap{grid-column:2}
   .card{padding:24px;border-radius:20px;box-shadow:0 18px 50px rgba(142,0,8,.08)}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style></head><body>
-<div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>Staff</h1><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div><div class="chips"><div class="chip">Campus Music Directors: show the QR and validate requests</div><div class="chip">Desks: mark by hand, validate and run rehearsals</div><div class="chip">Admins: decide absence requests</div></div></aside>
+
+.tag{margin:6px 0 0;font-size:14px;color:#FFE9EA}
+.si-t{font-size:26px;font-weight:900;color:var(--deep);line-height:1.2}
+.si-d{font-size:15px;color:var(--mut);margin:4px 0 14px}
+.lbl{display:block;font-size:14px;font-weight:900;margin-top:10px}
+.or{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13px;margin:12px 0 2px}
+.or span{flex:1;height:1px;background:var(--line)}
+.ghost{background:#fff;color:var(--fg);border:1px solid #D5DAE3;box-shadow:none}
+.ghost:hover{border-color:var(--acc);color:var(--acc);background:var(--rose);box-shadow:none}
+.note{background:#EDF3FB;color:#2F4F7E;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.note b{color:#1f3a63}
+.note p{margin:.25rem 0}
+.ov{position:fixed;inset:0;background:rgba(23,32,57,.58);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50}
+.ov.hide{display:none}
+.ov .box{background:#fff;border-radius:20px;max-width:30rem;width:100%;max-height:90vh;overflow:auto;box-shadow:0 30px 70px rgba(10,15,30,.4);animation:pop .35s cubic-bezier(.2,.7,.2,1) both}
+.ov .bh{background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;padding:18px 22px}
+.ov .bh .k{font-size:12px;letter-spacing:.1em;font-weight:900;color:#FFD9DC}
+.ov .bh .n{font-size:22px;font-weight:900;line-height:1.2;margin-top:2px}
+.ov .bb{padding:16px 22px 20px}
+.pillr{display:inline-block;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;background:var(--rose);color:var(--deep);margin:4px 6px 0 0}
+.hl{font-size:12px;font-weight:900;letter-spacing:.08em;color:var(--acc);text-transform:uppercase;margin:14px 0 4px}
+.hl:first-child{margin-top:0}
+ul.hp{margin:0;padding-left:1.1rem}ul.hp li{margin:.25rem 0}
+@keyframes pop{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
+#tabs{position:sticky;bottom:10px;z-index:10;box-shadow:0 10px 30px rgba(20,35,61,.16)}
+button,.card{-webkit-tap-highlight-color:rgba(182,0,10,.14)}
+.tab{white-space:nowrap;background:#fff;color:var(--fg);border:1px solid #D5DAE3;box-shadow:none;margin-top:0}
+.tab.on{background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(182,0,10,.25)}
+#rows>div,#qrows>div,#rhlist>div,#rmine>div{transition:background-color .2s}
+#rows>div:active,#qrows>div:active{background:#FFF6F6}
+@media (hover:hover){
+  .card:hover{border-color:#E9A9AE;box-shadow:0 14px 30px rgba(142,0,8,.12)}
+  .tab:hover{border-color:var(--acc);color:var(--acc);background:var(--rose);box-shadow:none}
+  #rows>div:hover,#qrows>div:hover,#rhlist>div:hover,#rmine>div:hover{background:#FFF6F6}
+}
+@media (min-width:900px){ .tag{display:none} body.out .wrap{align-self:center} }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head><body class="out">
+<div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
 <p id="notconn" class="hide" style="background:#fdecea;color:#8a1c14;padding:10px;border-radius:8px">This page is not connected to the production system yet.</p>
 
@@ -54,10 +90,19 @@ button[style*="background:none"]{box-shadow:none}
 <button id="out" style="width:auto;margin:0;padding:.4rem .9rem;background:none;color:var(--acc);border:1px solid var(--acc)">Sign out</button></div>
 <div id="busy" class="s hide" style="text-align:center">Working…</div>
 
-<div id="s1" class="card"><b>Sign in</b>
-<input id="mid" autocomplete="off" placeholder="Member ID or email"><p class="s" style="margin:.3rem 0 0">Staff who are not choir members: type your email.</p>
-<div id="gwrap" class="hide"><div id="gbtn" style="margin:.4rem 0"></div><p class="s" style="margin:.2rem 0 .6rem">If more than one member uses your email, type your Member ID first.</p><p class="s" style="margin:.2rem 0">Or use an email code:</p></div>
-<button id="send">Email me a code</button><p id="m1" class="s"></p></div>
+<div id="s1" class="card">
+<div class="si-t">Sign in</div>
+<div class="si-d">Press Sign in with Google. If your email is on the staff list, you are in. No code to wait for.</div>
+<div id="gwrap" class="hide"><div id="gbtn" style="margin:.2rem 0 .6rem"></div><div class="s">Share an email with someone else in the choir? Type your Member ID in the box below first, then press the Google button.</div><div class="or"><span></span>No Google account? Use an email code<span></span></div></div>
+<label for="mid" class="lbl">Member ID or email</label>
+<input id="mid" autocomplete="off" placeholder="Member ID, or your email if you are not a choir member">
+<button id="send">Email me a code</button><p id="m1" class="s"></p>
+<div class="s">We send a 6-digit code to the email on file. It lasts 10 minutes. You can ask for another after 2 minutes.</div>
+<button type="button" id="shelp" class="ghost">Need help signing in?</button>
+<div id="shbox" class="note hide">
+<p><b>It says my email is not found.</b> Your email may not be on the staff list yet. Try your Member ID, or ask Desk A (the System Administrator) to check your row.</p>
+<p><b>I did not get the code.</b> Look in spam. You can ask for a new code after 2 minutes. Always use the newest email.</p>
+<p><b>Too many wrong codes.</b> After 5 wrong tries, sign-in is locked for 15 minutes.</p></div></div>
 
 <div id="s2" class="card hide"><b>Enter the code</b>
 <p class="s">Use the newest email. Asking again is possible after the countdown on the first step.</p>
@@ -120,8 +165,11 @@ button[style*="background:none"]{box-shadow:none}
 <div id="qbar" class="hide"><button id="qvtick" style="width:auto;padding:.5rem .9rem">Validate ticked (0)</button> <button id="qatick" style="width:auto;padding:.5rem .9rem">Approve ticked (0)</button><p class="s">Tick the ones you have read. Reject, appeals, flagged requests and handing on are done one at a time.</p></div>
 <div id="qrows"></div><p id="m7" class="s"></p></div>
 
+<div id="s9" class="card hide"><b style="display:block">Help for your role</b><div id="helpbody"></div></div>
+
 <div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
 </main></div>
+<div id="welcome" class="ov hide" role="dialog" aria-modal="true" aria-labelledby="wtitle"><div class="box"><div class="bh"><div class="k">WELCOME BACK</div><div class="n" id="wtitle"></div><div id="wroles"></div></div><div class="bb"><div id="wbody"></div><button id="wgot">Got it</button><button id="whelp" class="ghost">Open Help</button></div></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxbedyyXRi_q3oatiJx6m-2mdCkrOxU07IQfVTLamrwGwZNAecCf27GM1ABY2tW5m35-Q/exec'; // PRODUCTION COPY web app
@@ -141,9 +189,10 @@ async function call(body) {
     if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
-const TABDEF = {qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal']};
+const TABDEF = {qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
 const LANDING = ['qr', 'rehearsal', 'checkins', 'requests', 'absence'];
-let myTabs = [], myName = '';
+let myTabs = [], myName = '', myRoles = [], welcomed = '';
+function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myName = j.name || ''; myRoles = j.roles || []; }
 function drawTabs() {
   $('tabs').innerHTML = myTabs.map(k => '<button class="tab" data-v="' + TABDEF[k][0] + '" style="width:auto;flex:1">' + TABDEF[k][1] + '</button>').join('');
   document.querySelectorAll('.tab').forEach(b => b.onclick = () => go(b.dataset.v));
@@ -152,14 +201,14 @@ function drawTabs() {
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
-function signedOutNow() { token = ''; myTabs = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7','s8'].indexOf(id) !== -1;
+function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8','s9'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
-  document.querySelectorAll('.tab').forEach(b => { b.style.opacity = b.dataset.v === id ? '1' : '.65'; }); }
+  document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); }
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 async function loadRows() {
   say('m4', 'Loading…');
@@ -396,10 +445,68 @@ $('verify').onclick = async () => {
     const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
     if (!j.ok) return say('m2', j.error || 'Could not sign in.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); } catch (e) {}
-    myTabs = j.tabs || ['absence']; myName = j.name || ''; drawTabs(); land();
+    setMe(j); drawTabs(); land(); welcome();
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 };
 $('back').onclick = () => show('s1');
+// ---- Help and the once-a-day welcome (text is built from the tabs the server gave this person) ----
+const TABHELP = {
+  qr: ['Show the QR', 'Show the check-in QR code of the open rehearsal so members can scan it. Campus Music Directors do this for their own campus. Desk D, the Assistant Global Admin and the Global Admin can when the Campus Music Director is not available.'],
+  checkins: ['Check the check-ins', 'See who has checked in and mark each check-in as checked. Late and hand-marked ones come first. Some roles can only look. Nobody checks their own.'],
+  hand: ['Mark a member by hand', 'For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.'],
+  rehearsal: ['Run rehearsals', 'Make, change or cancel a rehearsal, set the venue, and open check-in. Times are Lagos time. At most three rehearsals can be planned at once.'],
+  absence: ['Send your absence request', 'If you are a choir member, ask to be excused before the cut-off, 36 hours before the rehearsal.'],
+  requests: ['Handle absence requests', 'Campus Music Directors validate requests. People who decide approve or reject. The reason is shown only so you can decide.']
+};
+const NOTHAVE = {
+  qr: 'Show the QR (that is for Campus Music Directors, and others only when the Campus Music Director is not available)',
+  checkins: 'Check other people\'s check-ins',
+  hand: 'Mark members by hand',
+  rehearsal: 'Make or change rehearsals',
+  requests: 'Decide absence requests'
+};
+const LADDER = [
+  ['Pastor in Charge', 'the Global Music Director'],
+  ['Global Music Director', 'the Pastor in Charge'],
+  ['Global Admin', 'the Global Music Director, or the Pastor in Charge'],
+  ['Assistant Global Admin', 'the Global Admin'],
+  ['System Administrator', 'the Global Admin'],
+  ['Campus Music Director', 'the Global Admin or the Assistant Global Admin'],
+  ['Admin Team Member', 'the Assistant Global Admin']
+];
+function contactFor() {
+  const hit = LADDER.filter(x => myRoles.indexOf(x[0]) !== -1)[0];
+  return hit ? hit[1] : 'the Assistant Global Admin';
+}
+function can() { return myTabs.filter(k => TABHELP[k]); }
+function renderHelp() {
+  const t = myTabs, miss = Object.keys(NOTHAVE).filter(k => t.indexOf(k) === -1);
+  $('helpbody').innerHTML =
+    '<div class="hl">You are signed in as</div><div>' + esc(myName || 'a staff member') + '</div>' +
+    '<div>' + (myRoles.length ? myRoles.map(r => '<span class="pillr">' + esc(r) + '</span>').join('') : '') + '</div>' +
+    '<div class="hl">What you can do</div><ul class="hp">' + can().map(k => '<li><b>' + esc(TABHELP[k][0]) + '.</b> ' + esc(TABHELP[k][1]) + '</li>').join('') + '</ul>' +
+    '<div class="hl">What you cannot do</div><ul class="hp">' + miss.map(k => '<li>' + esc(NOTHAVE[k]) + '</li>').join('') +
+    '<li>Check, validate or approve your own check-in or request.</li>' +
+    '<li>Change the member list, roles or access. For now, Desk A (the System Administrator) does that.</li></ul>' +
+    '<div class="hl">When something needs someone else</div><p style="margin:.2rem 0">Speak to ' + esc(contactFor()) + '. For a sign-in or system problem, speak to Desk A (the System Administrator).</p>' +
+    '<div class="hl">Good to know</div><ul class="hp"><li>Everything you do is recorded with your name and the time.</li><li>Undoing a check needs a reason.</li><li>Sign out when you finish on a shared phone.</li></ul>';
+}
+function today() { try { return new Date().toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}); } catch (e) { return new Date().toISOString().slice(0, 10); } }
+function welcome() {
+  const key = today() + '|' + myName;
+  let seen = ''; try { seen = localStorage.getItem('rbcWelcome') || ''; } catch (e) {}
+  if (seen === key || welcomed === key) return;
+  welcomed = key; try { localStorage.setItem('rbcWelcome', key); } catch (e) {}
+  $('wtitle').textContent = myName ? 'Hello, ' + myName : 'Hello';
+  $('wroles').innerHTML = myRoles.map(r => '<span class="pillr">' + esc(r) + '</span>').join('');
+  $('wbody').innerHTML = '<div class="hl">Today you can</div><ul class="hp">' + can().map(k => '<li>' + esc(TABHELP[k][0]) + '</li>').join('') + '</ul>' +
+    '<p class="s" style="margin:.8rem 0 0">Anything needing someone else: speak to ' + esc(contactFor()) + '. The full list is under Help.</p>';
+  $('welcome').classList.remove('hide');
+}
+$('wgot').onclick = () => $('welcome').classList.add('hide');
+$('whelp').onclick = () => { $('welcome').classList.add('hide'); go('s9'); };
+$('shelp').onclick = () => $('shbox').classList.toggle('hide');
+
 // Sign in with Google (optional: shown only when a Google client ID is set). The email code above stays as the backup.
 const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.googleusercontent.com';
 async function googleDone(resp) {
@@ -408,7 +515,7 @@ async function googleDone(resp) {
     const j = await call({action: 'signin.google', idToken: resp.credential, memberId: $('mid').value.trim()});
     if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); } catch (e) {}
-    myTabs = j.tabs || ['absence']; myName = j.name || ''; drawTabs(); land();
+    setMe(j); drawTabs(); land(); welcome();
   } catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
 }
 if (GOOGLE_CLIENT_ID) {
@@ -440,5 +547,5 @@ async function start() {
     timer = setTimeout(start, wait);
   } catch (e) { if (me !== runId) return; say('m3', 'At ' + stamp() + ': network problem (' + (e && e.message ? e.message : 'unknown') + '). Trying again in 10 seconds.', 'bad'); timer = setTimeout(start, 10000); }
 }
-if (token) call({action: 'me', token}).then(j => { if (j.ok) { myTabs = j.tabs; myName = j.name; drawTabs(); land(); } else signedOutNow(); }).catch(() => signedOutNow());
+if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTabs(); land(); welcome(); } else signedOutNow(); }).catch(() => signedOutNow());
 </script></body></html>
