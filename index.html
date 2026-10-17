@@ -1,15 +1,31 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Check-in probe</title>
-<style>body{font:16px system-ui;margin:16px;max-width:36rem}button{font:inherit;padding:.6rem 1rem;margin:.3rem 0}pre{background:#eee;padding:.6rem;white-space:pre-wrap}@media(prefers-color-scheme:dark){body{background:#111;color:#eee}pre{background:#222}}</style></head>
-<body><h1>Check-in probe</h1>
-<p>Tests only what this browser allows. Nothing is sent or stored. Location is read once and shown here, never saved.</p>
-<button id="g">Test location</button><pre id="go">not run</pre>
-<button id="c">Test camera</button><pre id="co">not run</pre>
-<script>
-document.getElementById('g').onclick=()=>{const o=document.getElementById('go');
- if(!navigator.geolocation){o.textContent='NO: geolocation not available';return}
- navigator.geolocation.getCurrentPosition(p=>o.textContent='YES: accuracy about '+Math.round(p.coords.accuracy)+' m',e=>o.textContent='NO: '+e.message,{enableHighAccuracy:true,timeout:15000});};
-document.getElementById('c').onclick=async()=>{const o=document.getElementById('co');
- try{const s=await navigator.mediaDevices.getUserMedia({video:true});s.getTracks().forEach(t=>t.stop());o.textContent='YES: camera allowed'}catch(e){o.textContent='NO: '+e.name+' '+e.message}};
-</script></body></html>
+<title>Celebration Church Worship Choir Portal</title>
+<style>
+:root{--page:#F7F9FC;--fg:#172039;--mut:#5E6A7E;--acc:#B6000A;--deep:#8E0008;--line:#E6E9EF;--rose:#FFF0F1}
+*{box-sizing:border-box}
+body{font:16px/1.5 Lato,system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0;min-height:100vh;background:radial-gradient(520px 320px at 100% 100%,#FFE4E6 0,transparent 65%),var(--page);display:flex;flex-direction:column}
+.top{padding:22px 20px 26px;background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;border-radius:0 0 28px 28px}
+.brand{display:flex;align-items:center;gap:12px;max-width:44rem;margin:0 auto}
+.tile{background:#fff;border-radius:14px;padding:6px 8px;display:flex}.tile img{height:44px;width:auto;display:block}
+.b1{font-weight:900;font-size:15px;line-height:1.2}.b2{font-size:11px;letter-spacing:.14em;font-weight:700;color:#FFD9DC}
+h1{max-width:44rem;margin:18px auto 0;font-size:28px;font-weight:900;line-height:1.15}
+main{width:100%;max-width:44rem;margin:0 auto;padding:18px 16px 28px;display:grid;gap:14px;flex:1}
+.card{display:block;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 18px rgba(20,35,61,.05);padding:20px;color:inherit;text-decoration:none;transition:transform .2s,box-shadow .2s,border-color .2s}
+a.card:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(142,0,8,.12);border-color:#E9A9AE}
+a.card:active{transform:scale(.99)}
+.card b{display:block;font-size:20px;font-weight:900;color:var(--deep)}
+.card span{display:block;color:var(--mut);margin-top:4px}
+.go{display:inline-block;margin-top:12px;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;font-weight:700;border-radius:12px;padding:.65rem 1.1rem}
+.note{background:var(--rose);border-color:#F3C9CC}
+footer{padding:0 16px 24px;text-align:center;color:var(--mut);font-size:14px}footer a{color:var(--acc)}
+@media(min-width:800px){main{grid-template-columns:1fr 1fr;align-content:start;padding-top:32px}.note{grid-column:1/-1}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div class="top"><div class="brand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>Celebration Church Worship Choir Portal</h1></div>
+<main>
+<a class="card" href="prod/staff.html"><b>CCW Choir Staff</b><span>For Campus Music Directors, desks and admins. Sign in with Google to see the tabs for your role.</span><span class="go">Staff sign in</span></a>
+<div class="card note"><b>CCW Choir Members</b><span>At rehearsal, scan the QR code shown by your Campus Music Director with your phone camera. It opens your check-in page. No QR or phone? A Desk can mark you by hand.</span></div>
+</main>
+<footer><a href="about.html">About</a> &middot; <a href="privacy.html">Privacy notice</a></footer>
+</body></html>
