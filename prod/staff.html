@@ -71,59 +71,129 @@ ul.hp{margin:0;padding-left:1.1rem}ul.hp li{margin:.25rem 0}
 button,.card{-webkit-tap-highlight-color:rgba(182,0,10,.14)}
 .tab{white-space:nowrap;background:#fff;color:var(--fg);border:1px solid #D5DAE3;box-shadow:none;margin-top:0}
 .tab.on{background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(182,0,10,.25)}
-#rows>div,#qrows>div,#rhlist>div,#rmine>div{transition:background-color .2s}
-#rows>div:active,#qrows>div:active{background:#FFF6F6}
 @media (hover:hover){
   .card:hover{border-color:#E9A9AE;box-shadow:0 14px 30px rgba(142,0,8,.12)}
   .tab:hover{border-color:var(--acc);color:var(--acc);background:var(--rose);box-shadow:none}
-  #rows>div:hover,#qrows>div:hover,#rhlist>div:hover,#rmine>div:hover{background:#FFF6F6}
 }
 @media (min-width:900px){ .tag{display:none} body.out .wrap{align-self:center} }
 
-/* ===== Signed-in screens: same look as the mockup (side menu on PC, page titles, tags) ===== */
-.pill{display:inline-block;border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:700;white-space:nowrap;margin:2px 4px 2px 0}
-.p-ok{background:#EAF6EF;color:#20775A}.p-pend{background:#FFF4DF;color:#95621D}.p-no{background:#FDECEE;color:#AE2D37}.p-info{background:#EDF3FB;color:#2F4F7E}
-#ph{margin:18px 2px 4px}
-#ph .t{font-size:24px;font-weight:900;color:var(--deep);line-height:1.15}
+/* ===== Signed-in screens: a faithful copy of the mockup ===== */
+:root{--text:#374052;--ease:cubic-bezier(.2,.7,.2,1)}
+.hide{display:none!important}
+body:not(.out){background:radial-gradient(800px 380px at 100% 0,#FFE4E6 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#FFEEEF 0,transparent 65%),var(--page)}
+.rise{animation:rise .55s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.pill{border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;white-space:nowrap;display:inline-block;margin:2px 4px 2px 0}
+.p-ok{background:#EAF6EF;color:#20775A}.p-pend{background:#FFF4DF;color:#95621D}.p-no{background:#FFF0F1;color:#AE2D37}.p-info,.p-val{background:#EDF3FB;color:#2F4F7E}
+.pg{display:flex;flex-direction:column;gap:18px}
+.pg>.card,.pg .card{margin:0}
+.two{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.two>.c1{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.two>.c2{flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.card.pad{padding:22px}
+.ct{font-size:18px;font-weight:900;color:var(--fg)}
+.sub{font-size:13px;color:var(--mut)}
+.pg p{margin:.4rem 0}
+.pg label.s,.pg .lb{display:block;font-size:14px;font-weight:900;color:var(--fg);margin:12px 0 0}
+.pg input:not([type=checkbox]),.pg select,.pg textarea{height:46px;border:1px solid #D5DAE3;border-radius:12px;padding:0 14px;font-size:15px;margin-top:6px}
+.pg textarea{height:auto;padding:10px 14px;resize:vertical}
+.pg input[type=checkbox]{width:20px;height:20px;accent-color:#B6000A;margin:0;padding:0}
+.btn{font:inherit;font-weight:700;font-size:15px;height:48px;min-height:0;padding:0 22px;border-radius:12px;width:auto;margin:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .2s var(--ease),box-shadow .2s var(--ease),background-color .2s,border-color .2s,color .2s}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:translateY(0) scale(.98)}
+.btn.red{border:0;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;box-shadow:0 4px 12px rgba(182,0,10,.25)}
+.btn.red:hover{box-shadow:0 10px 22px rgba(182,0,10,.35);background:linear-gradient(180deg,#D3121E,#A90009)}
+.btn.line{border:1px solid #D5DAE3;background:#fff;color:var(--fg);box-shadow:none}
+.btn.line:hover{border-color:var(--acc);color:var(--acc);background:var(--rose);box-shadow:none}
+.btn.warn{border:1px solid #E9A9AE;background:#fff;color:#AE2D37;box-shadow:none}
+.btn.warn:hover{background:#FFF0F1;border-color:#AE2D37;box-shadow:none}
+.btn.sm{height:38px;padding:0 14px;border-radius:10px;font-size:14px}
+.btn[disabled]{background:#F1F3F7;border:1px solid #E1E5EE;color:#8A93A5;box-shadow:none;cursor:not-allowed;transform:none;opacity:1}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.stats{display:flex;gap:14px;flex-wrap:wrap}
+.stat{flex:1 1 150px;padding:14px 18px;margin:0}
+.stat .k{font-size:13px;font-weight:700}.stat .v{font-size:30px;font-weight:900;line-height:1.2}
+.tblc{padding:0;overflow:hidden}
+.tblh{padding:14px 20px;font-size:17px;font-weight:900;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tblh small{font-size:13px;font-weight:400;color:var(--mut)}
+.g{display:grid;gap:12px;padding:12px 20px;align-items:center;border-top:1px solid var(--line);font-size:14px}
+.g.th{background:#FAFBFD;font-size:12px;font-weight:900;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;border-top:0}
+.g.row{transition:background-color .2s var(--ease)}
+.g.row:hover{background:#FFF6F6}
+.g.flag{box-shadow:inset 4px 0 0 #B6000A}
+.g .who b{font-weight:900}.g .who .s{display:block;font-size:13px}
+.gv{grid-template-columns:36px 1.1fr 1.7fr 1.5fr}
+.gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
+.foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
+.note{background:#EDF3FB;color:#2F4F7E;border-radius:10px;padding:10px 12px;font-size:14px}
+.note.amber{background:#FFF4DF;color:#95621D}.note.rose{background:#FFF0F1;color:#AE2D37}
+.pv{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.pv span:first-child{color:var(--mut)}.pv b{font-weight:900;text-align:right}
+.pvh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.step{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;color:var(--mut)}
+.step:first-of-type{border-top:0}
+.row2{display:flex;gap:10px;align-items:center;font-size:14px;margin:6px 0}
+.row2 .pill{min-width:92px;text-align:center;margin:0}
+.qrhero{background:radial-gradient(520px 320px at 100% 0,rgba(255,255,255,.14) 0,transparent 65%),linear-gradient(160deg,#C8101B,#8E0008);color:#fff;border:0;display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding:24px;box-shadow:0 18px 40px rgba(142,0,8,.22)}
+.qbox{background:#fff;border-radius:18px;padding:14px;display:flex}
+.qrhero .eb{font-size:12px;letter-spacing:.12em;font-weight:900;color:#FFD9DC}
+.qrhero .qh{font-size:30px;font-weight:900;line-height:1.1;margin:6px 0}
+.qrhero .qs,.qrhero .qs.s{color:#FFE9EA;font-size:14px}.qrhero .qs.bad{color:#fff;font-weight:700}
+#q{display:block;padding:0;margin:0;background:none;line-height:0}
+#q img,#q canvas{display:block;max-width:100%;height:auto}
+.datebox{width:52px;text-align:center;flex:none}.datebox .m{font-size:12px;font-weight:900;color:var(--acc);letter-spacing:.04em}.datebox .d{font-size:26px;font-weight:900;line-height:1}
+.rhrow{display:flex;gap:16px;align-items:center;padding:14px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.rhrow .mid{flex:1 1 220px;min-width:0}.rhrow .mid b{font-size:16px;font-weight:900;display:block}.rhrow .mid .s{display:block}
+.rhrow:hover{background:#FFF6F6}
+.faq{padding:14px 20px;border-top:1px solid var(--line)}.faq b{font-size:16px;font-weight:900;display:block}.faq:first-child{border-top:0}
+ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
+#ph{margin:0 0 4px}
+#ph .t{font-size:28px;font-weight:900;color:var(--deep);line-height:1.15}
 #ph .d{font-size:15px;color:var(--mut);margin-top:4px}
-#s3>b:first-child,#s4>b:first-child,#s5>b:first-child,#s6>b:first-child,#s7>b:first-child,#s8>b:first-child,#s9>b:first-child{display:none!important}
-#rhbtns button,#rhgeo,#rhback,#vtick,#qatick,#qvtick{background:#fff;color:var(--fg);border:1px solid #D5DAE3;box-shadow:none}
-#rhbtns button:hover,#rhgeo:hover,#vtick:hover{border-color:var(--acc);color:var(--acc);background:var(--rose);box-shadow:none}
-label.s{display:block;color:var(--fg);font-size:14px;font-weight:900;margin-top:12px}
-#rows>div,#qrows>div,#rhlist>div,#rmine>div{border-top:1px solid var(--line)!important;padding:12px 10px!important}
-#rows>div:first-child,#qrows>div:first-child,#rhlist>div:first-child,#rmine>div:first-child{border-top:0!important}
 .tab{display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px}
 .tab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.rt{display:none}
+.signout{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:999px;border:1px solid #D5DAE3;background:#fff;color:var(--fg);font-weight:700;font-size:14px;width:auto;margin:0;min-height:0;box-shadow:none}
+.signout svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.signout:hover{border-color:var(--acc);color:var(--acc);background:var(--rose);box-shadow:none}
 #who{display:block;line-height:1.35}#who b{color:var(--fg);font-size:15px;display:block}
-body:not(.out) #tabs svg{flex:none}
 @media (max-width:899px){
   body:not(.out) .side{padding:14px 18px 16px;border-radius:0 0 24px 24px}
   body:not(.out) .side h1,body:not(.out) .side .tag{display:none}
   body:not(.out) .tile img{height:34px}
   .tab{flex-direction:column;gap:2px;font-size:12px;padding:.5rem .3rem;min-height:54px}
-  .tab svg{width:20px;height:20px}
+  .gv{grid-template-columns:28px 1fr}.gv>div:nth-child(n+3){grid-column:2}
+  .gq{grid-template-columns:28px 1fr}.gq>div:nth-child(n+3){grid-column:2}
+  .g.th{display:none}
+  #ph .t{font-size:24px}
+  .qrhero{justify-content:center;text-align:center}
 }
 @media (min-width:900px){
-  body:not(.out) .shell{grid-template-columns:272px 1fr}
-  body:not(.out) .side{background:#fff;color:var(--fg);border-right:1px solid var(--line);padding:24px 16px;gap:0;box-shadow:none}
-  body:not(.out) .side .hero,body:not(.out) .side .chips,body:not(.out) .side h1,body:not(.out) .side .tag{display:none}
-  body:not(.out) .side .tile{padding:0;background:none;border-radius:0}
-  body:not(.out) .side .tile img{height:58px}
-  body:not(.out) .side .brand{flex-direction:column;align-items:flex-start;gap:8px;padding:2px 8px 18px}
-  body:not(.out) .side .b1{color:var(--fg);font-size:15px}
-  body:not(.out) .side .b2{color:var(--mut)}
-  body:not(.out) .wrap{max-width:60rem;margin:0;padding:30px 40px 60px;align-self:start;width:100%}
-  body:not(.out) #ph .t{font-size:30px}
-  body:not(.out) .card button:not(.tab){width:auto;min-width:180px;padding-left:1.4rem;padding-right:1.4rem}
-  body:not(.out) #rows button,body:not(.out) #qrows button,body:not(.out) #rmine button,body:not(.out) #rhlist button,body:not(.out) #vbar button,body:not(.out) #qbar button{min-width:0;padding:.4rem .9rem}
-  #tabs{position:fixed!important;left:16px;top:168px;bottom:auto;width:240px;flex-direction:column!important;gap:4px!important;padding:0!important;margin:0!important;background:none;border:0;box-shadow:none!important;border-radius:0}
-  #tabs:hover{box-shadow:none}
-  .tab{justify-content:flex-start;gap:12px;width:100%!important;flex:none!important;border:0;background:transparent;color:var(--fg);font-size:15px;padding:.7rem .8rem;border-radius:10px;min-height:46px;transition:background-color .2s,color .2s,transform .2s}
+  body:not(.out) .shell{display:block}
+  body:not(.out) .side{display:none}
+  body:not(.out) .wrap{max-width:none;width:auto;margin:0 0 0 68px;padding:26px 30px 60px;transition:margin-left .3s var(--ease)}
+  body.rail-open:not(.out) .wrap{margin-left:248px}
+  #tabs{position:fixed!important;left:0;top:0;bottom:0;width:68px;flex-direction:column!important;flex-wrap:nowrap!important;gap:4px!important;padding:16px 10px!important;margin:0!important;background:#fff;border:0;border-right:1px solid var(--line);border-radius:0;box-shadow:none!important;overflow:hidden;white-space:nowrap;transition:width .3s var(--ease),padding .3s var(--ease);z-index:30}
+  #tabs:hover{box-shadow:none!important}
+  body.rail-open #tabs{width:248px;padding:22px 14px!important}
+  .rt{display:flex}
+  .rtg{align-items:center;gap:10px;height:44px;padding:0 12px;border-radius:10px;cursor:pointer;font-weight:900;font-size:14px;color:var(--fg);margin-bottom:6px;width:100%!important;background:none;border:0;box-shadow:none;min-height:0}
+  .rtg:hover{background:var(--rose);color:var(--acc);transform:none;box-shadow:none}
+  .rtg svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .rtg span{display:none}body.rail-open .rtg span{display:inline}
+  .rtb{display:none;flex-direction:column;gap:4px;padding:2px 6px 16px}
+  body.rail-open .rtb{display:flex}
+  .rtb img{height:58px;width:auto;align-self:flex-start}.rtb .n1{font-weight:900;font-size:15px;line-height:1.15;margin-top:4px}.rtb .n2{font-size:11px;letter-spacing:.12em;color:var(--mut);font-weight:700}
+  .rtu{display:none;margin-top:auto;border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:var(--mut);line-height:1.6}
+  body.rail-open .rtu{display:block}.rtu b{color:var(--fg);display:block;font-size:15px}
+  .tab{justify-content:flex-start;gap:12px;width:100%!important;flex:none!important;border:0;background:transparent;color:var(--fg);box-shadow:none;font-size:0;padding:0 12px;border-radius:10px;height:44px;min-height:0;transition:background-color .2s,color .2s,transform .2s}
+  .tab span{display:none}
+  body.rail-open .tab{font-size:15px}body.rail-open .tab span{display:inline}
   .tab.on{background:var(--rose);color:var(--acc);box-shadow:inset 0 0 0 1px #F3C9CC;border:0}
   @media (hover:hover){.tab:hover{background:var(--rose);color:var(--acc);transform:translateX(4px);border:0}}
-  #bar{position:fixed!important;left:16px;bottom:16px;width:240px;flex-direction:column;align-items:stretch!important;gap:10px!important;margin:0!important;border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none!important;background:#fff;padding:14px 8px 0!important}
-  #bar:hover{box-shadow:none}
-  #bar #out{width:100%!important}
+  #bar{position:fixed!important;right:20px;top:12px;margin:0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;width:auto;z-index:25}
+  #bar:hover{box-shadow:none!important}
+  #bar #who{display:none}
+  #ph{padding-right:150px;min-height:62px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style></head><body class="out">
@@ -133,7 +203,7 @@ body:not(.out) #tabs svg{flex:none}
 
 <div id="bar" class="card hide" style="display:none;align-items:center;justify-content:space-between;gap:10px">
 <span id="who" class="s" style="min-width:0"></span>
-<button id="out" style="width:auto;margin:0;padding:.4rem .9rem;background:none;color:var(--acc);border:1px solid var(--acc)">Sign out</button></div>
+<button id="out" class="signout" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign out</button></div>
 <div id="ph" class="hide"></div>
 <div id="busy" class="s hide" style="text-align:center">Working…</div>
 
@@ -157,62 +227,101 @@ body:not(.out) #tabs svg{flex:none}
 <button id="verify">Sign in</button><p id="m2" class="s"></p>
 <button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
-<div id="s3" class="card hide" style="text-align:center"><b style="display:block">Scan to check in</b>
-<div id="q"></div><p id="m3" class="s"></p></div>
+<div id="s3" class="pg hide">
+<div class="two">
+<div class="c1"><div class="card qrhero rise"><div class="qbox"><div id="q"></div></div><div style="flex:1 1 220px"><div class="eb">SHOW THIS TO YOUR MEMBERS</div><div class="qh">Scan to check in</div><div id="m3" class="s qs"></div></div></div></div>
+<div class="c2"><div class="card pad rise" style="animation-delay:.06s"><div class="ct">Safety settings</div><div style="display:flex;gap:10px;align-items:center;margin-top:12px"><input type="checkbox" checked disabled aria-label="New QR every 5 minutes"><span>New QR every 5 minutes</span></div><p class="sub" style="margin-top:12px">A shared photo stops working within minutes. Members also need to be at the venue to check in.</p></div></div>
+</div>
+<div class="note rise" style="animation-delay:.1s"><b>If the Campus MD is absent,</b> Desk D, the Assistant Global Admin or the Global Admin can show this QR for the campus.</div>
+</div>
 
+<div id="s4" class="pg hide">
+<div id="ckpick" class="card pad hide"><label class="s" style="margin-top:0">Rehearsal</label><select id="ckrid"></select></div>
+<span id="vsum" class="hide"></span>
+<div id="vstats" class="stats rise"></div>
+<div id="rows" class="pg" style="gap:18px"></div>
+<div id="vbar" class="card rise hide" style="padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+<div style="flex:1 1 280px"><div class="ct" style="font-size:17px">Three ways to validate</div><div class="sub" style="margin-top:4px">One by one, a ticked batch, or all clean at once. Flagged rows are never validated in bulk. Any validation can be undone with a reason, and nobody validates their own check-in.</div></div>
+<div class="actions" style="margin:0"><button id="vtick" class="btn line" type="button">Validate ticked (0)</button><button id="vall" class="btn red" type="button">Validate all clean</button></div></div>
+<p id="m4" class="s"></p>
+</div>
 
-<div id="s4" class="card hide"><b style="display:block">Today's check-ins</b>
-<p class="s">Flagged ones (late, hand-marked) come first with a red edge. Check them one by one, tick several, or validate all the clean ones at once. Any validation can be undone with a reason.</p>
-<div id="ckpick" class="hide"><label class="s">Rehearsal</label><select id="ckrid"></select></div>
-<p id="vsum" class="s"></p>
-<div id="vbar" class="hide"><button id="vall" style="width:auto;padding:.5rem .9rem">Validate all clean</button> <button id="vtick" style="width:auto;padding:.5rem .9rem;background:none;color:var(--acc);border:1px solid var(--acc)">Validate ticked (0)</button></div>
-<div id="rows"></div><p id="m4" class="s"></p></div>
+<div id="s5" class="pg hide">
+<div class="two">
+<div class="c1"><div class="card pad rise"><div class="ct">Mark a member by hand</div><p class="sub">For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.</p>
+<label for="hid" class="lb">Member ID</label><input id="hid" class="in" autocomplete="off" placeholder="Member ID">
+<div class="actions"><button id="hmark" class="btn red" type="button">Mark present</button></div><p id="m5" class="s"></p></div></div>
+<div class="c2"><div class="card pad rise" style="animation-delay:.06s"><div class="ct">What happens next</div>
+<div class="step" style="margin-top:8px"><span>1. You mark the member present</span><span class="pill p-pend">Marked by hand</span></div>
+<div class="step"><span>2. Someone else checks it</span><span class="pill p-val">Checked</span></div>
+<div class="step"><span>3. It counts in attendance</span><span class="pill p-ok">Recorded</span></div>
+<div class="note" style="margin-top:10px">Only people on the choir list can be marked. You cannot mark yourself.</div></div></div>
+</div></div>
 
-<div id="s5" class="card hide"><b>Mark a member by hand</b>
-<p class="s">For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.</p>
-<input id="hid" autocomplete="off" placeholder="Member ID"><button id="hmark">Mark present</button><p id="m5" class="s"></p></div>
+<div id="s6" class="pg hide">
+<div class="two">
+<div class="c1">
+<div class="card pad rise"><div class="ct">Request an absence</div><p id="rinfo" class="sub"></p>
+<div id="rform" class="hide"><label for="rreason" class="lb">Reason for the absence</label><textarea id="rreason" class="in" rows="3" maxlength="300" placeholder="Your reason (10 to 300 characters). Only you and the people who decide can see it." style="width:100%;font:inherit"></textarea>
+<div class="actions"><button id="rsend" class="btn red" type="button">Request absence</button></div></div>
+<p id="m6" class="s"></p></div>
+<div id="rmine" class="card pad rise" style="animation-delay:.06s"></div>
+</div>
+<div class="c2">
+<div id="rfor" class="card pad rise hide"><div class="ct">Late request for a member</div><p class="sub">Requests close 36 hours before a rehearsal. Only the Global Admin or Assistant Global Admin can send one after that.</p>
+<label for="rfid" class="lb">Member ID</label><input id="rfid" class="in" autocomplete="off" placeholder="Member ID">
+<label for="rfreason" class="lb">Reason for the absence</label><textarea id="rfreason" class="in" rows="2" maxlength="300" placeholder="Reason (10 to 300 characters)" style="width:100%;font:inherit"></textarea>
+<div class="actions"><button id="rfsend" class="btn red" type="button">Send late request</button></div><p id="m6b" class="s"></p></div>
+<div class="card pad rise" style="animation-delay:.1s"><div class="ct">What happens next</div>
+<div class="step" style="margin-top:8px"><span>1. Campus Music Director</span><span class="pill p-pend">Validates</span></div>
+<div class="step"><span>2. Global Admin or Assistant</span><span class="pill p-val">Decides</span></div>
+<div class="step"><span>3. The member is told</span><span class="pill p-ok">Approved or rejected</span></div></div>
+</div></div></div>
 
-<div id="s6" class="card hide"><b style="display:block">Absence request</b>
-<p id="rinfo" class="s"></p>
-<div id="rform" class="hide"><textarea id="rreason" rows="3" maxlength="300" placeholder="Your reason (10 to 300 characters). Only you and the people who decide can see it." style="font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem"></textarea>
-<button id="rsend">Request absence</button></div>
-<p id="m6" class="s"></p><div id="rmine"></div>
-<div id="rfor" class="hide" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b>Submit for a member</b>
-<p class="s">Late route for the Global Admin or Assistant Global Admin. Use it when a member could not ask before the cut-off.</p>
-<input id="rfid" autocomplete="off" placeholder="Member ID">
-<textarea id="rfreason" rows="2" maxlength="300" placeholder="Reason (10 to 300 characters)" style="font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg);margin-top:.4rem"></textarea>
-<button id="rfsend">Submit for this member</button><p id="m6b" class="s"></p></div></div>
-
-<div id="s8" class="card hide"><b style="display:block">Rehearsals</b>
-<p id="rhcount" class="s"></p>
-<div id="rhlist"></div>
-<div id="rhbtns"></div>
-<div id="rhmenu" class="hide" style="margin-top:12px"><button id="rhmake" type="button" data-noenter="1">Make a rehearsal</button><p id="rhhint" class="s"></p></div>
-<div id="rhvbox" class="hide" style="margin-top:10px"><p id="rhvinfo" class="s"></p>
-<button id="rhgeo" type="button" data-noenter="1">Confirm the venue position from this phone</button>
-<p class="s">Do this at the venue shortly before the rehearsal. Anyone from Desk B, Desk D or the admins can do it. If nobody does, the position found from the address is used.</p></div>
-<div id="rhform" class="hide" style="border-top:1px solid var(--mut);margin-top:12px;padding-top:10px"><b id="rhtitle">Make a rehearsal</b>
-<p class="s">Times are Lagos time. Check-in can open from one hour before the start and closes at the finish time. At most three rehearsals can be planned at once; the next upcoming one is the one members check in to and are told about.</p>
-<label class="s">Date</label><input id="rhdate" type="date">
-<label class="s">Start time</label><input id="rhstart" type="time">
-<label class="s">Finish time</label><input id="rhfinish" type="time">
-<label class="s">Late after (minutes after check-in opens)</label><input id="rhlate" type="number" min="0" max="180" value="30">
-<label class="s">Venue (write it as people would read it, e.g. "CCW Main Auditorium, 12 Example Road, Ikeja, Lagos")</label><input id="rhvenue" autocomplete="off" maxlength="150" placeholder="Venue name, street, area, city">
-<p class="s">This text goes in notices. The system finds its map position from it.</p>
-<details><summary class="s">Position typed by hand (only if the address is not found)</summary>
-<p class="s">In Google Maps press and hold the venue and tap the two numbers; you can paste "6.5244, 3.3792" into the first box.</p>
-<label class="s">Venue latitude</label><input id="rhlat" autocomplete="off" placeholder="e.g. 6.5244">
-<label class="s">Venue longitude</label><input id="rhlon" autocomplete="off" placeholder="e.g. 3.3792"></details>
-<div id="rhreasonbox" class="hide"><label class="s">Reason for the change (needed when the rehearsal is less than 36 hours away)</label><input id="rhreason" autocomplete="off" maxlength="200" placeholder="Why is it changing?"></div>
-<button id="rhsave">Save</button> <button id="rhcancel" type="button" data-noenter="1" class="hide" style="background:none;color:var(--bad);border:1px solid var(--bad)">Cancel this rehearsal</button> <button id="rhback" type="button" data-noenter="1" style="background:none;border:1px solid var(--mut);color:inherit">Back</button></div>
+<div id="s8" class="pg hide">
+<div class="two">
+<div class="c1">
+<div id="rhform" class="card pad rise hide">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><div id="rhtitle" class="ct">Make a rehearsal</div><span class="sub">Times are Lagos time</span></div>
+<label for="rhdate" class="lb">Rehearsal date</label><input id="rhdate" class="in" type="date">
+<div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 140px"><label for="rhstart" class="lb">Start time</label><input id="rhstart" class="in" type="time"></div><div style="flex:1 1 140px"><label for="rhfinish" class="lb">Finish time</label><input id="rhfinish" class="in" type="time"></div><div style="flex:1 1 140px"><label for="rhlate" class="lb">Late after (minutes)</label><input id="rhlate" class="in" type="number" min="0" max="180" value="30"></div></div>
+<label for="rhvenue" class="lb">Venue, written as people read it</label><input id="rhvenue" class="in" autocomplete="off" maxlength="150" placeholder="Venue name, street, area, city">
+<p class="sub">This text goes in notices. The system finds the map position from it. Check-in can open from one hour before the start and closes at the finish time. At most three rehearsals can be planned at once.</p>
+<details><summary class="sub" style="cursor:pointer;font-weight:700">Position typed by hand (only if the address is not found)</summary>
+<p class="sub">In Google Maps press and hold the venue and tap the two numbers; you can paste "6.5244, 3.3792" into the first box.</p>
+<label for="rhlat" class="lb">Venue latitude</label><input id="rhlat" class="in" autocomplete="off" placeholder="e.g. 6.5244">
+<label for="rhlon" class="lb">Venue longitude</label><input id="rhlon" class="in" autocomplete="off" placeholder="e.g. 3.3792"></details>
+<div id="rhreasonbox" class="hide"><label for="rhreason" class="lb">Reason for the change (needed when the rehearsal is less than 36 hours away)</label><input id="rhreason" class="in" autocomplete="off" maxlength="200" placeholder="Why is it changing?"></div>
+<div class="actions"><button id="rhsave" class="btn red" type="button">Save</button><button id="rhcancel" type="button" data-noenter="1" class="btn warn hide">Cancel this rehearsal</button><button id="rhback" type="button" data-noenter="1" class="btn line hide">Back to a new rehearsal</button></div>
 <p id="m8" class="s"></p></div>
+<div class="card rise" style="padding:18px 20px;animation-delay:.1s"><div class="ct" style="font-size:17px">Notice given</div><div class="sub" style="margin:4px 0 8px">The system works this out from the date you choose.</div>
+<div class="row2"><span class="pill p-ok">7 days+</span><span>Normal: reminders on schedule, requests close 36 hours before.</span></div>
+<div class="row2"><span class="pill p-pend">Short notice</span><span>36 hours to 7 days: pop-up and email go out at once. Deadline still 36 hours before.</span></div>
+<div class="row2"><span class="pill p-no">Urgent</span><span>Under 36 hours: requests close 6 hours before the start. The Assistant Global Admin or Global Admin must approve before anyone is told.</span></div></div>
+</div>
+<div class="c2">
+<div id="rhprev" class="card pad rise hide" style="animation-delay:.05s"><div class="pvh"><div class="ct">Preview</div><span id="pvvalid" class="pill p-pend">Fill in the form</span></div>
+<div class="pv"><span>Proposed ID</span><b id="pvid">-</b></div><div class="pv"><span>Date</span><b id="pvdate">-</b></div><div class="pv"><span>Status</span><span id="pvstatus" class="pill p-pend">Planned</span></div><div class="pv"><span>Absence requests close</span><b id="pvclose">-</b></div><div class="pv"><span>Notice</span><span id="pvnotice" class="pill p-pend">-</span></div>
+<div class="note" style="margin-top:10px">Pressing Save is the only thing that writes. The preview changes nothing.</div></div>
+<div id="rhmenu" class="hide"><button id="rhmake" type="button" data-noenter="1" class="hide">Make a rehearsal</button></div>
+<div id="rhcheck" class="card pad rise hide" style="animation-delay:.08s"><div class="ct">Check-in</div><p id="rhcisub" class="sub"></p><div id="rhbtns" class="actions" style="margin-top:8px"></div></div>
+<div id="rhvbox" class="card pad rise hide" style="animation-delay:.1s"><div class="ct">Confirm the venue position on site</div><p id="rhvinfo" class="sub"></p>
+<p class="sub">Do this at the venue shortly before the rehearsal. Anyone from Desk B, Desk D or the admins can do it. If nobody does, the position found from the address is used.</p>
+<div class="actions"><button id="rhgeo" type="button" data-noenter="1" class="btn line">Confirm the venue position from this phone</button></div></div>
+</div></div>
+<div class="card rise tblc" style="animation-delay:.12s"><div class="tblh"><span>Planned rehearsals</span><span id="rhcount" class="pill p-pend"></span></div>
+<div class="sub" style="padding:0 20px 12px">Up to three can be planned at once. A finished or cancelled one frees its place. The next upcoming one is <b>current</b>: members check in to it and only it is notified. The others are scheduled ahead and stay quiet until their turn.</div>
+<div id="rhlist"></div><div id="rhhint" class="sub" style="padding:10px 20px;border-top:1px solid var(--line)"></div></div>
+</div>
 
-<div id="s7" class="card hide"><b style="display:block">Requests waiting for you</b>
-<p class="s">Campus MDs validate. Deciders approve or reject. The member's reason is shown here only so you can decide.</p>
-<div id="qbar" class="hide"><button id="qvtick" style="width:auto;padding:.5rem .9rem">Validate ticked (0)</button> <button id="qatick" style="width:auto;padding:.5rem .9rem">Approve ticked (0)</button><p class="s">Tick the ones you have read. Reject, appeals, flagged requests and handing on are done one at a time.</p></div>
-<div id="qrows"></div><p id="m7" class="s"></p></div>
+<div id="s7" class="pg hide">
+<div class="card rise tblc"><div class="g gq th"><div></div><div>Member</div><div>Rehearsal</div><div>Status</div><div>Action</div></div>
+<div id="qrows"></div>
+<div id="qbar" class="foot hide"><span>Tick several requests, then confirm once. Flagged requests are skipped: do those one at a time.</span><span class="actions" style="margin:0"><button id="qvtick" class="btn line" type="button">Validate ticked (0)</button><button id="qatick" class="btn red" type="button">Approve ticked (0)</button></span></div>
+<p id="m7" class="s" style="padding:12px 20px;margin:0"></p></div>
+</div>
 
-<div id="s9" class="card hide"><b style="display:block">Help for your role</b><div id="helpbody"></div></div>
+<div id="s9" class="pg hide"><div id="helpbody"></div></div>
 
 <div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
 </main></div>
@@ -258,11 +367,17 @@ const PAGEHEAD = {
   s8: ['Rehearsals', 'Make a rehearsal. Members check in with the QR code.'],
   s9: ['Help', 'What you can do, what you cannot do, and who to ask.']
 };
+const MENU = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
 function drawTabs() {
-  $('tabs').innerHTML = myTabs.map(k => '<button class="tab" data-v="' + TABDEF[k][0] + '" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true">' + (ICON[k] || '') + '</svg><span>' + TABDEF[k][1] + '</span></button>').join('');
+  $('tabs').innerHTML = '<button type="button" class="rt rtg" id="railtg" title="Show or hide the menu" aria-label="Show or hide the menu">' + MENU + '<span>Hide menu</span></button>' +
+    '<div class="rt rtb"><img src="../logo.png" alt="CCW logo"><div class="n1">CELEBRATION<br>CHURCH WORSHIP</div><div class="n2">LAGOS REGION CHOIR</div></div>' +
+    myTabs.map(k => '<button class="tab" type="button" data-v="' + TABDEF[k][0] + '" title="' + TABDEF[k][1] + '" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true">' + (ICON[k] || '') + '</svg><span>' + TABDEF[k][1] + '</span></button>').join('') +
+    '<div class="rt rtu"><b>' + esc(myName || 'Signed in') + '</b>' + esc(myRoles.join(', ')) + '</div>';
   document.querySelectorAll('.tab').forEach(b => b.onclick = () => go(b.dataset.v));
+  $('railtg').onclick = () => { const open = document.body.classList.toggle('rail-open'); try { localStorage.setItem('rbcRail', open ? '1' : '0'); } catch (e) {} };
   $('who').innerHTML = myName ? '<b>' + esc(myName) + '</b>' + (myRoles.length ? '<span class="s">' + esc(myRoles.join(', ')) + '</span>' : '') : '<b>Signed in</b>';
 }
+try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('rail-open'); } catch (e) {}
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
@@ -293,12 +408,20 @@ async function loadRows() {
     $('vbar').classList.toggle('hide', !j.rows.length);
     $('vall').textContent = 'Validate all clean (' + c.clean + ')';
     $('vall').disabled = c.clean === 0;
-    $('rows').innerHTML = j.rows.map(r => '<div style="border-top:1px solid var(--line);padding:8px 0' + (r.flagged && !r.validatedBy ? ';border-left:4px solid var(--bad);padding-left:8px' : '') + '">' +
-      (r.canValidate ? '<input type="checkbox" class="tick" data-id="' + esc(r.memberId) + '" style="width:auto;margin:0 8px 0 0;vertical-align:middle"> ' : '') +
-      '<b>' + esc(r.memberId) + '</b> <span class="s">' + new Date(r.time).toLocaleTimeString() + '</span> ' + r.tags.map(t => '<span class="pill p-pend">' + esc(t) + '</span>').join('') + (r.validatedBy ? '<span class="pill p-ok">Checked</span>' : '') + '<br>' +
-      (r.canValidate ? '<button data-act="v" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem">Checked</button> ' : '') +
-      (r.canUndo ? '<button data-act="u" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--bad);border:1px solid var(--bad)">Undo</button> ' : '') +
-      (r.canCorrectLate ? '<button data-act="l" data-late="' + (r.late ? '0' : '1') + '" data-id="' + esc(r.memberId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">' + (r.late ? 'Was on time' : 'Mark late') + '</button>' : '') + '</div>').join('');
+    const tm = r => new Date(r.time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    const rowHtml = r => '<div class="g gv row' + (r.flagged && !r.validatedBy ? ' flag' : '') + '"><div>' + (r.canValidate ? '<input type="checkbox" class="tick" data-id="' + esc(r.memberId) + '" aria-label="Tick ' + esc(r.memberId) + '">' : '') + '</div>' +
+      '<div class="who"><b>' + esc(r.memberId) + '</b><span class="s">' + tm(r) + '</span></div>' +
+      '<div>' + ((r.tags || []).map(t => '<span class="pill ' + (/outside|venue/i.test(t) ? 'p-no' : 'p-pend') + '">' + esc(t) + '</span>').join('') || '<span class="pill p-ok">All ok</span>') + (r.validatedBy ? '<span class="pill p-ok">Checked</span>' : '') + '</div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+      (r.canValidate ? '<button class="btn red sm" type="button" data-act="v" data-id="' + esc(r.memberId) + '">Validate</button>' : '') +
+      (r.canCorrectLate ? '<button class="btn line sm" type="button" data-act="l" data-late="' + (r.late ? '0' : '1') + '" data-id="' + esc(r.memberId) + '">' + (r.late ? 'Was on time' : 'Mark late') + '</button>' : '') +
+      (r.canUndo ? '<button class="btn line sm" type="button" data-act="u" data-id="' + esc(r.memberId) + '">Undo</button>' : '') + '</div></div>';
+    const head = cols => '<div class="g gv th"><div></div><div>Member</div><div>' + cols + '</div><div>Action</div></div>';
+    const flagged = j.rows.filter(r => r.flagged && !r.validatedBy), clean = j.rows.filter(r => !r.flagged && !r.validatedBy), done = j.rows.filter(r => r.validatedBy);
+    const sect = (title, hint, list, cols) => list.length ? '<div class="card rise tblc"><div class="tblh"><span>' + title + ' (' + list.length + ') <small>· ' + hint + '</small></span></div>' + head(cols) + list.map(rowHtml).join('') + '</div>' : '';
+    $('rows').innerHTML = sect('Flagged first', 'one by one, or tick several', flagged, 'What looked odd') + sect('Clear, waiting', 'place and QR all ok', clean, 'Checked') + sect('Checked', 'every checked row can be undone with a reason', done, 'Status');
+    const stat = (k, v, col, bg) => '<div class="card stat"' + (bg ? ' style="background:' + bg + ';border-color:#F0E2C9"' : '') + '><div class="k" style="color:' + col + '">' + k + '</div><div class="v" style="color:' + col + '">' + v + '</div></div>';
+    $('vstats').innerHTML = stat('Checked in', j.rows.length, '#20775A') + stat('Clean (place and QR ok)', c.clean, '#20775A') + stat('Flagged', c.flagged, '#95621D', '#FFF4DF') + stat('Checked', c.validated, '#2F4F7E');
     const ticks = () => Array.from($('rows').querySelectorAll('.tick:checked')).map(x => x.dataset.id);
     const upd = () => { const n = ticks().length; $('vtick').textContent = 'Validate ticked (' + n + ')'; $('vtick').disabled = n === 0; };
     $('rows').querySelectorAll('.tick').forEach(x => x.onchange = upd);
@@ -325,6 +448,7 @@ async function loadRows() {
   } catch (e) { say('m4', 'Network problem. Try again.', 'bad'); }
 }
 let rhState = null, rhEditing = null;
+const lagosParts = ms => { const d = new Date(ms); return {mon: d.toLocaleString('en-GB', {timeZone: 'Africa/Lagos', month: 'short'}).toUpperCase(), day: d.toLocaleString('en-GB', {timeZone: 'Africa/Lagos', day: 'numeric'})}; };
 const lagos = ms => new Date(ms).toLocaleString('en-GB', {timeZone: 'Africa/Lagos', dateStyle: 'medium', timeStyle: 'short'});
 const rhLive = r => !r.cancelled && !r.finished;
 async function loadRehearsal() {
@@ -335,18 +459,20 @@ async function loadRehearsal() {
     if (!j.ok) { $('rhlist').innerHTML = ''; $('rhbtns').innerHTML = ''; $('rhcount').textContent = ''; return say('m8', j.error || 'Not available.', 'bad'); }
     say('m8', '');
     rhState = j;
-    $('rhform').classList.add('hide'); $('rhmenu').classList.toggle('hide', !j.canEdit);
+    
     const list = j.rehearsals || [];
     const cur = list.filter(r => r.isCurrent)[0] || null;
-    $('rhcount').textContent = j.liveCount + ' of ' + j.max + ' places used. The next upcoming rehearsal is the current one.';
-    $('rhlist').innerHTML = list.length ? list.map(r => '<div style="border-top:1px solid var(--line);padding:8px 0"><b>' + esc(r.id) + '</b> · ' + esc(lagos(r.startMs)) + ' to ' + esc(lagos(r.finishMs).slice(-5)) +
-      ' ' + (r.cancelled ? '<span class="pill p-no">Cancelled</span>' : r.finished ? '<span class="pill p-info">Finished</span>' : r.isCurrent ? '<span class="pill p-ok">Current</span><span class="pill ' + (r.checkInOpen ? 'p-ok' : 'p-pend') + '">Check-in ' + (r.checkInOpen ? 'open' : 'closed') + '</span>' : '<span class="pill p-pend">Planned</span>') + (r.urgent && rhLive(r) ? '<span class="pill p-no">Urgent</span>' : '') + '<br>' +
-      '<span class="s">' + esc(r.venue ? r.venue.name || '(no name)' : '(no venue)') + (rhLive(r) && r.venue ? ' · position ' + (r.venue.confirmed ? 'confirmed on site by ' + esc(r.venue.confirmedBy) : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site') : '') +
-      (r.editedBy ? ' · last edited by ' + esc(r.editedByRole) : '') + '</span>' +
-      (r.log && r.log.length ? '<details><summary class="s">Changes</summary>' + r.log.map(l => '<div class="s">' + esc(lagos(l.t)) + ' · ' + esc(l.by) + ' · ' + esc(l.w) + '</div>').join('') + '</details>' : '') +
-      (j.canEdit && rhLive(r) ? '<br><button data-edit="' + esc(r.id) + '" type="button" data-noenter="1" style="width:auto;padding:.4rem .8rem">Edit or cancel</button>' : '') + '</div>').join('') : '<p class="s">No rehearsal is set up yet.</p>';
-    $('rhbtns').innerHTML = cur && rhLive(cur) ? (cur.checkInOpen ? '<button data-op="close">Close check-in (' + esc(cur.id) + ')</button>' : '<button data-op="open">Open check-in (' + esc(cur.id) + ')</button>') : '';
+    $('rhcount').textContent = j.liveCount + ' of ' + j.max + ' places used';
+    $('rhlist').innerHTML = list.length ? list.map(r => { const dp = lagosParts(r.startMs); return '<div class="rhrow"><div class="datebox"><div class="m">' + dp.mon + '</div><div class="d">' + dp.day + '</div></div><div class="mid"><b>Rehearsal ' + esc(r.id) + '</b><span class="s">' + esc(lagos(r.startMs).slice(-5)) + ' to ' + esc(lagos(r.finishMs).slice(-5)) + ' · ' + esc(r.venue ? r.venue.name || '(no name)' : '(no venue)') + '</span>' +
+      (rhLive(r) && r.venue ? '<span class="s">Position ' + (r.venue.confirmed ? 'confirmed on site by ' + esc(r.venue.confirmedBy) : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site') + (r.editedBy ? ' · last edited by ' + esc(r.editedByRole) : '') + '</span>' : '') +
+      (r.log && r.log.length ? '<details><summary class="sub">Changes</summary>' + r.log.map(l => '<div class="sub">' + esc(lagos(l.t)) + ' · ' + esc(l.by) + ' · ' + esc(l.w) + '</div>').join('') + '</details>' : '') + '</div>' +
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' + (r.cancelled ? '<span class="pill p-no">Cancelled</span>' : r.finished ? '<span class="pill p-val">Finished</span>' : r.isCurrent ? '<span class="pill p-ok">Current</span><span class="pill ' + (r.checkInOpen ? 'p-ok' : 'p-pend') + '">Check-in ' + (r.checkInOpen ? 'open' : 'closed') + '</span>' : '<span class="pill p-pend">Planned</span>') + (r.urgent && rhLive(r) ? '<span class="pill p-no">Urgent</span>' : '') +
+      (j.canEdit && rhLive(r) ? '<button class="btn line sm" type="button" data-edit="' + esc(r.id) + '" data-noenter="1">Edit or cancel</button>' : '') + '</div></div>'; }).join('') : '<p class="sub" style="padding:14px 20px;margin:0">No rehearsal is set up yet.</p>';
+    $('rhbtns').innerHTML = cur && rhLive(cur) ? (cur.checkInOpen ? '<button class="btn line" type="button" data-op="close">Close check-in (' + esc(cur.id) + ')</button>' : '<button class="btn red" type="button" data-op="open">Open check-in (' + esc(cur.id) + ')</button>') : '';
+    $('rhcheck').classList.toggle('hide', !(cur && rhLive(cur) && j.canEdit));
+    if (cur) $('rhcisub').textContent = cur.id + ' is the current rehearsal. Check-in is ' + (cur.checkInOpen ? 'open.' : 'closed.') + ' It can open from one hour before the start.';
     $('rhhint').textContent = j.liveCount >= j.max ? 'Three rehearsals are planned. Finish or cancel one to make another.' : 'The next one will be ' + j.nextId + '.';
+    if (j.canEdit) rhOpenForm('make'); else { $('rhform').classList.add('hide'); $('rhprev').classList.add('hide'); }
     $('rhvbox').classList.toggle('hide', !cur || !rhLive(cur) || !cur.venue);
     if (cur && cur.venue) $('rhvinfo').textContent = 'Current rehearsal ' + cur.id + ' venue: ' + (cur.venue.name || '(no name)') + ' · position ' + (cur.venue.confirmed ? 'confirmed on site by ' + cur.venue.confirmedBy : 'not yet confirmed on site');
     $('rhlist').querySelectorAll('button[data-edit]').forEach(b => b.onclick = () => rhOpenForm('edit', b.dataset.edit));
@@ -361,7 +487,8 @@ function rhOpenForm(mode, id) {
   const r = mode === 'edit' ? ((rhState.rehearsals || []).filter(x => x.id === id)[0] || null) : null;
   if (mode === 'edit' && !r) return say('m8', 'That rehearsal was not found. Reload.', 'bad');
   rhEditing = r;
-  $('rhtitle').textContent = r ? 'Edit ' + r.id : 'Make rehearsal ' + rhState.nextId;
+  $('rhtitle').textContent = r ? 'Edit or cancel ' + r.id : 'Make a rehearsal';
+  $('rhback').classList.toggle('hide', !r);
   $('rhcancel').classList.toggle('hide', !r);
   $('rhreasonbox').classList.toggle('hide', !r); $('rhreason').value = '';
   if (r) {
@@ -371,14 +498,30 @@ function rhOpenForm(mode, id) {
     $('rhsave').disabled = !!r.checkInOpen; say('m8', r.checkInOpen ? 'Close check-in before changing this rehearsal.' : (r.editedBy ? 'Last edited by the ' + r.editedByRole + '. Only that role or higher can change it now.' : ''));
   } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; $('rhvenue').value = ''; $('rhsave').disabled = false; say('m8', ''); }
   $('rhlat').value = ''; $('rhlon').value = '';
-  $('rhform').classList.remove('hide'); $('rhmenu').classList.add('hide');
+  $('rhform').classList.remove('hide'); $('rhprev').classList.remove('hide'); rhPreview();
+  if (!r && rhState.liveCount >= rhState.max) { $('rhsave').disabled = true; say('m8', 'Three rehearsals are already planned. Finish or cancel one before making another.', 'bad'); }
 }
+function rhPreview() {
+  const d = $('rhdate').value, st = $('rhstart').value, fi = $('rhfinish').value;
+  $('pvid').textContent = rhEditing ? rhEditing.id : (rhState ? rhState.nextId : '-');
+  $('pvstatus').textContent = rhEditing ? (rhEditing.checkInOpen ? 'Check-in open' : 'Planned') : 'Planned';
+  const ok = !!(d && st && fi && fi > st);
+  $('pvvalid').textContent = ok ? 'Valid' : 'Fill in the form'; $('pvvalid').className = 'pill ' + (ok ? 'p-ok' : 'p-pend');
+  if (!d || !st) { $('pvdate').textContent = '-'; $('pvclose').textContent = '-'; $('pvnotice').textContent = '-'; $('pvnotice').className = 'pill p-pend'; return; }
+  const startMs = Date.parse(d + 'T' + st + ':00+01:00');
+  $('pvdate').textContent = new Date(startMs).toLocaleDateString('en-GB', {timeZone: 'Africa/Lagos', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
+  $('pvclose').textContent = lagos(startMs - 36 * 3600000);
+  const hrs = (startMs - Date.now()) / 3600000;
+  const lvl = hrs < 36 ? ['Urgent', 'p-no'] : hrs < 168 ? ['Short notice', 'p-pend'] : ['7 days+ · Normal', 'p-ok'];
+  $('pvnotice').textContent = lvl[0]; $('pvnotice').className = 'pill ' + lvl[1];
+}
+['rhdate', 'rhstart', 'rhfinish'].forEach(id => $(id).addEventListener('input', rhPreview));
 $('rhmake').onclick = () => {
   if (!rhState) return say('m8', 'Still loading. Try again in a moment.', 'bad');
   if (rhState.liveCount >= rhState.max) return say('m8', 'Three rehearsals are already planned. Finish or cancel one before making another.', 'bad');
   rhOpenForm('make');
 };
-$('rhback').onclick = () => { $('rhform').classList.add('hide'); $('rhmenu').classList.remove('hide'); say('m8', ''); };
+$('rhback').onclick = () => { rhOpenForm('make'); };
 $('rhcancel').onclick = async () => {
   if (!rhEditing) return;
   const reason = prompt('Cancel ' + rhEditing.id + ' (' + lagos(rhEditing.startMs) + ')? Why? (5 to 200 characters)'); if (!reason) return;
@@ -428,7 +571,7 @@ async function loadAbsence() {
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
     $('rfor').classList.toggle('hide', !j.canSubmitFor);
     say('m6', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
-    $('rmine').innerHTML = j.mine.length ? '<b>Your requests</b>' + j.mine.map(r => '<div style="border-top:1px solid var(--line);padding:8px 0">' + stPill(r.status) + ' <span class="s">' + new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' + (r.canWithdraw ? '<br><button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + (r.canAppeal ? '<br><button data-ap="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Appeal</button>' : '') + '</div>').join('') : '';
+    $('rmine').innerHTML = j.mine.length ? '<div class="ct">Your requests</div>' + j.mine.map(r => '<div style="border-top:1px solid var(--line);padding:10px 0;margin-top:8px">' + stPill(r.status) + ' <span class="s">' + new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' + (r.canWithdraw ? '<br><button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + (r.canAppeal ? '<br><button data-ap="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Appeal</button>' : '') + '</div>').join('') : '';
     $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => {
       if (b.dataset.ap) { const why = prompt('Why should this be looked at again? (10 to 300 characters)'); if (!why) return; const a = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m6', a.ok ? 'Appeal sent.' : (a.error || 'Could not appeal.'), a.ok ? 'ok' : 'bad'); loadAbsence(); return; }
       const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m6', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadAbsence(); });
