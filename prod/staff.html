@@ -109,6 +109,7 @@ body:not(.out){background:radial-gradient(800px 380px at 100% 0,#FFE4E6 0,transp
 .btn.sm{height:38px;padding:0 14px;border-radius:10px;font-size:14px}
 .btn[disabled]{background:#F1F3F7;border:1px solid #E1E5EE;color:#8A93A5;box-shadow:none;cursor:not-allowed;transform:none;opacity:1}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointer;transition:transform .25s var(--ease),box-shadow .25s var(--ease),border-color .25s var(--ease)}.lift:hover{transform:translateY(-3px);border-color:#E9A9AE;box-shadow:0 14px 30px rgba(142,0,8,.14)}
 .stats{display:flex;gap:14px;flex-wrap:wrap}
 .stat{flex:1 1 150px;padding:14px 18px;margin:0}
 .stat .k{font-size:13px;font-weight:700}.stat .v{font-size:30px;font-weight:900;line-height:1.2}
@@ -227,12 +228,18 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <button id="verify">Sign in</button><p id="m2" class="s"></p>
 <button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
+<div id="s10" class="pg hide">
+<div id="hgrid" class="stats rise"></div>
+<div id="hqr"></div>
+<p id="m10" class="s"></p>
+</div>
+
 <div id="s3" class="pg hide">
 <div class="two">
 <div class="c1"><div class="card qrhero rise"><div class="qbox"><div id="q"></div></div><div style="flex:1 1 220px"><div class="eb">SHOW THIS TO YOUR MEMBERS</div><div class="qh">Scan to check in</div><div id="m3" class="s qs"></div></div></div></div>
 <div class="c2"><div class="card pad rise" style="animation-delay:.06s"><div class="ct">Safety settings</div><div style="display:flex;gap:10px;align-items:center;margin-top:12px"><input type="checkbox" checked disabled aria-label="New QR every 5 minutes"><span>New QR every 5 minutes</span></div><p class="sub" style="margin-top:12px">A shared photo stops working within minutes. Members also need to be at the venue to check in.</p></div></div>
 </div>
-<div class="note rise" style="animation-delay:.1s"><b>If the Campus MD is absent,</b> Desk D, the Assistant Global Admin or the Global Admin can show this QR for the campus.</div>
+<div class="note rise" style="animation-delay:.1s"><b>If the Campus MD is absent,</b> the Global Admin or the Assistant Global Admin switches on "Campus Music Director is away" on the Home page. Then Desk D, the Assistant Global Admin and the Global Admin can show this QR.</div>
 </div>
 
 <div id="s4" class="pg hide">
@@ -345,11 +352,12 @@ async function call(body) {
     if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
-const TABDEF = {qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
-const LANDING = ['qr', 'rehearsal', 'checkins', 'requests', 'absence'];
+const TABDEF = {home: ['s10', 'Home'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
+const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myName = j.name || ''; myRoles = j.roles || []; }
 const ICON = {
+  home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
   qr: '<path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/>',
   checkins: '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/>',
   hand: '<path d="M8 13V6a2 2 0 014 0v5M12 11V4a2 2 0 014 0v7M16 11V7a2 2 0 014 0v6a8 8 0 01-8 8h-1a6 6 0 01-5-3l-2-4a2 2 0 013-2l1 1"/>',
@@ -359,6 +367,7 @@ const ICON = {
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17h.01"/>'
 };
 const PAGEHEAD = {
+  s10: ['Staff home', 'Your day at a glance. You see only what your role can use.'],
   s3: ['Rehearsal QR', 'Show this to members so they can check in. It renews every few minutes.'],
   s4: ['Check-ins', 'See who has checked in, validate them, and fix flags.'],
   s5: ['Mark by hand', 'For someone with no phone, camera or location.'],
@@ -381,17 +390,65 @@ try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7','s8','s9'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   const ph = PAGEHEAD[id]; $('ph').classList.toggle('hide', !ph); if (ph) $('ph').innerHTML = '<div class="t">' + ph[0] + '</div><div class="d">' + ph[1] + '</div>';
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
   document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); }
 function stPill(t) { const k = /approv|valid|accept/i.test(t) ? 'p-ok' : /reject|declin|cancel/i.test(t) ? 'p-no' : /withdr/i.test(t) ? 'p-info' : 'p-pend'; return '<span class="pill ' + k + '">' + esc(t) + '</span>'; }
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ---- Staff home: only the tiles this person may use; the server decides, the page just draws ----
+function tm(ms) { return lagos(ms); }
+async function loadHome() {
+  say('m10', 'Loading…');
+  try {
+    const j = await call({action: 'home.state', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('hgrid').innerHTML = ''; $('hqr').innerHTML = ''; return say('m10', j.error || 'Not available.', 'bad'); }
+    const t = j.tiles || {}, has = k => myTabs.indexOf(k) !== -1;
+    const link = (k, inner, extra) => has(k) ? '<a class="card stat lift" href="#" data-go="' + TABDEF[k][0] + '"' + (extra || '') + '>' + inner + '</a>' : '<div class="card stat"' + (extra || '') + '>' + inner + '</div>';
+    const tile = (k, v, sub, col, bg) => '<div class="k" style="color:' + col + '">' + k + '</div><div class="v" style="color:' + col + '">' + v + '</div>' + (sub || '');
+    let h = '';
+    if (t.rehearsal) {
+      const r = t.rehearsal;
+      h += link('rehearsal', '<div class="k" style="color:#2F4F7E">Next rehearsal</div><div class="v" style="font-size:20px;color:#172039">' + esc(r.id) + ' · ' + esc(tm(r.startMs)) + '</div><div class="s" style="margin-top:4px">' + esc(r.venue || 'No venue yet') + '</div><span class="pill ' + (r.checkInOpen ? 'p-ok' : 'p-pend') + '">Check-in ' + (r.checkInOpen ? 'open' : 'closed') + '</span>' + (r.urgent ? '<span class="pill p-no">Urgent</span>' : ''), ' style="flex:2 1 280px"');
+    } else if (has('rehearsal')) h += link('rehearsal', '<div class="k" style="color:#2F4F7E">Next rehearsal</div><div class="v" style="font-size:20px">None set up</div><div class="s">Make a rehearsal.</div>', ' style="flex:2 1 280px"');
+    if (t.checkins) h += link('checkins', tile('Check-ins to validate', t.checkins.waiting, '<span class="pill p-pend">' + t.checkins.flagged + ' flagged</span><span class="pill p-val">' + t.checkins.validated + ' checked</span>', '#20775A'));
+    if (t.requests) h += link('requests', tile('Requests waiting', t.requests.waiting, '<span class="pill p-pend">' + t.requests.late + ' late</span>' + (t.requests.flagged ? '<span class="pill p-no">' + t.requests.flagged + ' flagged</span>' : ''), '#95621D'));
+    if (t.counts) h += '<div class="card stat">' + tile('Active members', t.counts.members, '<span class="pill p-val">' + t.counts.campuses + ' campuses</span>', '#2F4F7E') + '</div>';
+    $('hgrid').innerHTML = h || '<div class="card pad"><div class="ct">Welcome</div><p class="sub">Nothing is waiting for you here. Use the menu for your tabs.</p></div>';
+    document.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
+    // the QR stand-in
+    const q = t.qr || {}, sd = q.standin;
+    let qh = '';
+    if (sd) qh = '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Campus Music Director is away: ON</div><p class="sub">Switched on by ' + esc(sd.by) + ' at ' + esc(tm(sd.sinceMs)) + '. Reason: ' + esc(sd.reason) + '. It ends by itself at ' + esc(tm(sd.untilMs)) + '.</p>' +
+      (q.canShow ? '<p class="sub">You can now show the QR from the QR tab.</p>' : '') +
+      (q.canToggle ? '<div class="actions"><button id="sdoff" class="btn line" type="button">Switch off</button></div>' : '') + '</div>';
+    else if (q.canToggle) qh = '<div class="card pad rise"><div class="ct">Campus Music Director away?</div><p class="sub">If the Campus Music Director cannot show the QR, switch this on. Then Desk D, the Assistant Global Admin and the Global Admin can show it for this rehearsal only. It is recorded with your name and the reason, and it ends by itself one hour after the rehearsal.</p>' +
+      '<label for="sdwhy" class="lb">Reason (5 to 200 characters)</label><input id="sdwhy" class="in" autocomplete="off" maxlength="200" placeholder="For example: the Campus Music Director is ill"><div class="actions"><button id="sdon" class="btn red" type="button">Let the admins show the QR</button></div></div>';
+    $('hqr').innerHTML = qh;
+    const flip = async on => {
+      const why = on ? ($('sdwhy').value || '').trim() : '';
+      if (on && why.length < 5) return say('m10', 'Give a reason of 5 to 200 characters.', 'bad');
+      say('m10', 'Saving…');
+      try {
+        const k = await call({action: 'qr.standin', token, on: on, reason: why});
+        if (k.signedOut) { signedOutNow(); return; }
+        if (!k.ok) return say('m10', k.error || 'Not saved.', 'bad');
+        const me = await call({action: 'me', token}); if (me.ok) { setMe(me); drawTabs(); }
+        loadHome(); say('m10', on ? 'On. The QR tab now shows for the admins and Desk D.' : 'Off.', 'ok');
+      } catch (e) { say('m10', 'Network problem. Try again.', 'bad'); }
+    };
+    if ($('sdon')) $('sdon').onclick = () => flip(true);
+    if ($('sdoff')) $('sdoff').onclick = () => flip(false);
+    say('m10', '');
+  } catch (e) { say('m10', 'Network problem. Try again.', 'bad'); }
+}
 async function loadRows() {
   say('m4', 'Loading…');
   try {
@@ -661,7 +718,7 @@ $('verify').onclick = async () => {
 $('back').onclick = () => show('s1');
 // ---- Help and the once-a-day welcome (text is built from the tabs the server gave this person) ----
 const TABHELP = {
-  qr: ['Show the QR', 'Show the check-in QR code of the open rehearsal so members can scan it. Campus Music Directors do this for their own campus. Desk D, the Assistant Global Admin and the Global Admin can when the Campus Music Director is not available.'],
+  qr: ['Show the QR', 'Show the check-in QR code of the open rehearsal so members can scan it. Campus Music Directors do this for their own campus. Desk D, the Assistant Global Admin and the Global Admin can after the Global Admin or Assistant Global Admin switches on "Campus Music Director is away" on the Home page.'],
   checkins: ['Check the check-ins', 'See who has checked in and mark each check-in as checked. Late and hand-marked ones come first. Some roles can only look. Nobody checks their own.'],
   hand: ['Mark a member by hand', 'For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.'],
   rehearsal: ['Run rehearsals', 'Make, change or cancel a rehearsal, set the venue, and open check-in. Times are Lagos time. At most three rehearsals can be planned at once.'],
