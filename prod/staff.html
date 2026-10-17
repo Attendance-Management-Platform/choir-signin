@@ -228,8 +228,19 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <button id="verify">Sign in</button><p id="m2" class="s"></p>
 <button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
+<div id="s11" class="pg hide">
+<div class="card pad rise"><div class="ct">Choose a report</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
+<div style="flex:1 1 160px"><label for="rpscope" class="lb" style="margin-top:0">Report</label><select id="rpscope" class="in"><option value="rehearsal">Rehearsal (daily)</option><option value="month">Month</option><option value="campus">Campus</option></select></div>
+<div style="flex:2 1 220px"><label for="rpkey" class="lb" style="margin-top:0">Which one</label><select id="rpkey" class="in"></select></div>
+<div id="rpdl" class="hide"><button id="rpcsv" class="btn red" type="button">Download CSV</button></div></div></div>
+<div id="rpout"></div>
+<p id="m11" class="s"></p>
+</div>
+
 <div id="s10" class="pg hide">
 <div id="hgrid" class="stats rise"></div>
+<div id="hcharts"></div>
 <div id="hqr"></div>
 <p id="m10" class="s"></p>
 </div>
@@ -352,11 +363,12 @@ async function call(body) {
     if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
-const TABDEF = {home: ['s10', 'Home'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
+const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
 const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myName = j.name || ''; myRoles = j.roles || []; }
 const ICON = {
+  reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
   home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
   qr: '<path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/>',
   checkins: '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/>',
@@ -367,6 +379,7 @@ const ICON = {
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17h.01"/>'
 };
 const PAGEHEAD = {
+  s11: ['Reports', 'Check-ins received, by rehearsal, month or campus. Not official attendance yet.'],
   s10: ['Staff home', 'Your day at a glance. You see only what your role can use.'],
   s3: ['Rehearsal QR', 'Show this to members so they can check in. It renews every few minutes.'],
   s4: ['Check-ins', 'See who has checked in, validate them, and fix flags.'],
@@ -390,12 +403,12 @@ try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's11') loadReports(); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   const ph = PAGEHEAD[id]; $('ph').classList.toggle('hide', !ph); if (ph) $('ph').innerHTML = '<div class="t">' + ph[0] + '</div><div class="d">' + ph[1] + '</div>';
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
   document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); }
@@ -404,6 +417,76 @@ function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&l
 
 // ---- Staff home: only the tiles this person may use; the server decides, the page just draws ----
 function tm(ms) { return lagos(ms); }
+
+// ---- Charts (plain SVG, no outside code) and the Reports page ----
+function lineChart(series) {
+  if (!series.length) return '<p class="sub">No check-ins to chart yet.</p>';
+  const W = 440, H = 190, L = 40, R = 16, T = 24, B = 34, max = Math.ceil(Math.max(10, ...series.map(x => x.present)) * 1.25 / 10) * 10;
+  const x = i => series.length === 1 ? (L + W - R) / 2 : L + i * (W - L - R) / (series.length - 1), y = v => T + (H - T - B) * (1 - v / max);
+  const pts = series.map((p, i) => x(i) + ',' + y(p.present)).join(' ');
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Check-ins received at the last rehearsals" style="width:100%;height:auto">' +
+    [0, .5, 1].map(f => '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(max * f) + '" y2="' + y(max * f) + '" stroke="#E6E9EF"/><text x="' + (L - 6) + '" y="' + (y(max * f) + 4) + '" font-size="11" fill="#5E6A7E" text-anchor="end">' + Math.round(max * f) + '</text>').join('') +
+    '<polyline points="' + pts + '" fill="none" stroke="#8E0008" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+    series.map((p, i) => '<circle cx="' + x(i) + '" cy="' + y(p.present) + '" r="' + (i === series.length - 1 ? 6 : 5) + '" fill="' + (i === series.length - 1 ? '#8E0008' : '#fff') + '" stroke="#8E0008" stroke-width="3"/>' +
+      '<text x="' + x(i) + '" y="' + (y(p.present) - 10) + '" font-size="12" font-weight="900" fill="#8E0008" text-anchor="middle">' + p.present + '</text>' +
+      '<text x="' + x(i) + '" y="' + (H - 12) + '" font-size="11" fill="#5E6A7E" text-anchor="middle">' + esc(p.id) + '</text>').join('') + '</svg>';
+}
+function bars(rows) {
+  return rows.map(r => '<div style="margin:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>' + esc(r.campus) + '</span><b>' + r.present + ' of ' + r.active + ' · ' + r.rate + '%</b></div>' +
+    '<div style="background:#EEF1F6;border-radius:99px;height:10px"><div style="width:' + Math.min(100, r.rate) + '%;height:10px;border-radius:99px;background:' + (r.rate >= 70 ? '#20775A' : '#95621D') + '"></div></div></div>').join('') || '<p class="sub">No campus figures yet.</p>';
+}
+function homeCharts(c) {
+  if (!c) return '';
+  return '<div class="stats rise"><div class="card pad" style="flex:1 1 320px"><div class="ct">Check-ins received, last ' + c.series.length + ' rehearsals</div>' + lineChart(c.series) + '</div>' +
+    '<div class="card pad" style="flex:1 1 320px"><div class="ct">' + (c.last ? 'Last rehearsal by campus (' + esc(c.last.id) + ')' : 'By campus') + '</div>' + bars(c.campuses) +
+    '<p class="sub" style="margin-top:8px">Counted from the old form and the new check-in page, out of members who are Active today. Not official attendance.</p></div></div>';
+}
+let rpState = null;
+async function loadReports() {
+  say('m11', 'Loading…');
+  try {
+    const j = await call({action: 'reports.state', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) return say('m11', j.error || 'Not available.', 'bad');
+    rpState = j; $('rpdl').classList.toggle('hide', !j.canDownload); say('m11', '');
+    fillKeys(); showReport();
+  } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
+}
+function fillKeys() {
+  const sc = $('rpscope').value, o = rpState || {rehearsals: [], months: [], campuses: []};
+  const list = sc === 'rehearsal' ? o.rehearsals.map(r => [r.id, r.id + (r.date ? ' · ' + r.date : '') + ' · ' + r.present + ' check-ins']) : sc === 'month' ? o.months.map(m => [m, m]) : o.campuses.map(c => [c, c]);
+  $('rpkey').innerHTML = list.map(x => '<option value="' + esc(x[0]) + '">' + esc(x[1]) + '</option>').join('') || '<option value="">Nothing yet</option>';
+}
+function table(cols, rows) {
+  return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr>' + cols.map(c => '<th style="text-align:left;padding:8px 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5E6A7E;border-bottom:1px solid #E6E9EF">' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
+    rows.map(r => '<tr>' + r.map(v => '<td style="padding:9px 10px;border-top:1px solid #E6E9EF">' + esc(v) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+}
+async function showReport() {
+  const key = $('rpkey').value; if (!key) { $('rpout').innerHTML = '<div class="card pad"><p class="sub">There is nothing to report yet.</p></div>'; return; }
+  say('m11', 'Loading…');
+  try {
+    const j = await call({action: 'reports.summary', token, scope: $('rpscope').value, key});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('rpout').innerHTML = ''; return say('m11', j.error || 'Not available.', 'bad'); }
+    const s = j.summary;
+    $('rpout').innerHTML = '<div class="card pad rise"><div class="ct">' + esc(s.title) + '</div><div class="stats" style="margin-top:10px">' +
+      s.tiles.map(t => '<div class="card stat" style="margin:0"><div class="k" style="color:#2F4F7E">' + esc(t[0]) + '</div><div class="v">' + esc(t[1]) + '</div></div>').join('') + '</div></div>' +
+      '<div class="card pad rise">' + table(s.columns, s.rows) + (s.rows2 ? '<div style="margin-top:14px"></div>' + table(s.columns2, s.rows2) : '') + '<p class="sub" style="margin-top:10px">' + esc(s.note) + '</p></div>';
+    say('m11', '');
+  } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
+}
+$('rpscope').onchange = () => { fillKeys(); showReport(); };
+$('rpkey').onchange = showReport;
+$('rpcsv').onclick = async () => {
+  say('m11', 'Preparing…');
+  try {
+    const j = await call({action: 'reports.csv', token, scope: $('rpscope').value, key: $('rpkey').value});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) return say('m11', j.error || 'Not allowed.', 'bad');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([j.csv], {type: 'text/csv'})); a.download = j.filename; document.body.appendChild(a); a.click(); a.remove();
+    say('m11', 'Downloaded. This download is recorded in the audit log.', 'ok');
+  } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
+};
 async function loadHome() {
   say('m10', 'Loading…');
   try {
@@ -423,6 +506,7 @@ async function loadHome() {
     if (t.counts) h += '<div class="card stat">' + tile('Active members', t.counts.members, '<span class="pill p-val">' + t.counts.campuses + ' campuses</span>', '#2F4F7E') + '</div>';
     $('hgrid').innerHTML = h || '<div class="card pad"><div class="ct">Welcome</div><p class="sub">Nothing is waiting for you here. Use the menu for your tabs.</p></div>';
     document.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
+    $('hcharts').innerHTML = homeCharts(t.charts);
     // the QR stand-in
     const q = t.qr || {}, sd = q.standin;
     let qh = '';
@@ -721,6 +805,7 @@ const TABHELP = {
   qr: ['Show the QR', 'Show the check-in QR code of the open rehearsal so members can scan it. Campus Music Directors do this for their own campus. Desk D, the Assistant Global Admin and the Global Admin can after the Global Admin or Assistant Global Admin switches on "Campus Music Director is away" on the Home page.'],
   checkins: ['Check the check-ins', 'See who has checked in and mark each check-in as checked. Late and hand-marked ones come first. Some roles can only look. Nobody checks their own.'],
   hand: ['Mark a member by hand', 'For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.'],
+  reports: ['See reports', 'See check-in summaries by rehearsal, month or campus, with charts. The Global Admin and the Assistant Global Admin can download them; every download is recorded.'],
   rehearsal: ['Run rehearsals', 'Make, change or cancel a rehearsal, set the venue, and open check-in. Times are Lagos time. At most three rehearsals can be planned at once.'],
   absence: ['Send your absence request', 'If you are a choir member, ask to be excused before the cut-off, 36 hours before the rehearsal.'],
   requests: ['Handle absence requests', 'Campus Music Directors validate requests. People who decide approve or reject. The reason is shown only so you can decide.']
@@ -730,7 +815,8 @@ const NOTHAVE = {
   checkins: 'Check other people\'s check-ins',
   hand: 'Mark members by hand',
   rehearsal: 'Make or change rehearsals',
-  requests: 'Decide absence requests'
+  requests: 'Decide absence requests',
+  reports: 'See or download reports'
 };
 const LADDER = [
   ['Pastor in Charge', 'the Global Music Director'],
