@@ -93,6 +93,25 @@ body:not(.out){background:radial-gradient(800px 380px at 100% 0,#FFE4E6 0,transp
 .card.pad{padding:22px}
 .ct{font-size:16px;font-weight:900;color:var(--fg)}
 .sub{font-size:13px;color:var(--mut)}
+
+/* Collapsible cards */
+.fh{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;-webkit-user-select:none;min-height:44px;margin:-8px -8px;padding:8px;border-radius:12px;transition:background .2s}
+.fh:hover{background:var(--rose)}
+.fh:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:0}
+.fh>.ct{flex:1;min-width:0}
+.fs{font-size:12px;font-weight:800;color:var(--acc);background:var(--rose);border-radius:999px;padding:3px 11px;white-space:nowrap}
+.fs:empty{display:none}
+.fch{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;flex:none;transition:transform .28s var(--ease),background .2s,border-color .2s}
+.fch::before{content:"";width:7px;height:7px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:translateY(-2px) rotate(45deg)}
+.fold:not(.shut) .fch{transform:rotate(180deg);background:var(--rose);border-color:#F0C9CD}
+.fold:not(.shut)>.fh{margin-bottom:6px}
+.fb{display:grid;grid-template-rows:1fr;transition:grid-template-rows .3s var(--ease)}
+.fbi{overflow:hidden;min-height:0;padding:0 6px 8px;margin:0 -6px -8px}
+.fold.shut>.fb{grid-template-rows:0fr}
+.fold.shut>.fb>.fbi{visibility:hidden;transition:visibility 0s .3s}
+.tblc.fold>.tblh.fh{margin:0;padding:14px 20px;min-height:52px;border-radius:0}
+.tblc.fold.shut>.tblh{border-bottom:0}
+@media (prefers-reduced-motion:reduce){.fb,.fch{transition:none}}
 .pg p{margin:.4rem 0}
 .pg label.s,.pg .lb{display:block;font-size:13px;font-weight:900;color:var(--fg);margin:12px 0 0}
 .pg input:not([type=checkbox]),.pg select,.pg textarea{height:42px;border:1px solid #D5DAE3;border-radius:10px;padding:0 12px;font-size:14px;margin-top:6px}
@@ -563,11 +582,11 @@ async function loadProcess() {
     if (!j.ok) return say('m15', j.error || 'Not available.', 'bad');
     prState = j; say('m15', j.saving ? '' : 'Saving is switched off, so nothing can be processed now.', j.saving ? '' : 'bad');
     $('prnote').textContent = j.note || '';
-    $('prlist').innerHTML = j.rehearsals.length ? j.rehearsals.map(r => '<div class="card pad" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b>' + esc(r.id) + ' · ' + esc(r.date) + '</b>' +
-      (r.processed ? '<span class="pill p-ok">Processed</span>' : (r.blocked ? '<span class="pill p-pend">Not ready</span>' : '<span class="pill p-val">Ready</span>')) + '</div>' +
+    $('prlist').innerHTML = j.rehearsals.length ? j.rehearsals.map(r => '<div class="card pad" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b>' + esc(r.id) + ' · ' + esc(r.date) + '</b><span><span class="pill p-info">' + (r.source === 'Google Form' ? 'Google Form' : 'QR check-in') + '</span> ' +
+      (r.processed ? '<span class="pill p-ok">Processed</span>' : (r.blocked ? '<span class="pill p-pend">Not ready</span>' : '<span class="pill p-val">Ready</span>')) + '</span></div>' +
       (r.counts ? '<p class="sub" style="margin:6px 0 0">' + r.counts.present + ' present · ' + r.counts.excused + ' excused · ' + r.counts.absent + ' absent · ' + r.counts.late + ' late</p>' : '') +
-      (r.blocked ? '<p class="sub" style="margin:6px 0 0">' + esc(r.blocked) + '</p>' : '') +
-      '<div style="margin-top:10px"><button class="btn ' + (r.processed ? 'line' : 'red') + ' sm" type="button" data-pr="' + esc(r.id) + '" data-prdone="' + (r.processed ? '1' : '0') + '">' + (r.processed ? 'See the result' : 'Preview') + '</button></div></div>').join('') : '<p class="sub">No rehearsal has been held yet.</p>';
+      (r.review ? '<p class="sub" style="margin:6px 0 0">' + r.review + ' form row(s) need a look</p>' : '') + (r.blocked ? '<p class="sub" style="margin:6px 0 0">' + esc(r.blocked) + '</p>' : '') +
+      '<div style="margin-top:10px"><button class="btn ' + (r.processed ? 'line' : 'red') + ' sm" type="button" data-pr="' + esc(r.id) + '" data-prdone="' + (r.processed ? '1' : '0') + '">' + (r.processed ? 'See the result' : 'Preview') + '</button></div></div>').join('') : '<p class="sub">No rehearsal has been held yet. A day taken on a Google Form shows here too, once it has an attendance sheet on the REHEARSALS tab.</p>';
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
 }
 function prTable(rows, canFix) {
@@ -584,7 +603,7 @@ async function prOpen(id, done) {
     const c = j.counts;
     $('prdetail').innerHTML = '<div class="card pad rise"><div class="ct">' + esc(j.id) + ' · ' + esc(j.date) + (done ? ' · processed' : ' · preview') + '</div>' + (c ? '<p class="sub">' + c.present + ' present · ' + c.excused + ' excused · ' + c.absent + ' absent · ' + c.late + ' late · ' + c.total + ' people</p>' : '') +
       (done ? '' : '<div class="actions"><button class="btn red" type="button" data-prgo="' + esc(j.id) + '"' + (prState && prState.saving ? '' : ' disabled') + '>Process ' + esc(j.id) + '</button></div><p class="sub">This writes the present people to PROCESSED ATTENDANCE for ' + esc(j.id) + ' and locks the day. Excused and Absent are worked out later, at publishing. Changes after that need a correction with a reason.</p>') +
-      prTable(j.rows, done && j.canCorrect) + '</div>';
+      (j.review && j.review.length ? '<div class="card pad" style="margin-top:12px;background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + j.review.length + ' form row(s) need a look</div><p class="sub">These are not written. After processing, the Global Admin or Assistant Global Admin can mark the person Present with a reason.</p>' + j.review.map(x => '<p class="sub" style="margin:4px 0 0"><b>' + esc(x.name || '(no name)') + '</b> · sheet row ' + esc(x.sourceRow) + ' · ' + esc(x.message) + '</p>').join('') + '</div>' : '') + (j.skipped ? '<p class="sub">' + j.skipped + ' repeat submission(s) were counted once.</p>' : '') + prTable(j.rows, done && j.canCorrect) + '</div>';
     $('prdetail').dataset.id = j.id;
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
 }
@@ -696,7 +715,7 @@ async function sendRequest() {
     const j = await call(b);
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) return say('m12b', j.error || 'Could not send.', 'bad');
-    say('m12b', 'Request ' + j.id + ' sent.', 'ok'); loadPeople(true);
+    say('m12b', 'Request ' + j.id + ' sent.', 'ok'); loadPeople(true); setTimeout(function () { if (window.rbcFoldSet) rbcFoldSet('Ask for a change', false); }, 2200);
   } catch (e) { say('m12b', 'Network problem. Try again.', 'bad'); }
 }
 function pWhen(t) { return t ? String(t).replace('T', ' ').replace('Z', ' UTC') : ''; }
@@ -1266,4 +1285,64 @@ async function start() {
   } catch (e) { if (me !== runId) return; say('m3', 'At ' + stamp() + ': network problem (' + (e && e.message ? e.message : 'unknown') + '). Trying again in 10 seconds.', 'bad'); timer = setTimeout(start, 10000); }
 }
 if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTabs(); land(); welcome(); } else signedOutNow(); }).catch(() => signedOutNow());
+</script><script>
+(function () {
+  var NOFOLD = ['Choose a report', 'Process attendance', 'Mark a member by hand', 'Request an absence'];
+  var SHUT = ['Ask for a change', 'Late request for a member', 'What happens next', 'Safety settings', 'Find a member', 'Being away'];
+  var LIST = ['Waiting for your answer', 'Requests you asked for', 'Approved and ready to carry out'];
+  var st = {};
+  try { st = JSON.parse(localStorage.getItem('rbcFold') || '{}') || {}; } catch (e) { st = {}; }
+  function save() { try { localStorage.setItem('rbcFold', JSON.stringify(st)); } catch (e) {} }
+  function count(card) { return card.querySelectorAll(':scope > .fb > .fbi > .card').length; }
+  function paint(card, head, title, open) {
+    card.classList.toggle('shut', !open);
+    head.setAttribute('aria-expanded', open ? 'true' : 'false');
+    var s = head.querySelector('.fs'); if (!s) return;
+    if (LIST.indexOf(title) >= 0) { var n = count(card); s.textContent = n ? String(n) : 'None'; }
+    else if (title === 'Being away') { var t = card.textContent; s.textContent = open || t.indexOf('Away now') < 0 ? '' : 'Someone is away'; }
+    else s.textContent = '';
+  }
+  function build(card) {
+    if (card.dataset.fold) return;
+    var head = card.firstElementChild; if (!head) return;
+    var isTbl = card.classList.contains('tblc') && head.classList.contains('tblh');
+    if (!isTbl && !head.classList.contains('ct')) return;
+    if (card.closest('#s10,#s14,#rpout')) return;
+    var title = (isTbl ? (head.querySelector('span') || head) : head).textContent.trim();
+    if (NOFOLD.indexOf(title) >= 0) { card.dataset.fold = 'x'; return; }
+    card.dataset.fold = '1';
+    var bar = head;
+    if (!isTbl) { bar = document.createElement('div'); card.insertBefore(bar, head); bar.appendChild(head); }
+    bar.classList.add('fh');
+    bar.setAttribute('role', 'button'); bar.tabIndex = 0;
+    var sum = document.createElement('span'); sum.className = 'fs'; bar.appendChild(sum);
+    var ch = document.createElement('span'); ch.className = 'fch'; ch.setAttribute('aria-hidden', 'true'); bar.appendChild(ch);
+    var fb = document.createElement('div'); fb.className = 'fb';
+    var fbi = document.createElement('div'); fbi.className = 'fbi'; fb.appendChild(fbi);
+    while (bar.nextSibling) fbi.appendChild(bar.nextSibling);
+    card.appendChild(fb);
+    card.classList.add('fold'); card.dataset.title = title;
+    var n = LIST.indexOf(title) >= 0 ? count(card) : 0;
+    var saved = st[title], open;
+    if (saved) open = !!saved.o || n > (saved.n || 0);
+    else if (LIST.indexOf(title) >= 0) open = n > 0;
+    else if (title === 'Being away') open = card.textContent.indexOf('Away now') >= 0;
+    else open = SHUT.indexOf(title) < 0;
+    paint(card, bar, title, open);
+    function flip() {
+      var o = card.classList.contains('shut');
+      st[title] = {o: o, n: n}; save(); paint(card, bar, title, o);
+    }
+    bar.addEventListener('click', flip);
+    bar.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+  }
+  function scan() { var l = document.querySelectorAll('.pg .card:not([data-fold])'); for (var i = 0; i < l.length; i++) build(l[i]); }
+  var q = 0;
+  new MutationObserver(function () { if (q) return; q = requestAnimationFrame(function () { q = 0; scan(); }); }).observe(document.body, {childList: true, subtree: true});
+  scan();
+  window.rbcFoldSet = function (title, open) {
+    var c = document.querySelectorAll('.fold');
+    for (var i = 0; i < c.length; i++) if (c[i].dataset.title === title) { var n = LIST.indexOf(title) >= 0 ? count(c[i]) : 0; st[title] = {o: open, n: n}; save(); paint(c[i], c[i].firstElementChild, title, open); }
+  };
+})();
 </script></body></html>
