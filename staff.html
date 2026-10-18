@@ -267,7 +267,11 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 
 <div id="s15" class="pg hide">
 <div class="card pad rise"><div class="ct">Process attendance</div>
-<p class="sub" id="prnote"></p><div id="prlist"></div></div>
+<p class="sub" id="prnote"></p>
+<div id="prfind" class="hide" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><input id="prq" class="in" list="prids" placeholder="Search: R104, 2026-09 or a date" style="flex:2 1 200px" autocomplete="off"><datalist id="prids"></datalist>
+<select id="prst" class="in" style="flex:1 1 130px"><option value="">All days</option><option value="todo">To process</option><option value="done">Processed</option><option value="wait">Not ready</option></select>
+<select id="prsrc" class="in" style="flex:1 1 130px"><option value="">Any source</option><option value="Google Form">Google Form</option><option value="Check-in page">QR check-in</option></select></div>
+<p class="sub" id="prcount" style="margin:8px 0 0"></p><div id="prlist"></div><div class="actions"><button id="prmore" class="btn line hide" type="button">Show 10 more</button></div></div>
 <div id="prdetail"></div>
 <p id="m15" class="s"></p>
 </div>
@@ -602,6 +606,28 @@ document.addEventListener('click', ev => { const b = ev.target.closest && ev.tar
 // ---- Process attendance ----
 let prState = null;
 const SPILL = {Present: 'p-ok', Excused: 'p-pend', Absent: 'p-no'};
+let prShown = 10;
+/** The list of held rehearsals: filtered by the search box and the two dropdowns, 10 at a time, so a long history stays quick to use. */
+function prDraw() {
+  const j = prState; if (!j) return;
+  const q = $('prq').value.trim().toLowerCase(), st = $('prst').value, src = $('prsrc').value;
+  const hit = j.rehearsals.filter(r => (!q || (r.id + ' ' + r.date).toLowerCase().indexOf(q) !== -1) &&
+    (!src || r.source === src) && (!st || (st === 'done' ? r.processed : st === 'wait' ? (!r.processed && r.blocked) : (!r.processed && !r.blocked))));
+  $('prfind').classList.toggle('hide', j.rehearsals.length < 6);
+  $('prfind').style.display = j.rehearsals.length < 6 ? 'none' : 'flex';
+  $('prcount').textContent = j.rehearsals.length > 5 ? 'Showing ' + Math.min(prShown, hit.length) + ' of ' + hit.length + (hit.length !== j.rehearsals.length ? ' (' + j.rehearsals.length + ' held in all)' : '') + ', newest first.' : '';
+  $('prmore').classList.toggle('hide', hit.length <= prShown);
+  $('prlist').innerHTML = j.rehearsals.length ? hit.slice(0, prShown).map(r => '<div class="card pad" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b>' + esc(r.id) + ' · ' + esc(r.date) + '</b><span><span class="pill p-info">' + (r.source === 'Google Form' ? 'Google Form' : 'QR check-in') + '</span> ' +
+      (r.processed ? '<span class="pill p-ok">Processed</span>' : (r.blocked ? '<span class="pill p-pend">Not ready</span>' : r.unchecked ? '<span class="pill p-info">Not yet looked at</span>' : '<span class="pill p-val">Ready</span>')) + '</span></div>' +
+      (r.counts ? '<p class="sub" style="margin:6px 0 0">' + r.counts.present + ' present · ' + r.counts.excused + ' excused · ' + r.counts.absent + ' absent · ' + r.counts.late + ' late</p>' : '') +
+      (r.unchecked ? '<p class="sub" style="margin:6px 0 0">The counts are worked out when you open it.</p>' : '') +
+      (r.review ? '<p class="sub" style="margin:6px 0 0">' + r.review + ' form row(s) need a look</p>' : '') + (r.blocked ? '<p class="sub" style="margin:6px 0 0">' + esc(r.blocked) + '</p>' : '') +
+      '<div style="margin-top:10px"><button class="btn ' + (r.processed ? 'line' : 'red') + ' sm" type="button" data-pr="' + esc(r.id) + '" data-prdone="' + (r.processed ? '1' : '0') + '">' + (r.processed ? 'See the result' : 'Preview') + '</button></div></div>').join('') + (hit.length ? '' : '<p class="sub">No rehearsal matches. Clear the search or the filters.</p>') : '<p class="sub">No rehearsal has been held yet. A day taken on a Google Form shows here too, once it has an attendance sheet on the REHEARSALS tab.</p>';
+}
+$('prq').oninput = () => { prShown = 10; prDraw(); };
+$('prq').onchange = () => { prShown = 10; prDraw(); const e = prState && prState.rehearsals.filter(r => r.id.toLowerCase() === $('prq').value.trim().toLowerCase())[0]; if (e) prOpen(e.id, e.processed); };
+$('prst').onchange = $('prsrc').onchange = () => { prShown = 10; prDraw(); };
+$('prmore').onclick = () => { prShown += 10; prDraw(); };
 async function loadProcess() {
   say('m15', 'Loading…'); $('prdetail').innerHTML = '';
   try {
@@ -610,11 +636,9 @@ async function loadProcess() {
     if (!j.ok) return say('m15', j.error || 'Not available.', 'bad');
     prState = j; say('m15', j.saving ? '' : 'Saving is switched off, so nothing can be processed now.', j.saving ? '' : 'bad');
     $('prnote').textContent = j.note || '';
-    $('prlist').innerHTML = j.rehearsals.length ? j.rehearsals.map(r => '<div class="card pad" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b>' + esc(r.id) + ' · ' + esc(r.date) + '</b><span><span class="pill p-info">' + (r.source === 'Google Form' ? 'Google Form' : 'QR check-in') + '</span> ' +
-      (r.processed ? '<span class="pill p-ok">Processed</span>' : (r.blocked ? '<span class="pill p-pend">Not ready</span>' : '<span class="pill p-val">Ready</span>')) + '</span></div>' +
-      (r.counts ? '<p class="sub" style="margin:6px 0 0">' + r.counts.present + ' present · ' + r.counts.excused + ' excused · ' + r.counts.absent + ' absent · ' + r.counts.late + ' late</p>' : '') +
-      (r.review ? '<p class="sub" style="margin:6px 0 0">' + r.review + ' form row(s) need a look</p>' : '') + (r.blocked ? '<p class="sub" style="margin:6px 0 0">' + esc(r.blocked) + '</p>' : '') +
-      '<div style="margin-top:10px"><button class="btn ' + (r.processed ? 'line' : 'red') + ' sm" type="button" data-pr="' + esc(r.id) + '" data-prdone="' + (r.processed ? '1' : '0') + '">' + (r.processed ? 'See the result' : 'Preview') + '</button></div></div>').join('') : '<p class="sub">No rehearsal has been held yet. A day taken on a Google Form shows here too, once it has an attendance sheet on the REHEARSALS tab.</p>';
+    prShown = 10; $('prq').value = ''; $('prst').value = ''; $('prsrc').value = '';
+    $('prids').innerHTML = j.rehearsals.slice(0, 500).map(r => '<option value="' + esc(r.id) + '">' + esc(r.date) + '</option>').join('');
+    prDraw();
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
 }
 function prTable(rows, canFix) {
