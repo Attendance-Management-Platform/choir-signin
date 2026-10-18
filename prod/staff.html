@@ -685,11 +685,12 @@ async function prOpen(id, done) {
       : '<div class="actions" style="margin-top:14px"><button class="btn red" type="button" data-prgo="' + esc(j.id) + '"' + (prState && prState.saving ? '' : ' disabled') + '>Process ' + esc(j.id) + '</button></div><p class="sub" style="margin:8px 0 0">This writes the present people to PROCESSED ATTENDANCE for ' + esc(j.id) + ' and locks the day. Excused and Absent are worked out later, at publishing. Changes after that need a correction with a reason.</p>';
     const head = '<div class="card pad rise"><div class="ct">Summary</div><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px"><div style="font-size:18px;font-weight:900">' + esc(j.id) + ' · ' + esc(j.date) + '</div><span class="pill ' + (done ? 'p-ok' : 'p-val') + '">' + (done ? 'Processed' : 'Preview') + '</span></div>' +
       '<div class="stats" style="margin-top:14px">' + tile('Present', c.present, '#1F7A4D') + tile('Excused', c.excused, '#95621D') + tile('Absent', c.absent, '#AE2D37') + tile('Late', c.late) + tile('People', c.total) + '</div>' + act + (j.skipped ? '<p class="sub" style="margin:10px 0 0">' + j.skipped + ' repeat submission(s) were counted once.</p>' : '') + '</div>';
-    const names = j.review && j.review.length ? '<div class="card pad rise" style="margin-top:16px"><div class="ct">Names to answer (' + j.review.length + ')</div><p class="sub" style="margin:0 0 6px">' + (done && j.canResolve ? 'These form names did not match the list and are not written. For each one, say who it is.' : 'These form names did not match the list and are not written. After the day is processed, each can be answered: an existing member, a new member, or a visitor.') + '</p>' + (j.review.length > 1 ? prBar('pn', 'Search a name', j.review.map(x => x.campus), j.review.map(x => x.part)) + '<p class="s" id="pncount" style="margin:6px 0 0"></p>' : '') +
+    const names = j.review && j.review.length ? '<div class="card pad rise" style="margin-top:16px"><div class="ct">Names to answer (' + j.review.length + ')</div><p class="sub" style="margin:0 0 6px">' + (done && j.canResolve ? 'These form names did not match the list and are not written. For each one, say who it is.' : 'These form names did not match the list and are not written. After the day is processed, each can be answered: an existing member, a new member, or a visitor.') + '</p>' + (j.review.length > 1 ? prBar('pn', 'Search a name', j.review.map(x => x.campus), j.review.map(x => x.part), '', '0 0 4px') + '<p class="s" id="pncount" style="margin:6px 0 0"></p>' : '') +
       j.review.map(x => '<div class="prnm" data-k="' + esc(String(x.name || '').toLowerCase()) + '" data-c="' + esc(x.campus || '') + '" data-p="' + esc(x.part || '') + '" style="display:flex;justify-content:space-between;align-items:center;gap:10px 16px;flex-wrap:wrap;border-top:1px solid var(--line);padding:12px 0"><div style="flex:1 1 220px;min-width:0"><b>' + esc(x.name || '(no name)') + '</b><div class="s">' + esc([x.campus, x.part].filter(Boolean).join(' · ')) + (x.campus || x.part ? ' · ' : '') + 'Sheet row ' + esc(x.sourceRow) + ' · ' + esc(x.message) + '</div></div>' +
         (done && j.canResolve ? '<div class="actions" style="margin:0"><button class="btn line sm" type="button" data-prres="member" data-row="' + esc(x.sourceRow) + '">Existing member…</button>' + (j.canAddNew ? '<button class="btn line sm" type="button" data-prres="new" data-row="' + esc(x.sourceRow) + '">Add as new member</button>' : '') + '<button class="btn line sm" type="button" data-prres="visitor" data-row="' + esc(x.sourceRow) + '">Visitor, leave out</button></div>' : '') + '</div>').join('') + '</div>' : '';
     const list = '<div id="prtablecard" class="card rise tblc" style="margin-top:16px"><div class="tblh"><span>Everyone on the list</span><span class="s" id="prtcount"></span></div>' +
       prBar('pt', 'Search a name or ID', rows.map(r => r.campus), rows.map(r => r.part), '<select id="pttst" class="in" style="flex:1 1 110px;max-width:150px"><option value="">Any status</option><option value="Present">Present</option><option value="Absent">Absent</option><option value="Excused">Excused</option></select>') + prTable(rows, done && j.canCorrect) + '</div>';
+    window.prCtx = {rows: rows, review: j.review || []};
     $('prdetail').innerHTML = head + names + list;
     $('prdetail').dataset.id = j.id;
     prWire('pt', '#prtablecard tbody tr', (tr, f) => (!f.s || tr.dataset.st === f.s), n => { $('prtcount').textContent = '· ' + n + ' of ' + rows.length; });
@@ -698,9 +699,9 @@ async function prOpen(id, done) {
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
 }
 /** A small filter bar: search box, Campus and Part dropdowns, optional extra control, and a Clear button. Ids start with the prefix p. */
-function prBar(p, ph, campuses, parts, extra) {
+function prBar(p, ph, campuses, parts, extra, pad) {
   const opts = (all, label) => '<option value="">' + label + '</option>' + Array.from(new Set(all.filter(Boolean))).sort().map(v => '<option value="' + esc(v) + '">' + esc(v) + '</option>').join('');
-  return '<div style="padding:0 20px 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="' + p + 'q" class="in" placeholder="' + esc(ph) + '" style="flex:2 1 160px;max-width:260px" autocomplete="off">' +
+  return '<div style="padding:' + (pad === undefined ? '0 20px 10px' : pad) + ';display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="' + p + 'q" class="in" placeholder="' + esc(ph) + '" style="flex:2 1 160px;max-width:260px" autocomplete="off">' +
     '<select id="' + p + 'c" class="in" style="flex:1 1 120px;max-width:170px">' + opts(campuses, 'Any campus') + '</select><select id="' + p + 'p" class="in" style="flex:1 1 110px;max-width:150px">' + opts(parts, 'Any part') + '</select>' + (extra || '') +
     '<button id="' + p + 'x" class="btn line sm" type="button">Clear</button></div>';
 }
@@ -714,6 +715,41 @@ function prWire(p, sel, more, done) {
   q.oninput = run; c.onchange = pt.onchange = run; if (st) st.onchange = run;
   $(p + 'x').onclick = () => { q.value = ''; c.value = ''; pt.value = ''; if (st) st.value = ''; run(); q.focus(); };
   run();
+}
+/** "Existing member": pick the campus and part, search, choose the name from the list, give a reason, save. Only members marked Absent for the day can be chosen. */
+function prPicker(rowEl, srcRow) {
+  const old = $('prpick'); if (old) { const same = old.parentNode === rowEl; old.remove(); if (same) return; }
+  const ctx = window.prCtx || {rows: [], review: []}, cand = ctx.rows.filter(r => r.status === 'Absent');
+  const it = ctx.review.filter(x => String(x.sourceRow) === String(srcRow))[0] || {};
+  const d = document.createElement('div'); d.id = 'prpick'; d.style.cssText = 'flex:1 1 100%;border-top:1px dashed var(--line);margin-top:6px;padding-top:10px';
+  d.innerHTML = '<div class="s" style="margin-bottom:8px"><b>Who is &ldquo;' + esc(it.name || 'this name') + '&rdquo;?</b> Narrow the list by campus and part, or search, then pick the name. Only members marked Absent for this day are shown.</div>' +
+    prBar('pk', 'Search a name or ID', cand.map(r => r.campus), cand.map(r => r.part), '', '0 0 8px') +
+    '<select id="pklist" class="in" size="6" style="width:100%;height:150px;padding:4px"></select><p class="s" id="pkcount" style="margin:4px 0 0"></p>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px"><input id="pkwhy" class="in" maxlength="200" placeholder="Reason (5 to 200 characters)" style="flex:1 1 220px" autocomplete="off"><button id="pksave" class="btn red sm" type="button">Save</button><button id="pkcancel" class="btn line sm" type="button">Cancel</button></div>';
+  rowEl.appendChild(d);
+  const q = $('pkq'), c = $('pkc'), p = $('pkp'), list = $('pklist');
+  const have = (sel, v) => Array.from(sel.options).some(o => o.value === v);
+  if (it.campus && have(c, it.campus)) c.value = it.campus;
+  if (it.part && have(p, it.part)) p.value = it.part;
+  const draw = () => {
+    const k = q.value.trim().toLowerCase();
+    const hit = cand.filter(r => (!k || (r.name + ' ' + r.memberId).toLowerCase().indexOf(k) !== -1) && (!c.value || r.campus === c.value) && (!p.value || r.part === p.value));
+    list.innerHTML = hit.slice(0, 200).map(r => '<option value="' + esc(r.memberId) + '">' + esc(r.name + ' · ' + r.memberId + ' · ' + r.campus + (r.part ? ' · ' + r.part : '')) + '</option>').join('');
+    $('pkcount').textContent = hit.length ? (hit.length > 200 ? 'Showing the first 200 of ' + hit.length + '. Narrow it down.' : hit.length + ' member(s). Tap one name.') : 'Nobody matches. Clear the filters, or check that the person is marked Absent.';
+  };
+  q.oninput = draw; c.onchange = p.onchange = draw;
+  $('pkx').onclick = () => { q.value = ''; c.value = ''; p.value = ''; draw(); q.focus(); };
+  $('pkcancel').onclick = () => d.remove();
+  $('pksave').onclick = async () => {
+    const id = list.value, reason = $('pkwhy').value.trim();
+    if (!id) return say('m15', 'Tap the member this name belongs to.', 'bad');
+    if (reason.length < 5) return say('m15', 'Give a reason of 5 to 200 characters.', 'bad');
+    $('pksave').disabled = true;
+    try { const j = await call({action: 'process.resolve', token, rehearsalId: $('prdetail').dataset.id, sourceRow: srcRow, choice: 'member', memberId: id, reason});
+      if (j.signedOut) { signedOutNow(); return; }
+      say('m15', j.ok ? 'Done: ' + j.summary + '.' : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if (j.ok) prOpen($('prdetail').dataset.id, true); else $('pksave').disabled = false; } catch (e) { $('pksave').disabled = false; say('m15', 'Network problem. Try again.', 'bad'); }
+  };
+  draw();
 }
 function prTable(rows, canFix) {
   return '<div style="overflow-x:auto"><table class="tbl" style="margin:0"><thead><tr><th>Name</th><th>Campus</th><th>Status</th><th>How</th>' + (canFix ? '<th></th>' : '') + '</tr></thead><tbody>' + rows.map(r => '<tr data-st="' + esc(r.status) + '" data-k="' + esc((r.name + ' ' + r.memberId).toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-p="' + esc(r.part || '') + '"><td>' + esc(r.name) + '<div class="s">' + esc(r.memberId) + '</div></td><td>' + esc(r.campus) + (r.part ? '<div class="s">' + esc(r.part) + '</div>' : '') + '</td><td><span class="pill ' + (SPILL[r.status] || '') + '">' + esc(r.status) + '</span>' + (r.late ? ' <span class="pill p-pend">Late</span>' : '') + (r.corrected ? ' <span class="s">was ' + esc(r.previous) + '</span>' : '') + '</td><td>' + esc(r.source) + '</td>' +
@@ -739,7 +775,7 @@ document.addEventListener('click', async ev => {
   const rs = ev.target.closest && ev.target.closest('[data-prres]');
   if (rs) {
     const choice = rs.dataset.prres; let memberId = '';
-    if (choice === 'member') { memberId = prompt('Member ID of the person this name belongs to:'); if (!memberId) return; }
+    if (choice === 'member') { prPicker(rs.closest('.prnm'), rs.dataset.row); return; }
     const reason = prompt(choice === 'member' ? 'Why is this the same person? (5 to 200 characters)' : choice === 'new' ? 'Who is this and why are they being added? (5 to 200 characters)' : 'Who is this visitor? (5 to 200 characters)'); if (!reason) return;
     let activeFrom = '';
     if (choice === 'new') {
