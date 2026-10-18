@@ -1414,7 +1414,7 @@ async function start() {
 if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTabs(); land(); welcome(); } else signedOutNow(); }).catch(() => signedOutNow());
 </script><script>
 (function () {
-  var NOFOLD = ['Choose a report', 'Process attendance', 'Mark a member by hand', 'Request an absence'];
+  var NOFOLD = ['Choose a report', 'Mark a member by hand', 'Request an absence'];
   var SHUT = ['Ask for a change', 'Late request for a member', 'What happens next', 'Safety settings', 'Find a member', 'Being away'];
   var LIST = ['Waiting for your answer', 'Requests you asked for', 'Approved and ready to carry out'];
   var st = {};
