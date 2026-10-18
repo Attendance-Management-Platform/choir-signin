@@ -272,6 +272,21 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <p id="m15" class="s"></p>
 </div>
 
+<div id="s16" class="pg hide">
+<div id="chpet"></div>
+<div class="card pad rise"><div class="ct">What changed</div>
+<p class="sub" id="chsub"></p><div id="chlist"></div></div>
+<p id="m16" class="s"></p>
+</div>
+
+<div id="s17" class="pg hide">
+<div class="card pad rise"><div class="ct">Members</div>
+<p class="sub" id="mbsub">Find a member by name or Member ID. You can deactivate or reactivate them, or set the dates on their membership history. Each change needs a reason and is recorded; their Campus Music Director is told.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="mbq" class="in" placeholder="Name or Member ID" style="flex:1 1 220px" autocomplete="off"><button id="mbgo" class="btn red" type="button">Find</button></div>
+<div id="mblist"></div></div>
+<p id="m17" class="s"></p>
+</div>
+
 <div id="s14" class="pg hide">
 <div class="card pad rise"><div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><button class="btn line sm" type="button" id="calprev">&larr; Earlier</button><div id="caltitle" class="ct" style="margin:0"></div><button class="btn line sm" type="button" id="calnext">Later &rarr;</button></div>
 <div id="calgrid" class="calgrid"></div><div id="calday"></div></div>
@@ -438,7 +453,7 @@ async function call1(body) {
     if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
-const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People'], records: ['s13', 'Records'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
+const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People'], records: ['s13', 'Records'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process'], changes: ['s16', 'Changes'], members: ['s17', 'Members'], qr: ['s3', 'QR'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'By hand'], absence: ['s6', 'Absence'], requests: ['s7', 'Requests'], rehearsal: ['s8', 'Rehearsal'], help: ['s9', 'Help']};
 const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myName = j.name || ''; myRoles = j.roles || []; }
@@ -455,9 +470,13 @@ const ICON = {
   absence: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>',
   requests: '<path d="M4 4h16v12H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',
   rehearsal: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+  changes: '<path d="M4 6h16M4 12h10M4 18h6"/><path d="M17 14l3 3-3 3"/>',
+  members: '<circle cx="10" cy="8" r="3"/><path d="M4 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><path d="M18 8v6M15 11h6"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17h.01"/>'
 };
 const PAGEHEAD = {
+  s16: ['Changes and updates', 'What was changed in the system and by whom, and petitions about changes. Admin and operations are shown apart.'],
+  s17: ['Members', 'Deactivate or reactivate a member, and catch up their membership dates. Every change has a reason and is recorded.'],
   s15: ['Process attendance', 'Turn the checked check-ins and approved absences of a held rehearsal into Present, Excused and Absent.'],
   s14: ['Calendar', 'Rehearsals by month. Senior roles also see who is away and who is covering.'],
   s13: ['Attendance records', 'The official record of each rehearsal, and one member\'s record, from ATTENDANCE LOG. Empty until a rehearsal has been published.'],
@@ -486,12 +505,12 @@ try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { $('mblist').innerHTML = ''; say('m17', ''); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   const ph = PAGEHEAD[id]; $('ph').classList.toggle('hide', !ph); if (ph) $('ph').innerHTML = '<div class="t">' + ph[0] + '</div><div class="d">' + ph[1] + '</div>';
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
   document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); }
@@ -931,7 +950,9 @@ async function loadHome() {
       ((j.openFunctions || []).length ? '<div class="card pad rise" style="background:#E6F2EC;border-color:#CBE2D6"><div class="ct">Opened to you for a short time</div><p class="sub">' + esc(j.openFunctions.map(f => FN[f] || f).join(', ')) + '. It ends by itself.</p></div>' : '');
     const bph = (j.bypasses || []).length ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Done by an admin instead of the usual desk or role</div><p class="sub">The Global Admin or Assistant did these themselves, each with a reason.</p>' +
       j.bypasses.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + '</div>' : '';
-    $('hcharts').innerHTML = awh + bph + crh + homeCharts(t.charts, has('reports'));
+    const mch = (j.memberChanges || []).length ? '<div class="card pad rise"><div class="ct">Membership changes</div>' + j.memberChanges.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + (has('changes') ? '<div class="actions"><button class="btn line" type="button" data-go="s16">Open Changes and updates</button></div>' : '') + '</div>' : '';
+    const pth = t.petitions && t.petitions.waiting ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.petitions.waiting + ' petition(s) waiting for your answer</div><div class="actions"><button class="btn red" type="button" data-go="s16">Open Changes and updates</button></div></div>' : '';
+    $('hcharts').innerHTML = pth + awh + bph + mch + crh + homeCharts(t.charts, has('reports'));
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
     // the QR stand-in
@@ -1156,7 +1177,7 @@ async function loadQueue() {
     say('m7', j.items.length ? '' : 'Nothing is waiting for you.');
     const batchable = r => (r.ops.indexOf('validate') !== -1 || r.ops.indexOf('approve') !== -1);
     $('qrows').innerHTML = j.items.map(r => '<div style="border-top:1px solid var(--line);padding:8px 0">' + (batchable(r) ? '<input type="checkbox" class="qtick" data-id="' + esc(r.requestId) + '" data-v="' + (r.ops.indexOf('validate') !== -1 ? '1' : '') + '" data-a="' + (r.ops.indexOf('approve') !== -1 ? '1' : '') + '" data-f="' + (r.flagged ? '1' : '') + '" style="width:auto;margin:0 8px 0 0;vertical-align:middle">' : '') + '<b>' + esc(r.name || 'Member') + '</b> <span class="s">' + esc(r.campus) + ' · ' + esc(r.status) + (r.late ? ' · late route' : '') + (r.flagged ? ' · not in attendance, no request' + (r.lapsed ? ' · time is up: stays Absent' : r.dueMs ? ' · ' + r.hoursLeft + ' h left' : '') : '') + (r.bypass ? ' · waiting for the Campus MD' : '') + (r.handedToCampusMd ? ' · handed to a Campus MD' : '') + ' · ' + new Date(r.rehearsalStartMs).toLocaleString() + '</span><br><span class="s">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span><br>' +
-      r.ops.map(o => '<button data-id="' + esc(r.requestId) + '" data-op="' + o + '" style="width:auto;padding:.4rem .8rem;margin-right:6px' + (/reject/.test(o) ? ';background:none;color:var(--bad);border:1px solid var(--bad)' : '') + '">' + (r.flagged && FLABEL[o] ? FLABEL[o] : OPLABEL[o]) + '</button>').join('') + '</div>').join('');
+      r.ops.map(o => '<button data-id="' + esc(r.requestId) + '" data-op="' + o + '" style="width:auto;padding:.4rem .8rem;margin-right:6px' + (/reject/.test(o) ? ';background:none;color:var(--bad);border:1px solid var(--bad)' : '') + '">' + (r.flagged && FLABEL[o] ? FLABEL[o] : OPLABEL[o]) + '</button>').join('') + (r.flagged && r.memberId && r.ops.indexOf('validate') !== -1 ? '<button class="btn line" type="button" style="width:auto;padding:.4rem .8rem" data-deact="1" data-mid="' + esc(r.memberId) + '" data-name="' + esc(r.name) + '" data-campus="' + esc(r.campus) + '">No longer in the choir: ask to deactivate…</button>' : '') + '</div>').join('');
     const ticked = () => Array.from($('qrows').querySelectorAll('.qtick:checked'));
     const upd = () => {
       const t = ticked(), v = t.filter(x => x.dataset.v).length, a = t.filter(x => x.dataset.a).length;
@@ -1399,4 +1420,80 @@ if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTab
     for (var i = 0; i < c.length; i++) if (c[i].dataset.title === title) { var n = LIST.indexOf(title) >= 0 ? count(c[i]) : 0; st[title] = {o: open, n: n}; save(); paint(c[i], c[i].firstElementChild, title, open); }
   };
 })();
+
+/** Changes and updates, and petitions. */
+async function loadChanges() {
+  say('m16', 'Loading…');
+  try {
+    const j = await call({action: 'changes.state', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('chlist').innerHTML = ''; $('chpet').innerHTML = ''; return say('m16', j.error || 'Not available.', 'bad'); }
+    say('m16', '');
+    $('chsub').textContent = 'The last ' + j.days + ' days: ' + j.counts.admin + ' admin, ' + j.counts.operations + ' operations, ' + j.counts.bypasses + ' done by an admin instead of the usual desk or role.' + (j.petitionTo ? ' If you disagree with a change, send a petition to the ' + j.petitionTo + '.' : '');
+    $('chlist').innerHTML = j.changes.length ? j.changes.map(c => '<div style="border-top:1px solid var(--line);padding:8px 0"><span class="pill ' + (c.bypass ? 'p-pend' : c.area === 'Admin' ? 'p-val' : 'p-info') + '">' + (c.bypass ? 'Done instead' : esc(c.area)) + '</span> <b>' + esc(c.label) + '</b> · ' + esc(c.recordId) + ' · ' + esc(c.by) + ' · ' + esc(tm(c.atMs)) +
+      (c.detail ? '<br><span class="s">' + esc(c.detail) + '</span>' : '') + (c.reason ? '<br><span class="s">Reason: ' + esc(c.reason) + '</span>' : '') +
+      (j.petitionTo ? '<br><button class="btn line" type="button" style="margin-top:6px" data-pet="' + esc(c.label + ' ' + c.recordId) + '">Petition about this</button>' : '') + '</div>').join('') : '<p class="sub">Nothing has changed in this time.</p>';
+    $('chpet').innerHTML = j.petitions.length ? '<div class="card pad rise"><div class="ct">Petitions' + (j.counts.waiting ? ' (' + j.counts.waiting + ' waiting for you)' : '') + '</div>' + j.petitions.map(p => '<div style="border-top:1px solid var(--line);padding:8px 0">' + stPill(p.status) + ' <b>' + esc(p.from) + '</b> to the ' + esc(p.to) + ' · ' + esc(tm(p.atMs)) +
+      '<br><span class="s">' + esc(p.text) + (p.about ? ' · about: ' + esc(p.about) : '') + '</span>' + (p.answer ? '<br><span class="s">' + esc(p.answeredBy) + ': ' + esc(p.answer) + '</span>' : '') +
+      (p.canAnswer ? '<div class="actions" style="margin:6px 0 0"><button class="btn red" type="button" data-pans="upheld" data-id="' + esc(p.id) + '">Uphold</button><button class="btn line" type="button" data-pans="declined" data-id="' + esc(p.id) + '">Decline</button></div>' : '') + '</div>').join('') +
+      '<p class="sub">Upholding a petition is the recorded decision. The change itself is put right with the normal tool (for example Members or People and access).</p></div>' : '';
+  } catch (e) { say('m16', 'Network problem. Try again.', 'bad'); }
+}
+/** Members: find, deactivate, reactivate, catch up the dates. */
+async function loadMembers() {
+  const q = $('mbq').value.trim();
+  if (q.length < 2) { $('mblist').innerHTML = ''; return say('m17', ''); }
+  say('m17', 'Looking…');
+  try {
+    const j = await call({action: 'member.find', token, q});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('mblist').innerHTML = ''; return say('m17', j.error || 'Not available.', 'bad'); }
+    say('m17', j.matches.length ? '' : 'Nobody found.');
+    const c = j.counts;
+    $('mblist').innerHTML = '<p class="sub" style="margin:10px 0 0">' + c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet.</p>' + j.matches.map(m => '<div style="border-top:1px solid var(--line);padding:8px 0;margin-top:8px"><b>' + esc(m.name) + '</b> · ' + esc(m.memberId) + ' · ' + esc(m.campus) + ' ' + stPill(m.status === 'Active' ? 'Active' : 'Not active') +
+      '<br><span class="s">' + (m.periods ? 'Active from ' + esc(m.from || '?') + (m.until ? ' until ' + esc(m.until) : ' (still active)') + (m.periods > 1 ? ' · ' + m.periods + ' periods' : '') : 'No history yet') + '</span>' +
+      '<div class="actions" style="margin:6px 0 0">' + (m.status === 'Active' ? '<button class="btn line" type="button" data-mb="deactivate" data-id="' + esc(m.memberId) + '">Deactivate…</button>' : '<button class="btn line" type="button" data-mb="reactivate" data-id="' + esc(m.memberId) + '">Reactivate…</button>') +
+      (j.historyReady ? '<button class="btn line" type="button" data-mb="history" data-id="' + esc(m.memberId) + '">Set dates…</button>' : '') + '</div></div>').join('');
+  } catch (e) { say('m17', 'Network problem. Try again.', 'bad'); }
+}
+$('mbgo').onclick = loadMembers;
+$('mbq').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); loadMembers(); } };
+document.addEventListener('click', async ev => {
+  const pb = ev.target.closest && ev.target.closest('[data-pet]');
+  if (pb) {
+    const text = prompt('Why do you disagree with this? (10 to 300 characters)'); if (!text) return;
+    const j = await call({action: 'petition.send', token, text, about: pb.dataset.pet});
+    say('m16', j.ok ? 'Petition sent: ' + j.summary + '.' : (j.error || 'Could not send.'), j.ok ? 'ok' : 'bad'); if (j.ok) loadChanges(); return;
+  }
+  const pa = ev.target.closest && ev.target.closest('[data-pans]');
+  if (pa) {
+    const reason = prompt((pa.dataset.pans === 'upheld' ? 'Why are you upholding this petition?' : 'Why are you declining this petition?') + ' (10 to 300 characters)'); if (!reason) return;
+    const j = await call({action: 'petition.answer', token, id: pa.dataset.id, decision: pa.dataset.pans, reason});
+    say('m16', j.ok ? 'Saved: ' + j.summary + '.' : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if (j.ok) loadChanges(); return;
+  }
+  const mb = ev.target.closest && ev.target.closest('[data-mb]');
+  if (mb) {
+    const kind = mb.dataset.mb, id = mb.dataset.id; let body;
+    if (kind === 'history') {
+      const from = prompt('Active From (yyyy-mm-dd). Leave empty to keep the date as it is:'); if (from === null) return;
+      const until = prompt('Active Until (yyyy-mm-dd), the last day they were active. Leave empty if there is no end or to keep it:'); if (until === null) return;
+      const reason = prompt('Why are the dates being set? (10 to 300 characters)'); if (!reason) return;
+      body = {action: 'member.history', token, memberId: id, from: from.trim(), until: until.trim(), reason};
+    } else {
+      const date = prompt((kind === 'deactivate' ? 'The last day they were active' : 'The day they came back') + ' (yyyy-mm-dd). Leave empty for today:'); if (date === null) return;
+      const reason = prompt('Why? (10 to 300 characters). The Campus Music Director is told and can petition.'); if (!reason) return;
+      if (!confirm((kind === 'deactivate' ? 'Deactivate ' : 'Reactivate ') + id + '? It changes the members list now.')) return;
+      body = {action: 'member.change', token, memberId: id, change: kind, date: date.trim(), reason};
+    }
+    mb.disabled = true;
+    const j = await call(body);
+    say('m17', j.ok ? 'Done: ' + j.summary + (j.note ? ' (' + j.note + ')' : '') + '.' : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if (j.ok) loadMembers(); else mb.disabled = false; return;
+  }
+  const dq = ev.target.closest && ev.target.closest('[data-deact]');
+  if (dq) {
+    const reason = prompt('Why should ' + dq.dataset.name + ' be deactivated? (for example: moved away and has left the choir)'); if (!reason) return;
+    const j = await call({action: 'access.ask', token, kind: 'member', change: 'deactivate', memberId: dq.dataset.mid, subjectName: dq.dataset.name, campus: dq.dataset.campus, target: 'Deactivate ' + dq.dataset.name, reason});
+    say('m7', j.ok ? 'Asked. It goes to the Global Admin for a yes, then Desk A carries it out. You can still answer the absence.' : (j.error || 'Could not ask.'), j.ok ? 'ok' : 'bad'); return;
+  }
+});
 </script></body></html>
