@@ -420,6 +420,15 @@ try { token = sessionStorage.getItem('rbcTok') || ''; } catch (e) {}
 let pending = 0, busyT = null;
 let ckRid = '';
 async function call(body) {
+  const j = await call1(body);
+  // The Global Admin or Assistant doing a step that belongs to a desk: the server asks for a reason, and we ask once and send it again.
+  if (j && j.needsReason && !body.bypassReason) {
+    const why = prompt((j.error || 'Give a reason.') + '\n\nType your reason (10 to 300 characters):');
+    if (why && why.trim()) return call1(Object.assign({}, body, {bypassReason: why.trim()}));
+  }
+  return j;
+}
+async function call1(body) {
   if (ckRid && /^(validate\.|late\.|handmark)/.test(String(body.action))) body.rehearsalId = ckRid;
   if (++pending === 1) busyT = setTimeout(() => $('busy').classList.remove('hide'), 400);
   try {
@@ -889,7 +898,9 @@ async function loadHome() {
     const FN = {rehearsal: 'Set up rehearsals', qr: 'Show the QR', records: 'See attendance records'};
     const awh = (awl.length ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Away now: ' + esc(awl.join(', ')) + '</div><p class="sub">If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.</p></div>' : '') +
       ((j.openFunctions || []).length ? '<div class="card pad rise" style="background:#E6F2EC;border-color:#CBE2D6"><div class="ct">Opened to you for a short time</div><p class="sub">' + esc(j.openFunctions.map(f => FN[f] || f).join(', ')) + '. It ends by itself.</p></div>' : '');
-    $('hcharts').innerHTML = awh + crh + homeCharts(t.charts, has('reports'));
+    const bph = (j.bypasses || []).length ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Done by an admin instead of the usual desk or role</div><p class="sub">The Global Admin or Assistant did these themselves, each with a reason.</p>' +
+      j.bypasses.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + '</div>' : '';
+    $('hcharts').innerHTML = awh + bph + crh + homeCharts(t.charts, has('reports'));
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
     // the QR stand-in
