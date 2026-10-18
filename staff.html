@@ -602,7 +602,7 @@ async function prOpen(id, done) {
     say('m15', '');
     const c = j.counts;
     $('prdetail').innerHTML = '<div class="card pad rise"><div class="ct">' + esc(j.id) + ' · ' + esc(j.date) + (done ? ' · processed' : ' · preview') + '</div>' + (c ? '<p class="sub">' + c.present + ' present · ' + c.excused + ' excused · ' + c.absent + ' absent · ' + c.late + ' late · ' + c.total + ' people</p>' : '') +
-      (done ? '' : '<div class="actions"><button class="btn red" type="button" data-prgo="' + esc(j.id) + '"' + (prState && prState.saving ? '' : ' disabled') + '>Process ' + esc(j.id) + '</button></div><p class="sub">This writes the present people to PROCESSED ATTENDANCE for ' + esc(j.id) + ' and locks the day. Excused and Absent are worked out later, at publishing. Changes after that need a correction with a reason.</p>') +
+      (done ? (j.published ? '<p><span class="pill p-ok">In the official attendance</span></p>' : (j.canPublish ? '<div class="actions"><button class="btn red" type="button" data-prof="' + esc(j.id) + '">Publish ' + esc(j.id) + ' to the official attendance (practice only)</button></div><p class="sub">This fills ATTENDANCE LOG and ATTENDANCE SUMMARY, so Home, Records and Reports show real numbers. It works only in practice mode, and an undo clears it.</p>' : (j.canCorrect && j.officialNote ? '<p class="sub">' + esc(j.officialNote) + '</p>' : ''))) : '<div class="actions"><button class="btn red" type="button" data-prgo="' + esc(j.id) + '"' + (prState && prState.saving ? '' : ' disabled') + '>Process ' + esc(j.id) + '</button></div><p class="sub">This writes the present people to PROCESSED ATTENDANCE for ' + esc(j.id) + ' and locks the day. Excused and Absent are worked out later, at publishing. Changes after that need a correction with a reason.</p>') +
       (j.review && j.review.length ? '<div class="card pad" style="margin-top:12px;background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + j.review.length + ' form row(s) need a look</div><p class="sub">These are not written. After processing, the Global Admin or Assistant Global Admin can mark the person Present with a reason.</p>' + j.review.map(x => '<p class="sub" style="margin:4px 0 0"><b>' + esc(x.name || '(no name)') + '</b> · sheet row ' + esc(x.sourceRow) + ' · ' + esc(x.message) + '</p>').join('') + '</div>' : '') + (j.skipped ? '<p class="sub">' + j.skipped + ' repeat submission(s) were counted once.</p>' : '') + prTable(j.rows, done && j.canCorrect) + '</div>';
     $('prdetail').dataset.id = j.id;
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
@@ -617,6 +617,15 @@ document.addEventListener('click', async ev => {
     try { const j = await call({action: 'process.publish', token, rehearsalId: g.dataset.prgo}); if (j.signedOut) { signedOutNow(); return; }
       if (!j.ok) { g.disabled = false; return say('m15', j.error || 'Could not process.', 'bad'); }
       await loadProcess(); await prOpen(g.dataset.prgo, true); say('m15', 'Done: ' + j.summary + '.', 'ok'); } catch (e) { g.disabled = false; say('m15', 'Network problem. Try again.', 'bad'); }
+    return;
+  }
+  const of = ev.target.closest && ev.target.closest('[data-prof]');
+  if (of) {
+    if (!confirm('Publish ' + of.dataset.prof + ' to the official attendance now? This is practice mode: an undo clears it.')) return;
+    of.disabled = true;
+    try { const j = await call({action: 'process.official', token, rehearsalId: of.dataset.prof}); if (j.signedOut) { signedOutNow(); return; }
+      if (!j.ok) { of.disabled = false; return say('m15', j.error || 'Could not publish.', 'bad'); }
+      await loadProcess(); await prOpen(of.dataset.prof, true); say('m15', 'Done: ' + j.summary + '.', 'ok'); } catch (e) { of.disabled = false; say('m15', 'Network problem. Try again.', 'bad'); }
     return;
   }
   const f = ev.target.closest && ev.target.closest('[data-prfix]');
