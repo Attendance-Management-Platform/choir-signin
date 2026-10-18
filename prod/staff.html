@@ -666,7 +666,8 @@ async function prFlagCard(id) {
     const f = await call({action: 'absence.flagged', token, rehearsalId: id});
     if (!f.ok || $('prdetail').dataset.id !== id) return;
     const cell = (n, l) => '<span style="margin-right:14px"><b>' + n + '</b> ' + l + '</span>';
-    $('prdetail').insertAdjacentHTML('beforeend', '<div class="card pad" style="margin-top:12px"><div class="ct">Absence answers</div>' +
+    const old = $('prflagcard'); if (old) old.remove();
+    $('prdetail').insertAdjacentHTML('beforeend', '<div id="prflagcard" class="card pad" style="margin-top:12px"><div class="ct">Absence answers</div>' +
       (f.campuses.length ? f.campuses.map(c => '<p class="sub" style="margin:6px 0"><b>' + esc(c.campus) + '</b> · ' + cell(c.waiting, 'with the Campus MD') + cell(c.validated, 'with the Global Admin') + cell(c.excused, 'excused') + cell(c.notExcused, 'not excused') + (c.lapsed ? cell(c.lapsed, 'time is up') : '') + '</p>').join('') : '<p class="sub">Nobody is waiting for an answer for ' + esc(id) + '.</p>') +
       '<p class="sub">Each absent member with no request goes to their Campus MD, who has 48 hours. Anyone not excused in time stays Absent.</p>' +
       (f.canChase ? '<div class="actions"><button class="btn line" type="button" data-prflag="' + esc(id) + '">Send the absence list again</button></div>' : '') + '</div>');
