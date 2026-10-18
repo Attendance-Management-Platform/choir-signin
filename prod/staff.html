@@ -613,9 +613,9 @@ function prDraw() {
   const q = $('prq').value.trim().toLowerCase(), st = $('prst').value, src = $('prsrc').value;
   const hit = j.rehearsals.filter(r => (!q || (r.id + ' ' + r.date).toLowerCase().indexOf(q) !== -1) &&
     (!src || r.source === src) && (!st || (st === 'done' ? r.processed : st === 'wait' ? (!r.processed && r.blocked) : (!r.processed && !r.blocked))));
-  $('prfind').classList.toggle('hide', j.rehearsals.length < 6);
-  $('prfind').style.display = j.rehearsals.length < 6 ? 'none' : 'flex';
-  $('prcount').textContent = j.rehearsals.length > 5 ? 'Showing ' + Math.min(prShown, hit.length) + ' of ' + hit.length + (hit.length !== j.rehearsals.length ? ' (' + j.rehearsals.length + ' held in all)' : '') + ', newest first.' : '';
+  $('prfind').classList.remove('hide');
+  $('prfind').style.display = 'flex';
+  $('prcount').textContent = j.rehearsals.length ? 'Showing ' + Math.min(prShown, hit.length) + ' of ' + hit.length + (hit.length !== j.rehearsals.length ? ' (' + j.rehearsals.length + ' held in all)' : '') + ', newest first.' : '';
   $('prmore').classList.toggle('hide', hit.length <= prShown);
   $('prlist').innerHTML = j.rehearsals.length ? hit.slice(0, prShown).map(r => '<div class="card pad" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b>' + esc(r.id) + ' · ' + esc(r.date) + '</b><span><span class="pill p-info">' + (r.source === 'Google Form' ? 'Google Form' : 'QR check-in') + '</span> ' +
       (r.processed ? '<span class="pill p-ok">Processed</span>' : (r.blocked ? '<span class="pill p-pend">Not ready</span>' : r.unchecked ? '<span class="pill p-info">Not yet looked at</span>' : '<span class="pill p-val">Ready</span>')) + '</span></div>' +
