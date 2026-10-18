@@ -707,7 +707,12 @@ document.addEventListener('click', async ev => {
     if (choice === 'member') { memberId = prompt('Member ID of the person this name belongs to:'); if (!memberId) return; }
     const reason = prompt(choice === 'member' ? 'Why is this the same person? (5 to 200 characters)' : choice === 'new' ? 'Who is this and why are they being added? (5 to 200 characters)' : 'Who is this visitor? (5 to 200 characters)'); if (!reason) return;
     let activeFrom = '';
-    if (choice === 'new') { activeFrom = (prompt('Date they become an active member, as year-month-day (for example ' + new Date().toISOString().slice(0, 10) + '):') || '').trim(); if (!/^\d{4}-\d{2}-\d{2}$/.test(activeFrom)) { say('m15', 'Nothing saved. The date must look like 2026-10-18.', 'bad'); return; } }
+    if (choice === 'new') {
+      const rid = $('prdetail').dataset.id, rh = prState && prState.rehearsals.filter(x => x.id === rid)[0], dflt = rh ? rh.date : '';
+      activeFrom = (prompt('Date they become an active member, as year-month-day. They count in the attendance from this day, so it cannot be after ' + rid + (dflt ? ' (' + dflt + ')' : '') + ':', dflt) || '').trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(activeFrom)) { say('m15', 'Nothing saved. The date must look like 2026-10-18.', 'bad'); return; }
+      if (!confirm('This adds the person to the real members list, active from ' + activeFrom + ', and counts them Present for ' + rid + '. Go ahead?')) return;
+    }
     rs.disabled = true;
     try { const j = await call({action: 'process.resolve', token, rehearsalId: $('prdetail').dataset.id, sourceRow: rs.dataset.row, choice, memberId: memberId.trim(), reason, activeFrom});
       if (j.signedOut) { signedOutNow(); return; }
