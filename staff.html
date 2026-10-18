@@ -614,11 +614,31 @@ async function prOpen(id, done) {
       (done ? (j.published ? '<p><span class="pill p-ok">In the official attendance</span></p>' : (j.canPublish ? '<div class="actions"><button class="btn red" type="button" data-prof="' + esc(j.id) + '">Publish ' + esc(j.id) + ' to the official attendance (practice only)</button></div><p class="sub">This fills ATTENDANCE LOG and ATTENDANCE SUMMARY, so Home, Records and Reports show real numbers. It works only in practice mode, and an undo clears it.</p>' : (j.canCorrect && j.officialNote ? '<p class="sub">' + esc(j.officialNote) + '</p>' : ''))) : '<div class="actions"><button class="btn red" type="button" data-prgo="' + esc(j.id) + '"' + (prState && prState.saving ? '' : ' disabled') + '>Process ' + esc(j.id) + '</button></div><p class="sub">This writes the present people to PROCESSED ATTENDANCE for ' + esc(j.id) + ' and locks the day. Excused and Absent are worked out later, at publishing. Changes after that need a correction with a reason.</p>') +
       (j.review && j.review.length ? '<div class="card pad" style="margin-top:12px;background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + j.review.length + ' form row(s) need a look</div><p class="sub">These are not written. After processing, the Global Admin or Assistant Global Admin can mark the person Present with a reason.</p>' + j.review.map(x => '<p class="sub" style="margin:4px 0 0"><b>' + esc(x.name || '(no name)') + '</b> · sheet row ' + esc(x.sourceRow) + ' · ' + esc(x.message) + '</p>').join('') + '</div>' : '') + (j.skipped ? '<p class="sub">' + j.skipped + ' repeat submission(s) were counted once.</p>' : '') + prTable(j.rows, done && j.canCorrect) + '</div>';
     $('prdetail').dataset.id = j.id;
+    if (done) prFlagCard(j.id);
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
+}
+/** Who has answered the absences nobody asked for: one line per campus. Desk C uses it to chase; the Global Admin can send the list again. */
+async function prFlagCard(id) {
+  try {
+    const f = await call({action: 'absence.flagged', token, rehearsalId: id});
+    if (!f.ok || $('prdetail').dataset.id !== id) return;
+    const cell = (n, l) => '<span style="margin-right:14px"><b>' + n + '</b> ' + l + '</span>';
+    $('prdetail').insertAdjacentHTML('beforeend', '<div class="card pad" style="margin-top:12px"><div class="ct">Absence answers</div>' +
+      (f.campuses.length ? f.campuses.map(c => '<p class="sub" style="margin:6px 0"><b>' + esc(c.campus) + '</b> · ' + cell(c.waiting, 'with the Campus MD') + cell(c.validated, 'with the Global Admin') + cell(c.excused, 'excused') + cell(c.notExcused, 'not excused') + (c.lapsed ? cell(c.lapsed, 'time is up') : '') + '</p>').join('') : '<p class="sub">Nobody is waiting for an answer for ' + esc(id) + '.</p>') +
+      '<p class="sub">Each absent member with no request goes to their Campus MD, who has 48 hours. Anyone not excused in time stays Absent.</p>' +
+      (f.canChase ? '<div class="actions"><button class="btn line" type="button" data-prflag="' + esc(id) + '">Send the absence list again</button></div>' : '') + '</div>');
+  } catch (e) { /* the status card is only extra information */ }
 }
 document.addEventListener('click', async ev => {
   const o = ev.target.closest && ev.target.closest('[data-pr]');
   if (o) { prOpen(o.dataset.pr, o.dataset.prdone === '1'); return; }
+  const fl = ev.target.closest && ev.target.closest('[data-prflag]');
+  if (fl) {
+    fl.disabled = true;
+    try { const j = await call({action: 'process.flagAbsent', token, rehearsalId: fl.dataset.prflag}); if (j.signedOut) { signedOutNow(); return; }
+      say('m15', j.ok ? 'Done: ' + j.summary + '.' : (j.error || 'Could not send the list.'), j.ok ? 'ok' : 'bad'); if (j.ok) prOpen(fl.dataset.prflag, true); else fl.disabled = false; } catch (e) { fl.disabled = false; say('m15', 'Network problem. Try again.', 'bad'); }
+    return;
+  }
   const g = ev.target.closest && ev.target.closest('[data-prgo]');
   if (g) {
     if (!confirm('Process ' + g.dataset.prgo + ' now? This writes the present people to PROCESSED ATTENDANCE and locks the day.')) return;
