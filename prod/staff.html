@@ -130,6 +130,7 @@ body:not(.out){background:radial-gradient(800px 380px at 100% 0,#FFE4E6 0,transp
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointer;transition:transform .25s var(--ease),box-shadow .25s var(--ease),border-color .25s var(--ease)}.lift:hover{transform:translateY(-3px);border-color:#E9A9AE;box-shadow:0 14px 30px rgba(142,0,8,.14)}
 .stats{display:flex;gap:14px;flex-wrap:wrap}
+.pgx{display:flex;justify-content:flex-end;margin:0 0 6px}
 .stat{flex:1 1 150px;padding:14px 18px;margin:0}
 .stat .k{font-size:13px;font-weight:700}.stat .v{font-size:24px;font-weight:900;line-height:1.2}
 .tblc{padding:0;overflow:hidden}
@@ -522,6 +523,21 @@ function go(v) {
   if (v === 's3') return start();
   show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { $('mblist').innerHTML = ''; say('m17', ''); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
+/** "Clear this page": empties the boxes and filters on a menu page, closes anything open on it and reloads it fresh. It never deletes saved data. */
+const CLEARABLE = ['s4', 's5', 's6', 's7', 's8', 's11', 's12', 's13', 's15', 's16', 's17'];
+function pgClearInstall() {
+  CLEARABLE.forEach(id => { const p = $(id); if (!p || p.querySelector(':scope > .pgx')) return; const d = document.createElement('div'); d.className = 'pgx'; d.innerHTML = '<button class="btn line sm" type="button" data-pgx="' + id + '">Clear this page</button>'; p.insertBefore(d, p.firstChild); });
+}
+function pgClear(id) {
+  const p = $(id); if (!p) return;
+  const unsent = Array.from(p.querySelectorAll('textarea, input[data-why], input[id*="why"], input[id*="reason"], input[id*="note"]')).some(e => e.value.trim());
+  if (unsent && !confirm('You have text that has not been sent. Clear this page anyway?')) return;
+  p.querySelectorAll('input, textarea').forEach(e => { if (e.type === 'checkbox' || e.type === 'radio') e.checked = false; else if (e.type !== 'button' && e.type !== 'submit') e.value = ''; });
+  p.querySelectorAll('select').forEach(e => { e.selectedIndex = 0; });
+  p.querySelectorAll('p[id]').forEach(e => { if (/^m\d+b?$/.test(e.id)) say(e.id, ''); });
+  go(id); window.scrollTo(0, 0);
+}
+document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-pgx]'); if (b) pgClear(b.dataset.pgx); });
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
 function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17']) $(x).classList.toggle('hide', x !== id);
@@ -1435,6 +1451,7 @@ async function start() {
     timer = setTimeout(start, wait);
   } catch (e) { if (me !== runId) return; say('m3', 'At ' + stamp() + ': network problem (' + (e && e.message ? e.message : 'unknown') + '). Trying again in 10 seconds.', 'bad'); timer = setTimeout(start, 10000); }
 }
+pgClearInstall();
 if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTabs(); land(); welcome(); } else signedOutNow(); }).catch(() => signedOutNow());
 </script><script>
 (function () {
