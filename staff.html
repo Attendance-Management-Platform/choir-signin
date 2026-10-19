@@ -164,6 +164,7 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}.calh{font-size:12px;font-weight:700;color:#5E6A7E;text-align:center}.calc{min-height:64px;border:1px solid #E5E8EE;border-radius:8px;background:#fff;color:#172039;box-shadow:none;transform:none;padding:4px;text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;overflow:hidden;width:auto}.calc:hover{background:#FFF7F7}.calx{border:0;background:none;cursor:default}.cald{font-size:12px;font-weight:700;color:#172039}.caltoday{border-color:#B3262F}.calp{font-size:10px;line-height:1.2;border-radius:6px;padding:1px 4px;background:#EEF1F6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fpbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:10px 0 12px;border-bottom:1px solid #E5E8EE}.fpbar .lb{margin-top:0}.fplist{max-height:min(62vh,520px);overflow-y:auto;overscroll-behavior:contain;margin-top:10px;padding-right:6px}.fplist>.card{margin-top:0;margin-bottom:10px}.fpcount{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:8px;font-size:13px;color:#5E6A7E}.caltip{position:fixed;z-index:60;max-width:260px;background:#172039;color:#fff;border-radius:10px;padding:8px 11px;font-size:12.5px;line-height:1.4;box-shadow:0 8px 24px rgba(10,16,36,.25);pointer-events:none}.caltip b{color:#fff}.calfree{background:#FAFBFD}.calact{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:10px}.hgrid .card{margin:0;display:flex;flex-direction:column;gap:6px}.hgrid .card .actions{margin-top:auto}.hq{border-top:1px solid #E5E8EE;padding:2px 0}.hq summary{cursor:pointer;font-weight:700;padding:11px 0;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}.hq summary::-webkit-details-marker{display:none}.hq summary:after{content:"+";font-size:20px;color:#8E0008;font-weight:400}.hq[open] summary:after{content:"\2212"}.hq .ha{padding:0 0 12px;color:#394560;line-height:1.5}.hdl dt{font-weight:800;margin-top:10px}.hdl dd{margin:2px 0 0;color:#394560}.hwho{width:100%;border-collapse:collapse;font-size:14px}.hwho td,.hwho th{text-align:left;padding:9px 10px;border-top:1px solid #E5E8EE;vertical-align:top}.hwho th{font-size:12px;color:#5E6A7E;border-top:0}
+#helpbody>div,#helpbody>.card{margin-bottom:18px}#helpbody .fplist{max-height:min(52vh,440px)}#helpbody .hq{padding:0 4px}
 @media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
@@ -1819,34 +1820,43 @@ function contactFor() {
 }
 function can() { return myTabs.filter(k => TABHELP[k]); }
 function renderHelp() {
-  const t = myTabs, shown = can(), faq = FAQ.filter(f => !f.t.length || f.t.some(k => t.indexOf(k) !== -1));
-  const sec = (h, inner) => '<div class="card pad rise" data-hsec><div class="ct">' + h + '</div>' + inner + '</div>';
+  const t = myTabs, shown = can(), faq = FAQ.filter(f => !f.t.length || f.t.some(k => t.indexOf(k) !== -1)).map(f => Object.assign({}, f, {topic: (f.t.filter(k => t.indexOf(k) !== -1).map(k => TABDEF[k] && TABDEF[k][1])[0]) || 'General'}));
+  const who = [
+    ['Desk A', 'The choir list: adding, editing, deactivating and reactivating members, and filling in parts.'],
+    ['Desk B', 'Rehearsals: setting them up, opening check-in, and the attendance records.'],
+    ['Desk C', 'Absence requests, processing attendance and downloads.'],
+    ['Desk D', 'The QR code, check-in and marking members by hand.'],
+    ['Campus Music Director', 'Their own campus: shows the QR, validates absence requests, sees changes about their campus.'],
+    ['Global Admin and Assistant Global Admin', 'Can do any desk\'s job with a reason (that desk is told, on every campus). Decide absence requests and approve downloads.'],
+    ['Global Music Director and Pastor in Charge', 'See everything, and answer petitions and top-role requests.'],
+    ['System Administrator', 'Carries out role and access changes, and adds new campuses.']];
+  const gl = [
+    ['Part (Section)', 'Soprano, Alto, Tenor or Bass. The same thing as the Section column in the member list.'],
+    ['Eligible', 'A member who was active at the time of that rehearsal.'],
+    ['Present, Excused, Absent', 'Present: checked in and checked. Excused: an approved absence request. Absent: neither.'],
+    ['Official attendance', 'The final record, published after a rehearsal is processed. All reports are drawn from it.'],
+    ['Done instead', 'A step the Global Admin or Assistant did in place of the usual desk, with a reason. The desk is told.'],
+    ['Petition', 'A recorded objection to a change, answered by the right person.']];
+  const txt = (...a) => a.join(' ');
   $('helpbody').innerHTML =
-    '<div class="card pad rise"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><div class="sub" style="margin:0">You are signed in as</div><div style="font-size:20px;font-weight:900">' + esc(myName || 'a staff member') + '</div>' +
+    '<div class="card pad rise"><div class="sub" style="margin:0">You are signed in as</div><div style="font-size:20px;font-weight:900">' + esc(myName || 'a staff member') + '</div>' +
       '<div>' + myRoles.filter(r => r !== 'Choir Member').map(r => '<span class="pillr">' + esc(r) + '</span>').join('') + '</div></div>' +
-      '<div style="flex:1 1 260px;max-width:420px"><label for="hsq" class="lb" style="margin-top:0">Search help</label><input id="hsq" class="in" type="search" autocomplete="off" placeholder="For example: absence, report, member"></div></div></div>' +
-    '<p id="hsn" class="sub hide" style="margin:10px 4px">Nothing in Help matches that. Try a shorter word.</p>' +
-    sec('Your menus', '<div class="hgrid">' + shown.map(k => '<div class="card pad" data-h="' + esc((TABHELP[k][0] + ' ' + TABHELP[k][1]).toLowerCase()) + '"><b>' + esc(TABHELP[k][0]) + '</b><span class="sub" style="margin:0">' + esc(TABHELP[k][1]) + '</span>' + (TABDEF[k] ? '<div class="actions"><button class="btn line sm" type="button" data-helpgo="' + TABDEF[k][0] + '">Open ' + esc(TABDEF[k][1]) + '</button></div>' : '') + '</div>').join('') + '</div>') +
-    sec('How do I…?', faq.map(f => '<details class="hq" data-h="' + esc((f.q + ' ' + f.a).toLowerCase()) + '"><summary>' + esc(f.q) + '</summary><div class="ha">' + esc(f.a) + '</div></details>').join('')) +
-    sec('Who does what', '<div style="overflow-x:auto"><table class="hwho"><thead><tr><th>Who</th><th>Looks after</th></tr></thead><tbody>' + [
-      ['Desk A', 'The choir list: adding, editing, deactivating and reactivating members, and filling in parts.'],
-      ['Desk B', 'Rehearsals: setting them up, opening check-in, and the attendance records.'],
-      ['Desk C', 'Absence requests, processing attendance and downloads.'],
-      ['Desk D', 'The QR code, check-in and marking members by hand.'],
-      ['Campus Music Director', 'Their own campus: shows the QR, validates absence requests, sees changes about their campus.'],
-      ['Global Admin and Assistant Global Admin', 'Can do any desk\'s job with a reason (the desk is told). Decide absence requests and approve downloads.'],
-      ['Global Music Director and Pastor in Charge', 'See everything, and answer petitions and top-role requests.'],
-      ['System Administrator', 'Carries out role and access changes, and adds new campuses.']].map(r => '<tr data-h="' + esc((r[0] + ' ' + r[1]).toLowerCase()) + '"><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td></tr>').join('') + '</tbody></table></div>') +
-    sec('Rules that always apply', '<ul class="hp" data-h="rules always apply recorded audit own work reason"><li>Everything you do is recorded with your name and the time.</li><li>Nobody checks, approves or changes their own work or record.</li><li>Nothing is deleted. A member who leaves is made inactive.</li><li>When an admin does a desk\'s step, they give a reason and that desk is told.</li><li>Sign out when you finish on a shared phone.</li></ul>') +
-    sec('Words you will see', '<dl class="hdl"><div data-h="part section"><dt>Part (Section)</dt><dd>Soprano, Alto, Tenor or Bass. The same thing as the Section column in the member list.</dd></div><div data-h="eligible"><dt>Eligible</dt><dd>A member who was active at the time of that rehearsal.</dd></div><div data-h="excused absent present"><dt>Present, Excused, Absent</dt><dd>Present: checked in and checked. Excused: an approved absence request. Absent: neither.</dd></div><div data-h="official attendance published"><dt>Official attendance</dt><dd>The final record, published after a rehearsal is processed. All reports are drawn from it.</dd></div><div data-h="done instead bypass"><dt>Done instead</dt><dd>A step the Global Admin or Assistant did in place of the usual desk, with a reason.</dd></div><div data-h="petition"><dt>Petition</dt><dd>A recorded objection to a change, answered by the right person.</dd></div></dl>') +
-    sec('Need more help?', '<p style="margin:.2rem 0" data-h="help contact">Speak to ' + esc(contactFor()) + '. For a sign-in or system problem, speak to the System Administrator.</p>');
-  const q = $('hsq');
-  q.oninput = () => {
-    const v = q.value.trim().toLowerCase(); let any = false;
-    document.querySelectorAll('#helpbody [data-h]').forEach(e => { const hit = !v || e.dataset.h.indexOf(v) !== -1; e.style.display = hit ? '' : 'none'; if (hit) any = true; });
-    document.querySelectorAll('#helpbody [data-hsec]').forEach(s => { const vis = !v || Array.from(s.querySelectorAll('[data-h]')).some(e => e.style.display !== 'none'); s.style.display = vis ? '' : 'none'; });
-    $('hsn').classList.toggle('hide', any);
-  };
+    '<div id="hb1"></div><div id="hb2"></div><div id="hb3"></div>' +
+    '<div class="card pad rise"><div class="ct">Rules that always apply</div><ul class="hp"><li>Everything you do is recorded with your name and the time.</li><li>Nobody checks, approves or changes their own work or record.</li><li>Nothing is deleted. A member who leaves is made inactive.</li><li>When an admin does a desk\'s step, they give a reason and that desk is told.</li><li>Sign out when you finish on a shared phone.</li></ul></div>' +
+    '<div id="hb4"></div>' +
+    '<div class="card pad rise"><div class="ct">Need more help?</div><p style="margin:.2rem 0">Speak to ' + esc(contactFor()) + '. For a sign-in or system problem, speak to the System Administrator.</p></div>';
+  fpPanel('hmenu', 'hb1', {title: 'Your menus', sub: 'What each menu is for. Use Open to go there.', items: shown, empty: 'No menus yet.',
+    fields: [{k: 'q', label: 'Search menus', ph: 'For example: report, member, rehearsal', type: 'text', get: k => txt(TABHELP[k][0], TABHELP[k][1])}],
+    card: k => '<div class="card pad" style="margin-top:0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><div style="flex:1 1 260px"><b>' + esc(TABHELP[k][0]) + '</b><div class="sub" style="margin:2px 0 0">' + esc(TABHELP[k][1]) + '</div></div>' + (TABDEF[k] ? '<button class="btn line sm" type="button" data-helpgo="' + TABDEF[k][0] + '">Open ' + esc(TABDEF[k][1]) + '</button>' : '') + '</div>'});
+  fpPanel('hfaq', 'hb2', {title: 'How do I…?', sub: 'Short answers for the menus you have. Choose a question to open it.', items: faq, empty: 'No questions yet.',
+    fields: [{k: 'q', label: 'Search questions', ph: 'For example: absence, add, report', type: 'text', get: f => txt(f.q, f.a)}, {k: 'topic', label: 'Topic', type: 'list', get: f => f.topic}],
+    card: f => '<details class="hq"><summary>' + esc(f.q) + '</summary><div class="ha">' + esc(f.a) + '</div></details>'});
+  fpPanel('hwho', 'hb3', {title: 'Who does what', items: who, empty: '',
+    fields: [{k: 'q', label: 'Search', ph: 'A role or a job', type: 'text', get: r => txt(r[0], r[1])}],
+    card: r => '<div class="card pad" style="margin-top:0"><b>' + esc(r[0]) + '</b><div class="sub" style="margin:2px 0 0">' + esc(r[1]) + '</div></div>'});
+  fpPanel('hgl', 'hb4', {title: 'Words you will see', items: gl, empty: '',
+    fields: [{k: 'q', label: 'Search words', ph: 'For example: eligible, petition', type: 'text', get: r => txt(r[0], r[1])}],
+    card: r => '<div class="card pad" style="margin-top:0"><b>' + esc(r[0]) + '</b><div class="sub" style="margin:2px 0 0">' + esc(r[1]) + '</div></div>'});
 }
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-helpgo]'); if (b) go(b.dataset.helpgo); });
 function today() { try { return new Date().toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}); } catch (e) { return new Date().toISOString().slice(0, 10); } }
