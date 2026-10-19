@@ -572,11 +572,19 @@ try { token = sessionStorage.getItem('rbcTok') || ''; } catch (e) {}
 let pending = 0, busyT = null;
 let ckRid = '';
 async function call(body) {
-  const j = await call1(body);
-  // The Global Admin or Assistant doing a step that belongs to a desk: the server asks for a reason, and we ask once and send it again.
+  let j = await call1(body);
+  // The Global Admin or Assistant doing a step that belongs to a desk: the server asks for a reason, and we ask and send it again.
   if (j && j.needsReason && !body.bypassReason) {
-    const why = prompt((j.error || 'Give a reason.') + '\n\nType your reason (10 to 300 characters):');
-    if (why && why.trim()) return call1(Object.assign({}, body, {bypassReason: why.trim()}));
+    let msg = j.error || 'Give a reason.';
+    for (let i = 0; i < 3; i++) {
+      const why = prompt(msg + '\n\nType your reason (10 to 300 characters):');
+      if (!why || !why.trim()) return {ok: false, error: 'No reason was given, so nothing was saved.'};
+      if (why.trim().length < 10) { msg = 'That reason is too short. Use at least 10 characters.'; continue; }
+      j = await call1(Object.assign({}, body, {bypassReason: why.trim()}));
+      if (!(j && j.needsReason)) return j;
+      msg = j.error || 'Give a reason.';
+    }
+    return {ok: false, error: 'The reason was not accepted, so nothing was saved.'};
   }
   return j;
 }
