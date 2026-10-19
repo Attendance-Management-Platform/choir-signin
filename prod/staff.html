@@ -1032,7 +1032,10 @@ async function prOpen(id, done) {
   try {
     const j = await call({action: done ? 'process.rows' : 'process.preview', token, rehearsalId: id});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('prdetail').innerHTML = ''; return say('m15', j.error || 'Not available.', 'bad'); }
+    if (!j.ok) {
+      $('prdetail').innerHTML = /^Close check-in for/.test(j.error || '') && myTabs.indexOf('rehearsal') !== -1 ? '<div class="card pad rise"><div class="ct">One step first</div><p class="sub">' + esc(j.error) + ' Check-in is still open for this rehearsal, and the day cannot be processed while people could still check in.</p><div class="actions"><button class="btn red" type="button" data-gotab="s8">Go to Rehearsals and close check-in</button></div></div>' : '';
+      return say('m15', j.error || 'Not available.', 'bad');
+    }
     say('m15', '');
     const rows = j.rows || [];
     const n = s => rows.filter(r => r.status === s).length;
@@ -1459,6 +1462,7 @@ function fpPanel(key, boxId, o) {
   if (key === 'tasks' && typeof hfoldApply === 'function') hfoldApply();
 }
 document.addEventListener('input', ev => { const t = ev.target; if (t && t.dataset && t.dataset.fp) { FP[t.dataset.fp].v[t.dataset.k] = t.value; fpDraw(t.dataset.fp); } });
+document.addEventListener('click', ev => { const gt = ev.target.closest && ev.target.closest('[data-gotab]'); if (gt) go(gt.dataset.gotab); });
 document.addEventListener('click', ev => { const ch = ev.target.closest && ev.target.closest('[data-fpchip]'); if (ch) { const p = ch.dataset.fpchip.split('|'), st2 = FP[p[0]]; st2.v[p[1]] = p.slice(2).join('|'); fpPanel(p[0], st2.box, st2.o); } });
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-fpx]'); if (!b) return; const st = FP[b.dataset.fpx]; st.v = {}; fpPanel(b.dataset.fpx, st.box, st.o); });
 const pFields = [
