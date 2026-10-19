@@ -462,6 +462,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s4" class="pg hide">
+<div id="roombox"></div>
 <div id="ckpick" class="card pad hide"><label class="s" style="margin-top:0">Rehearsal</label><select id="ckrid"></select></div>
 <span id="vsum" class="hide"></span>
 <div id="vstats" class="stats rise"></div>
@@ -577,7 +578,7 @@ async function call(body) {
   return j;
 }
 async function call1(body) {
-  if (ckRid && /^(validate\.|late\.|handmark)/.test(String(body.action))) body.rehearsalId = ckRid;
+  if (ckRid && /^(validate\.|late\.|handmark|room\.)/.test(String(body.action))) body.rehearsalId = ckRid;
   if (++pending === 1) busyT = setTimeout(() => $('busy').classList.remove('hide'), 400);
   try {
     const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
@@ -1613,12 +1614,37 @@ async function loadHome() {
     say('m10', '');
   } catch (e) { say('m10', 'Network problem. Try again.', 'bad'); }
 }
+const ROOMLAB = {'': ['Waiting for a yes', 'p-pend'], yes: ['In the room', 'p-ok'], no: ['Not here', 'p-no']};
+async function loadRoom() {
+  const box = $('roombox'); if (!box) return;
+  try {
+    const j = await call({action: 'room.list', token, rehearsalId: (typeof ckRid !== 'undefined' && ckRid) ? ckRid : undefined});
+    if (!j.ok) { box.innerHTML = ''; return; }
+    fpPanel('room', 'roombox', {title: 'Who is in the room?', sub: 'These members checked in with Google, without the QR. Say yes only if you can see them here.' + (j.campus ? ' You see your own campus.' : ''),
+      items: j.rows, empty: 'No one has checked in without the QR yet.',
+      fields: [{k: 'q', label: 'Search', ph: 'A name or ID', type: 'text', get: r => r.name + ' ' + r.memberId},
+        {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus},
+        {k: 'answer', label: 'Answer', type: 'list', get: r => ROOMLAB[r.answer || ''][0], all: ['Waiting for a yes', 'In the room', 'Not here']}],
+      card: r => '<div class="fprow"><div style="flex:1 1 220px"><div class="nm">' + esc(r.name || r.memberId) + '</div><div class="mt">' + esc(r.memberId) + (r.campus ? ' · ' + esc(r.campus) : '') + ' · ' + new Date(r.time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) + '</div></div>' +
+        '<div class="tkside">' + (r.sharedDevice ? '<span class="pill p-no">same phone as another member</span>' : '') + (r.late ? '<span class="pill p-pend">late</span>' : '') + '<span class="pill ' + ROOMLAB[r.answer || ''][1] + '">' + ROOMLAB[r.answer || ''][0] + '</span>' +
+        (r.canAnswer ? '<button class="btn red sm" type="button" data-room="yes" data-id="' + esc(r.memberId) + '">Yes, in the room</button><button class="btn line sm" type="button" data-room="no" data-id="' + esc(r.memberId) + '">Not here</button>' : '') + '</div></div>'});
+  } catch (e) { box.innerHTML = ''; }
+}
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('[data-room]'); if (!b) return;
+  b.disabled = true;
+  const j = await call({action: 'room.answer', token, memberId: b.dataset.id, answer: b.dataset.room, rehearsalId: (typeof ckRid !== 'undefined' && ckRid) ? ckRid : undefined});
+  if (j && j.signedOut) { signedOutNow(); return; }
+  if (j && j.needsReason) { b.disabled = false; return; }
+  await loadRoom(); if (typeof loadRows === 'function') await loadRows();
+  say('m4', j && j.ok ? (j.summary || 'Saved.') : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
+});
 async function loadRows() {
-  say('m4', 'Loading…');
+  say('m4', 'Loading…'); loadRoom();
   try {
     const j = await call({action: 'validate.list', token});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('rows').innerHTML = ''; $('vbar').classList.add('hide'); return say('m4', j.error || 'Not available.', 'bad'); }
+    if (!j.ok) { $('rows').innerHTML = ''; $('vbar').classList.add('hide'); $('vstats').innerHTML = ''; return say('m4', /cannot see the check-ins/.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad'); }
     const choices = j.rehearsals || [];
     $('ckpick').classList.toggle('hide', choices.length < 2);
     $('ckrid').innerHTML = choices.map(x => '<option value="' + esc(x.id) + '"' + (x.id === j.rehearsalId ? ' selected' : '') + '>' + esc(x.id) + ' · ' + esc(new Date(x.startMs).toLocaleDateString('en-GB')) + (x.finished ? ' (finished)' : '') + '</option>').join('');
