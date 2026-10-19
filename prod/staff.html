@@ -441,7 +441,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div id="s7" class="pg hide">
 <div id="qsum"></div>
 <div class="card rise tblc"><div class="tblh"><span>Waiting for your decision</span><span id="qcount" class="s"></span></div>
-<div id="qfind" class="hide" style="padding:0 20px 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="qq" class="in" placeholder="Search a name" style="flex:2 1 160px;max-width:260px" autocomplete="off"><select id="qc" class="in" style="flex:1 1 120px;max-width:170px"></select><select id="qt" class="in" style="flex:1 1 150px;max-width:210px"></select><button id="qx" class="btn line sm" type="button">Clear</button><button id="qall" class="btn line sm" type="button">Tick all shown</button></div>
+<div id="qfind" class="hide" style="padding:0 20px 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="qq" class="in" placeholder="Search a name" style="flex:2 1 160px;max-width:260px" autocomplete="off"><select id="qc" class="in" style="flex:1 1 120px;max-width:170px"></select><select id="qr" class="in" style="flex:1 1 170px;max-width:240px"></select><select id="qt" class="in" style="flex:1 1 150px;max-width:210px"></select><button id="qx" class="btn line sm" type="button">Clear</button><button id="qall" class="btn line sm" type="button">Tick all shown</button></div>
 <div id="qrows"></div>
 <div id="qbar" class="foot hide"><span>Tick several, then confirm once. For absences nobody asked for, you give one reason for all the ticked ones.</span><span class="actions" style="margin:0"><button id="qvtick" class="btn line" type="button">Validate ticked (0)</button><button id="qatick" class="btn red" type="button">Approve ticked (0)</button></span></div>
 <p id="m7" class="s" style="padding:12px 20px;margin:0"></p></div>
@@ -1325,6 +1325,8 @@ async function loadQueue() {
     $('qfind').classList.toggle('hide', !items.length);
     const camps = Array.from(new Set(items.map(r => r.campus).filter(Boolean))).sort();
     $('qc').innerHTML = '<option value="">Any campus</option>' + camps.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+    const rh = {}; items.forEach(r => { if (r.rehearsalId) rh[r.rehearsalId] = {ms: r.rehearsalStartMs || 0, n: (rh[r.rehearsalId] ? rh[r.rehearsalId].n : 0) + 1}; });
+    $('qr').innerHTML = '<option value="">Any rehearsal</option>' + Object.keys(rh).sort((a, b) => rh[b].ms - rh[a].ms).map(id => '<option value="' + esc(id) + '">' + esc(id) + (rh[id].ms ? ' · ' + new Date(rh[id].ms).toLocaleDateString('en-GB', {day: 'numeric', month: 'short'}) : '') + ' (' + rh[id].n + ')</option>').join('');
     $('qt').innerHTML = '<option value="">Any kind</option>' + Object.keys(KIND).filter(k => n(k)).map(k => '<option value="' + k + '">' + KIND[k] + ' (' + n(k) + ')</option>').join('');
     $('qrows').innerHTML = items.map(r => {
       const k = kind(r), when = r.rehearsalStartMs ? new Date(r.rehearsalStartMs).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}) : '';
@@ -1333,10 +1335,10 @@ async function loadQueue() {
         (r.bypass ? '<span class="pill p-info">With the Campus MD</span>' : '') + (r.handedToCampusMd ? '<span class="pill p-info">Handed to a Campus MD</span>' : '');
       const btns = r.ops.map(o => '<button type="button" class="btn ' + (/reject/.test(o) ? 'warn' : 'red') + ' sm" data-id="' + esc(r.requestId) + '" data-op="' + o + '" data-f="' + (r.flagged ? '1' : '') + '" data-w="' + (r.bypass ? '1' : '') + '">' + esc(r.flagged && FLABEL[o] ? FLABEL[o] : OPLABEL[o]) + '</button>').join('') +
         (r.flagged && r.memberId && r.ops.indexOf('validate') !== -1 ? '<button class="btn line sm" type="button" data-deact="1" data-mid="' + esc(r.memberId) + '" data-name="' + esc(r.name) + '" data-campus="' + esc(r.campus) + '">No longer in the choir…</button>' : '');
-      return '<div class="qrow" data-k="' + esc((r.name || '').toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-t="' + k + '">' +
+      return '<div class="qrow" data-k="' + esc((r.name || '').toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-r="' + esc(r.rehearsalId || '') + '" data-t="' + k + '">' +
         '<div class="qck">' + (batchable(r) ? '<input type="checkbox" class="qtick" data-id="' + esc(r.requestId) + '" data-v="' + (r.ops.indexOf('validate') !== -1 ? '1' : '') + '" data-a="' + (r.ops.indexOf('approve') !== -1 ? '1' : '') + '" data-f="' + (r.flagged ? '1' : '') + '" aria-label="Tick ' + esc(r.name || 'member') + '">' : '') + '</div>' +
         '<div class="qmain"><div class="qname">' + esc(r.name || 'Member') + ' <span class="s">' + esc(r.campus) + (when ? ' · ' + esc(r.rehearsalId || '') + ' · ' + when : '') + '</span></div><div class="qpills">' + pills + '</div>' +
-        '<div class="s qwhy">' + esc(r.reason || (r.flagged ? 'Marked Absent at the rehearsal. Nobody sent a request.' : 'No reason recorded.')) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div></div>' +
+        (r.bypass ? '<div class="s qwhy" style="color:#2F4F7E">This is with the Campus MD, who has the 48 hours. You can wait for them, or decide now yourself (your reason is recorded and they are told).</div>' : '') + '<div class="s qwhy">' + esc(r.reason || (r.flagged ? 'Marked Absent at the rehearsal. Nobody sent a request.' : 'No reason recorded.')) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div></div>' +
         '<div class="qact">' + btns + '</div></div>';
     }).join('');
     const rowsEl = () => Array.from($('qrows').querySelectorAll('.qrow'));
@@ -1349,13 +1351,13 @@ async function loadQueue() {
       $('qbar').classList.toggle('hide', !$('qrows').querySelector('.qtick'));
     };
     const filt = () => {
-      const q = $('qq').value.trim().toLowerCase(), c = $('qc').value, t = $('qt').value;
-      rowsEl().forEach(e => { e.style.display = (!q || e.dataset.k.indexOf(q) !== -1) && (!c || e.dataset.c === c) && (!t || e.dataset.t === t) ? '' : 'none'; });
+      const q = $('qq').value.trim().toLowerCase(), c = $('qc').value, t = $('qt').value, rr = $('qr').value;
+      rowsEl().forEach(e => { e.style.display = (!q || e.dataset.k.indexOf(q) !== -1) && (!c || e.dataset.c === c) && (!rr || e.dataset.r === rr) && (!t || e.dataset.t === t) ? '' : 'none'; });
       $('qcount').textContent = items.length ? 'Showing ' + shown().length + ' of ' + items.length + '.' : '';
       upd();
     };
-    $('qq').oninput = filt; $('qc').onchange = $('qt').onchange = filt;
-    $('qx').onclick = () => { $('qq').value = ''; $('qc').value = ''; $('qt').value = ''; rowsEl().forEach(e => { const b = e.querySelector('.qtick'); if (b) b.checked = false; }); filt(); };
+    $('qq').oninput = filt; $('qc').onchange = $('qr').onchange = $('qt').onchange = filt;
+    $('qx').onclick = () => { $('qq').value = ''; $('qc').value = ''; $('qr').value = ''; $('qt').value = ''; rowsEl().forEach(e => { const b = e.querySelector('.qtick'); if (b) b.checked = false; }); filt(); };
     $('qall').onclick = () => { shown().forEach(e => { const b = e.querySelector('.qtick'); if (b) b.checked = true; }); upd(); };
     $('qrows').querySelectorAll('.qtick').forEach(x => x.onchange = upd);
     filt();
