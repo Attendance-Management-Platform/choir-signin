@@ -223,6 +223,11 @@ input[list].in,.anpick input.in{background-image:url("data:image/svg+xml,%3Csvg 
 input[list].in::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:38px;height:100%;cursor:pointer}
 input[list].in{position:relative}
 .anclear{align-self:flex-end}
+.hfd .anh,.hfd>.ct{cursor:pointer;position:relative;padding-right:46px}
+.hfd .anh::after,.hfd>.ct::after{content:"";position:absolute;right:0;top:0;width:32px;height:32px;border-radius:50%;background:#FFF0F1 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238E0008' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 15l6-6 6 6'/%3E%3C/svg%3E") center no-repeat;transition:transform .2s ease}
+.hfd.hshut .anh::after,.hfd.hshut>.ct::after{transform:rotate(180deg)}
+.hfd.hshut>*:not(.ct):not(.sub):not(.anh){display:none}
+.hfd.hshut .anh .fpchips,.hfd.hshut .anh .anpicks{display:none}
 @media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
@@ -784,6 +789,18 @@ function heat(cols, rows, cells, label, rate) {
       return '<td style="background:' + bg(v) + ';color:' + fg(v) + '"' + (x && x.title ? ' title="' + esc(x.title) + '"' : '') + '>' + (x ? esc(x.t) : '–') + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table></div><p class="sub" style="margin:8px 0 0">Darker means higher' + (rate ? '; red means under 70%' : '') + '. A dash means no one in that group.</p>';
 }
 let ANTAB = 'ov';
+const HF = (() => { try { return JSON.parse(localStorage.getItem('rbcHomeFold') || '{}') || {}; } catch (e) { return {}; } })();
+function hfoldApply() {
+  [['an', '#hcharts .anl'], ['tk', '#htasks > .card'], ['nt', '#hnotes .ntc']].forEach(x => { const c = document.querySelector(x[1]); if (!c) return; c.classList.add('hfd'); c.dataset.hk = x[0]; c.classList.toggle('hshut', HF[x[0]] === true); });
+}
+document.addEventListener('click', ev => {
+  const t = ev.target, h = t.closest && t.closest('#hcharts .anl .anh, #hnotes .ntc .anh, #htasks > .card > .ct'); if (!h) return;
+  if (t.closest('button,input,select,label,datalist') ) return;
+  const c = h.closest('.hfd'); if (!c) return;
+  const k = c.dataset.hk; HF[k] = !HF[k]; c.classList.toggle('hshut', HF[k] === true);
+  try { localStorage.setItem('rbcHomeFold', JSON.stringify(HF)); } catch (e) {}
+});
+
 function anTally(rows) { const n = {present: 0, absent: 0, excused: 0}; rows.forEach(r => { const k = String(r.status || '').toLowerCase(); if (n[k] !== undefined) n[k]++; }); n.total = rows.length; n.rate = rows.length ? Math.round(n.present / rows.length * 1000) / 10 : 0; return n; }
 function anGroup(rows, key, blank) { const g = {}; rows.forEach(r => { const k = r[key] || blank; (g[k] = g[k] || []).push(r); }); return Object.keys(g).map(k => { const t = anTally(g[k]); return {name: k, value: t.rate, a: t.present, b: t.total}; }).sort((x, y) => y.value - x.value); }
 function anRedraw() { if (!ANC) return; try { const ae = document.activeElement; if (ae && /^an(reh|camp)$/.test(ae.id)) ae.blur(); } catch (e) {} $('hcharts').innerHTML = homeCharts(ANC, myTabs.indexOf('reports') !== -1, myTabs.indexOf('reports') !== -1, myTabs.indexOf('records') !== -1); wireHome(); }
@@ -815,6 +832,7 @@ document.addEventListener('change', ev => {
   }
 });
 function wireHome() {
+  hfoldApply();
   document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
 }
 document.addEventListener('click', ev => { const x = ev.target.closest && ev.target.closest('[data-anclear]'); if (x) { ANREH = ''; ANCAMP = ''; ANROWS = null; anRedraw(); anLoad(); } });
@@ -1289,6 +1307,7 @@ function fpPanel(key, boxId, o) {
   target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub" style="margin:0 0 4px">' + esc(o.sub) + '</p>' : '') + dl +
     chipsHtml + '<div class="fpbar">' + bar + '<button class="btn line sm" type="button" data-fpx="' + key + '">Clear</button></div><div class="fplist" id="fpl_' + key + '"></div><div class="fpcount"><span id="fpc_' + key + '"></span><span>Scroll inside this box</span></div>' + (o.after || '') + '</div>';
   fpDraw(key);
+  if (key === 'tasks' && typeof hfoldApply === 'function') hfoldApply();
 }
 document.addEventListener('input', ev => { const t = ev.target; if (t && t.dataset && t.dataset.fp) { FP[t.dataset.fp].v[t.dataset.k] = t.value; fpDraw(t.dataset.fp); } });
 document.addEventListener('click', ev => { const ch = ev.target.closest && ev.target.closest('[data-fpchip]'); if (ch) { const p = ch.dataset.fpchip.split('|'), st2 = FP[p[0]]; st2.v[p[1]] = p.slice(2).join('|'); fpPanel(p[0], st2.box, st2.o); } });
@@ -1585,6 +1604,7 @@ async function loadHome() {
     $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'), has('records'));
     if (has('records')) anLoad();
     drawNotes([['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
+    hfoldApply();
     drawTasks(j.tasks || []);
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
