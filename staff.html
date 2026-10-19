@@ -1419,8 +1419,8 @@ function cbAttach(inp, optsFn, onPick) {
     box.classList.add('on');
   };
   const hl = (txt, t) => { const i = t ? txt.toLowerCase().indexOf(t) : -1; return i < 0 ? esc(txt) : esc(txt.slice(0, i)) + '<b>' + esc(txt.slice(i, i + t.length)) + '</b>' + esc(txt.slice(i + t.length)); };
-  const choose = i => { const o = st.items[i]; if (!o) return; box.classList.remove('on'); st.pick(o, inp); };
-  inp.addEventListener('focus', () => { st.typed = false; draw(); }); inp.addEventListener('input', () => { st.typed = true; draw(); });
+  const choose = i => { const o = st.items[i]; if (!o) return; box.classList.remove('on'); st.picking = true; try { st.pick(o, inp); } finally { st.picking = false; } box.classList.remove('on'); if (CBOPEN === box) CBOPEN = null; };
+  inp.addEventListener('focus', () => { st.typed = false; draw(); }); inp.addEventListener('input', () => { if (st.picking) return; st.typed = true; draw(); });
   inp.addEventListener('keydown', ev => {
     if (!box.classList.contains('on')) { if (ev.key === 'ArrowDown') draw(); return; }
     if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); st.hi = Math.max(0, Math.min(st.items.length - 1, st.hi + (ev.key === 'ArrowDown' ? 1 : -1))); box.querySelectorAll('.cbo').forEach((e, i) => { e.classList.toggle('hi', i === st.hi); if (i === st.hi) e.scrollIntoView({block: 'nearest'}); }); }
