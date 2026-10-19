@@ -131,6 +131,15 @@ body:not(.out){background:radial-gradient(800px 380px at 100% 0,#FFE4E6 0,transp
 a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointer;transition:transform .25s var(--ease),box-shadow .25s var(--ease),border-color .25s var(--ease)}.lift:hover{transform:translateY(-3px);border-color:#E9A9AE;box-shadow:0 14px 30px rgba(142,0,8,.14)}
 .stats{display:flex;gap:14px;flex-wrap:wrap}
 .pgx{display:flex;justify-content:flex-end;margin:0 0 6px}
+.qrow{display:grid;grid-template-columns:24px 1fr auto;gap:8px 14px;align-items:center;padding:14px 20px;border-top:1px solid var(--line)}
+.qrow:hover{background:#FBFCFE}
+.qck input{width:auto;margin:0}
+.qname{font-weight:900}.qname .s{font-weight:400;margin-left:6px}
+.qpills{margin-top:4px}.qwhy{margin-top:4px}
+.qact{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:700px){.qrow{grid-template-columns:24px 1fr}.qact{grid-column:1 / -1;justify-content:flex-start}}
+#qfind.hide{display:none!important}
+
 .stat{flex:1 1 150px;padding:14px 18px;margin:0}
 .stat .k{font-size:13px;font-weight:700}.stat .v{font-size:24px;font-weight:900;line-height:1.2}
 .tblc{padding:0;overflow:hidden}
@@ -430,7 +439,9 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s7" class="pg hide">
-<div class="card rise tblc"><div class="g gq th"><div></div><div>Member</div><div>Rehearsal</div><div>Status</div><div>Action</div></div>
+<div id="qsum"></div>
+<div class="card rise tblc"><div class="tblh"><span>Waiting for your decision</span><span id="qcount" class="s"></span></div>
+<div id="qfind" class="hide" style="padding:0 20px 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="qq" class="in" placeholder="Search a name" style="flex:2 1 160px;max-width:260px" autocomplete="off"><select id="qc" class="in" style="flex:1 1 120px;max-width:170px"></select><select id="qt" class="in" style="flex:1 1 150px;max-width:210px"></select><button id="qx" class="btn line sm" type="button">Clear</button><button id="qall" class="btn line sm" type="button">Tick all shown</button></div>
 <div id="qrows"></div>
 <div id="qbar" class="foot hide"><span>Tick several, then confirm once. For absences nobody asked for, you give one reason for all the ticked ones.</span><span class="actions" style="margin:0"><button id="qvtick" class="btn line" type="button">Validate ticked (0)</button><button id="qatick" class="btn red" type="button">Approve ticked (0)</button></span></div>
 <p id="m7" class="s" style="padding:12px 20px;margin:0"></p></div>
@@ -1301,20 +1312,53 @@ async function loadQueue() {
   try {
     const j = await call({action: 'absence.queue', token});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('qrows').innerHTML = ''; return say('m7', j.error || 'Not available.', 'bad'); }
+    if (!j.ok) { $('qrows').innerHTML = ''; $('qsum').innerHTML = ''; $('qfind').classList.add('hide'); return say('m7', j.error || 'Not available.', 'bad'); }
     say('m7', j.items.length ? '' : 'Nothing is waiting for you.');
+    const items = j.items;
+    const isAppeal = r => r.ops.some(o => /^appeal/.test(o));
+    const kind = r => r.flagged ? 'flag' : isAppeal(r) ? 'appeal' : r.late ? 'late' : 'normal';
+    const KIND = {flag: 'Absent, no request', appeal: 'Appeal', late: 'Late route', normal: 'Request'};
     const batchable = r => (r.ops.indexOf('validate') !== -1 || r.ops.indexOf('approve') !== -1);
-    $('qrows').innerHTML = j.items.map(r => '<div style="border-top:1px solid var(--line);padding:8px 0">' + (batchable(r) ? '<input type="checkbox" class="qtick" data-id="' + esc(r.requestId) + '" data-v="' + (r.ops.indexOf('validate') !== -1 ? '1' : '') + '" data-a="' + (r.ops.indexOf('approve') !== -1 ? '1' : '') + '" data-f="' + (r.flagged ? '1' : '') + '" style="width:auto;margin:0 8px 0 0;vertical-align:middle">' : '') + '<b>' + esc(r.name || 'Member') + '</b> <span class="s">' + esc(r.campus) + ' · ' + esc(r.status) + (r.late ? ' · late route' : '') + (r.flagged ? ' · not in attendance, no request' + (r.lapsed ? ' · time is up: stays Absent' : r.dueMs ? ' · ' + r.hoursLeft + ' h left' : '') : '') + (r.bypass ? ' · waiting for the Campus MD' : '') + (r.handedToCampusMd ? ' · handed to a Campus MD' : '') + ' · ' + new Date(r.rehearsalStartMs).toLocaleString() + '</span><br><span class="s">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span><br>' +
-      r.ops.map(o => '<button data-id="' + esc(r.requestId) + '" data-op="' + o + '" style="width:auto;padding:.4rem .8rem;margin-right:6px' + (/reject/.test(o) ? ';background:none;color:var(--bad);border:1px solid var(--bad)' : '') + '">' + (r.flagged && FLABEL[o] ? FLABEL[o] : OPLABEL[o]) + '</button>').join('') + (r.flagged && r.memberId && r.ops.indexOf('validate') !== -1 ? '<button class="btn line" type="button" style="width:auto;padding:.4rem .8rem" data-deact="1" data-mid="' + esc(r.memberId) + '" data-name="' + esc(r.name) + '" data-campus="' + esc(r.campus) + '">No longer in the choir: ask to deactivate…</button>' : '') + '</div>').join('');
-    const ticked = () => Array.from($('qrows').querySelectorAll('.qtick:checked'));
+    const n = k => items.filter(r => kind(r) === k).length;
+    const tile = (k, v, col) => '<div class="card stat" style="box-shadow:none"><div class="k" style="color:var(--mut)">' + k + '</div><div class="v"' + (col ? ' style="color:' + col + '"' : '') + '>' + v + '</div></div>';
+    $('qsum').innerHTML = items.length ? '<div class="stats" style="margin:0 0 14px">' + tile('Waiting for you', items.length) + tile('Absent, no request', n('flag'), '#AE2D37') + tile('Late route', n('late'), '#95621D') + tile('Appeals', n('appeal'), '#2F4F7E') + '</div>' : '';
+    $('qfind').classList.toggle('hide', !items.length);
+    const camps = Array.from(new Set(items.map(r => r.campus).filter(Boolean))).sort();
+    $('qc').innerHTML = '<option value="">Any campus</option>' + camps.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+    $('qt').innerHTML = '<option value="">Any kind</option>' + Object.keys(KIND).filter(k => n(k)).map(k => '<option value="' + k + '">' + KIND[k] + ' (' + n(k) + ')</option>').join('');
+    $('qrows').innerHTML = items.map(r => {
+      const k = kind(r), when = r.rehearsalStartMs ? new Date(r.rehearsalStartMs).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'}) : '';
+      const pills = '<span class="pill ' + (k === 'flag' ? 'p-no' : k === 'normal' ? 'p-val' : 'p-pend') + '">' + KIND[k] + '</span>' +
+        (r.flagged ? (r.lapsed ? '<span class="pill p-no">Time is up: stays Absent</span>' : r.dueMs ? '<span class="pill p-pend">' + r.hoursLeft + ' h left</span>' : '') : '') +
+        (r.bypass ? '<span class="pill p-info">With the Campus MD</span>' : '') + (r.handedToCampusMd ? '<span class="pill p-info">Handed to a Campus MD</span>' : '');
+      const btns = r.ops.map(o => '<button type="button" class="btn ' + (/reject/.test(o) ? 'warn' : 'red') + ' sm" data-id="' + esc(r.requestId) + '" data-op="' + o + '" data-f="' + (r.flagged ? '1' : '') + '" data-w="' + (r.bypass ? '1' : '') + '">' + esc(r.flagged && FLABEL[o] ? FLABEL[o] : OPLABEL[o]) + '</button>').join('') +
+        (r.flagged && r.memberId && r.ops.indexOf('validate') !== -1 ? '<button class="btn line sm" type="button" data-deact="1" data-mid="' + esc(r.memberId) + '" data-name="' + esc(r.name) + '" data-campus="' + esc(r.campus) + '">No longer in the choir…</button>' : '');
+      return '<div class="qrow" data-k="' + esc((r.name || '').toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-t="' + k + '">' +
+        '<div class="qck">' + (batchable(r) ? '<input type="checkbox" class="qtick" data-id="' + esc(r.requestId) + '" data-v="' + (r.ops.indexOf('validate') !== -1 ? '1' : '') + '" data-a="' + (r.ops.indexOf('approve') !== -1 ? '1' : '') + '" data-f="' + (r.flagged ? '1' : '') + '" aria-label="Tick ' + esc(r.name || 'member') + '">' : '') + '</div>' +
+        '<div class="qmain"><div class="qname">' + esc(r.name || 'Member') + ' <span class="s">' + esc(r.campus) + (when ? ' · ' + esc(r.rehearsalId || '') + ' · ' + when : '') + '</span></div><div class="qpills">' + pills + '</div>' +
+        '<div class="s qwhy">' + esc(r.reason || (r.flagged ? 'Marked Absent at the rehearsal. Nobody sent a request.' : 'No reason recorded.')) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div></div>' +
+        '<div class="qact">' + btns + '</div></div>';
+    }).join('');
+    const rowsEl = () => Array.from($('qrows').querySelectorAll('.qrow'));
+    const shown = () => rowsEl().filter(e => e.style.display !== 'none');
+    const ticked = () => Array.from($('qrows').querySelectorAll('.qtick:checked')).filter(x => x.closest('.qrow').style.display !== 'none');
     const upd = () => {
       const t = ticked(), v = t.filter(x => x.dataset.v).length, a = t.filter(x => x.dataset.a).length;
       $('qvtick').textContent = 'Validate ticked (' + v + ')'; $('qvtick').disabled = v === 0;
       $('qatick').textContent = 'Approve ticked (' + a + ')'; $('qatick').disabled = a === 0;
       $('qbar').classList.toggle('hide', !$('qrows').querySelector('.qtick'));
     };
+    const filt = () => {
+      const q = $('qq').value.trim().toLowerCase(), c = $('qc').value, t = $('qt').value;
+      rowsEl().forEach(e => { e.style.display = (!q || e.dataset.k.indexOf(q) !== -1) && (!c || e.dataset.c === c) && (!t || e.dataset.t === t) ? '' : 'none'; });
+      $('qcount').textContent = items.length ? 'Showing ' + shown().length + ' of ' + items.length + '.' : '';
+      upd();
+    };
+    $('qq').oninput = filt; $('qc').onchange = $('qt').onchange = filt;
+    $('qx').onclick = () => { $('qq').value = ''; $('qc').value = ''; $('qt').value = ''; rowsEl().forEach(e => { const b = e.querySelector('.qtick'); if (b) b.checked = false; }); filt(); };
+    $('qall').onclick = () => { shown().forEach(e => { const b = e.querySelector('.qtick'); if (b) b.checked = true; }); upd(); };
     $('qrows').querySelectorAll('.qtick').forEach(x => x.onchange = upd);
-    upd();
+    filt();
     const batch = async (op, attr) => {
       const ids = ticked().filter(x => x.dataset[attr]).map(x => x.dataset.id);
       if (!ids.length) return;
@@ -1327,10 +1371,10 @@ async function loadQueue() {
     };
     $('qvtick').onclick = () => batch('validate', 'v');
     $('qatick').onclick = () => batch('approve', 'a');
-    $('qrows').querySelectorAll('button').forEach(b => b.onclick = async () => {
+    $('qrows').querySelectorAll('button[data-op]').forEach(b => b.onclick = async () => {
       let reason = '', delegateMemberId = '';
       if (b.dataset.op === 'delegate') { delegateMemberId = prompt('Member ID of the Campus MD to hand this to (same campus as the member):'); if (!delegateMemberId) return; }
-      if ((/reject/.test(b.dataset.op) && b.closest('div').textContent.indexOf('waiting for the Campus MD') === -1) || (b.dataset.op === 'validate' && b.closest('div').textContent.indexOf('no request') !== -1)) { reason = prompt('Reason (10 to 300 characters):'); if (!reason) return; }
+      if ((/reject/.test(b.dataset.op) && !b.dataset.w) || (b.dataset.op === 'validate' && b.dataset.f)) { reason = prompt('Reason (10 to 300 characters):'); if (!reason) return; }
       const k = await call({action: 'absence.act', token, requestId: b.dataset.id, op: b.dataset.op, reason, delegateMemberId});
       say('m7', k.ok ? 'Saved: ' + k.status : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); if (k.ok) loadQueue();
     });
