@@ -20,14 +20,16 @@ button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;
 
 <div id="step1" class="card hide">
 <b>1. Who are you?</b>
-<div id="gwrap" class="hide"><div id="gbtn" style="margin:.4rem 0"></div><p id="gmsg" class="s"></p><p class="s" style="margin:.2rem 0">Or type your Member ID:</p></div>
+<p id="how" class="s hide">No QR needed. Sign in with the Google account you gave the choir, then check your location. Your phone is remembered, so next time it is quick.</p>
+<div id="gwrap" class="hide"><div id="gbtn" style="margin:.4rem 0"></div><p id="gmsg" class="s"></p><p id="orid" class="s" style="margin:.2rem 0">Or type your Member ID:</p></div>
 <input id="mid" autocomplete="off" placeholder="Member ID">
+<p id="noqr" class="s bad hide">To check in without the QR code you need to sign in with Google. If Google does not work for you, scan the QR code your Campus MD shows, or ask your Campus MD or Desk D to mark you.</p>
 <button id="loc">2. Check my location</button>
 <p id="locmsg" class="s"></p></div>
 
 <div id="step3" class="card hide">
 <b>3. Confirm</b>
-<p class="s">The code from the QR you scanned is attached automatically.</p>
+<p id="step3txt" class="s">The code from the QR you scanned is attached automatically.</p>
 <button id="send">Check me in</button>
 <p id="out" class="s"></p></div>
 
@@ -59,10 +61,13 @@ if (GOOGLE_CLIENT_ID) {
 }
 let agreed = false; try { agreed = localStorage.getItem('rbcConsent') === '1'; } catch (e) {}
 if (!BACKEND_URL) $('demo').classList.remove('hide');
-function showSteps(){ $('consent').classList.add('hide'); $('step1').classList.remove('hide'); }
+const PORTAL = !T;
+function showSteps(){ $('consent').classList.add('hide'); $('step1').classList.remove('hide');
+  if (PORTAL) { $('how').classList.remove('hide'); $('mid').classList.add('hide'); $('orid').classList.add('hide'); $('noqr').classList.toggle('hide', !!GOOGLE_CLIENT_ID); $('step3txt').textContent = 'You are signed in with Google. Your location was checked once and is not kept.'; } }
 if (agreed) showSteps();
 $('agree').onclick = () => { try { localStorage.setItem('rbcConsent','1'); } catch (e) {} showSteps(); };
 $('loc').onclick = () => {
+  if (PORTAL && !gTok) { $('locmsg').textContent = 'Sign in with Google first.'; $('locmsg').className = 's bad'; return; }
   if (!gTok && !$('mid').value.trim()) { $('locmsg').textContent = 'Sign in with Google or enter your Member ID first.'; $('locmsg').className = 's bad'; return; }
   $('locmsg').textContent = 'Checking…'; $('locmsg').className = 's';
   navigator.geolocation.getCurrentPosition(p => {
