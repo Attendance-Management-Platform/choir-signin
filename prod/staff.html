@@ -914,7 +914,7 @@ async function showRecords() {
     const col = st => st === 'Present' ? NAVY : st === 'Absent' ? ATTN : SOFT;
     fpPanel('rec', 'rcout', {bare: true, items: j.rows, empty: 'Nobody is listed for this rehearsal.',
       before: '<p class="sub" style="margin:10px 0 0">' + esc(j.id + (j.date ? ' · ' + j.date : '')) + ' · ' + j.count + ' people' + (j.count > j.shown ? ' (first ' + j.shown + ')' : '') + '. Tap a name to open that member\'s record below.</p>',
-      fields: [{k: 'q', label: 'Search name', ph: 'Type a name', type: 'text', get: r => r.name}, {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus}, {k: 'part', label: 'Part', type: 'list', get: r => r.part || '(no part)'}, {k: 'status', label: 'Status', type: 'list', get: r => r.status}],
+      fields: [{k: 'q', label: 'Search name', ph: 'Type a name, or choose', type: 'text', get: r => r.name, sug: r => [r.name]}, {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus}, {k: 'part', label: 'Part', type: 'list', get: r => r.part || '(no part)'}, {k: 'status', label: 'Status', type: 'list', get: r => r.status}],
       card: r => '<div class="fprow" style="border-left-color:' + col(r.status) + '"><div><button class="btn line sm nmb" type="button" data-rcpick="' + esc(r.memberId) + '" data-rcname="' + esc(r.name) + '">' + esc(r.name) + '</button><div class="mt">' + esc(r.campus) + ' · ' + esc(r.part || '(no part)') + '</div></div>' + stPill(r.status) + '</div>'});
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
@@ -1292,8 +1292,9 @@ function fpPanel(key, boxId, o) {
   const target = $(boxId);
   const opn = o.bare ? '<div>' : '<div class="card pad rise" data-n="' + o.items.length + '">', hd = o.bare ? '' : '<div class="ct">' + esc(o.title) + '</div>';
   if (!o.items.length) { target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub">' + esc(o.sub) + '</p>' : '') + '<p class="sub">' + esc(o.empty || 'Nothing here.') + '</p>' + (o.after || '') + '</div>'; return; }
+  o.fields.forEach(f => { if (f.sug) f.opts = Array.from(new Set([].concat.apply([], o.items.map(it => f.sug(it))).filter(Boolean))).sort(); });
   o.fields.forEach(f => { if (f.type === 'list') f.opts = f.optsAll ? f.optsAll.slice() : f.all ? f.all.slice() : Array.from(new Set([].concat.apply([], o.items.map(it => f.get(it))).filter(Boolean))).sort(); });
-  const dl = o.fields.filter(f => f.type === 'list').map(f => '<datalist id="fpd_' + key + '_' + f.k + '">' + f.opts.map(x => '<option value="' + esc(x) + '">').join('') + '</datalist>').join('');
+  const dl = o.fields.filter(f => f.type === 'list' || f.sug).map(f => '<datalist id="fpd_' + key + '_' + f.k + '">' + f.opts.map(x => '<option value="' + esc(x) + '">').join('') + '</datalist>').join('');
   let chipsHtml = '';
   if (o.chips) {
     const cf = o.fields.filter(f => f.k === o.chips)[0], cnt = {}; o.items.forEach(it => { [].concat(cf.get(it)).forEach(v => { cnt[v] = (cnt[v] || 0) + 1; }); });
@@ -1301,7 +1302,7 @@ function fpPanel(key, boxId, o) {
     if (keys.length > 1) chipsHtml = '<div class="fpchips"><button type="button" class="fpchip' + (st.v[o.chips] ? '' : ' on') + '" data-fpchip="' + key + '|' + o.chips + '|">All roles<b>' + o.items.length + '</b></button>' + keys.map(v => '<button type="button" class="fpchip' + (st.v[o.chips] === v ? ' on' : '') + '" data-fpchip="' + key + '|' + o.chips + '|' + esc(v) + '">' + esc(v) + '<b>' + cnt[v] + '</b></button>').join('') + '</div>';
   }
   const bar = o.fields.map(f => { const id = 'fp_' + key + '_' + f.k; return '<div style="flex:' + (f.k === 'q' ? '2 1 200px' : '1 1 140px') + '"><label class="lb" for="' + id + '">' + esc(f.label) + '</label><input id="' + id + '" class="in" data-fp="' + key + '" data-k="' + f.k + '"' +
-    (f.type === 'date' ? ' type="date"' : ' autocomplete="off" placeholder="' + esc(f.ph || (f.type === 'list' ? 'Type or choose' : '')) + '"' + (f.type === 'list' ? ' list="fpd_' + key + '_' + f.k + '"' : '')) + ' value="' + esc(st.v[f.k] || '') + '"></div>'; }).join('');
+    (f.type === 'date' ? ' type="date"' : ' autocomplete="off" placeholder="' + esc(f.ph || (f.type === 'list' || f.sug ? 'Type or choose' : '')) + '"' + (f.type === 'list' || f.sug ? ' list="fpd_' + key + '_' + f.k + '"' : '')) + ' value="' + esc(st.v[f.k] || '') + '"></div>'; }).join('');
   target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub" style="margin:0 0 4px">' + esc(o.sub) + '</p>' : '') + dl +
     chipsHtml + '<div class="fpbar">' + bar + '<button class="btn line sm" type="button" data-fpx="' + key + '">Clear</button></div><div class="fplist" id="fpl_' + key + '"></div><div class="fpcount"><span id="fpc_' + key + '"></span><span>Scroll inside this box</span></div>' + (o.after || '') + '</div>';
   fpDraw(key);
@@ -1640,7 +1641,7 @@ async function loadRoom() {
     if (!j.ok) { box.innerHTML = ''; return; }
     fpPanel('room', 'roombox', {title: 'Who is in the room?', sub: 'These members checked in with Google, without the QR. Say yes only if you can see them here.' + (j.campus ? ' You see your own campus.' : ''),
       items: j.rows, empty: 'No one has checked in without the QR yet.',
-      fields: [{k: 'q', label: 'Search', ph: 'A name or ID', type: 'text', get: r => r.name + ' ' + r.memberId},
+      fields: [{k: 'q', label: 'Search', ph: 'Type a name or ID, or choose', type: 'text', get: r => r.name + ' ' + r.memberId, sug: r => [r.name, r.memberId]},
         {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus},
         {k: 'answer', label: 'Answer', type: 'list', get: r => ROOMLAB[r.answer || ''][0], all: ['Waiting for a yes', 'In the room', 'Not here']}],
       card: r => '<div class="fprow"><div style="flex:1 1 220px"><div class="nm">' + esc(r.name || r.memberId) + '</div><div class="mt">' + esc(r.memberId) + (r.campus ? ' · ' + esc(r.campus) : '') + ' · ' + new Date(r.time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) + '</div></div>' +
@@ -1984,7 +1985,7 @@ async function loadRoll() {
     const c = j.counts || {};
     fpPanel('roll', 'rollbox', {title: 'Roll call', sub: c.present + ' present · ' + c.absent + ' absent · ' + c.excused + ' excused · ' + c.none + ' not marked.' + (j.campus ? ' You see your own campus.' : '') + (j.window ? (j.campus ? (j.window.mdOpen ? ' It is your turn to mark.' : ' It is not your turn to mark now.') : (j.window.deskOpen ? ' It is Desk D\'s turn to mark.' : j.window.open ? ' You can check the Campus MDs\' marks. Desk D marks from 45 minutes before the end.' : ' The roll call is closed.')) : ''),
       items: j.rows, empty: 'No members to show.',
-      fields: [{k: 'q', label: 'Search', ph: 'A name or ID', type: 'text', get: r => r.name + ' ' + r.memberId},
+      fields: [{k: 'q', label: 'Search', ph: 'Type a name or ID, or choose', type: 'text', get: r => r.name + ' ' + r.memberId, sug: r => [r.name, r.memberId]},
         {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus},
         {k: 'part', label: 'Part', type: 'list', get: r => r.part},
         {k: 'state', label: 'State', type: 'list', get: r => ROLLLAB[r.state || ''][0], all: ['Not marked', 'Present', 'Absent', 'Excused', 'Not in room']}],
@@ -2278,7 +2279,7 @@ async function loadChanges() {
 const MB = {campuses: [], parts: [], canAdd: false};
 const mbOpts = (list, cur, first) => (first ? '<option value="">' + esc(first) + '</option>' : '') + list.map(x => '<option' + (String(x).toLowerCase() === String(cur || '').toLowerCase() ? ' selected' : '') + '>' + esc(x) + '</option>').join('');
 const mbFields = [
-  {k: 'q', label: 'Search', ph: 'Name, Member ID, email or phone', type: 'text', get: m => [m.name, m.memberId, m.email, m.phone].join(' ')},
+  {k: 'q', label: 'Search', ph: 'Name, Member ID, email or phone, or choose', type: 'text', get: m => [m.name, m.memberId, m.email, m.phone].join(' '), sug: m => [m.name, m.memberId]},
   {k: 'campus', label: 'Campus', type: 'list', get: m => m.campus},
   {k: 'part', label: 'Part', type: 'list', get: m => m.part || '(no part)'},
   {k: 'status', label: 'Status', type: 'list', get: m => m.status}];
