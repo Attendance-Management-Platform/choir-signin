@@ -285,14 +285,25 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
 <div id="s11" class="pg hide">
-<div class="card pad rise"><div class="ct">Analyse attendance</div>
-<p class="sub" style="margin:4px 0 0">Pick a stretch of rehearsals, and narrow it by campus and part if you like. Charts, rankings and a follow-up list appear below.</p>
+<div class="card pad rise"><div class="ct">Build a report</div>
+<p class="sub" style="margin:4px 0 8px">Choose what you want to know, how to break it down and for which period. Nothing is drawn until you press Show.</p>
+<div id="anpre" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+<button class="btn line sm" type="button" data-anpreset="campus6">Last 6 rehearsals by campus</button>
+<button class="btn line sm" type="button" data-anpreset="month">This year by month</button>
+<button class="btn line sm" type="button" data-anpreset="combo">Campus and part, last 3 months</button>
+<button class="btn line sm" type="button" data-anpreset="absentpart">Absences by part, this year</button>
+<button class="btn line sm" type="button" data-anpreset="streak">Who keeps missing</button></div>
 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
-<div style="flex:1 1 150px"><label for="anf" class="lb" style="margin-top:0">From</label><select id="anf" class="in"></select></div>
-<div style="flex:1 1 150px"><label for="ant" class="lb" style="margin-top:0">To</label><select id="ant" class="in"></select></div>
-<div style="flex:1 1 150px"><label for="anc" class="lb" style="margin-top:0">Campus</label><select id="anc" class="in"></select></div>
-<div style="flex:1 1 130px"><label for="anp" class="lb" style="margin-top:0">Part</label><select id="anp" class="in"></select></div></div>
-<div class="actions"><button id="anx" class="btn line sm" type="button">Clear</button><button id="anl6" class="btn line sm" type="button">Last 6 rehearsals</button><span id="andl" class="hide"><button id="ancsv" class="btn red sm" type="button">Download CSV</button></span></div></div>
+<div style="flex:1 1 190px"><label for="anm" class="lb" style="margin-top:0">Show</label><select id="anm" class="in"><option value="rate">Attendance rate</option><option value="present">Number present</option><option value="absent">Number absent</option><option value="excused">Number excused</option><option value="streak">Who keeps missing</option></select></div>
+<div id="anbw" style="flex:1 1 190px"><label for="anb" class="lb" style="margin-top:0">Broken down by</label><select id="anb" class="in"><option value="rehearsal">Rehearsal</option><option value="month">Month</option><option value="year">Year</option><option value="campus">Campus</option><option value="part">Part</option><option value="campuspart">Campus and part</option></select></div>
+<div id="anmw" class="hide" style="flex:1 1 190px"><label for="anms" class="lb" style="margin-top:0">Missed at least</label><select id="anms" class="in"><option value="2">2 in a row</option><option value="3">3 in a row</option><option value="4">4 in a row</option><option value="5">5 in a row</option></select></div>
+<div style="flex:1 1 190px"><label for="anpd" class="lb" style="margin-top:0">Period</label><select id="anpd" class="in"><option value="last6">Last 6 rehearsals</option><option value="last12">Last 12 rehearsals</option><option value="thismonth">This month</option><option value="last3months">Last 3 months</option><option value="thisyear">This year</option><option value="all">All time</option><option value="custom">Choose dates</option></select></div></div>
+<div id="andw" class="hide" style="display:none;gap:12px;flex-wrap:wrap;margin-top:8px"><div style="flex:1 1 170px"><label for="anfd" class="lb" style="margin-top:0">From</label><input id="anfd" class="in" type="date"></div><div style="flex:1 1 170px"><label for="antd" class="lb" style="margin-top:0">To</label><input id="antd" class="in" type="date"></div></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
+<div style="flex:1 1 190px"><label for="anc" class="lb" style="margin-top:0">Only this campus</label><select id="anc" class="in"></select></div>
+<div style="flex:1 1 190px"><label for="anp" class="lb" style="margin-top:0">Only this part</label><select id="anp" class="in"></select></div>
+<label id="ancw" style="flex:1 1 190px;display:flex;gap:8px;align-items:center;font-size:14px;min-height:44px"><input id="ancmp" type="checkbox"> Compare with the period before</label></div>
+<div class="actions"><button id="anrun" class="btn red" type="button">Show</button><button id="anx" class="btn line" type="button">Clear</button></div></div>
 <div id="anout"></div>
 <h3 style="margin:22px 0 6px;font-size:16px">Quick reports</h3><p class="sub" style="margin:0 0 8px">One rehearsal, one month or one campus at a time.</p>
 <div class="card pad rise"><div class="ct">Choose a report</div>
@@ -342,7 +353,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div style="flex:2 1 220px"><label for="rcrid" class="lb" style="margin-top:0">Rehearsal</label><select id="rcrid" class="in"></select></div>
 <div style="flex:1 1 160px"><label for="rccamp" class="lb" style="margin-top:0">Campus</label><select id="rccamp" class="in"></select></div>
 <div style="flex:1 1 140px"><label for="rcpart" class="lb" style="margin-top:0">Part</label><select id="rcpart" class="in"></select></div></div>
-<div id="rcout"></div></div>
+<div id="rcout"></div><div class="actions"><button id="rcx1" class="btn line sm" type="button">Clear</button></div></div>
 <div class="card pad rise"><div class="ct">Find a member</div>
 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
 <div style="flex:2 1 220px"><label for="rcq" class="lb" style="margin-top:0">Name</label><input id="rcq" class="in" autocomplete="off" placeholder="Type at least 2 letters, or tap a name above"></div>
@@ -601,68 +612,77 @@ function bars(rows, drill) {
   return rows.map(r => '<div style="margin:8px 0"' + (drill ? ' class="drill" role="button" tabindex="0" data-sc="campus" data-key="' + esc(r.campus) + '" title="Open the ' + esc(r.campus) + ' report"' : '') + '><div style="display:flex;justify-content:space-between;font-size:14px"><span>' + esc(r.campus) + '</span><b>' + r.present + ' of ' + r.active + ' · ' + r.rate + '%</b></div>' +
     '<div style="background:#EEF1F6;border-radius:99px;height:10px"><div style="width:' + Math.min(100, r.rate) + '%;height:10px;border-radius:99px;background:' + (r.rate >= 70 ? '#20775A' : '#95621D') + '"></div></div></div>').join('') || '<p class="sub">No campus figures yet.</p>';
 }
+const NAVY = '#2F4F7E', SOFT = '#A9B4C6', ATTN = '#B4474D';
 function ring(rate, color) {
   const R = 52, C = 2 * Math.PI * R, f = Math.max(0, Math.min(100, rate)) / 100 * C;
   return '<svg viewBox="0 0 130 130" width="150" height="150" role="img" aria-label="Attendance rate ' + rate + ' percent" style="flex:none;max-width:100%"><circle cx="65" cy="65" r="' + R + '" fill="none" stroke="#EEF1F6" stroke-width="14"/>' +
     '<circle cx="65" cy="65" r="' + R + '" fill="none" stroke="' + color + '" stroke-width="14" stroke-linecap="round" stroke-dasharray="' + f + ' ' + C + '" transform="rotate(-90 65 65)"/>' +
     '<text x="65" y="64" text-anchor="middle" font-size="21" font-weight="900" fill="#151B2D">' + rate + '%</text><text x="65" y="84" text-anchor="middle" font-size="11" fill="#5E6A7E">were present</text></svg>';
 }
-function rateColor(r) { return r >= 85 ? '#20775A' : r >= 70 ? '#95621D' : '#8E0008'; }
+function rateColor(r) { return r >= 70 ? NAVY : ATTN; }
 function kpi(k, v, s, col, cls) { return '<div class="card kpi ' + (cls || '') + '" style="--kc:' + col + '"><div class="kk">' + esc(k) + '</div><div class="kv">' + esc(v) + '</div>' + (s ? '<div class="ks">' + esc(s) + '</div>' : '') + '</div>'; }
-/** Columns of rate % per rehearsal (value on top, id underneath). rows = [{id, rate}] */
-function trendBars(rows, drill) {
+/** Columns over time. rows = [{name, value}]; max = the top of the scale (100 for a rate). Under 70 on a rate is drawn in the attention colour. */
+function colChart(rows, opt) {
+  opt = opt || {};
   if (!rows.length) return '<p class="sub">Nothing to show yet.</p>';
-  if (rows.length === 1) return '<p class="sub">A trend appears from the second published rehearsal.</p>';
-  const n = rows.length, W = 100 * n, H = 170, base = 140, top = 24;
-  const x = i => i * 100 + 50, y = v => base - (base - top) * Math.min(100, v) / 100;
-  const pts = rows.map((r, i) => x(i) + ',' + y(r.rate)).join(' ');
-  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Attendance rate for each rehearsal" style="width:100%;height:auto;max-height:230px">' +
-    [0, 50, 100].map(v => '<line x1="0" x2="' + W + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#E6E9EF"/><text x="2" y="' + (y(v) - 3) + '" font-size="10" fill="#8A93A5">' + v + '%</text>').join('') +
-    rows.map((r, i) => '<rect x="' + (x(i) - 20) + '" y="' + y(r.rate) + '" width="40" height="' + (base - y(r.rate)) + '" rx="6" fill="' + rateColor(r.rate) + '" opacity=".16"/>').join('') +
-    '<polyline points="' + pts + '" fill="none" stroke="#2F4F7E" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
-    rows.map((r, i) => '<circle cx="' + x(i) + '" cy="' + y(r.rate) + '" r="5" fill="' + rateColor(r.rate) + '" stroke="#fff" stroke-width="2"/><text x="' + x(i) + '" y="' + (y(r.rate) - 10) + '" text-anchor="middle" font-size="12" font-weight="800" fill="' + rateColor(r.rate) + '">' + r.rate + '%</text>' +
-      '<text x="' + x(i) + '" y="' + (base + 18) + '" text-anchor="middle" font-size="11" fill="#5E6A7E"' + (drill ? ' class="drill" data-sc="rehearsal" data-key="' + esc(r.id) + '" style="cursor:pointer;text-decoration:underline"' : '') + '>' + esc(r.id) + '</text>').join('') + '</svg>';
+  if (rows.length === 1 && !opt.single) return '<p class="sub">A trend appears from the second published rehearsal.</p>';
+  const n = rows.length, unit = opt.unit || '', rate = unit === '%', max = rate ? 100 : Math.max(1, Math.ceil(Math.max(...rows.map(r => r.value)) * 1.15)), step = Math.max(1, Math.ceil(n / 12));
+  const W = Math.max(300, 62 * n), H = 190, base = 150, top = 26;
+  const x = i => i * (W / n) + (W / n) / 2, y = v => base - (base - top) * Math.min(max, v) / max, bw = Math.min(40, (W / n) * .6);
+  const col = r => rate ? rateColor(r.value) : NAVY;
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(opt.label || 'Chart') + '" style="width:100%;height:auto;max-height:260px">' +
+    [0, .5, 1].map(f => '<line x1="0" x2="' + W + '" y1="' + y(max * f) + '" y2="' + y(max * f) + '" stroke="#E6E9EF"/><text x="2" y="' + (y(max * f) - 3) + '" font-size="10" fill="#8A93A5">' + Math.round(max * f) + unit + '</text>').join('') +
+    rows.map((r, i) => '<rect x="' + (x(i) - bw / 2) + '" y="' + y(r.value) + '" width="' + bw + '" height="' + Math.max(1, base - y(r.value)) + '" rx="5" fill="' + col(r) + '" opacity=".85"/>' +
+      '<text x="' + x(i) + '" y="' + (y(r.value) - 6) + '" text-anchor="middle" font-size="11" font-weight="800" fill="#2B3447">' + r.value + unit + '</text>' +
+      (i % step === 0 ? '<text x="' + x(i) + '" y="' + (base + 16) + '" text-anchor="middle" font-size="10.5" fill="#5E6A7E"' + (opt.drill ? ' class="drill" data-sc="rehearsal" data-key="' + esc(r.name) + '" style="cursor:pointer;text-decoration:underline"' : '') + '>' + esc(r.name) + '</text>' : '')).join('') + '</svg>';
 }
 /** Present / Absent / Excused ring with a key beside it. */
 function statusDonut(st) {
   const tot = st.present + st.absent + st.excused || 1, R = 46, C = 2 * Math.PI * R;
   let off = 0;
-  const segs = [['Present', st.present, '#20775A'], ['Absent', st.absent, '#8E0008'], ['Excused', st.excused, '#95621D']];
+  const segs = [['Present', st.present, NAVY], ['Absent', st.absent, ATTN], ['Excused', st.excused, SOFT]];
   const arcs = segs.map(s => { const len = s[1] / tot * C, a = '<circle cx="60" cy="60" r="' + R + '" fill="none" stroke="' + s[2] + '" stroke-width="16" stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-off) + '" transform="rotate(-90 60 60)"/>'; off += len; return a; }).join('');
   return '<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center"><svg viewBox="0 0 120 120" width="150" height="150" role="img" aria-label="Present, absent and excused" style="max-width:100%"><circle cx="60" cy="60" r="' + R + '" fill="none" stroke="#EEF1F6" stroke-width="16"/>' + arcs +
-    '<text x="60" y="58" text-anchor="middle" font-size="20" font-weight="900" fill="#151B2D">' + (tot === 1 && !segs[0][1] ? 0 : tot) + '</text><text x="60" y="74" text-anchor="middle" font-size="10" fill="#5E6A7E">records</text></svg>' +
+    '<text x="60" y="58" text-anchor="middle" font-size="20" font-weight="900" fill="#151B2D">' + (st.present + st.absent + st.excused) + '</text><text x="60" y="74" text-anchor="middle" font-size="10" fill="#5E6A7E">records</text></svg>' +
     '<div>' + segs.map(s => '<div style="display:flex;align-items:center;gap:8px;margin:6px 0;font-size:14px"><span style="width:12px;height:12px;border-radius:4px;background:' + s[2] + '"></span><b style="min-width:34px">' + s[1] + '</b><span class="sub" style="margin:0">' + s[0] + ' · ' + Math.round(1000 * s[1] / tot) / 10 + '%</span></div>').join('') + '</div></div>';
 }
-/** Ranked horizontal bars. rows = [{name, rate, a, b}] where a/b are shown as "a of b". */
-function rankBars(rows, drillScope, drill, color) {
-  return rows.map((r, i) => '<div' + (drill && drillScope ? ' class="drill" role="button" tabindex="0" data-sc="' + drillScope + '" data-key="' + esc(r.name) + '" title="Open the ' + esc(r.name) + ' report"' : '') + ' style="cursor:' + (drill && drillScope ? 'pointer' : 'default') + ';display:flex;align-items:center;gap:12px;padding:9px 0;border-top:' + (i ? '1px solid #EEF1F6' : '0') + '">' +
-    '<div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;font-size:14px"><b>' + esc(r.name) + '</b><span class="sub" style="margin:0">' + r.a + ' of ' + r.b + '</span></div>' +
-    '<div style="background:#EEF1F6;border-radius:99px;height:8px;margin-top:5px"><div style="width:' + Math.min(100, r.rate) + '%;height:8px;border-radius:99px;background:' + (color || rateColor(r.rate)) + '"></div></div></div>' +
-    '<span style="flex:none;min-width:54px;text-align:center;font-weight:900;font-size:13px;color:' + rateColor(r.rate) + ';background:#F5F7FA;border-radius:99px;padding:4px 8px">' + r.rate + '%</span></div>').join('') || '<p class="sub">No figures yet.</p>';
+/** Ranked horizontal bars. rows = [{name, value, a, b}]; a rate (unit %) fills to its value, a count fills against the biggest. */
+function rankBars(rows, opt) {
+  opt = opt || {};
+  const unit = opt.unit || '%', max = unit === '%' ? 100 : Math.max(1, ...rows.map(r => r.value));
+  return rows.map((r, i) => '<div' + (opt.drill ? ' class="drill" role="button" tabindex="0" data-sc="campus" data-key="' + esc(r.name) + '" title="Open the ' + esc(r.name) + ' report"' : '') + ' style="cursor:' + (opt.drill ? 'pointer' : 'default') + ';display:flex;align-items:center;gap:12px;padding:9px 0;border-top:' + (i ? '1px solid #EEF1F6' : '0') + '">' +
+    '<div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;font-size:14px"><b>' + esc(r.name) + '</b><span class="sub" style="margin:0">' + (r.b != null ? r.a + ' of ' + r.b : '') + '</span></div>' +
+    '<div style="background:#EEF1F6;border-radius:99px;height:8px;margin-top:5px"><div style="width:' + Math.max(1, Math.min(100, 100 * r.value / max)) + '%;height:8px;border-radius:99px;background:' + (unit === '%' ? rateColor(r.value) : NAVY) + '"></div></div></div>' +
+    '<span style="flex:none;min-width:54px;text-align:center;font-weight:900;font-size:13px;color:' + (unit === '%' ? rateColor(r.value) : '#2B3447') + ';background:#F5F7FA;border-radius:99px;padding:4px 8px">' + r.value + unit + '</span></div>').join('') || '<p class="sub">No figures yet.</p>';
 }
-function heat(cols, rows, cells, label) {
-  const bg = v => v === null || v === undefined ? '#F5F7FA' : v >= 85 ? '#CFE8DC' : v >= 70 ? '#F4E3C3' : '#F2CDD0';
+/** Colour grid. cells[i][j] = null or {t: text, v: 0-100 for the shade, title}. */
+function heat(cols, rows, cells, label, rate) {
+  const bg = v => v === null ? '#F5F7FA' : (rate && v < 70) ? '#F6E1E2' : 'rgba(47,79,126,' + (0.14 + 0.72 * Math.min(100, v) / 100).toFixed(2) + ')';
+  const fg = v => v === null ? '#8A93A5' : (rate && v < 70) ? '#8E0008' : v >= 55 ? '#fff' : '#1E2A44';
   return '<div style="overflow-x:auto"><table class="heat"><thead><tr><th class="rl">' + esc(label || '') + '</th>' + cols.map(c => '<th>' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
-    rows.map((r, i) => '<tr><th class="rl">' + esc(r) + '</th>' + cols.map((c, j) => { const v = cells[i][j]; const t = v === null || v === undefined ? '–' : (typeof v === 'object' ? v.t : v + '%'); const n = v === null || v === undefined ? null : (typeof v === 'object' ? v.v : v);
-      return '<td style="background:' + bg(n) + '"' + (v && typeof v === 'object' && v.title ? ' title="' + esc(v.title) + '"' : '') + '>' + esc(t) + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table></div><p class="sub" style="margin:8px 0 0">Green 85% or more · amber 70% or more · red below 70% · – no one in that group.</p>';
+    rows.map((r, i) => '<tr><th class="rl">' + esc(r) + '</th>' + cols.map((c, j) => { const x = cells[i][j]; const v = x ? x.v : null;
+      return '<td style="background:' + bg(v) + ';color:' + fg(v) + '"' + (x && x.title ? ' title="' + esc(x.title) + '"' : '') + '>' + (x ? esc(x.t) : '–') + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table></div><p class="sub" style="margin:8px 0 0">Darker means higher' + (rate ? '; red means under 70%' : '') + '. A dash means no one in that group.</p>';
 }
-function homeCharts(c, drill) {
+function homeCharts(c, drill, canSee) {
   if (!c) return '';
   if (!c.series.length) return '<div class="card pad rise"><div class="ct">Attendance</div><p class="sub">No official attendance yet. It appears here once a rehearsal has been processed and published to ATTENDANCE SUMMARY and ATTENDANCE LOG.</p></div>';
   const L = c.last || {present: 0, eligible: 0, absent: 0, excused: 0, rate: 0};
-  const parts = (c.parts || []).slice().sort((a, b) => b.present - a.present), pmax = Math.max(1, ...parts.map(x => x.present));
-  const camps = c.campuses.slice().sort((a, b) => b.rate - a.rate).map(r => ({name: r.campus, rate: r.rate, a: r.present, b: r.active}));
-  const prev = c.series.length > 1 ? c.series[c.series.length - 2] : null;
-  const delta = prev ? (Math.round((L.rate - prev.rate) * 10) / 10) : null;
+  const camps = c.campuses.slice().sort((a, b) => b.rate - a.rate).map(r => ({name: r.campus, value: r.rate, a: r.present, b: r.active}));
+  const prev = c.series.length > 1 ? c.series[c.series.length - 2] : null, delta = prev ? (Math.round((L.rate - prev.rate) * 10) / 10) : null;
+  const at = c.attention || {lowCampuses: [], streak: 0, who: []};
+  const none = !at.lowCampuses.length && !at.streak;
+  const attn = '<div class="c5 card pad"><div class="ct">Needs attention</div>' + (none ? '<p class="sub" style="margin:0">Nothing needs attention right now. Every campus is at 70% or more and no one has missed three in a row.</p>' :
+    (at.lowCampuses.length ? '<p class="sub" style="margin:0 0 6px">Under 70% at ' + esc(L.id || 'the last rehearsal') + '</p><div style="display:flex;gap:8px;flex-wrap:wrap">' + at.lowCampuses.map(x => '<span class="pill p-no">' + esc(x.campus) + ' · ' + x.rate + '%</span>').join('') + '</div>' : '') +
+    (at.streak ? '<p class="sub" style="margin:12px 0 4px"><b>' + at.streak + '</b> member' + (at.streak === 1 ? ' has' : 's have') + ' missed 3 or more rehearsals in a row.</p>' + ((at.who || []).length ? '<p class="sub" style="margin:0">' + at.who.map(x => esc(x.name) + ' (' + esc(x.campus) + ', ' + x.streak + ')').join(' · ') + '</p>' : '') : '') +
+    (canSee && at.streak ? '<div class="actions"><button class="btn line sm" type="button" data-anpreset="streak">See who</button></div>' : '')) + '</div>';
   return '<div class="dash rise">' +
     '<div class="c3 card kpi" style="--kc:' + rateColor(L.rate) + '"><div class="kk">Attendance rate</div><div class="kv">' + L.rate + '%</div><div class="ks">' + esc(L.id || '') + (L.date ? ' · ' + esc(L.date) : '') + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + ' pts') + '</div></div>' +
-    '<div class="c3 card kpi" style="--kc:#20775A"><div class="kk">Present</div><div class="kv">' + L.present + '</div><div class="ks">of ' + L.eligible + ' members</div></div>' +
-    '<div class="c3 card kpi" style="--kc:#8E0008"><div class="kk">Absent</div><div class="kv">' + L.absent + '</div><div class="ks">no approved reason</div></div>' +
-    '<div class="c3 card kpi" style="--kc:#95621D"><div class="kk">Excused</div><div class="kv">' + L.excused + '</div><div class="ks">approved absences</div></div>' +
-    '<div class="c7 card pad"><div class="ct">Attendance rate, recent rehearsals</div><div class="grow" style="display:flex;align-items:center">' + '<div style="width:100%">' + trendBars(c.series, drill) + '</div></div></div>' +
+    '<div class="c3 card kpi" style="--kc:' + NAVY + '"><div class="kk">Present</div><div class="kv">' + L.present + '</div><div class="ks">of ' + L.eligible + ' members</div></div>' +
+    '<div class="c3 card kpi" style="--kc:' + ATTN + '"><div class="kk">Absent</div><div class="kv">' + L.absent + '</div><div class="ks">no approved reason</div></div>' +
+    '<div class="c3 card kpi" style="--kc:' + SOFT + '"><div class="kk">Excused</div><div class="kv">' + L.excused + '</div><div class="ks">approved absences</div></div>' +
+    '<div class="c7 card pad"><div class="ct">Last ' + c.series.length + ' rehearsals</div><div class="grow" style="display:flex;align-items:center"><div style="width:100%">' + colChart(c.series.map(p => ({name: p.id, value: p.rate})), {unit: '%', drill: drill, label: 'Attendance rate, last rehearsals'}) + '</div></div>' + (canSee ? '<p class="sub" style="margin:6px 0 0">Older rehearsals, months and years are in Reports.</p>' : '') + '</div>' +
     '<div class="c5 card pad"><div class="ct">Last rehearsal</div><div class="grow" style="display:flex;align-items:center;justify-content:center">' + statusDonut({present: L.present, absent: L.absent, excused: L.excused}) + '</div></div>' +
-    '<div class="c7 card pad"><div class="ct">By campus · best first</div>' + rankBars(camps, 'campus', drill) + '<p class="sub" style="margin-top:8px">Green 85% or more, amber 70% or more.</p></div>' +
-    '<div class="c5 card pad"><div class="ct">Present by part</div>' + (parts.length ? parts.map(x => '<div style="display:flex;align-items:center;gap:10px;margin:9px 0;font-size:14px"><span style="width:84px;flex:none">' + esc(x.part) + '</span><div style="flex:1;background:#EEF1F6;border-radius:99px;height:10px"><div style="width:' + Math.round(100 * x.present / pmax) + '%;height:10px;border-radius:99px;background:#2F4F7E"></div></div><b style="width:30px;text-align:right">' + x.present + '</b></div>').join('') : '<p class="sub">The parts appear once the Section column is filled in for the members.</p>') + '</div>' +
+    '<div class="c7 card pad"><div class="ct">By campus · last rehearsal</div>' + rankBars(camps, {unit: '%', drill: drill}) + '</div>' + attn +
     '</div>';
 }
 let rpState = null, rpPick = null;
@@ -726,6 +746,7 @@ $('rccamp').addEventListener('change', showRecords);
 $('rcpart').addEventListener('change', showRecords);
 $('rcmc').addEventListener('change', findMember);
 $('rcmp').addEventListener('change', findMember);
+$('rcx1').onclick = () => { $('rccamp').value = ''; $('rcpart').value = ''; if ($('rcrid').options.length) $('rcrid').selectedIndex = 0; showRecords(); };
 $('rcx').onclick = () => { $('rcq').value = ''; $('rcmc').value = ''; $('rcmp').value = ''; $('rcmatch').innerHTML = ''; $('rcmem').innerHTML = ''; say('m13', ''); $('rcq').focus(); };
 $('rcq').addEventListener('input', () => { clearTimeout(rcT); rcT = setTimeout(findMember, 300); });
 document.addEventListener('click', ev => {
@@ -1124,7 +1145,7 @@ async function loadReports() {
     rpState = j; $('rpdl').classList.toggle('hide', !j.canDownload); say('m11', j.empty || '');
     if (rpPick) { $('rpscope').value = rpPick.scope; }
     fillKeys(); if (rpPick) { $('rpkey').value = rpPick.key; rpPick = null; }
-    anFill(); showAnalysis();
+    anFill(); if (rpPreset) { const pr = rpPreset; rpPreset = ''; anApply(pr); }
     showReport();
   } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
 }
@@ -1138,56 +1159,82 @@ function table(cols, rows, raw) {
     rows.map(r => '<tr>' + r.map(v => '<td style="padding:9px 10px;border-top:1px solid #E6E9EF">' + (raw ? v : esc(v)) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
 }
 
-// ---- Analyse attendance (Reports) ----
+// ---- Build a report (Reports) ----
+let rpPreset = '', anLast = null;
+const AN_PRE = {campus6: {m: 'rate', b: 'campus', p: 'last6'}, month: {m: 'rate', b: 'month', p: 'thisyear'}, combo: {m: 'rate', b: 'campuspart', p: 'last3months'}, absentpart: {m: 'absent', b: 'part', p: 'thisyear'}, streak: {m: 'streak', b: 'rehearsal', p: 'last6'}};
 function anFill() {
-  const o = rpState || {ids: [], campuses: [], parts: []}, keep = ['anf', 'ant', 'anc', 'anp'].map(i => $(i).value);
-  const ids = (o.ids || []).map(i => '<option>' + esc(i) + '</option>').join('');
-  $('anf').innerHTML = ids; $('ant').innerHTML = ids;
-  $('anc').innerHTML = '<option value="">All campuses</option>' + (o.campuses || []).map(c => '<option>' + esc(c) + '</option>').join('');
-  $('anp').innerHTML = '<option value="">All parts</option>' + (o.parts || []).map(c => '<option>' + esc(c) + '</option>').join('');
-  if (keep[0]) $('anf').value = keep[0]; else if ((o.ids || []).length) $('anf').value = o.ids[0];
-  if (keep[1]) $('ant').value = keep[1]; else if ((o.ids || []).length) $('ant').value = o.ids[o.ids.length - 1];
-  if (keep[2]) $('anc').value = keep[2]; if (keep[3]) $('anp').value = keep[3];
+  const o = rpState || {campuses: [], parts: []}, c = $('anc').value, p = $('anp').value;
+  $('anc').innerHTML = '<option value="">All campuses</option>' + (o.campuses || []).map(x => '<option>' + esc(x) + '</option>').join('');
+  $('anp').innerHTML = '<option value="">All parts</option>' + (o.parts || []).map(x => '<option>' + esc(x) + '</option>').join('');
+  if (c) $('anc').value = c; if (p) $('anp').value = p;
+  anShape();
 }
-async function showAnalysis() {
-  if (!(rpState && (rpState.ids || []).length)) { $('anout').innerHTML = ''; return; }
-  say('m11', 'Loading…');
+function anShape() {
+  const st = $('anm').value === 'streak';
+  $('anbw').classList.toggle('hide', st); $('anmw').classList.toggle('hide', !st); $('ancw').classList.toggle('hide', st);
+  const cu = $('anpd').value === 'custom'; $('andw').classList.toggle('hide', !cu); $('andw').style.display = cu ? 'flex' : 'none';
+}
+function anClear() {
+  $('anm').value = 'rate'; $('anb').value = 'rehearsal'; $('anpd').value = 'last6'; $('anc').value = ''; $('anp').value = ''; $('ancmp').checked = false; $('anms').value = '2'; $('anfd').value = ''; $('antd').value = '';
+  $('anout').innerHTML = ''; anLast = null; anShape(); say('m11', '');
+}
+function anParams() { return {measure: $('anm').value, by: $('anb').value, period: $('anpd').value, from: $('anfd').value, to: $('antd').value, campus: $('anc').value, part: $('anp').value, compare: $('ancmp').checked, minStreak: Number($('anms').value)}; }
+async function showBuild() {
+  say('m11', 'Working it out…');
   try {
-    const j = await call({action: 'reports.analyse', token, from: $('anf').value, to: $('ant').value, campus: $('anc').value, part: $('anp').value});
+    const j = await call(Object.assign({action: 'reports.build', token}, anParams()));
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('anout').innerHTML = '<div class="card pad"><p class="sub">' + esc(j.error || 'Nothing to show.') + '</p></div>'; return say('m11', ''); }
-    const a = j.analysis, t = a.tiles, col = ['#2F4F7E', '#2F4F7E', rateColor(parseFloat(t[2][1])), '#2F4F7E', '#20775A', '#8E0008'];
-    $('andl').classList.toggle('hide', !j.canDownload);
-    const camp = a.byCampus.map(r => ({name: r.name, rate: r.rate, a: r.present, b: r.eligible})), part = a.byPart.map(r => ({name: r.name, rate: r.rate, a: r.present, b: r.eligible}));
-    const cmb = {}; a.combo.cells.forEach(c => { cmb[c.campus + '\u0001' + c.part] = c; });
-    const comboCells = a.combo.campuses.map(c => a.combo.parts.map(p => { const x = cmb[c + '\u0001' + p]; return x ? {t: x.rate + '%', v: x.rate, title: x.present + ' of ' + x.eligible + ' present'} : null; }));
-    let h = '<div class="dash rise" style="margin-top:14px">' +
-      [0, 1, 2, 3].map(i => kpi(t[i][0], t[i][1], '', col[i], 'c3')).join('') + kpi(t[4][0], t[4][1], '', col[4], 'c6') + kpi(t[5][0], t[5][1], '', col[5], 'c6') +
-      '<div class="c7 card pad"><div class="ct">Attendance rate by rehearsal</div><div class="grow" style="display:flex;align-items:center"><div style="width:100%">' + trendBars(a.trend.map(x => ({id: x.id, rate: x.rate})), false) + '</div></div></div>' +
-      '<div class="c5 card pad"><div class="ct">Present, absent, excused</div><div class="grow" style="display:flex;align-items:center;justify-content:center">' + statusDonut(a.status) + '</div></div>' +
-      '<div class="c6 card pad"><div class="ct">By campus · best first</div>' + rankBars(camp, '', false) + '</div>' +
-      '<div class="c6 card pad"><div class="ct">By part · best first</div>' + rankBars(part, '', false, '') + '</div>' +
-      '<div class="c12 card pad"><div class="ct">Campus by rehearsal</div>' + heat(a.matrix.rehearsals, a.matrix.campuses, a.matrix.cells, 'Campus') + '</div>' +
-      '<div class="c12 card pad"><div class="ct">Campus and part together</div>' + heat(a.combo.parts, a.combo.campuses, comboCells, 'Campus') + '</div>';
-    if (a.followUp) h += '<div class="c12 card pad"><div class="ct">Absent two or more rehearsals in a row</div><p class="sub" style="margin:0 0 6px">' + (a.followUp.length ? a.followUp.length + ' member(s). An excused absence does not break a run. Campus Music Directors can follow these up.' : 'No one has missed two in a row in this stretch.') + (a.perfect ? ' ' + a.perfect + ' member(s) were never absent.' : '') + '</p>' +
-      (a.followUp.length ? table(['Name', 'Campus', 'Part', 'In a row', 'Present', 'Absent', 'Rate'], a.followUp.map(x => [x.name, x.campus, x.part, x.streak, x.present, x.absent, x.rate + '%'])) : '') + '</div>';
-    $('anout').innerHTML = h + '<p class="sub c12" style="grid-column:span 12;margin:0">' + esc(a.note) + '</p></div>';
-    say('m11', '');
+    if (!j.ok) { $('anout').innerHTML = ''; return say('m11', j.error || 'Nothing to show.', 'bad'); }
+    anLast = j; drawBuild(j); say('m11', '');
   } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
 }
-['anf', 'ant', 'anc', 'anp'].forEach(i => $(i).addEventListener('change', showAnalysis));
-$('anx').onclick = () => { const o = rpState || {ids: []}; $('anc').value = ''; $('anp').value = ''; if (o.ids.length) { $('anf').value = o.ids[0]; $('ant').value = o.ids[o.ids.length - 1]; } showAnalysis(); };
-$('anl6').onclick = () => { const o = rpState || {ids: []}; if (!o.ids.length) return; $('anf').value = o.ids[Math.max(0, o.ids.length - 6)]; $('ant').value = o.ids[o.ids.length - 1]; showAnalysis(); };
-$('ancsv').onclick = async () => {
-  say('m11', 'Preparing…');
-  try {
-    const j = await call({action: 'reports.analysecsv', token, from: $('anf').value, to: $('ant').value, campus: $('anc').value, part: $('anp').value});
-    if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) return say('m11', j.error || 'Not allowed.', 'bad');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([j.csv], {type: 'text/csv'})); a.download = j.filename; document.body.appendChild(a); a.click(); a.remove();
-    say('m11', 'Downloaded. This download is recorded in the audit log.', 'ok');
-  } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
-};
+function drawBuild(j) {
+  const v = j.view, unit = v.unit || '', clr = '<div class="actions"><button class="btn line sm" type="button" data-anclear="1">Clear this result</button></div>';
+  const what = v.label + (v.byLabel ? ' by ' + v.byLabel.toLowerCase() : '') + ' · ' + v.period + (v.filters.campus ? ' · ' + v.filters.campus : '') + (v.filters.part ? ' · ' + v.filters.part : '');
+  const csv = j.canDownload ? '<button class="btn red sm" type="button" data-ancsv="1">Download CSV</button>' : '';
+  let h = '';
+  if (v.kind === 'members') {
+    h = '<div class="card pad rise"><div class="ct">Summary</div><p class="sub" style="margin:0">' + esc(what) + '. ' + v.rehearsals + ' rehearsal(s). ' + v.members.length + ' member(s) missed ' + v.minStreak + ' or more in a row' + (v.perfect ? '; ' + v.perfect + ' were never absent' : '') + '. An excused absence does not break a run.</p>' + clr + '</div>' +
+      '<div class="card pad rise"><div class="ct">Members to follow up</div>' + (v.members.length ? table(['Name', 'Campus', 'Part', 'In a row', 'Present', 'Absent', 'Rate'], v.members.map(x => [x.name, x.campus, x.part, x.streak, x.present, x.absent, x.rate + '%'])) : '<p class="sub">No one matches.</p>') + '<div class="actions">' + csv + '<button class="btn line sm" type="button" data-anclear="1">Clear this result</button></div></div>';
+  } else {
+    const tiles = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">' + v.tiles.map(t => '<div style="background:#F5F7FA;border-radius:12px;padding:10px 14px;border-top:3px solid ' + NAVY + '"><div class="sub" style="margin:0;font-weight:800">' + esc(t[0]) + '</div><div style="font-size:21px;font-weight:900">' + esc(t[1]) + '</div></div>').join('') + '</div>';
+    let chart;
+    const rate = v.measure === 'rate', valueOf = g => g.value;
+    if (v.kind === 'time') chart = colChart(v.groups.map(g => ({name: g.name, value: valueOf(g)})), {unit: unit, single: true, label: what});
+    else if (v.kind === 'rank') chart = rankBars(v.groups.map(g => ({name: g.name, value: valueOf(g), a: g.present, b: g.eligible})), {unit: unit || ''});
+    else {
+      const mx = Math.max(1, ...v.grid.cells.map(r => Math.max(...r.map(x => (x ? x.value : 0)))));
+      chart = heat(v.grid.cols, v.grid.rows, v.grid.cells.map(r => r.map(x => x ? {t: x.value + unit, v: rate ? x.value : 100 * x.value / mx, title: x.present + ' of ' + x.eligible + ' present'} : null)), 'Campus', rate);
+    }
+    const rows = v.kind === 'grid' ? [].concat(...v.grid.rows.map((c, i) => v.grid.cols.map((p, k) => v.grid.cells[i][k] ? [c, p, v.grid.cells[i][k].value + unit, v.grid.cells[i][k].present, v.grid.cells[i][k].eligible] : null).filter(Boolean))) : v.groups.map(g => [g.name, g.value + unit, g.present, g.absent, g.excused, g.eligible]);
+    const cols = v.kind === 'grid' ? ['Campus', 'Part', v.label, 'Present', 'Eligible'] : [v.byLabel, v.label, 'Present', 'Absent', 'Excused', 'Eligible'];
+    h = '<div class="card pad rise"><div class="ct">Summary</div><p class="sub" style="margin:0 0 8px">' + esc(what) + (v.previous ? '. Before that: ' + esc(v.previous.period) : '') + '</p>' + tiles + clr + '</div>' +
+      '<div class="card pad rise"><div class="ct">Chart</div>' + chart + '<p class="sub" style="margin:8px 0 0">' + esc(v.note) + '</p>' + clr + '</div>' +
+      '<div class="card pad rise"><div class="ct">Figures behind the chart</div>' + table(cols, rows) + '<div class="actions">' + csv + '<button class="btn line sm" type="button" data-anclear="1">Clear this result</button></div></div>';
+  }
+  $('anout').innerHTML = h;
+}
+function anApply(name) {
+  const x = AN_PRE[name]; if (!x) return;
+  $('anm').value = x.m; $('anb').value = x.b; $('anpd').value = x.p; $('anc').value = ''; $('anp').value = ''; $('ancmp').checked = false; $('anms').value = name === 'streak' ? '3' : '2'; anShape(); showBuild();
+}
+['anm', 'anpd'].forEach(i => $(i).addEventListener('change', anShape));
+$('anrun').onclick = showBuild; $('anx').onclick = anClear;
+document.addEventListener('click', async ev => {
+  const t = ev.target.closest && ev.target.closest('[data-anpreset],[data-anclear],[data-ancsv]'); if (!t) return;
+  if (t.dataset.anpreset) { if (!$('s11').classList.contains('hide')) anApply(t.dataset.anpreset); else { rpPreset = t.dataset.anpreset; go('s11'); } }
+  else if (t.dataset.anclear) anClear();
+  else if (t.dataset.ancsv) {
+    say('m11', 'Preparing…');
+    try {
+      const j = await call(Object.assign({action: 'reports.buildcsv', token}, anParams()));
+      if (j.signedOut) { signedOutNow(); return; }
+      if (!j.ok) return say('m11', j.error || 'Not allowed.', 'bad');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([j.csv], {type: 'text/csv'})); a.download = j.filename; document.body.appendChild(a); a.click(); a.remove();
+      say('m11', 'Downloaded. This download is recorded in the audit log.', 'ok');
+    } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
+  }
+});
 async function showReport() {
   const key = $('rpkey').value; if (!key) { $('rpout').innerHTML = '<div class="card pad"><p class="sub">There is nothing to report yet.</p></div>'; return; }
   say('m11', 'Loading…');
@@ -1252,7 +1299,7 @@ async function loadHome() {
       j.bypasses.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + '</div>' : '';
     const mch = (j.memberChanges || []).length ? '<div class="card pad rise"><div class="ct">Membership changes</div>' + j.memberChanges.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + (has('changes') ? '<div class="actions"><button class="btn line" type="button" data-go="s16">Open Changes and updates</button></div>' : '') + '</div>' : '';
     const pth = t.petitions && t.petitions.waiting ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.petitions.waiting + ' petition(s) waiting for your answer</div><div class="actions"><button class="btn red" type="button" data-go="s16">Open Changes and updates</button></div></div>' : '';
-    $('hcharts').innerHTML = pth + awh + bph + mch + crh + homeCharts(t.charts, has('reports'));
+    $('hcharts').innerHTML = pth + awh + bph + mch + crh + homeCharts(t.charts, has('reports'), has('reports'));
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
     // the QR stand-in
@@ -1698,8 +1745,8 @@ pgClearInstall();
 if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTabs(); land(); welcome(); } else signedOutNow(); }).catch(() => signedOutNow());
 </script><script>
 (function () {
-  var NOFOLD = ['Analyse attendance', 'Choose a report', 'Mark a member by hand', 'Request an absence'];
-  var SHUT = ['Ask for a change', 'Late request for a member', 'What happens next', 'Safety settings', 'Being away'];
+  var NOFOLD = ['Build a report', 'Choose a report', 'Mark a member by hand', 'Request an absence'];
+  var SHUT = ['Figures behind the chart', 'Ask for a change', 'Late request for a member', 'What happens next', 'Safety settings', 'Being away'];
   var LIST = ['Waiting for your answer', 'Requests you asked for', 'Approved and ready to carry out'];
   var st = {};
   try { st = JSON.parse(localStorage.getItem('rbcFold') || '{}') || {}; } catch (e) { st = {}; }
@@ -1718,7 +1765,7 @@ if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTab
     var head = card.firstElementChild; if (!head) return;
     var isTbl = card.classList.contains('tblc') && head.classList.contains('tblh');
     if (!isTbl && !head.classList.contains('ct')) return;
-    if (card.closest('#s10,#s14,#rpout,#anout')) return;
+    if (card.closest('#s10,#s14,#rpout')) return;
     var title = (isTbl ? (head.querySelector('span') || head) : head).textContent.trim();
     if (NOFOLD.indexOf(title) >= 0) { card.dataset.fold = 'x'; return; }
     card.dataset.fold = '1';
