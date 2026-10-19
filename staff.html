@@ -100,6 +100,7 @@ body:not(.out){background:radial-gradient(800px 380px at 100% 0,#FFE4E6 0,transp
 .fh:hover{background:var(--rose)}
 .fh:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:0}
 .fh>.ct{flex:1;min-width:0}
+.anh.fh>div:first-child{flex:1;min-width:0}
 .fs{font-size:12px;font-weight:800;color:var(--acc);background:var(--rose);border-radius:999px;padding:3px 11px;white-space:nowrap}
 .fs:empty{display:none}
 .fch{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;flex:none;transition:transform .28s var(--ease),background .2s,border-color .2s}
@@ -1559,7 +1560,7 @@ async function showReport() {
     }
     const fig = '<details class="c12 card pad" style="cursor:default"><summary style="cursor:pointer;font-weight:800;font-size:15px">Figures behind the charts</summary><div style="margin-top:10px">' + table(s.columns, s.rows) + (s.rows2 ? '<div style="margin-top:14px"></div>' + table(s.columns2, s.rows2) : '') + '</div></details>';
     $('rpout').innerHTML = '<div class="card pad rise" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><div class="ct" style="margin:0">' + esc(s.title) + '</div><button class="btn line sm" type="button" data-rpclear="1">Clear this result</button></div>' +
-      '<div class="dash rise">' + tiles + body + fig + '</div><p class="sub" style="margin:8px 4px 0">' + esc(s.note) + '</p>';
+      '<div class="dash rise"><div class="c12 card pad"><div class="ct">Key figures</div><div class="dash" style="margin-top:6px">' + tiles + '</div></div>' + body + fig + '</div><p class="sub" style="margin:8px 4px 0">' + esc(s.note) + '</p>';
     document.querySelectorAll('#rpout .drill').forEach(e => { const f = () => { const to = e.dataset.sc; $('rpscope').value = to; fillKeys(); $('rpkey').value = e.dataset.key; showReport(); }; e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
     say('m11', '');
   } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
@@ -2209,7 +2210,7 @@ pgClearInstall();
 if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTabs(); land(); welcome(); } else signedOutNow(); }).catch(() => signedOutNow());
 </script><script>
 (function () {
-  var NOFOLD = ['Build a report', 'Choose a report', 'Mark a member by hand', 'Request an absence'];
+  var NOFOLD = ['Mark a member by hand', 'Request an absence'];
   var SHUT = ['Figures behind the chart', 'Ask for a change', 'Late request for a member', 'What happens next', 'Safety settings', 'Being away'];
   var LIST = ['Waiting for your answer', 'Requests you asked for', 'Approved and ready to carry out'];
   var st = {};
@@ -2228,13 +2229,14 @@ if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTab
     if (card.dataset.fold) return;
     var head = card.firstElementChild; if (!head) return;
     var isTbl = card.classList.contains('tblc') && head.classList.contains('tblh');
-    if (!isTbl && !head.classList.contains('ct')) return;
-    if (card.closest('#s10,#s14,#rpout')) return;
-    var title = (isTbl ? (head.querySelector('span') || head) : head).textContent.trim();
+    var isAnh = !isTbl && head.classList.contains('anh') && !!head.querySelector('.ct');
+    if (!isTbl && !isAnh && !head.classList.contains('ct')) return;
+    if (card.closest('#s10,#s14')) return;
+    var title = (isAnh ? head.querySelector('.ct') : isTbl ? (head.querySelector('span') || head) : head).textContent.trim();
     if (NOFOLD.indexOf(title) >= 0) { card.dataset.fold = 'x'; return; }
     card.dataset.fold = '1';
     var bar = head;
-    if (!isTbl) { bar = document.createElement('div'); card.insertBefore(bar, head); bar.appendChild(head); }
+    if (!isTbl && !isAnh) { bar = document.createElement('div'); card.insertBefore(bar, head); bar.appendChild(head); }
     bar.classList.add('fh');
     bar.setAttribute('role', 'button'); bar.tabIndex = 0;
     var sum = document.createElement('span'); sum.className = 'fs'; bar.appendChild(sum);
