@@ -661,10 +661,17 @@ function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9
   document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); }
 function ownerLabel(k) { k = String(k || ''); if (/^desk /.test(k)) return 'Desk ' + k.slice(5).split('/').map(x => x.toUpperCase()).join(' or '); if (/^campus md /.test(k)) return 'the ' + k.slice(10).replace(/\b\w/g, c => c.toUpperCase()) + ' Campus Music Director'; if (k === 'campus md') return 'the Campus Music Directors'; return 'the usual role'; }
 const TKLEV = {now: ['Now', '#B4474D', 'p-no'], soon: ['Today', '#D9A441', 'p-pend'], info: ['For your attention', '#A9B4C6', 'p-info']};
-function roleOf(t) { const o = t.owner || ''; if (/^Campus MD/.test(o)) return 'Campus MD'; if (o === 'You') return (myRoles && myRoles[0]) || 'You'; return o; }
+function roleOf(t) {
+  const o = t.owner || ''; if (o === 'You') return [(myRoles && myRoles[0]) || 'You'];
+  const out = []; o.split(/ or /).forEach(x => { x = x.trim(); if (/^Campus M/.test(x)) x = 'Campus MD'; else if (x === 'Assistant') x = 'Assistant Global Admin'; else if (/^[A-D]$/.test(x)) x = 'Desk ' + x; if (x && out.indexOf(x) === -1) out.push(x); });
+  if (/^Desk [A-D]$/.test(out[0] || '')) { /* "Desk C or D" */ }
+  return out;
+}
 function drawTasks(list) {
   const box = $('htasks'); if (!box) return;
-  if (!list || !list.length) { box.innerHTML = Object.keys(myBypass || {}).length || myRoles.length ? '<div class="card pad rise"><div class="ct">Needs attention</div><p class="sub" style="margin:0">Nothing is waiting today. Well done.</p></div>' : ''; return; }
+  list = list || [];
+  const OVER = ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge'].some(r => (myRoles || []).indexOf(r) !== -1);
+  if ((!list || !list.length) && !OVER) { box.innerHTML = Object.keys(myBypass || {}).length || myRoles.length ? '<div class="card pad rise"><div class="ct">Needs attention</div><p class="sub" style="margin:0">Nothing is waiting today. Well done.</p></div>' : ''; return; }
   const others = list.some(t => !t.mine);
   const has = k => myTabs.indexOf(k) !== -1;
   const goBtn = t => {
@@ -674,9 +681,9 @@ function drawTasks(list) {
     return g && has(g) ? '<button class="btn ' + (t.mine ? 'red' : 'line') + ' sm" type="button" data-taskgo="' + esc(g) + '">' + label + '</button>' : '';
   };
   fpPanel('tasks', 'htasks', {title: 'Needs attention', sub: 'What is waiting today, and who it is waiting for.' + (others ? ' Work that is not yours is shown so you can follow it up; "Do it instead" opens it with a reason and tells the owner.' : ''),
-    items: list, chips: 'role', empty: 'Nothing is waiting today.',
+    items: list || [], chips: 'role', empty: 'Nothing is waiting today.',
     fields: [{k: 'q', label: 'Search', ph: 'A task, a desk, a campus', type: 'text', get: t => [t.title, t.detail, t.owner, t.campus].join(' ')},
-      {k: 'role', label: 'Role', type: 'list', get: roleOf},
+      {k: 'role', label: 'Role', type: 'list', get: roleOf, all: OVER ? ['Global Admin', 'Assistant Global Admin', 'Desk A', 'Desk B', 'Desk C', 'Desk D', 'Campus MD'] : null},
       {k: 'owner', label: 'Desk or campus', type: 'list', get: t => t.owner === 'You' ? 'You' : t.owner},
       {k: 'level', label: 'How urgent', type: 'list', get: t => TKLEV[t.level][0]}],
     card: t => '<div class="fprow tkrow tk-' + t.level + '" style="border-left-color:' + TKLEV[t.level][1] + '"><div style="flex:1 1 260px"><div class="nm">' + esc(t.title) + (t.count > 1 ? '<span class="tkn">' + t.count + '</span>' : '') + '</div><div class="mt">' + esc(t.detail) + '</div></div>' +
@@ -1189,12 +1196,15 @@ const FP = {};
 function fpOk(f, it, v) {
   if (!v) return true;
   if (f.type === 'date') { const ms = f.get(it); if (!ms) return false; const day = new Date(ms).toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}); return f.k.indexOf('from') === 0 ? day >= v : day <= v; }
-  return String(f.get(it) || '').toLowerCase().indexOf(String(v).trim().toLowerCase()) !== -1;
+  const gv = f.get(it), vl = String(v).trim().toLowerCase();
+  if (Array.isArray(gv)) { const ex = (f.opts || []).some(x => x.toLowerCase() === vl); return gv.some(x => ex ? String(x).toLowerCase() === vl : String(x).toLowerCase().indexOf(vl) !== -1); }
+  return String(gv || '').toLowerCase().indexOf(vl) !== -1;
 }
 function fpDraw(key) {
   const st = FP[key], o = st.o, box = document.getElementById('fpl_' + key); if (!box) return;
   const left = o.items.filter(it => o.fields.every(f => fpOk(f, it, st.v[f.k])));
-  box.innerHTML = left.length ? left.map(o.card).join('') : '<p class="sub" style="margin:8px 0">Nothing matches. Clear the filters to see everything.</p>';
+  const onlyChip = o.chips && st.v[o.chips] && o.fields.every(f => f.k === o.chips || !st.v[f.k]);
+  box.innerHTML = left.length ? left.map(o.card).join('') : '<p class="sub" style="margin:8px 0">' + (onlyChip ? 'Nothing is waiting for ' + esc(st.v[o.chips]) + '. All clear.' : 'Nothing matches. Clear the filters to see everything.') + '</p>';
   document.getElementById('fpc_' + key).textContent = 'Showing ' + left.length + ' of ' + o.items.length;
 }
 function fpPanel(key, boxId, o) {
@@ -1202,12 +1212,12 @@ function fpPanel(key, boxId, o) {
   const target = $(boxId);
   const opn = o.bare ? '<div>' : '<div class="card pad rise" data-n="' + o.items.length + '">', hd = o.bare ? '' : '<div class="ct">' + esc(o.title) + '</div>';
   if (!o.items.length) { target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub">' + esc(o.sub) + '</p>' : '') + '<p class="sub">' + esc(o.empty || 'Nothing here.') + '</p>' + (o.after || '') + '</div>'; return; }
-  o.fields.forEach(f => { if (f.type === 'list') f.opts = Array.from(new Set(o.items.map(it => f.get(it)).filter(Boolean))).sort(); });
+  o.fields.forEach(f => { if (f.type === 'list') f.opts = f.all ? f.all.slice() : Array.from(new Set([].concat.apply([], o.items.map(it => f.get(it))).filter(Boolean))).sort(); });
   const dl = o.fields.filter(f => f.type === 'list').map(f => '<datalist id="fpd_' + key + '_' + f.k + '">' + f.opts.map(x => '<option value="' + esc(x) + '">').join('') + '</datalist>').join('');
   let chipsHtml = '';
   if (o.chips) {
-    const cf = o.fields.filter(f => f.k === o.chips)[0], cnt = {}; o.items.forEach(it => { const v = cf.get(it); cnt[v] = (cnt[v] || 0) + 1; });
-    const keys = Object.keys(cnt).sort();
+    const cf = o.fields.filter(f => f.k === o.chips)[0], cnt = {}; o.items.forEach(it => { [].concat(cf.get(it)).forEach(v => { cnt[v] = (cnt[v] || 0) + 1; }); });
+    const keys = (cf.all || []).concat(Object.keys(cnt).filter(k => (cf.all || []).indexOf(k) === -1).sort()); keys.forEach(k => { cnt[k] = cnt[k] || 0; });
     if (keys.length > 1) chipsHtml = '<div class="fpchips"><button type="button" class="fpchip' + (st.v[o.chips] ? '' : ' on') + '" data-fpchip="' + key + '|' + o.chips + '|">All roles<b>' + o.items.length + '</b></button>' + keys.map(v => '<button type="button" class="fpchip' + (st.v[o.chips] === v ? ' on' : '') + '" data-fpchip="' + key + '|' + o.chips + '|' + esc(v) + '">' + esc(v) + '<b>' + cnt[v] + '</b></button>').join('') + '</div>';
   }
   const bar = o.fields.map(f => { const id = 'fp_' + key + '_' + f.k; return '<div style="flex:' + (f.k === 'q' ? '2 1 200px' : '1 1 140px') + '"><label class="lb" for="' + id + '">' + esc(f.label) + '</label><input id="' + id + '" class="in" data-fp="' + key + '" data-k="' + f.k + '"' +
