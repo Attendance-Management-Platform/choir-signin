@@ -219,6 +219,10 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 @media(max-width:899px){.anl .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.anl .anr{grid-template-columns:1fr}}
 @media(max-width:480px){.anl,.ntc{padding:20px 16px}.anl .kpis{gap:12px}.anl .kpi .kv{font-size:26px}}
 .anpicks{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}.anpick{min-width:170px;flex:0 1 200px}.anpick .in{height:40px;border-radius:999px;padding:0 16px;font-weight:700}
+input[list].in,.anpick input.in{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235E6A7E' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px!important;cursor:pointer}
+input[list].in::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:38px;height:100%;cursor:pointer}
+input[list].in{position:relative}
+.anclear{align-self:flex-end}
 @media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
@@ -812,6 +816,8 @@ document.addEventListener('change', ev => {
 function wireHome() {
   document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
 }
+document.addEventListener('click', ev => { const x = ev.target.closest && ev.target.closest('[data-anclear]'); if (x) { ANREH = ''; ANCAMP = ''; ANROWS = null; anRedraw(); anLoad(); } });
+document.addEventListener('click', ev => { const t = ev.target; if (t && t.tagName === 'INPUT' && t.getAttribute('list') && t.showPicker) { try { t.showPicker(); } catch (e) {} } });
 document.addEventListener('click', ev => {
   const b = ev.target.closest && ev.target.closest('[data-antab],[data-nttab]'); if (!b) return;
   const at = b.dataset.antab !== undefined, root = b.closest(at ? '.anl' : '.ntc'), v = at ? b.dataset.antab : b.dataset.nttab;
@@ -846,7 +852,7 @@ function homeCharts(c, drill, canSee, canPick) {
   const tab = TB.some(x => x[0] === ANTAB) ? ANTAB : 'ov', hid = k => tab === k ? '' : ' hidden';
   const rid = ANROWS ? ANROWS.id : (last.id || '');
   const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="Type or choose" onfocus="this.select()" value="' + esc(rid) + '"><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + anDays(c).map(d => '<option value="All on ' + esc(d) + '">Whole day, ' + c.series.filter(x => x.date === d).length + ' rehearsals</option>').join('') + '</datalist></div>' +
-    (ANROWS ? '<div class="anpick"><label class="lb" for="ancamp">Campus</label><input id="ancamp" class="in" list="ancampl" autocomplete="off" placeholder="All campuses" onfocus="this.select()" value="' + esc(ANCAMP) + '"><datalist id="ancampl">' + Array.from(new Set(ANROWS.rows.map(r => r.campus).filter(Boolean))).sort().map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' : '') + '</div>' : '';
+    (ANROWS ? '<div class="anpick"><label class="lb" for="ancamp">Campus</label><input id="ancamp" class="in" list="ancampl" autocomplete="off" placeholder="All campuses" onfocus="this.select()" value="' + esc(ANCAMP) + '"><datalist id="ancampl">' + Array.from(new Set(ANROWS.rows.map(r => r.campus).filter(Boolean))).sort().map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' : '') + (ANREH || ANCAMP ? '<button class="btn line sm anclear" type="button" data-anclear="1">Clear</button>' : '') + '</div>' : '';
   const kp = (k, v, s, col) => '<div class="kpi" style="--kc:' + col + '"><div class="kk">' + k + '</div><div class="kv">' + v + '</div><div class="ks">' + s + '</div></div>';
   const kpis = '<div class="kpis">' + kp('Attendance rate', L.rate + '%', esc(L.id || '') + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + ' pts'), rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'approved absences', SOFT) + '</div>';
   const idl = (L.id || '') + (L.date ? ' · ' + L.date : '') + (ANCAMP ? ' · ' + ANCAMP : '');
