@@ -118,6 +118,33 @@ input.in{height:48px;padding:0 14px}
   .big{font-size:26px}
   #attlist{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px!important}
 }
+
+/* search and filters (same rules as the staff pages) */
+.mf{display:flex;flex-direction:column;gap:12px}
+.mfchips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.mfchip{flex:none;border:1px solid #DCE3F0;background:#fff;color:#2B3447;border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;min-height:0;width:auto;transition:background .15s,border-color .15s}
+.mfchip b{margin-left:6px;color:#8E0008}.mfchip:hover{background:#FFF7F7;border-color:#E9B8BC}
+.mfchip.on{background:#172039;border-color:#172039;color:#fff}.mfchip.on b{color:#FFD9DC}
+.mfbar{background:linear-gradient(160deg,#fff 0%,#FFF8F8 60%,#F7F9FF 100%);border:1px solid #F0D5D8;border-radius:16px;padding:12px 12px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;box-shadow:0 8px 24px rgba(142,0,8,.05)}
+.mfbar>div{flex:1 1 140px;min-width:0}.mfbar>div.q{flex:2 1 200px}
+.mfbar label{font-size:12.5px;font-weight:900;color:var(--ink)}
+.mfbar .in{margin-top:4px}
+.mfbar .btn{min-height:44px;font-size:14px;padding:0 14px}
+.mfcount{font-size:13px;color:var(--muted)}
+.cbw{position:relative}
+.cbl{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;background:#fff;border:1px solid #E4D3D6;border-radius:14px;box-shadow:0 18px 40px rgba(142,0,8,.14),0 2px 6px rgba(23,32,57,.06);max-height:240px;overflow-y:auto;padding:6px;display:none}
+.cbl.on{display:block}
+.cbo{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:15px}
+.cbo b{color:#8E0008}.cbo.hi,.cbo:hover{background:#FFF0F1}
+.cbo .ct2{background:#F5F7FB;color:#8E0008;border-radius:999px;font-size:11.5px;font-weight:800;padding:2px 8px;flex:none}
+.cbn{padding:10px 12px;color:var(--muted);font-size:13.5px}
+.mfpg{display:flex;gap:6px;align-items:center;overflow-x:auto;padding:2px 0 4px;justify-content:center}
+.mfpg button{flex:none;min-width:40px;min-height:40px;height:40px;padding:0 12px;border-radius:999px;border:1px solid #DCE3F0;background:#fff;color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer;box-shadow:none;width:auto}
+.mfpg button:hover:not([disabled]){border-color:var(--red);color:var(--red);background:var(--rose);transform:none}
+.mfpg button.on{background:linear-gradient(180deg,#C8101B,#B6000A);border-color:#B6000A;color:#fff}
+.mfpg button[disabled]{opacity:.4;cursor:default}
+.dh{border:1px solid var(--line);border-left:4px solid #E9A9AE;border-radius:14px;background:#fff;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.dh.done{border-left-color:#9CD3B8}.dh.no{border-left-color:#E9A9AE}.dh.wd{border-left-color:#C9CFDB}
 </style></head><body>
 <div id="outv">
  <div class="lp"><div class="lbrand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
@@ -407,15 +434,22 @@ async function loadReqs() {
     else { box.className = 'note'; box.textContent = 'Requests for this rehearsal are closed. Please contact the Global Admin or Assistant Global Admin.'; }
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
     say('m3', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
-    $('rmine').innerHTML = j.mine.length ? j.mine.map(r => '<div class="card lift col" style="gap:8px"><div class="rowl"><div><div style="font-size:16px;font-weight:900">' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</div><div class="s">' + esc(subOf(r)) + (r.late ? ' · late' : '') + '</div></div>' + pill(r.status, r) + '</div>' +
+    const reqCard = r => '<div class="card lift col" style="gap:8px"><div class="rowl"><div><div style="font-size:16px;font-weight:900">' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</div><div class="s">' + esc(subOf(r)) + (r.late ? ' · late' : '') + '</div></div>' + pill(r.status, r) + '</div>' +
       (r.reason ? '<div class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div>' : '') +
       (r.canAppeal ? '<label for="ap' + esc(r.requestId) + '" style="font-size:14px;font-weight:900">Why are you appealing?</label><textarea id="ap' + esc(r.requestId) + '" class="in" rows="3" maxlength="300"></textarea><button class="btn btn-red" style="margin-top:0" data-ap="' + esc(r.requestId) + '">Send appeal</button><div class="s">Appeals go to the Global Music Director first, then the Pastor.</div>' : '') +
-      (r.canWithdraw ? '<button class="btn btn-line" style="margin-top:0" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '') + '</div>').join('') : '<div class="s">You have no requests yet.</div>';
-    $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => {
-      if (b.dataset.ap) { const why = ($('ap' + b.dataset.ap).value || '').trim(); if (why.length < 10) return say('m3', 'Please give a reason of at least 10 characters.', 'bad'); const a2 = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m3', a2.ok ? 'Appeal sent.' : (a2.error || 'Could not appeal.'), a2.ok ? 'ok' : 'bad'); loadReqs(); return; }
-      const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m3', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadReqs(); });
+      (r.canWithdraw ? '<button class="btn btn-line" style="margin-top:0" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '') + '</div>';
+    mfPanel('req', 'rmine', {items: j.mine, empty: 'You have no requests yet.', card: reqCard, chips: 'status', chipsAll: 'All requests',
+      fields: [
+        {k: 'q', label: 'Search', ph: 'A date, or words from your reason', get: r => [dlong(r.rehearsalStartMs), r.reason, r.note].join(' ')},
+        {k: 'month', label: 'Month', type: 'list', get: r => MONTH(r.rehearsalStartMs), sort: (a, b) => 0},
+        {k: 'status', label: 'Status', type: 'list', get: r => r.status === 'Withdrawn' && r.note ? 'Withdrawn' : r.status}]});
   } catch (e) { say('m3', 'Network problem. Try again.', 'bad'); }
 }
+$('rmine').addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('button[data-ap],button[data-w]'); if (!b) return;
+  if (b.dataset.ap) { const why = ($('ap' + b.dataset.ap).value || '').trim(); if (why.length < 10) return say('m3', 'Please give a reason of at least 10 characters.', 'bad'); const a2 = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m3', a2.ok ? 'Appeal sent.' : (a2.error || 'Could not appeal.'), a2.ok ? 'ok' : 'bad'); loadReqs(); return; }
+  const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m3', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadReqs();
+});
 $('rsend').onclick = async () => {
   $('rsend').disabled = true;
   try { const k = await call({action: 'absence.submit', token, reason: $('rreason').value.trim()}); say('m3', k.ok ? 'Request sent.' : (k.error || 'Could not send.'), k.ok ? 'ok' : 'bad'); if (k.ok) { $('rreason').value = ''; loadReqs(); } }
@@ -423,6 +457,87 @@ $('rsend').onclick = async () => {
   $('rsend').disabled = false;
 };
 
+
+// ---- Search and filters: the same rules as the staff pages ----
+// Start typing and matches are suggested; you pick. Different filters narrow together; each list only offers what is still possible.
+const MF = {};
+let MFOPEN = null;
+function mfCombo(inp, optsFn, onPick) {
+  const w = document.createElement('div'); w.className = 'cbw'; inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
+  const box = document.createElement('div'); box.className = 'cbl'; w.appendChild(box);
+  const st = {hi: -1, items: [], typed: false};
+  const hl = (txt, t) => { const i = t ? txt.toLowerCase().indexOf(t) : -1; return i < 0 ? esc(txt) : esc(txt.slice(0, i)) + '<b>' + esc(txt.slice(i, i + t.length)) + '</b>' + esc(txt.slice(i + t.length)); };
+  const draw = () => {
+    if (MFOPEN && MFOPEN !== box) MFOPEN.classList.remove('on'); MFOPEN = box;
+    const t = st.typed ? inp.value.trim().toLowerCase() : '';
+    st.items = (optsFn() || []).filter(o => !t || o.label.toLowerCase().indexOf(t) !== -1).slice(0, 40); st.hi = t && st.items.length ? 0 : -1;
+    box.innerHTML = st.items.length ? st.items.map((o, i) => '<div class="cbo' + (i === st.hi ? ' hi' : '') + '" data-i="' + i + '"><span>' + hl(o.label, t) + '</span>' + (o.n != null ? '<span class="ct2">' + o.n + '</span>' : '') + '</div>').join('') : '<div class="cbn">No match. Try fewer letters, or clear the other filters.</div>';
+    box.classList.add('on');
+  };
+  const choose = i => { const o = st.items[i]; if (o) { box.classList.remove('on'); onPick(o, inp); } };
+  inp.addEventListener('focus', () => { st.typed = false; draw(); inp.select(); }); inp.addEventListener('input', () => { st.typed = true; draw(); });
+  inp.addEventListener('keydown', ev => {
+    if (!box.classList.contains('on')) { if (ev.key === 'ArrowDown') draw(); return; }
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); st.hi = Math.max(0, Math.min(st.items.length - 1, st.hi + (ev.key === 'ArrowDown' ? 1 : -1))); box.querySelectorAll('.cbo').forEach((e, i) => e.classList.toggle('hi', i === st.hi)); }
+    else if (ev.key === 'Enter' && st.hi >= 0) { ev.preventDefault(); choose(st.hi); }
+    else if (ev.key === 'Escape') box.classList.remove('on');
+  });
+  box.addEventListener('mousedown', ev => { const e = ev.target.closest('.cbo'); if (e) { ev.preventDefault(); choose(+e.dataset.i); } });
+  box.addEventListener('touchstart', ev => { const e = ev.target.closest('.cbo'); if (e) { ev.preventDefault(); choose(+e.dataset.i); } }, {passive: false});
+}
+document.addEventListener('click', ev => { if (MFOPEN && !(ev.target.closest && ev.target.closest('.cbw'))) { MFOPEN.classList.remove('on'); MFOPEN = null; } });
+function mfOk(f, it, v) {
+  if (!v) return true;
+  const gv = String(f.get(it) == null ? '' : f.get(it)).toLowerCase(), vl = String(v).trim().toLowerCase();
+  if (f.type === 'list') return gv === vl || (!(f.opts || []).some(x => x.toLowerCase() === vl) && gv.indexOf(vl) !== -1);
+  return gv.indexOf(vl) !== -1;
+}
+function mfLeft(st, skip) { return st.o.items.filter(it => st.o.fields.every(f => f.k === skip || mfOk(f, it, st.v[f.k]))); }
+function mfPanel(key, boxId, o) {
+  const st = MF[key] = MF[key] || {v: {}, page: 0}; st.o = o; st.box = boxId;
+  const target = $(boxId), PER = o.per || 5;
+  if (!o.items.length) { target.innerHTML = '<div class="s">' + esc(o.empty || 'Nothing here yet.') + '</div>'; return; }
+  const many = o.items.length > 3;
+  o.fields.forEach(f => { if (f.type === 'list') f.opts = Array.from(new Set(o.items.map(it => f.get(it)).filter(Boolean))).sort(f.sort || undefined); });
+  let chips = '';
+  if (o.chips && many) {
+    const cf = o.fields.filter(f => f.k === o.chips)[0], cnt = {}; o.items.forEach(it => { const v = cf.get(it); cnt[v] = (cnt[v] || 0) + 1; });
+    const keys = (cf.all || []).concat(Object.keys(cnt).filter(k => (cf.all || []).indexOf(k) === -1).sort());
+    chips = '<div class="mfchips"><button type="button" class="mfchip' + (st.v[o.chips] ? '' : ' on') + '" data-mfc="' + key + '|' + o.chips + '|">' + esc(o.chipsAll || 'All') + '<b>' + o.items.length + '</b></button>' + keys.map(k => '<button type="button" class="mfchip' + (st.v[o.chips] === k ? ' on' : '') + '" data-mfc="' + key + '|' + o.chips + '|' + esc(k) + '">' + esc(k) + '<b>' + (cnt[k] || 0) + '</b></button>').join('') + '</div>';
+  }
+  const bar = many ? '<div class="mfbar">' + o.fields.filter(f => f.k !== o.chips).map(f => '<div' + (f.k === 'q' ? ' class="q"' : '') + '><label for="mf_' + key + '_' + f.k + '">' + esc(f.label) + '</label><input id="mf_' + key + '_' + f.k + '" class="in" autocomplete="off" data-mf="' + key + '" data-k="' + f.k + '" placeholder="' + esc(f.ph || (f.type === 'list' ? 'Start typing…' : '')) + '" value="' + esc(st.v[f.k] || '') + '"></div>').join('') + '<button type="button" class="btn btn-line" data-mfx="' + key + '">Clear</button></div>' : '';
+  target.innerHTML = '<div class="mf">' + chips + bar + '<div class="mfcount" id="mfn_' + key + '"></div><div class="col" id="mfl_' + key + '" style="gap:10px"></div><div class="mfpg" id="mfp_' + key + '"></div></div>';
+  o.fields.filter(f => f.type === 'list' && f.k !== o.chips).forEach(f => {
+    const inp = document.getElementById('mf_' + key + '_' + f.k); if (!inp) return;
+    mfCombo(inp, () => { const cnt = {}; mfLeft(st, f.k).forEach(it => { const v = f.get(it); if (v) cnt[v] = (cnt[v] || 0) + 1; }); return Object.keys(cnt).sort(f.sort || undefined).map(v => ({v: v, label: v, n: cnt[v]})); },
+      (opt, el) => { st.v[f.k] = opt.v; el.value = opt.v; st.page = 0; mfDraw(key); });
+  });
+  mfDraw(key);
+}
+function mfDraw(key) {
+  const st = MF[key], o = st.o, PER = o.per || 5, left = mfLeft(st), pages = Math.max(1, Math.ceil(left.length / PER));
+  if (st.page >= pages) st.page = pages - 1;
+  const from = st.page * PER, shown = left.slice(from, from + PER);
+  $('mfl_' + key).innerHTML = shown.length ? shown.map(o.card).join('') : '<div class="s">Nothing matches. Clear the filters to see everything.</div>';
+  $('mfn_' + key).textContent = o.items.length > 3 ? (left.length ? 'Showing ' + (from + 1) + ' to ' + (from + shown.length) + ' of ' + left.length + (left.length !== o.items.length ? ' (filtered from ' + o.items.length + ')' : '') : '0 of ' + o.items.length) : '';
+  const pg = $('mfp_' + key);
+  if (pages < 2) { pg.innerHTML = ''; return; }
+  let lo = Math.max(0, Math.min(st.page - 2, pages - 5)), hi = Math.min(pages, lo + 5), h = '<button type="button" data-mfg="' + key + '|' + (st.page - 1) + '"' + (st.page ? '' : ' disabled') + ' aria-label="Previous page">&lsaquo;</button>';
+  if (lo > 0) h += '<button type="button" data-mfg="' + key + '|0">1</button>' + (lo > 1 ? '<span class="s">…</span>' : '');
+  for (let i = lo; i < hi; i++) h += '<button type="button" class="' + (i === st.page ? 'on' : '') + '" data-mfg="' + key + '|' + i + '">' + (i + 1) + '</button>';
+  if (hi < pages) h += (hi < pages - 1 ? '<span class="s">…</span>' : '') + '<button type="button" data-mfg="' + key + '|' + (pages - 1) + '">' + pages + '</button>';
+  pg.innerHTML = h + '<button type="button" data-mfg="' + key + '|' + (st.page + 1) + '"' + (st.page < pages - 1 ? '' : ' disabled') + ' aria-label="Next page">&rsaquo;</button>';
+}
+document.addEventListener('input', ev => { const t = ev.target; if (t && t.dataset && t.dataset.mf) { const st = MF[t.dataset.mf]; st.v[t.dataset.k] = t.value; st.page = 0; mfDraw(t.dataset.mf); } });
+document.addEventListener('click', ev => {
+  const c = ev.target.closest && ev.target.closest('[data-mfc]');
+  if (c) { const p = c.dataset.mfc.split('|'), st = MF[p[0]]; st.v[p[1]] = p.slice(2).join('|'); st.page = 0; mfPanel(p[0], st.box, st.o); return; }
+  const x = ev.target.closest && ev.target.closest('[data-mfx]');
+  if (x) { const st = MF[x.dataset.mfx]; st.v = {}; st.page = 0; mfPanel(x.dataset.mfx, st.box, st.o); return; }
+  const g = ev.target.closest && ev.target.closest('[data-mfg]');
+  if (g && !g.disabled) { const p = g.dataset.mfg.split('|'); MF[p[0]].page = +p[1]; mfDraw(p[0]); }
+});
+const MONTH = ms => D(ms).toLocaleDateString('en-GB', {month: 'long', year: 'numeric'});
 // ---- attendance and profile ----
 async function loadAtt() {
   say('m4', 'Loading…'); $('attlist').innerHTML = ''; $('attsum').classList.add('hide');
@@ -436,7 +551,13 @@ async function loadAtt() {
     $('attpct').textContent = Math.round(100 * j.attended / j.of) + '%';
     $('attsub').innerHTML = '<b style="color:var(--ink)">' + j.attended + ' of ' + j.of + '</b> rehearsals<br>' + j.excused + ' excused · ' + j.absent + ' absent';
     const fd = s => { const d = new Date(String(s) + 'T12:00:00'); return isNaN(d) ? String(s || '') : d.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'}); };
-    $('attlist').innerHTML = j.rehearsals.map(r => '<div class="card lift rowl" style="padding:12px 16px"><div><b>' + esc(fd(r.date) || r.id) + '</b><div class="s" style="font-size:13px">' + esc(r.id) + '</div></div><span class="pill ' + ({Present: 'p-ok', Excused: 'p-app', Absent: 'p-no'}[r.status] || 'p-pend') + '">' + esc(r.status || '') + '</span></div>').join('');
+    const attCard = r => '<div class="card lift rowl" style="padding:12px 16px"><div><b>' + esc(fd(r.date) || r.id) + '</b><div class="s" style="font-size:13px">' + esc(r.id) + '</div></div><span class="pill ' + ({Present: 'p-ok', Excused: 'p-app', Absent: 'p-no'}[r.status] || 'p-pend') + '">' + esc(r.status || '') + '</span></div>';
+    const mo = r => { const d = new Date(String(r.date) + 'T12:00:00'); return isNaN(d) ? '' : d.toLocaleDateString('en-GB', {month: 'long', year: 'numeric'}); };
+    mfPanel('att', 'attlist', {items: j.rehearsals, per: 8, empty: 'Your attendance will show here once rehearsals are published.', card: attCard, chips: 'status', chipsAll: 'All rehearsals',
+      fields: [
+        {k: 'q', label: 'Search', ph: 'A date or rehearsal number', get: r => [fd(r.date), r.id, r.date].join(' ')},
+        {k: 'month', label: 'Month', type: 'list', get: mo, sort: (a, b) => 0},
+        {k: 'status', label: 'Status', type: 'list', get: r => r.status || '', all: ['Present', 'Excused', 'Absent']}]});
     drawTiles();
   } catch (e) { say('m4', 'Network problem. Try again.', 'bad'); }
 }
@@ -453,13 +574,26 @@ async function loadDetails() {
     if (!j.ok) return;
     dreq = j.requests || [];
     $('dask').classList.toggle('hide', j.canAsk === false || !$('dform').classList.contains('hide'));
-    $('dlist').innerHTML = dreq.map(r => {
-      const st = r.status === 'Waiting' ? '<span class="pill p-pend">Waiting for Desk A</span>' : r.status === 'Done' ? '<span class="pill p-ok">Done</span>' : '<span class="pill p-no">Not changed</span>';
-      return '<div style="border-top:1px solid #E6E9F0;padding-top:10px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><b>' + esc(r.kind) + '</b>' + st + '</div><div class="s" style="font-size:14px">Should be: ' + esc(r.text) + '</div>' +
-        (r.answer ? '<div class="s" style="font-size:14px">Desk A: ' + esc(r.answer) + '</div>' : '') + '<div class="s" style="font-size:12px">Sent ' + esc(dtm(r.atMs)) + '</div></div>';
-    }).join('');
+    const dCard = r => {
+      const st = r.status === 'Waiting' ? '<span class="pill p-pend">Waiting for Desk A</span>' : r.status === 'Done' ? '<span class="pill p-ok">Done</span>' : r.status === 'Withdrawn' ? '<span class="pill p-pend" style="background:#EEF1F6;color:#4A5568">Withdrawn</span>' : '<span class="pill p-no">Not changed</span>';
+      return '<div class="dh ' + (r.status === 'Done' ? 'done' : r.status === 'Waiting' ? '' : r.status === 'Withdrawn' ? 'wd' : 'no') + '"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><b>' + esc(r.kind) + '</b>' + st + '</div><div class="s" style="font-size:14px">Should be: ' + esc(r.text) + '</div>' +
+        (r.note ? '<div class="s" style="font-size:14px">Your note: ' + esc(r.note) + '</div>' : '') +
+        (r.answer ? '<div class="s" style="font-size:14px">Desk A: ' + esc(r.answer) + '</div>' : '') + '<div class="s" style="font-size:12px">Sent ' + esc(dtm(r.atMs)) + '</div>' +
+        (r.status === 'Waiting' ? '<div><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dw="' + esc(r.id) + '">Withdraw this request</button></div>' : '') +
+        (r.status === 'Not changed' ? '<div><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dagain="' + esc(r.id) + '">Ask again</button></div>' : '') + '</div>';
+    };
+    mfPanel('det', 'dlist', {items: dreq, empty: '', card: dCard, chips: 'status', chipsAll: 'All requests',
+      fields: [
+        {k: 'q', label: 'Search', ph: 'Words from your request or the answer', get: r => [r.kind, r.text, r.note, r.answer].join(' ')},
+        {k: 'kind', label: 'What was wrong', type: 'list', get: r => r.kind},
+        {k: 'status', label: 'Status', type: 'list', get: r => r.status, all: ['Waiting', 'Done', 'Not changed', 'Withdrawn']}]});
   } catch (e) {}
 }
+$('dlist').addEventListener('click', async ev => {
+  const w = ev.target.closest && ev.target.closest('[data-dw]'), ag = ev.target.closest && ev.target.closest('[data-dagain]');
+  if (w) { w.disabled = true; const j = await call({action: 'me.details.withdraw', token, id: w.dataset.dw}); if (j && j.signedOut) { signedOutNow(); return; } say('m5', j && j.ok ? 'Withdrawn.' : ((j && j.error) || 'Could not withdraw.'), j && j.ok ? 'ok' : 'bad'); await loadDetails(); return; }
+  if (ag) { const r = dreq.filter(x => x.id === ag.dataset.dagain)[0]; if (!r) return; $('dform').classList.remove('hide'); $('dask').classList.add('hide'); $('dkind').value = r.kind; $('dtext').value = r.text; $('dnote').value = r.note || ''; say('m5', 'Check it, change anything that was wrong, then send it again.'); $('dform').scrollIntoView({behavior: 'smooth', block: 'center'}); }
+});
 $('dask').onclick = () => { $('dform').classList.remove('hide'); $('dask').classList.add('hide'); say('m5', ''); };
 $('dcancel').onclick = () => { $('dform').classList.add('hide'); $('dask').classList.remove('hide'); say('m5', ''); };
 $('dsend').onclick = async () => {
