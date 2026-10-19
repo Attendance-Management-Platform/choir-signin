@@ -3,26 +3,37 @@
 <title>CCW Choir Members</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap">
 <style>
-:root{--page:#F7F9FC;--fg:#172039;--mut:#5E6A7E;--acc:#B6000A;--ok:#20775A;--bad:#AE2D37;--line:#E6E9EF;--rose:#FFF0F1;--deep:#8E0008}
+:root{--page:#F7F9FC;--fg:#172039;--text:#374052;--mut:#5E6A7E;--acc:#B6000A;--ok:#20775A;--bad:#AE2D37;--line:#E6E9EF;--rose:#FFF0F1;--deep:#8E0008;--ease:cubic-bezier(.2,.7,.2,1)}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{font:15px/1.5 Lato,system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0;min-height:100vh;background:radial-gradient(420px 260px at 100% 0,#FFE4E6 0,transparent 65%),var(--page)}
-.col{max-width:30rem;margin:0 auto;min-height:100vh;padding-bottom:96px}
-.hdr{position:relative;background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;padding:26px 20px;display:flex;align-items:center;gap:14px;border-radius:0 0 28px 28px}
+body{font:15px/1.5 Lato,system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0;min-height:100vh;background:radial-gradient(520px 320px at 100% 100%,#FFE4E6 0,transparent 65%),var(--page)}
+.shell{display:block;min-height:100vh}
+/* the red panel: a header on a phone, a side panel on a computer */
+.side{position:relative;background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;padding:22px 20px;display:flex;flex-direction:column;gap:14px;border-radius:0 0 28px 28px}
+.brand{display:flex;align-items:center;gap:12px}
 .tile{background:#fff;border-radius:14px;padding:6px 8px;display:flex}.tile img{height:40px;width:auto;display:block}
-.b2{font-size:11px;letter-spacing:.06em;color:#FFD9DC;font-weight:700;line-height:1.3}
-.hello{font-size:24px;font-weight:900;line-height:1.15}
-.meta{font-size:14px;color:#FFE9EA}
-#hdr{padding-top:50px}.so{position:absolute;top:12px;right:14px;width:auto;margin:0;min-height:32px;height:32px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:13px;box-shadow:none}
-.wrap{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.b1{font-weight:900;font-size:15px;line-height:1.2}.b2{font-size:11px;letter-spacing:.14em;font-weight:700;color:#FFD9DC}
+.hero{display:none}
+.user{display:none}
+body.in .user{display:block}
+.hello{font-size:24px;font-weight:900;line-height:1.15}.meta{font-size:14px;color:#FFE9EA}
+.so{display:none}
+body.in .so{display:inline-flex}
+.so{position:absolute;top:14px;right:14px;align-items:center;width:auto;margin:0;min-height:32px;height:32px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:13px;box-shadow:none}
+body.in .side{padding-top:52px}
+main{padding:16px 20px 110px;max-width:34rem;margin:0 auto;width:100%}
 .card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(20,35,61,.05);padding:18px}
 .card>b:first-child,.k{font-size:12px;font-weight:900;color:var(--acc);letter-spacing:.08em;text-transform:uppercase}
 .row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px}
-button{font:inherit;font-weight:700;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;border:0;border-radius:12px;padding:.75rem 1rem;width:100%;margin-top:.6rem;min-height:48px;cursor:pointer;box-shadow:0 4px 12px rgba(182,0,10,.25);transition:transform .2s,box-shadow .2s}
-button:hover{transform:translateY(-1px)}button:active{transform:scale(.98)}button[disabled]{opacity:.5;transform:none}
+.grid{display:flex;flex-direction:column;gap:14px}
+.ptitle{display:none}
+button{font:inherit;font-weight:700;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;border:0;border-radius:12px;padding:.75rem 1rem;width:100%;margin-top:.6rem;min-height:50px;cursor:pointer;box-shadow:0 4px 12px rgba(182,0,10,.25);transition:transform .2s var(--ease),box-shadow .2s var(--ease),background-color .2s,border-color .2s,color .2s}
+button:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(182,0,10,.35)}button:active{transform:translateY(0) scale(.98)}button[disabled]{opacity:.5;transform:none}
 .line{border:1px solid #D5DAE3;background:#fff;color:var(--fg);box-shadow:none}
-textarea{font:inherit;width:100%;padding:.7rem .75rem;border-radius:12px;border:1px solid #D5DAE3;margin-top:.4rem;color:var(--fg)}
-textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(182,0,10,.12);outline:0}
+.line:hover{border-color:var(--acc);color:var(--acc);background:var(--rose);box-shadow:none}
+input,textarea{font:inherit;width:100%;padding:.75rem .85rem;border-radius:12px;border:1px solid #D5DAE3;margin-top:.4rem;color:var(--fg);background:#fff;transition:border-color .2s,box-shadow .2s}
+input{height:48px;padding:0 14px;font-size:16px}
+input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(182,0,10,.12);outline:0}
 :focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px}
 .s{color:var(--mut);font-size:.9rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.hide{display:none!important}
 .big{font-size:21px;font-weight:900;margin:.2rem 0}
@@ -30,29 +41,87 @@ textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(182,0,10,.12);o
 .p-ok{background:#EAF6EF;color:#20775A}.p-no{background:#FFF0F1;color:#AE2D37}.p-pend{background:#FFF4DF;color:#95621D}.p-app{background:#F1EAFB;color:#4B2A85}
 .note{background:#FFF4DF;color:#95621D;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:.6rem}
 .good{background:#EAF6EF;color:#20775A;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:.6rem}
-.tabbar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;background:#fff;border-top:1px solid var(--line);padding:8px 12px calc(14px + env(safe-area-inset-bottom));z-index:5}
-.tabbar>div{display:flex;gap:4px;width:100%;max-width:30rem}
+.info{background:#EDF3FB;color:#2F4F7E;border-radius:10px;padding:10px 12px;font-size:14px}
+/* the menu: a bar along the bottom on a phone, a list in the red panel on a computer */
+.nav{display:none}
+body.in .nav{display:flex}
+.nav{position:fixed;left:0;right:0;bottom:0;gap:4px;background:#fff;border-top:1px solid var(--line);padding:8px 12px calc(14px + env(safe-area-inset-bottom));z-index:5}
 .tab{flex:1;margin:0;min-height:52px;background:transparent;color:var(--mut);box-shadow:none;border-radius:12px;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
+.tab:hover{background:var(--rose);color:var(--acc);box-shadow:none}
 .tab.on{color:var(--acc);background:var(--rose)}
 .tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 a{color:var(--acc);font-weight:700;text-decoration:none}
+.signwrap{padding:20px;display:flex;justify-content:center}
+.signcard{width:100%;max-width:26rem;padding:26px;display:flex;flex-direction:column;gap:14px}
+.signcard h1{font-size:26px;font-weight:900;color:var(--deep);margin:0}
+.or{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13px}.or span{flex:1;height:1px;background:var(--line)}
+.modal{position:fixed;inset:0;background:rgba(23,32,57,.58);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+.mbox{width:100%;max-width:600px;background:#fff;border-radius:20px;box-shadow:0 30px 70px rgba(10,15,30,.4);overflow:hidden;max-height:90vh;overflow-y:auto}
+.mhead{background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mx{width:40px;height:40px;margin:0;padding:0;min-height:0;border-radius:50%;background:rgba(255,255,255,.18);font-size:20px;box-shadow:none}
+.issue{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
+.issue i{width:30px;height:30px;border-radius:50%;background:var(--rose);color:var(--acc);font-weight:900;display:grid;place-items:center;flex:none;font-style:normal}
+@media (min-width:900px){
+  .shell{display:grid;grid-template-columns:minmax(320px,5fr) 7fr}
+  .side{position:sticky;top:0;height:100vh;border-radius:0;padding:48px 48px 40px;gap:26px;background:radial-gradient(520px 320px at 90% 8%,rgba(255,255,255,.14) 0,transparent 65%),linear-gradient(160deg,#C8101B,#8E0008)}
+  body.in .side{padding-top:48px}
+  .tile{border-radius:16px;padding:8px 10px}.tile img{height:54px}
+  .b1{font-size:18px}.b2{font-size:12px}
+  .hero{display:flex;flex-direction:column;gap:14px;margin-top:auto;max-width:460px}
+  body.in .hero{display:none}
+  .hero .h{font-size:40px;font-weight:900;line-height:1.1}.hero .p{font-size:17px;color:#FFE9EA}
+  .user .hello{font-size:28px}.user .meta{font-size:15px}
+  .so{top:auto;bottom:40px;left:48px;right:auto;height:44px;min-height:44px;padding:0 22px;font-size:14px}
+  .so:hover{background:rgba(255,255,255,.3);color:#fff}
+  .nav{position:static;flex-direction:column;gap:6px;background:none;border:0;padding:0;margin-top:6px}
+  .tab{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;min-height:48px;padding:0 16px;font-size:15px;color:#fff;background:rgba(255,255,255,.12);width:100%;max-width:300px}
+  .tab:hover{background:rgba(255,255,255,.26);color:#fff;transform:translateX(4px)}
+  .tab.on{background:#fff;color:var(--acc)}
+  main{max-width:64rem;width:100%;margin:0;padding:48px 56px 56px;align-self:start}
+  .signwrap{padding:56px 40px;align-items:center;min-height:100vh}
+  .signcard{padding:34px;border-radius:20px;box-shadow:0 18px 50px rgba(142,0,8,.10)}
+  .ptitle{display:block;font-size:30px;font-weight:900;color:var(--deep);margin:0 0 20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  .grid .wide{grid-column:1 / -1}
+  .card{padding:24px;border-radius:20px;box-shadow:0 18px 50px rgba(142,0,8,.06)}
+  #attlist{display:grid!important;grid-template-columns:1fr 1fr;gap:14px!important}
+}
+@media (max-width:899px){.hero{display:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
-<div class="col">
-<div id="hdr" class="hdr hide"><button id="out" class="so">Sign out</button><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b2">CELEBRATION CHURCH WORSHIP<br>LAGOS REGION CHOIR</div><div id="who" class="hello"></div><div id="meta" class="meta"></div></div></div>
+<div class="shell">
+<aside class="side">
+<button id="out" class="so">Sign out</button>
+<div class="brand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
+<div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. Check in at rehearsal, ask to be excused, and see your own attendance.</div></div>
+<div class="user"><div id="who" class="hello"></div><div id="meta" class="meta"></div></div>
+<nav id="nav" class="nav">
+<button id="t1" class="tab on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
+<button id="t2" class="tab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"/></svg>Requests</button>
+<button id="t3" class="tab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Attendance</button>
+<button id="t4" class="tab"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profile</button>
+</nav>
+</aside>
 
-<div id="signin" style="padding:0">
-<div class="hdr"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b2">CELEBRATION CHURCH WORSHIP<br>LAGOS REGION CHOIR</div><div class="hello">CCW Choir Members</div></div></div>
-<div class="wrap"><div class="card"><b>Sign in</b>
-<p class="big" style="color:var(--deep)">Welcome</p>
-<p class="s">One place to check in, ask to be excused, and see your own attendance. Press Sign in with Google. If your email is on the choir list, you are in.</p>
-<div id="gbtn" style="margin:.6rem 0;min-height:44px"></div>
-<p id="m1" class="s"></p>
-<p class="s">You only see your own information.</p></div>
-<div class="card s"><b style="color:var(--fg);letter-spacing:0;text-transform:none;font-size:15px">No phone, camera or location?</b> Tell your Campus Music Director or Desk D and they will mark you by hand.</div></div></div>
+<main>
+<div id="signin" class="signwrap"><div class="card signcard">
+<div><h1>Sign in</h1><div class="s" style="font-size:15px;margin-top:4px">Press Sign in with Google. If your email is on the choir list, you are in. No code to wait for.</div></div>
+<div id="gbtn" style="min-height:44px"></div>
+<div class="s">Share an email with someone else in the choir? Type your Member ID in the box below first, then press the Google button.</div>
+<div class="or"><span></span>No Google account? Use an email code<span></span></div>
+<p id="m1" class="s" style="margin:0"></p>
+<label for="mid" style="font-size:14px;font-weight:900;margin-bottom:-6px">Member ID</label>
+<input id="mid" autocomplete="off" placeholder="For example M014">
+<button id="mailcode" style="margin-top:0;height:52px">Email me a code</button>
+<div id="codebox" class="hide"><label for="code" style="font-size:14px;font-weight:900">The 6-digit code</label><input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"><button id="codego" class="line">Sign in with the code</button></div>
+<div class="s">We send a 6-digit code to the email on file. It lasts 10 minutes. Check-in itself needs Google.</div>
+<button id="help" class="line" style="margin-top:0;min-height:46px">Need help signing in?</button>
+<div class="info">After sign in you land on <b>Home</b>. Staff with a role use the <b>CCW Choir Staff</b> page for their role screens.</div>
+</div></div>
 
-<div id="app" class="wrap hide">
-<div id="v1" style="display:flex;flex-direction:column;gap:14px">
+<div id="app" class="hide">
+<h2 id="ptitle" class="ptitle">Home</h2>
+<div id="v1" class="grid">
 <div class="card"><b>Next rehearsal</b>
 <div id="rh" class="big">Loading…</div><div id="rhs" class="s"></div>
 <div id="state"></div>
@@ -62,10 +131,10 @@ a{color:var(--acc);font-weight:700;text-decoration:none}
 <div id="regoogle" class="hide"><p class="s">For your safety, press this once more to confirm it is you.</p><div id="gbtn2" style="margin:.4rem 0"></div></div>
 <p id="m2" class="s"></p></div>
 <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b>My requests</b><a id="seeall" href="#">See all</a></div><div id="mini" class="s" style="margin-top:6px">Loading…</div></div>
-<a id="attlink" href="#" class="card s" style="display:block;color:var(--mut);font-weight:400"><span id="attline">Loading…</span></a>
+<a id="attlink" href="#" class="card s wide" style="display:block;color:var(--mut);font-weight:400"><span id="attline">Loading…</span></a>
 </div>
 
-<div id="v2" class="hide" style="display:flex;flex-direction:column;gap:14px">
+<div id="v2" class="grid hide">
 <div class="card"><b>Ask to be excused</b><p id="rinfo" class="s"></p>
 <div id="rform" class="hide"><label class="s" for="rreason">Reason (10 to 300 characters)</label><textarea id="rreason" rows="3" maxlength="300"></textarea><p class="s">Only the people who decide your request can read this.</p><button id="rsend">Send request</button></div>
 <p id="m3" class="s"></p>
@@ -73,25 +142,30 @@ a{color:var(--acc);font-weight:700;text-decoration:none}
 <div class="card"><b>My requests</b><div id="rmine"></div></div>
 </div>
 
-<div id="v3" class="hide" style="display:flex;flex-direction:column;gap:10px">
-<div id="attsum" class="card hide" style="display:flex;align-items:center;gap:16px"><div id="attpct" style="font-size:40px;font-weight:900;color:var(--deep)"></div><div id="attsub" class="s"></div></div>
-<p id="m4" class="s"></p>
-<div id="attlist" style="display:flex;flex-direction:column;gap:10px"></div>
-<p class="s">Only you can see this page. It shows rehearsals once they are published.</p>
+<div id="v3" class="grid hide">
+<div id="attsum" class="card hide wide" style="display:flex;align-items:center;gap:16px"><div id="attpct" style="font-size:40px;font-weight:900;color:var(--deep)"></div><div id="attsub" class="s"></div></div>
+<p id="m4" class="s wide"></p>
+<div id="attlist" class="wide" style="display:flex;flex-direction:column;gap:10px"></div>
+<p class="s wide">Only you can see this page. It shows rehearsals once they are published.</p>
 </div>
 
-<div id="v4" class="hide" style="display:flex;flex-direction:column;gap:14px">
+<div id="v4" class="grid hide">
 <div class="card" id="prof" style="line-height:2;font-size:15px"></div>
 <div class="card"><b>Something wrong?</b><p class="s">You cannot edit these yourself. Tell Desk A or your Campus Music Director to correct your email, part or campus.</p></div>
 </div>
 </div>
+</main>
 </div>
-<div id="tabbar" class="tabbar hide"><div>
-<button id="t1" class="tab on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
-<button id="t2" class="tab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"/></svg>Requests</button>
-<button id="t3" class="tab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Attendance</button>
-<button id="t4" class="tab"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profile</button>
-</div></div>
+
+<div id="helpbox" class="modal hide"><div class="mbox">
+<div class="mhead"><div><div style="font-size:12px;letter-spacing:.1em;font-weight:900;color:#FFD9DC">SIGN-IN HELP</div><div style="font-size:20px;font-weight:900">What went wrong?</div></div><button id="helpx" class="mx" aria-label="Close help">&times;</button></div>
+<div style="padding:18px 22px;display:flex;flex-direction:column;gap:10px">
+<div class="issue"><i>1</i><div><b>It says my email is not found</b><div class="s">Your email may be missing or spelled differently on the choir list. Desk A will correct it.</div></div></div>
+<div class="issue"><i>2</i><div><b>My Member ID does not match</b><div class="s">Ask your Campus Music Director for your ID. It looks like M014.</div></div></div>
+<div class="issue"><i>3</i><div><b>It says I am not active</b><div class="s">Only active members can sign in. Desk A can check your status.</div></div></div>
+<div class="issue"><i>4</i><div><b>I signed in but I cannot see my screens</b><div class="s">Your role may not be set yet. The Global Admin or System Administrator can fix it.</div></div></div>
+<button id="helpback" class="line">Back to sign in</button>
+</div></div></div>
 <script>
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyPAYTBNK11xxnOyjI3wfNRIE64Os2wqJJ4jFoyJ6uDVVIkX-qiYYd-kt1DYT4eYVxo/exec';
 const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.googleusercontent.com';
@@ -113,10 +187,11 @@ async function call(body) {
 }
 function signedOutNow(msg) {
   token = ''; try { sessionStorage.removeItem('rbcMTok'); } catch (e) {}
-  $('app').classList.add('hide'); $('tabbar').classList.add('hide'); $('signin').classList.remove('hide'); $('hdr').classList.add('hide'); say('m1', msg || '', msg ? 'bad' : '');
+  document.body.classList.remove('in'); $('app').classList.add('hide'); $('signin').classList.remove('hide'); say('m1', msg || '', msg ? 'bad' : '');
 }
 function tab(n) {
   [1, 2, 3, 4].forEach(i => { $('v' + i).classList.toggle('hide', n !== i); $('t' + i).classList.toggle('on', n === i); });
+  $('ptitle').textContent = ['', 'Home', 'My requests', 'My attendance', 'My profile'][n];
   window.scrollTo(0, 0);
   if (n === 1) loadHome(); else if (n === 2) loadReqs(); else if (n === 3) loadAtt(); else drawProfile();
 }
@@ -139,12 +214,12 @@ function gisInit() {
   gs.src = 'https://accounts.google.com/gsi/client'; gs.async = true;
   gs.onload = () => { try {
     google.accounts.id.initialize({client_id: GOOGLE_CLIENT_ID, callback: resp => { if (onFresh) { const f = onFresh; onFresh = null; gTok = resp.credential; gAt = Date.now(); $('regoogle').classList.add('hide'); f(); } else googleDone(resp); }, auto_select: false});
-    google.accounts.id.renderButton($('gbtn'), {theme: 'outline', size: 'large', text: 'signin_with', width: 280});
+    google.accounts.id.renderButton($('gbtn'), {theme: 'outline', size: 'large', text: 'signin_with', width: 340});
     google.accounts.id.renderButton($('gbtn2'), {theme: 'outline', size: 'large', text: 'continue_with', width: 280});
   } catch (e) { say('m1', 'Google sign-in is not available right now.', 'bad'); } };
   document.head.appendChild(gs);
 }
-function enter(name) { $('signin').classList.add('hide'); $('app').classList.remove('hide'); $('tabbar').classList.remove('hide'); $('hdr').classList.remove('hide'); $('who').textContent = name ? 'Hello, ' + name : ''; tab(1); }
+function enter(name) { document.body.classList.add('in'); $('signin').classList.add('hide'); $('app').classList.remove('hide'); $('who').textContent = name ? 'Hello, ' + name : ''; tab(1); }
 $('out').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
 
 // ---- home ----
@@ -260,6 +335,23 @@ function drawProfile() {
   if (!h) { loadHome().then(drawProfile); return; }
   $('prof').innerHTML = '<b style="font-size:18px">' + esc(h.name) + '</b><br><span class="s">Member ID</span> ' + esc(h.memberId) + '<br><span class="s">Campus</span> ' + esc(h.campus || '-') + '<br><span class="s">Part</span> ' + esc(h.part || '-') + '<br><span class="s">Email</span> ' + esc(h.email || '-');
 }
+
+$('mailcode').onclick = async () => {
+  const id = $('mid').value.trim();
+  if (!id) return say('m1', 'Type your Member ID first, for example M014.', 'bad');
+  say('m1', 'Sending the code…');
+  try { const j = await call({action: 'signin.start', memberId: id}); if (!j.ok) return say('m1', j.error || 'Could not send a code.', 'bad'); say('m1', j.message || 'A code is on its way to the email on file.', 'ok'); $('codebox').classList.remove('hide'); }
+  catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
+};
+$('codego').onclick = async () => {
+  say('m1', 'Checking the code…');
+  try { const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
+    if (!j.ok) return say('m1', j.error || 'That code did not work.', 'bad');
+    token = j.token; try { sessionStorage.setItem('rbcMTok', token); } catch (e) {} enter(j.name); }
+  catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
+};
+$('help').onclick = () => $('helpbox').classList.remove('hide');
+$('helpx').onclick = $('helpback').onclick = () => $('helpbox').classList.add('hide');
 gisInit();
 if (token) { call({action: 'me.home', token}).then(j => { if (j && j.ok) enter(j.name); else signedOutNow(); }).catch(() => signedOutNow()); }
 </script></body></html>
