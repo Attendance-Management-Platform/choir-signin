@@ -364,6 +364,8 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 #hgrid.stats>.hsec{grid-column:1/-1;margin:6px 4px 0}.hhero .hr .s,.hhero .hr .k,.hhero .hr .v{color:#fff!important}
 body #hgrid.stats{margin-bottom:18px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}#hgrid.stats>.stat{flex:1 1 230px!important}
 #hgrid.stats .stat{border-left:5px solid var(--sc,#B6000A);padding:16px 20px}#hgrid.stats .stat .v{font-size:32px}
+.hsec.fold{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;cursor:pointer;font-family:inherit;text-align:left}.hsec.fold:after{content:"";width:9px;height:9px;border-right:2.5px solid #8E0008;border-bottom:2.5px solid #8E0008;transform:rotate(45deg);margin:-4px 6px 0;transition:transform .25s}
+.shut>.hsec.fold:after,.hsec.fold.shut:after{transform:rotate(-45deg);margin-top:0}#hquick.shut .hquick{display:none}#hgrid.shut>.stat{display:none}
 </style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -1779,6 +1781,14 @@ $('rpcsv').onclick = async () => {
   } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
 };
 
+
+function homeShut(k) { try { return (localStorage.getItem('rbcHomeShut') || '').split(',').indexOf(k) !== -1; } catch (e) { return false; } }
+document.addEventListener('click', ev => {
+  const b = ev.target.closest && ev.target.closest('[data-hfold]'); if (!b) return;
+  const k = b.dataset.hfold, box = k === 'work' ? $('hquick') : $('hgrid'), shut = !box.classList.contains('shut');
+  box.classList.toggle('shut', shut); b.setAttribute('aria-expanded', shut ? 'false' : 'true');
+  try { const l = (localStorage.getItem('rbcHomeShut') || '').split(',').filter(x => x && x !== k); if (shut) l.push(k); localStorage.setItem('rbcHomeShut', l.join(',')); } catch (e) {}
+});
 function drawHero(j, t, has) {
   const hr = parseInt(new Date().toLocaleString('en-GB', {hour: 'numeric', hour12: false, timeZone: 'Africa/Lagos'}), 10);
   const gr = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
@@ -1796,7 +1806,8 @@ function drawHero(j, t, has) {
 function drawQuick(has) {
   const ks = (myTabs || []).filter(k => k !== 'home' && k !== 'help' && TABDEF[k]);
   const box = $('hquick'); if (!box) return;
-  box.innerHTML = ks.length ? '<div class="hsec">Your work</div><div class="hquick">' + ks.map(k => '<a href="#" data-go="' + TABDEF[k][0] + '"><span class="hi"><svg viewBox="0 0 24 24">' + (ICON[k] || ICON.records) + '</svg></span>' + esc(TABDEF[k][1]) + '</a>').join('') + '</div>' : '';
+  box.classList.toggle('shut', homeShut('work'));
+  box.innerHTML = ks.length ? '<button type="button" class="hsec fold" data-hfold="work" aria-expanded="' + (homeShut('work') ? 'false' : 'true') + '">Your work</button><div class="hquick">' + ks.map(k => '<a href="#" data-go="' + TABDEF[k][0] + '"><span class="hi"><svg viewBox="0 0 24 24">' + (ICON[k] || ICON.records) + '</svg></span>' + esc(TABDEF[k][1]) + '</a>').join('') + '</div>' : '';
   box.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
 }
 async function loadHome() {
@@ -1817,7 +1828,8 @@ async function loadHome() {
     if (t.email) h += '<div class="card stat">' + tile('Emails left today', t.email.left, '<span class="s">' + t.email.reserve + ' are kept for sign-in codes</span>', '#2F4F7E') + '</div>';
     if (t.counts) h += '<div class="card stat">' + tile('Active members', t.counts.members, '<span class="pill p-val">' + t.counts.campuses + ' campuses</span>', '#2F4F7E') + '</div>';
     drawHero(j, t, has); drawQuick(has);
-    $('hgrid').innerHTML = h ? '<div class="hsec" style="flex:1 1 100%;margin-top:6px">At a glance</div>' + h : '';
+    $('hgrid').innerHTML = h ? '<button type="button" class="hsec fold" data-hfold="glance" aria-expanded="' + (homeShut('glance') ? 'false' : 'true') + '">At a glance</button>' + h : '';
+    $('hgrid').classList.toggle('shut', homeShut('glance'));
     document.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     const cr = t.cancelReminder;
     const crh = cr ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + esc(cr.id) + (cr.kind === 'last' ? '' : ' held as planned?') + '</div><p class="sub">' +
