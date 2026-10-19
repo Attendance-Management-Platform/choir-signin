@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CCW Choir Members</title>
+<style>
+:root{--bg:#fff;--page:#F7F9FC;--fg:#172039;--mut:#5E6A7E;--card:#fff;--acc:#B6000A;--ok:#20775A;--bad:#AE2D37;--line:#E6E9EF;--rose:#FFF0F1;--deep:#8E0008}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font:15px/1.5 Lato,system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0;min-height:100vh;background:var(--page)}
+.side{padding:20px 20px 22px;background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;border-radius:0 0 28px 28px}
+.brand{display:flex;align-items:center;gap:12px}
+.tile{background:#fff;border-radius:14px;padding:6px 8px;display:flex}
+.tile img{height:40px;width:auto;display:block}
+.b1{font-weight:900;font-size:15px;line-height:1.2}.b2{font-size:11px;letter-spacing:.14em;font-weight:700;color:#FFD9DC}
+.side h1{font-size:22px;font-weight:900;margin:16px 0 0;line-height:1.15}
+.hero,.chips{display:none}
+.wrap{max-width:34rem;margin:0 auto;padding:0 16px 28px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(20,35,61,.05);padding:18px;margin:12px 0}
+.card>b:first-child{font-size:13px;font-weight:900;color:var(--acc)}
+button{font:inherit;font-weight:700;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;border:0;border-radius:12px;padding:.75rem 1rem;width:100%;margin-top:.6rem;min-height:44px;cursor:pointer;box-shadow:0 4px 12px rgba(182,0,10,.25);transition:transform .2s,box-shadow .2s}
+button:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(182,0,10,.3)}
+button:active{transform:scale(.98)}
+button[disabled]{opacity:.5;cursor:default;transform:none}
+input,select,textarea{font:inherit;width:100%;padding:.7rem .75rem;border-radius:12px;border:1px solid #D5DAE3;background:#fff;color:var(--fg);margin-top:.4rem;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(182,0,10,.12);outline:0}
+:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px}
+.s{color:var(--mut);font-size:.9rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.hide{display:none}
+button[style*="background:none"]{box-shadow:none}
+
+@media (min-width:900px){
+  .shell{display:grid;grid-template-columns:minmax(340px,5fr) 7fr;min-height:100vh}
+  .side{position:sticky;top:0;height:100vh;border-radius:0;padding:48px 56px;display:flex;flex-direction:column;gap:28px;background:radial-gradient(520px 320px at 90% 8%,rgba(255,255,255,.14) 0,transparent 65%),linear-gradient(160deg,#C8101B,#8E0008)}
+  .tile{border-radius:16px;padding:8px 10px}.tile img{height:54px}
+  .b1{font-size:18px}.b2{font-size:12px}
+  .side h1{display:none}
+  .hero{display:flex;flex-direction:column;gap:14px;margin-top:auto;max-width:460px}
+  .hero .h{font-size:32px;font-weight:900;line-height:1.1}
+  .hero .p{font-size:15px;color:#FFE9EA}
+  .chips{display:flex;flex-direction:column;gap:8px;max-width:460px;margin-bottom:8px}
+  .chip{padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:700}
+  .wrap{width:100%;max-width:38rem;padding:40px 32px 48px;align-self:start;margin:0 auto}
+  main.wrap{background:none}
+  .shell{background:radial-gradient(520px 320px at 100% 100%,#FFE4E6 0,transparent 65%),var(--page)}
+  .shell>.side{grid-column:1}.shell>.wrap{grid-column:2}
+  .card{padding:24px;border-radius:20px;box-shadow:0 18px 50px rgba(142,0,8,.08)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.tabs{display:flex;gap:6px;margin:14px 0 0}
+.tab{flex:1;margin:0;background:#fff;color:var(--mut);box-shadow:none;border:1px solid var(--line);font-size:14px}
+.tab.on{color:var(--acc);border-color:#E9A9AE;background:var(--rose)}
+.pill{display:inline-block;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;margin-right:6px}
+.p-ok{background:#EAF6EF;color:#20775A}.p-no{background:#FFF0F1;color:#AE2D37}.p-pend{background:#FFF4DF;color:#95621D}.p-app{background:#F1EAFB;color:#4B2A85}
+.big{font-size:21px;font-weight:900;margin:.2rem 0}
+.note{background:#FFF4DF;color:#95621D;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:.6rem}
+.good{background:#EAF6EF;color:#20775A;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:.6rem}
+.line{border:1px solid #D5DAE3;background:#fff;color:var(--fg);box-shadow:none}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.top button{width:auto;margin:0;padding:.4rem .9rem;min-height:36px;font-size:14px}
+</style></head><body>
+<div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Members</h1><div class="hero"><div class="h">Your choir, in one place.</div><div class="p">Check in at rehearsal, ask to be excused, and follow your requests.</div></div></aside>
+<main class="wrap">
+
+<div id="signin" class="card">
+<b>Sign in</b>
+<p class="big" style="color:var(--deep)">CCW Choir Members</p>
+<p class="s">One place to check in, ask to be excused, and follow your requests. Press Sign in with Google. If your email is on the choir list, you are in.</p>
+<div id="gbtn" style="margin:.6rem 0;min-height:44px"></div>
+<p id="m1" class="s"></p>
+<p class="s">You only see your own information. No phone, camera or location? Tell your Campus MD or Desk D and they will mark you.</p></div>
+
+<div id="app" class="hide">
+<div class="top"><div><div class="s">Signed in as</div><div id="who" style="font-weight:900;font-size:18px"></div></div><button id="out" class="line">Sign out</button></div>
+<div class="tabs"><button id="t1" class="tab on">Home</button><button id="t2" class="tab">Requests</button></div>
+
+<div id="v1">
+<div class="card"><b>NEXT REHEARSAL</b>
+<div id="rh" class="big">Loading…</div><div id="rhs" class="s"></div>
+<div id="state"></div>
+<div id="consent" class="hide"><p class="s">To confirm you are at rehearsal, this page checks your phone's location once. It is sent once to confirm you are at the venue, then thrown away. It is never stored. Only "location confirmed" is recorded, and only for the rehearsal day. A record that you agreed is kept.</p><button id="agree">I agree</button></div>
+<button id="ci" class="hide">Check in with Google</button>
+<button id="req" class="line hide">Request an absence</button>
+<div id="regoogle" class="hide"><p class="s">For your safety, press this once more to confirm it is you.</p><div id="gbtn2" style="margin:.4rem 0"></div></div>
+<p id="m2" class="s"></p></div>
+<div class="card"><b>MY LATEST REQUESTS</b><div id="mini" class="s">Loading…</div></div>
+</div>
+
+<div id="v2" class="hide">
+<div class="card"><b>ASK TO BE EXCUSED</b><p id="rinfo" class="s"></p>
+<div id="rform" class="hide"><label class="s" for="rreason">Reason (10 to 300 characters)</label><textarea id="rreason" rows="3" maxlength="300"></textarea><p class="s">Only the people who decide your request can read this.</p><button id="rsend">Send request</button></div>
+<p id="m3" class="s"></p>
+<p class="s">Late? Ask the Global Admin or Assistant to send it for you.</p></div>
+<div class="card"><b>MY REQUESTS</b><div id="rmine"></div></div>
+</div>
+
+<p class="s">No phone, camera or location? Tell your Campus MD or Desk D and they will mark you.</p>
+</div>
+</main></div>
+<script>
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxdSQPQ28ALJAaDnTpAVU6dkwJHGIGO6ImGX7X2aGs3bqvPHAgXtW47w6B7eEGFnWE4hg/exec';
+const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.googleusercontent.com';
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+let token = '', gTok = '', gAt = 0, home = null, abs = null, onFresh = null, reading = null;
+try { token = sessionStorage.getItem('rbcMTok') || ''; } catch (e) {}
+const say = (id, t, k) => { $(id).textContent = t || ''; $(id).className = 's' + (k ? ' ' + k : ''); };
+const when = ms => new Date(Number(ms)).toLocaleString([], {weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
+async function call(body) {
+  for (let i = 0; i < 3; i++) {
+    try {
+      const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
+      const j = await r.json();
+      if (!j.ok && /not available right now/i.test(j.error || '') && i < 2) { await new Promise(r2 => setTimeout(r2, 1500 * (i + 1))); continue; }
+      return j;
+    } catch (e) { if (i === 2) throw e; await new Promise(r2 => setTimeout(r2, 1500 * (i + 1))); }
+  }
+}
+function signedOutNow(msg) {
+  token = ''; try { sessionStorage.removeItem('rbcMTok'); } catch (e) {}
+  $('app').classList.add('hide'); $('signin').classList.remove('hide'); say('m1', msg || '', msg ? 'bad' : '');
+}
+function tab(n) {
+  $('v1').classList.toggle('hide', n !== 1); $('v2').classList.toggle('hide', n !== 2);
+  $('t1').classList.toggle('on', n === 1); $('t2').classList.toggle('on', n === 2);
+  if (n === 1) loadHome(); else loadReqs();
+}
+$('t1').onclick = () => tab(1); $('t2').onclick = () => tab(2); $('req').onclick = () => tab(2);
+const pill = s => '<span class="pill ' + ({Approved: 'p-ok', Rejected: 'p-no', Pending: 'p-pend', Appeal: 'p-app', Withdrawn: 'p-pend'}[s] || 'p-pend') + '">' + esc(s) + '</span>';
+
+// ---- sign in ----
+async function googleDone(resp) {
+  say('m1', 'Checking with Google…');
+  try {
+    const j = await call({action: 'signin.google', idToken: resp.credential});
+    if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
+    token = j.token; gTok = resp.credential; gAt = Date.now(); try { sessionStorage.setItem('rbcMTok', token); } catch (e) {}
+    enter(j.name);
+  } catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
+}
+function gisInit() {
+  const gs = document.createElement('script');
+  gs.src = 'https://accounts.google.com/gsi/client'; gs.async = true;
+  gs.onload = () => { try {
+    google.accounts.id.initialize({client_id: GOOGLE_CLIENT_ID, callback: resp => { if (onFresh) { const f = onFresh; onFresh = null; gTok = resp.credential; gAt = Date.now(); $('regoogle').classList.add('hide'); f(); } else googleDone(resp); }, auto_select: false});
+    google.accounts.id.renderButton($('gbtn'), {theme: 'outline', size: 'large', text: 'signin_with', width: 280});
+    google.accounts.id.renderButton($('gbtn2'), {theme: 'outline', size: 'large', text: 'continue_with', width: 280});
+  } catch (e) { say('m1', 'Google sign-in is not available right now.', 'bad'); } };
+  document.head.appendChild(gs);
+}
+function enter(name) { $('signin').classList.add('hide'); $('app').classList.remove('hide'); $('who').textContent = name || ''; tab(1); }
+$('out').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
+
+// ---- home ----
+async function loadHome() {
+  say('m2', '');
+  try {
+    const [h, a] = await Promise.all([call({action: 'me.home', token}), call({action: 'absence.state', token})]);
+    if (h.signedOut || a.signedOut) return signedOutNow('Please sign in again.');
+    if (!h.ok) return say('m2', h.error || 'Not available.', 'bad');
+    home = h; abs = a.ok ? a : null; $('who').textContent = h.name || '';
+    drawHome();
+  } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
+}
+function drawHome() {
+  const h = home, rh = h.rehearsal, a = abs;
+  const mineReq = rh && a ? a.mine.filter(r => r.rehearsalId === rh.id && r.status !== 'Withdrawn')[0] : null;
+  ['ci', 'req', 'consent', 'regoogle'].forEach(i => $(i).classList.add('hide'));
+  $('state').innerHTML = '';
+  if (!rh) { $('rh').textContent = 'No rehearsal is set up yet'; $('rhs').textContent = ''; }
+  else {
+    $('rh').textContent = when(rh.startMs); $('rhs').textContent = rh.venue || '';
+    let m = h.mine;
+    if (m === 'none' && mineReq && mineReq.status === 'Approved') m = 'excused';
+    if (m === 'waiting') $('state').innerHTML = '<p><span class="pill p-pend">Waiting for a yes</span></p><p class="s">You are checked in. Your Campus MD or Desk D now says yes that you are in the room. You do nothing more.</p>';
+    else if (m === 'checked') $('state').innerHTML = '<p><span class="pill p-ok">Checked in</span></p><p class="s">A Desk D team member will check it. It counts once that is done.</p>';
+    else if (m === 'notroom') $('state').innerHTML = '<p><span class="pill p-no">Not in the room</span></p><p class="s">You were marked as not in the room. If that is wrong, tell your Campus MD or Desk D.</p>';
+    else if (m === 'excused') $('state').innerHTML = '<p><span class="pill p-app">Excused</span></p><p class="s">Your absence request for this rehearsal was approved.</p>';
+    else if (h.staffOnly) $('state').innerHTML = '<div class="note">You are signed in for staff duties. Check-in and requests are for choir members.</div>';
+    else if (rh.finished) $('state').innerHTML = '<p class="s">This rehearsal has finished.</p>';
+    else if (rh.checkInOpen) {
+      $('state').innerHTML = '<div class="good"><b>Check-in is open.</b> It uses your phone location, so you must be at the venue. No QR needed.</div>';
+      let agreed = false; try { agreed = localStorage.getItem('rbcConsent') === '1'; } catch (e) {}
+      $(agreed ? 'ci' : 'consent').classList.remove('hide');
+      $('state').insertAdjacentHTML('beforeend', '<p class="s">Cannot use Google? Scan the QR in the room instead. No phone or location? Tell your Campus MD or Desk D.</p>');
+    } else {
+      if (mineReq) $('state').innerHTML = '<p>' + pill(mineReq.status) + '</p><p class="s">Your request for this rehearsal.</p>';
+      else if (a && a.rehearsal && a.rehearsal.open) { $('state').innerHTML = '<div class="note">Absence requests close ' + esc(when(a.rehearsal.closeMs)) + '. Check-in opens 1 hour before the start.</div>'; }
+      else $('state').innerHTML = '<p class="s">Check-in opens 1 hour before the start.</p>';
+    }
+    if (!h.staffOnly && !rh.finished && !mineReq && m === 'none' && a && a.rehearsal && a.rehearsal.open) $('req').classList.remove('hide');
+  }
+  const recent = a ? a.mine.slice(0, 3) : [];
+  $('mini').innerHTML = recent.length ? recent.map(r => '<div style="padding:6px 0">' + pill(r.status) + ' <span class="s">' + esc(when(r.rehearsalStartMs)) + '</span></div>').join('') : 'You have no requests yet.';
+}
+$('agree').onclick = () => { try { localStorage.setItem('rbcConsent', '1'); } catch (e) {} drawHome(); };
+function deviceId() {
+  try { let v = localStorage.getItem('rbcDev'); if (!v) { v = (self.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2, 12)); localStorage.setItem('rbcDev', v); } return v; } catch (e) { return ''; }
+}
+$('ci').onclick = () => {
+  say('m2', 'Checking your location…');
+  navigator.geolocation.getCurrentPosition(p => {
+    reading = {lat: p.coords.latitude, lon: p.coords.longitude, accuracyM: p.coords.accuracy};
+    sendCheckIn();
+  }, () => say('m2', 'Location not available. Tell your Campus MD or Desk D to mark you by hand.', 'bad'), {enableHighAccuracy: true, timeout: 15000});
+};
+async function sendCheckIn() {
+  if (!gTok || Date.now() - gAt > 8 * 60 * 1000) { gTok = ''; onFresh = sendCheckIn; $('regoogle').classList.remove('hide'); return say('m2', 'Please press the Google button to confirm it is you.', 'bad'); }
+  $('ci').disabled = true; say('m2', 'Checking you in…');
+  try {
+    const j = await call({rehearsalId: '', token: '', memberId: '', reading: reading, deviceId: deviceId(), idToken: gTok});
+    if (j.ok) { say('m2', ''); loadHome(); } else { say('m2', j.error || 'Could not check you in.', 'bad'); }
+  } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
+  $('ci').disabled = false;
+}
+
+// ---- requests ----
+async function loadReqs() {
+  say('m3', 'Loading…'); $('rform').classList.add('hide');
+  try {
+    const j = await call({action: 'absence.state', token});
+    if (j.signedOut) return signedOutNow('Please sign in again.');
+    if (!j.ok) { $('rmine').innerHTML = ''; return say('m3', j.error || 'Not available.', 'bad'); }
+    abs = j; const rh = j.rehearsal;
+    const live = j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
+    $('rinfo').textContent = rh ? 'Next rehearsal: ' + when(rh.startMs) + '. Requests ' + (rh.open ? 'are open until ' + when(rh.closeMs) + '.' : 'are closed. Please contact the Global Admin or Assistant Global Admin.') : 'No rehearsal is open for requests yet.';
+    $('rform').classList.toggle('hide', !(rh && rh.open && !live));
+    say('m3', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
+    $('rmine').innerHTML = j.mine.length ? j.mine.map(r => '<div style="border-top:1px solid var(--line);padding:10px 0;margin-top:8px">' + pill(r.status) + ' <span class="s">' + esc(when(r.rehearsalStartMs)) + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' +
+      (r.canWithdraw ? '<button class="line" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '') + (r.canAppeal ? '<button class="line" data-ap="' + esc(r.requestId) + '">Appeal</button>' : '') + '</div>').join('') : '<p class="s">You have no requests yet.</p>';
+    $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => {
+      if (b.dataset.ap) { const why = prompt('Why should this be looked at again? (10 to 300 characters)'); if (!why) return; const a = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m3', a.ok ? 'Appeal sent.' : (a.error || 'Could not appeal.'), a.ok ? 'ok' : 'bad'); loadReqs(); return; }
+      const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m3', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadReqs(); });
+  } catch (e) { say('m3', 'Network problem. Try again.', 'bad'); }
+}
+$('rsend').onclick = async () => {
+  $('rsend').disabled = true;
+  try { const k = await call({action: 'absence.submit', token, reason: $('rreason').value.trim()}); say('m3', k.ok ? 'Request sent.' : (k.error || 'Could not send.'), k.ok ? 'ok' : 'bad'); if (k.ok) { $('rreason').value = ''; loadReqs(); } }
+  catch (e) { say('m3', 'Network problem. Try again.', 'bad'); }
+  $('rsend').disabled = false;
+};
+gisInit();
+if (token) { call({action: 'me.home', token}).then(j => { if (j && j.ok) enter(j.name); else signedOutNow(); }).catch(() => signedOutNow()); }
+</script></body></html>
