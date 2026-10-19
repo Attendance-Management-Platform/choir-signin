@@ -347,6 +347,23 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 .mpk .cnt b{color:#8E0008}
 .mpick{margin-top:12px;border:1px solid #EBC4C8;border-left:5px solid #B6000A;border-radius:14px;background:#fff;padding:12px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
 .mpick .nm{font-weight:800;color:#172039}.mpick .mt{font-size:13px;color:#5E6A7E;margin-top:2px}
+
+/* Home: welcome banner, quick links, desk tiles */
+.hhero{display:flex;gap:18px;flex-wrap:wrap;align-items:stretch;margin:0 0 16px;padding:22px 24px;border-radius:20px;background:linear-gradient(135deg,#8E0008 0%,#B6000A 55%,#C8323A 100%);color:#fff;box-shadow:0 16px 34px rgba(142,0,8,.22);position:relative;overflow:hidden}
+.hhero:after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07)}
+.hhero .hw{flex:2 1 280px;position:relative;z-index:1}.hhero .hg{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85}.hhero .hn{font-size:28px;font-weight:900;line-height:1.15;margin:4px 0 8px}
+.hhero .hb{display:inline-block;padding:3px 12px;border-radius:99px;background:rgba(255,255,255,.18);font-size:12.5px;font-weight:800;margin:0 6px 6px 0}.hhero .hs{font-size:14.5px;opacity:.95;margin:6px 0 0;line-height:1.45}
+.hhero .hr{flex:1 1 230px;position:relative;z-index:1;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:16px;padding:14px 16px;color:#fff;text-decoration:none;display:block}
+.hhero .hr .k{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;opacity:.85}.hhero .hr .v{font-size:22px;font-weight:900;margin:3px 0}.hhero .hr .s{font-size:13.5px;opacity:.95}
+.hhero .hr .pill{background:#fff;color:#8E0008;margin-top:8px;display:inline-block}
+.hquick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 16px}
+.hquick a{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid #E6E9EF;border-radius:16px;text-decoration:none;color:#172039;font-weight:800;font-size:14.5px;transition:transform .2s,box-shadow .2s,border-color .2s}
+.hquick a:hover{transform:translateY(-3px);border-color:#E9A9AE;box-shadow:0 14px 30px rgba(142,0,8,.14)}
+.hquick .hi{flex:none;width:38px;height:38px;border-radius:12px;background:#FFF0F1;color:#B6000A;display:flex;align-items:center;justify-content:center}.hquick svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hsec{font-size:13px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8E0008;margin:22px 4px 10px}
+#hgrid.stats>.hsec{grid-column:1/-1;margin:6px 4px 0}.hhero .hr .s,.hhero .hr .k,.hhero .hr .v{color:#fff!important}
+#hgrid.stats{margin-bottom:18px}#hgrid.stats>.stat{flex:1 1 230px!important}
+#hgrid.stats .stat{border-left:5px solid var(--sc,#B6000A);padding:16px 20px}#hgrid.stats .stat .v{font-size:32px}
 </style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -476,10 +493,12 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s10" class="pg hide">
-<div id="hcharts"></div>
+<div id="hhero"></div>
 <div id="htasks"></div>
-<div id="hnotes"></div>
+<div id="hquick"></div>
 <div id="hgrid" class="stats rise"></div>
+<div id="hnotes"></div>
+<div id="hcharts"></div>
 <div id="hqr"></div>
 <p id="m10" class="s"></p>
 </div>
@@ -1759,6 +1778,27 @@ $('rpcsv').onclick = async () => {
     say('m11', 'Downloaded. This download is recorded in the audit log.', 'ok');
   } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
 };
+
+function drawHero(j, t, has) {
+  const hr = parseInt(new Date().toLocaleString('en-GB', {hour: 'numeric', hour12: false, timeZone: 'Africa/Lagos'}), 10);
+  const gr = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+  const first = String(j.name || myName || '').split(' ')[0] || 'there';
+  const roles = (j.roles && j.roles.length ? j.roles : myRoles) || [];
+  const badges = roles.map(r => '<span class="hb">' + esc(r) + '</span>').join('') + (j.campus ? '<span class="hb">' + esc(j.campus) + '</span>' : '');
+  const mine = (j.tasks || []).filter(x => x.mine).length;
+  const line = mine ? 'You have <b>' + mine + '</b> thing' + (mine === 1 ? '' : 's') + ' waiting for you today.' : 'Nothing is waiting for you today. Well done.';
+  const r = t.rehearsal;
+  const rh = r ? '<' + (has('rehearsal') ? 'a href="#" data-go="' + TABDEF.rehearsal[0] + '"' : 'div') + ' class="hr"><div class="k">Next rehearsal</div><div class="v">' + esc(r.id) + '</div><div class="s">' + esc(tm(r.startMs)) + '</div><div class="s">' + esc(r.venue || 'No venue yet') + '</div><span class="pill">Check-in ' + (r.checkInOpen ? 'open' : 'closed') + '</span></' + (has('rehearsal') ? 'a' : 'div') + '>'
+    : '<div class="hr"><div class="k">Next rehearsal</div><div class="v">None set up</div></div>';
+  $('hhero').innerHTML = '<div class="hhero rise"><div class="hw"><div class="hg">' + gr + '</div><div class="hn">' + esc(first) + '</div><div>' + badges + '</div><p class="hs">' + line + '</p></div>' + rh + '</div>';
+  document.querySelectorAll('#hhero [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
+}
+function drawQuick(has) {
+  const ks = (myTabs || []).filter(k => k !== 'home' && k !== 'help' && TABDEF[k]);
+  const box = $('hquick'); if (!box) return;
+  box.innerHTML = ks.length ? '<div class="hsec">Your work</div><div class="hquick">' + ks.map(k => '<a href="#" data-go="' + TABDEF[k][0] + '"><span class="hi"><svg viewBox="0 0 24 24">' + (ICON[k] || ICON.records) + '</svg></span>' + esc(TABDEF[k][1]) + '</a>').join('') + '</div>' : '';
+  box.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
+}
 async function loadHome() {
   say('m10', 'Loading…');
   try {
@@ -1769,10 +1809,6 @@ async function loadHome() {
     const link = (k, inner, extra) => has(k) ? '<a class="card stat lift" href="#" data-go="' + TABDEF[k][0] + '"' + (extra || '') + '>' + inner + '</a>' : '<div class="card stat"' + (extra || '') + '>' + inner + '</div>';
     const tile = (k, v, sub, col, bg) => '<div class="k" style="color:' + col + '">' + k + '</div><div class="v" style="color:' + col + '">' + v + '</div>' + (sub || '');
     let h = '';
-    if (t.rehearsal) {
-      const r = t.rehearsal;
-      h += link('rehearsal', '<div class="k" style="color:#2F4F7E">Next rehearsal</div><div class="v" style="font-size:20px;color:#172039">' + esc(r.id) + ' · ' + esc(tm(r.startMs)) + '</div><div class="s" style="margin-top:4px">' + esc(r.venue || 'No venue yet') + '</div><span class="pill ' + (r.checkInOpen ? 'p-ok' : 'p-pend') + '">Check-in ' + (r.checkInOpen ? 'open' : 'closed') + '</span>' + (r.urgent ? '<span class="pill p-no">Urgent</span>' : ''), ' style="flex:2 1 280px"');
-    } else if (has('rehearsal')) h += link('rehearsal', '<div class="k" style="color:#2F4F7E">Next rehearsal</div><div class="v" style="font-size:20px">None set up</div><div class="s">Make a rehearsal.</div>', ' style="flex:2 1 280px"');
     if (t.checkins) h += link('checkins', tile('Check-ins to validate', t.checkins.waiting, '<span class="pill p-pend">' + t.checkins.flagged + ' flagged</span><span class="pill p-val">' + t.checkins.validated + ' checked</span>', '#20775A'));
     if (t.requests) h += link('requests', tile('Requests waiting', t.requests.waiting, '<span class="pill p-pend">' + t.requests.late + ' late</span>' + (t.requests.flagged ? '<span class="pill p-no">' + t.requests.flagged + ' absent, no request' + (t.requests.hoursLeft ? ' · ' + t.requests.hoursLeft + ' h left' : '') + (t.requests.lapsed ? ' · ' + t.requests.lapsed + ' time is up' : '') + '</span>' : ''), '#95621D'));
     if (t.access) h += link('people', tile('People and access', t.access.waiting, '<span class="pill p-pend">' + t.access.waiting + ' for your answer</span><span class="pill p-val">' + t.access.ready + ' ready to carry out</span>', '#2F4F7E'));
@@ -1780,7 +1816,8 @@ async function loadHome() {
     if (t.appeals) h += link('requests', tile('Appeals waiting for you', t.appeals.waiting, '', '#95621D'));
     if (t.email) h += '<div class="card stat">' + tile('Emails left today', t.email.left, '<span class="s">' + t.email.reserve + ' are kept for sign-in codes</span>', '#2F4F7E') + '</div>';
     if (t.counts) h += '<div class="card stat">' + tile('Active members', t.counts.members, '<span class="pill p-val">' + t.counts.campuses + ' campuses</span>', '#2F4F7E') + '</div>';
-    $('hgrid').innerHTML = h || '<div class="card pad"><div class="ct">Welcome</div><p class="sub">Nothing is waiting for you here. Use the menu for your tabs.</p></div>';
+    drawHero(j, t, has); drawQuick(has);
+    $('hgrid').innerHTML = h ? '<div class="hsec" style="flex:1 1 100%;margin-top:6px">At a glance</div>' + h : '';
     document.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     const cr = t.cancelReminder;
     const crh = cr ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + esc(cr.id) + (cr.kind === 'last' ? '' : ' held as planned?') + '</div><p class="sub">' +
