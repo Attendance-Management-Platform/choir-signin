@@ -156,6 +156,7 @@ input.in{height:48px;padding:0 14px}
   <div id="app" style="margin-top:16px">
 
    <div id="v1">
+    <div id="anotes" class="col" style="gap:10px;margin-bottom:12px"></div>
     <div id="tiles" class="tiles"></div>
     <div class="grid">
      <div class="card lift rise col"><div class="kick">Next rehearsal</div>
@@ -261,7 +262,7 @@ function tab(n) {
 [1, 2, 3, 4].forEach(i => $('t' + i).onclick = () => tab(i));
 $('req').onclick = () => tab(2); $('seeall').onclick = e => { e.preventDefault(); tab(2); }; $('attlink').onclick = e => { e.preventDefault(); tab(3); };
 $('out').onclick = $('out2').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
-const pill = s => '<span class="pill ' + ({Approved: 'p-ok', Rejected: 'p-no', Pending: 'p-pend', Appeal: 'p-app', Withdrawn: 'p-pend'}[s] || 'p-pend') + '">' + esc(s) + '</span>';
+const pill = (s, r) => s === 'Withdrawn' && r && /^Cancelled by/.test(r.note || '') ? '<span class="pill p-no">Cancelled</span>' : '<span class="pill ' + ({Approved: 'p-ok', Rejected: 'p-no', Pending: 'p-pend', Appeal: 'p-app', Withdrawn: 'p-pend'}[s] || 'p-pend') + '">' + esc(s) + '</span>';
 const short = n => { const p = String(n || '').trim().split(/\s+/); return p.length > 1 ? p[0] + ' ' + p[p.length - 1].charAt(0) + '.' : (p[0] || ''); };
 
 // ---- sign in ----
@@ -315,10 +316,14 @@ async function loadHome() {
     const [h, a] = await Promise.all([call({action: 'me.home', token}), call({action: 'absence.state', token})]);
     if (h.signedOut || a.signedOut) return signedOutNow('Please sign in again.');
     if (!h.ok) return say('m2', h.error || 'Not available.', 'bad');
-    home = h; abs = a.ok ? a : null; setWho(h); drawHome(); loadAttLine();
+    home = h; abs = a.ok ? a : null; setWho(h); drawHome(); loadAttLine(); drawNotices(h.notices || []);
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 }
-const subOf = r => r.status === 'Approved' ? 'Counted as excused' : r.status === 'Pending' ? 'Waiting for your Campus Music Director' : r.status === 'Rejected' ? (r.canAppeal ? 'Rejected · you can appeal' : 'Rejected') : r.status === 'Appeal' ? 'Appeal with the Global Music Director' : r.status === 'Withdrawn' ? 'You withdrew this request' : '';
+const drawNotices = ns => {
+  $('anotes').innerHTML = ns.slice(0, 3).map(n => '<div class="' + (n.kind === 'cancelled' ? 'note' : 'good') + '"><b>' + (n.kind === 'cancelled' ? 'An absence was cancelled' : 'An absence was entered for you') + '</b><br>' +
+    (n.kind === 'cancelled' ? 'The Global Admin cancelled the absence entered for ' : 'An admin entered an approved absence for ') + esc(n.rehearsalId || 'a rehearsal') + ' (' + esc(dtm(n.atMs)) + '). See My requests for the details.</div>').join('');
+};
+const subOf = r => r.status === 'Withdrawn' && /^Cancelled by/.test(r.note || '') ? 'Cancelled by the Global Admin' : r.enteredBy && r.status === 'Approved' ? 'Counted as excused · entered by the ' + r.enteredBy : r.status === 'Approved' ? 'Counted as excused' : r.status === 'Pending' ? 'Waiting for your Campus Music Director' : r.status === 'Rejected' ? (r.canAppeal ? 'Rejected · you can appeal' : 'Rejected') : r.status === 'Appeal' ? 'Appeal with the Global Music Director' : r.status === 'Withdrawn' ? 'You withdrew this request' : '';
 function drawHome() {
   const h = home, rh = h.rehearsal, a = abs;
   const mineReq = rh && a ? a.mine.filter(r => r.rehearsalId === rh.id && r.status !== 'Withdrawn')[0] : null;
@@ -350,7 +355,7 @@ function drawHome() {
     if (!h.staffOnly && !rh.finished && !mineReq && m === 'none' && a && a.rehearsal && a.rehearsal.open) $('req').classList.remove('hide');
   }
   const mine = a ? a.mine : [], recent = mine.slice(0, 3);
-  $('mini').innerHTML = recent.length ? recent.map(r => '<div class="rq"><div><b>' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</b><div class="s">' + esc(subOf(r)) + '</div></div>' + pill(r.status) + '</div>').join('') : '<div class="s">You have no requests yet.</div>';
+  $('mini').innerHTML = recent.length ? recent.map(r => '<div class="rq"><div><b>' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</b><div class="s">' + esc(subOf(r)) + '</div></div>' + pill(r.status, r) + '</div>').join('') : '<div class="s">You have no requests yet.</div>';
   const pend = mine.filter(r => r.status === 'Pending').length;
   window.__tiles = {when: rh ? dshort(rh.startMs) : '-', time: rh ? tm(rh.startMs) + (rh.venue ? ' · ' + rh.venue : '') : '', status: status, pend: pend};
   drawTiles();
@@ -402,7 +407,7 @@ async function loadReqs() {
     else { box.className = 'note'; box.textContent = 'Requests for this rehearsal are closed. Please contact the Global Admin or Assistant Global Admin.'; }
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
     say('m3', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
-    $('rmine').innerHTML = j.mine.length ? j.mine.map(r => '<div class="card lift col" style="gap:8px"><div class="rowl"><div><div style="font-size:16px;font-weight:900">' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</div><div class="s">' + esc(subOf(r)) + (r.late ? ' · late' : '') + '</div></div>' + pill(r.status) + '</div>' +
+    $('rmine').innerHTML = j.mine.length ? j.mine.map(r => '<div class="card lift col" style="gap:8px"><div class="rowl"><div><div style="font-size:16px;font-weight:900">' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</div><div class="s">' + esc(subOf(r)) + (r.late ? ' · late' : '') + '</div></div>' + pill(r.status, r) + '</div>' +
       (r.reason ? '<div class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div>' : '') +
       (r.canAppeal ? '<label for="ap' + esc(r.requestId) + '" style="font-size:14px;font-weight:900">Why are you appealing?</label><textarea id="ap' + esc(r.requestId) + '" class="in" rows="3" maxlength="300"></textarea><button class="btn btn-red" style="margin-top:0" data-ap="' + esc(r.requestId) + '">Send appeal</button><div class="s">Appeals go to the Global Music Director first, then the Pastor.</div>' : '') +
       (r.canWithdraw ? '<button class="btn btn-line" style="margin-top:0" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '') + '</div>').join('') : '<div class="s">You have no requests yet.</div>';

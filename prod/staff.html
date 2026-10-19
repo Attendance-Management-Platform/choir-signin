@@ -498,10 +498,16 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div id="rmine" class="card pad rise" style="animation-delay:.06s"></div>
 </div>
 <div class="c2">
-<div id="rfor" class="card pad rise hide"><div class="ct">Late request for a member</div><p class="sub">Requests close 36 hours before a rehearsal. Only the Global Admin or Assistant Global Admin can send one after that.</p>
-<label for="rfid" class="lb">Member ID</label><input id="rfid" class="in" autocomplete="off" placeholder="Member ID">
-<label for="rfreason" class="lb">Reason for the absence</label><textarea id="rfreason" class="in" rows="2" maxlength="300" placeholder="Reason (10 to 300 characters)" style="width:100%;font:inherit"></textarea>
-<div class="actions"><button id="rfsend" class="btn red" type="button">Send late request</button></div><p id="m6b" class="s"></p></div>
+<div id="rfor" class="card pad rise hide"><div class="ct">Enter an absence for a member</div><p class="sub">Global Admin and Assistant only. It is approved at once, before or after the rehearsal, until that rehearsal's attendance is published as official. Always give a reason.</p>
+<label for="rfq" class="lb">Find the member</label><input id="rfq" class="in" autocomplete="off" maxlength="60" placeholder="Name or Member ID (at least 2 letters)">
+<div id="rfmatch" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div>
+<div id="rfpick" class="nt hide" style="margin-top:8px"></div>
+<label for="rfrh" class="lb">Rehearsal</label><select id="rfrh" class="in"></select>
+<p class="sub" style="margin:4px 0 0">Cancelled rehearsals and ones already published as official are not in this list.</p>
+<label for="rfreason" class="lb">Reason (10 to 300 characters)</label><textarea id="rfreason" class="in" rows="2" maxlength="300" placeholder="Why was or will this member be absent?" style="width:100%;font:inherit"></textarea>
+<div class="actions"><button id="rfsend" class="btn red" type="button">Enter and approve</button></div><p id="m6b" class="s"></p></div>
+<div id="rfrev" class="card pad rise hide"></div>
+<div id="rfnote" class="card pad rise hide"></div>
 <div class="card pad rise" style="animation-delay:.1s"><div class="ct">What happens next</div>
 <div class="step" style="margin-top:8px"><span>1. Campus Music Director</span><span class="pill p-pend">Validates</span></div>
 <div class="step"><span>2. Global Admin or Assistant</span><span class="pill p-val">Decides</span></div>
@@ -1616,10 +1622,12 @@ async function loadHome() {
     const mch = (j.memberChanges || []).length ? '<div class="nt"><div class="ct">Membership changes</div>' + j.memberChanges.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + (has('changes') ? '<div class="actions"><button class="btn line" type="button" data-go="s16">Open Changes and updates</button></div>' : '') + '</div>' : '';
     const pth = t.petitions && t.petitions.waiting ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.petitions.waiting + ' petition(s) waiting for your answer</div><div class="actions"><button class="btn red" type="button" data-go="s16">Open Changes and updates</button></div></div>' : '';
     const dth = t.details && t.details.waiting ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.details.waiting + ' member(s) asked for their details to be corrected</div><div class="actions"><button class="btn red" type="button" data-go="s17">Open Members</button></div></div>' : '';
+    const abn = j.absenceNotices || [];
+    const abh = abn.length ? '<div class="nt"><div class="ct">Absences entered by an admin</div>' + abn.slice(0, 8).map(n => '<p class="sub" style="margin:6px 0 0"><span class="pill ' + (n.kind === 'cancelled' ? 'p-no' : 'p-ok') + '">' + (n.kind === 'cancelled' ? 'Cancelled' : 'Entered') + '</span> <b>' + esc(n.member) + '</b> · ' + esc(n.rehearsalId) + ' · ' + esc(n.by) + (n.byAssistant ? ' (Assistant)' : '') + ' · ' + esc(tm(n.atMs)) + (n.reason ? '<br>Reason: ' + esc(n.reason) : '') + '</p>').join('') + (has('absence') ? '<div class="actions"><button class="btn line" type="button" data-go="s6">Open Absence</button></div>' : '') + '</div>' : '';
     ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
     $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'), has('records'));
     if (has('records')) anLoad();
-    drawNotes([['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
+    drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
     hfoldApply();
     drawTasks(j.tasks || []);
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
@@ -1853,7 +1861,7 @@ async function loadAbsence() {
     const live = j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
     $('rinfo').textContent = rh ? 'Next rehearsal: ' + new Date(rh.startMs).toLocaleString() + '. Requests ' + (rh.open ? 'are open until ' + new Date(rh.closeMs).toLocaleString() + '.' : 'are closed. Please contact the Global Admin or Assistant Global Admin.') : 'No rehearsal is open for requests yet.';
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
-    $('rfor').classList.toggle('hide', !j.canSubmitFor);
+    $('rfor').classList.toggle('hide', !j.canSubmitFor); if (j.canSubmitFor) loadAbsAdmin();
     say('m6', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
     $('rmine').innerHTML = j.mine.length ? '<div class="ct">Your requests</div>' + j.mine.map(r => '<div style="border-top:1px solid var(--line);padding:10px 0;margin-top:8px">' + stPill(r.status) + ' <span class="s">' + new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' + (r.canWithdraw ? '<br><button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + (r.canAppeal ? '<br><button data-ap="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Appeal</button>' : '') + '</div>').join('') : '';
     $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => {
@@ -1979,11 +1987,60 @@ async function loadQueue() {
     });
   } catch (e) { say('m7', 'Network problem. Try again.', 'bad'); }
 }
+/** Enter an absence for a member (Global Admin, Assistant). */
+let RF = {id: '', name: ''}, rfTimer = null;
+async function loadAbsAdmin() {
+  try {
+    const j = await call({action: 'absence.adminState', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { $('rfrev').classList.add('hide'); $('rfnote').classList.add('hide'); return; }
+    const dt = ms => new Date(ms).toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'});
+    const cur = $('rfrh').value;
+    $('rfrh').innerHTML = j.rehearsals.length ? j.rehearsals.map(r => '<option value="' + esc(r.id) + '"' + (r.id === cur ? ' selected' : '') + '>' + esc(r.id) + ' · ' + esc(dt(r.startMs)) + ' (' + esc(r.when) + (r.processed ? ', day processed' : '') + ')</option>').join('') : '<option value="">No rehearsal is available</option>';
+    const rv = $('rfrev');
+    if (j.canReview) {
+      rv.classList.remove('hide');
+      rv.innerHTML = '<div class="ct">Entered by an Assistant' + (j.review.length ? ' (' + j.review.length + ' to look at)' : '') + '</div><p class="sub">Only the Global Admin sees this list. Keep an entry by doing nothing, or cancel it with a reason.</p>' +
+        (j.review.length ? j.review.map(r => '<div style="border:1px solid var(--line);border-left:4px solid #E9A9AE;border-radius:14px;padding:12px 14px;margin-top:10px;display:flex;flex-direction:column;gap:6px"><div><b>' + esc(r.name) + '</b> <span class="s">· ' + esc(r.campus) + ' · ' + esc(r.rehearsalId) + ' · ' + esc(dt(r.rehearsalStartMs)) + ' · entered ' + esc(tm(r.atMs)) + '</span></div><div class="s">Reason: ' + esc(r.reason) + '</div><div class="actions" style="margin:0"><button class="btn line sm" type="button" data-rfcancel="' + esc(r.requestId) + '">Cancel this absence</button></div></div>').join('') : '<p class="sub">Nothing to look at.</p>');
+    } else rv.classList.add('hide');
+    const nt = $('rfnote'), ns = j.notices || [];
+    if (ns.length) {
+      nt.classList.remove('hide');
+      nt.innerHTML = '<div class="ct">Recent absences entered by an admin</div>' + ns.map(n => '<p class="sub" style="margin:8px 0 0"><span class="pill ' + (n.kind === 'cancelled' ? 'p-no' : 'p-ok') + '">' + (n.kind === 'cancelled' ? 'Cancelled' : 'Entered') + '</span> <b>' + esc(n.member) + '</b> · ' + esc(n.rehearsalId) + ' · ' + esc(n.by) + ' · ' + esc(tm(n.atMs)) + (n.reason ? '<br>Reason: ' + esc(n.reason) : '') + '</p>').join('');
+    } else nt.classList.add('hide');
+  } catch (e) { /* the form still works */ }
+}
+function rfPick(id, name, line) { RF = {id: id, name: name}; $('rfmatch').innerHTML = ''; $('rfpick').classList.remove('hide'); $('rfpick').textContent = line; }
+$('rfq').oninput = () => {
+  clearTimeout(rfTimer); RF = {id: '', name: ''}; $('rfpick').classList.add('hide');
+  const v = $('rfq').value.trim(); if (v.length < 2) { $('rfmatch').innerHTML = ''; return; }
+  rfTimer = setTimeout(async () => {
+    const j = await call({action: 'member.find', token, q: v});
+    if (!j || !j.ok) { $('rfmatch').innerHTML = ''; return; }
+    const m = (j.matches || []).filter(x => String(x.status || 'Active') === 'Active');
+    $('rfmatch').innerHTML = m.length ? m.map(x => '<button type="button" class="btn line sm" style="text-align:left" data-rfm="' + esc(x.memberId) + '" data-n="' + esc(x.name) + '" data-l="' + esc(x.name + ' · ' + x.memberId + ' · ' + (x.campus || '-')) + '">' + esc(x.name) + ' · ' + esc(x.memberId) + ' · ' + esc(x.campus || '-') + '</button>').join('') : '<p class="sub">No active member matches.</p>';
+  }, 300);
+};
+document.addEventListener('click', async ev => {
+  const p = ev.target.closest && ev.target.closest('[data-rfm]');
+  if (p) { rfPick(p.dataset.rfm, p.dataset.n, p.dataset.l); return; }
+  const c = ev.target.closest && ev.target.closest('[data-rfcancel]');
+  if (c) {
+    const why = prompt('Why is this absence being cancelled? (10 to 300 characters)'); if (!why) return;
+    c.disabled = true;
+    const k = await call({action: 'absence.adminCancel', token, requestId: c.dataset.rfcancel, reason: why.trim()});
+    say('m6b', k.ok ? 'Cancelled. The member, their Campus Music Director and the Assistant are told.' : (k.error || 'Could not cancel.'), k.ok ? 'ok' : 'bad'); loadAbsAdmin();
+  }
+});
 $('rfsend').onclick = async () => {
+  if (!RF.id) return say('m6b', 'Find and choose the member first.', 'bad');
+  if (!$('rfrh').value) return say('m6b', 'Choose a rehearsal.', 'bad');
   $('rfsend').disabled = true;
-  try { const k = await call({action: 'absence.submitFor', token, memberId: $('rfid').value.trim(), reason: $('rfreason').value.trim()});
-    say('m6b', k.ok ? 'Submitted for the member' + (k.late ? ' (late route).' : '.') : (k.error || 'Could not submit.'), k.ok ? 'ok' : 'bad'); if (k.ok) { $('rfid').value = ''; $('rfreason').value = ''; } }
-  catch (e) { say('m6b', 'Network problem. Try again.', 'bad'); }
+  try {
+    const k = await call({action: 'absence.adminEnter', token, memberId: RF.id, rehearsalId: $('rfrh').value, reason: $('rfreason').value.trim()});
+    say('m6b', k.ok ? 'Entered and approved for ' + RF.name + '. They and their Campus Music Director are told.' + (k.warning ? ' ' + k.warning : '') : (k.error || 'Could not enter it.'), k.ok ? 'ok' : 'bad');
+    if (k.ok) { $('rfreason').value = ''; $('rfq').value = ''; RF = {id: '', name: ''}; $('rfpick').classList.add('hide'); loadAbsAdmin(); }
+  } catch (e) { say('m6b', 'Network problem. Try again.', 'bad'); }
   $('rfsend').disabled = false;
 };
 $('rsend').onclick = async () => {
@@ -2211,7 +2268,7 @@ if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTab
 </script><script>
 (function () {
   var NOFOLD = ['Mark a member by hand', 'Request an absence'];
-  var SHUT = ['Figures behind the chart', 'Ask for a change', 'Late request for a member', 'What happens next', 'Safety settings', 'Being away'];
+  var SHUT = ['Figures behind the chart', 'Ask for a change', 'What happens next', 'Safety settings', 'Being away'];
   var LIST = ['Waiting for your answer', 'Requests you asked for', 'Approved and ready to carry out'];
   var st = {};
   try { st = JSON.parse(localStorage.getItem('rbcFold') || '{}') || {}; } catch (e) { st = {}; }
