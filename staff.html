@@ -166,6 +166,20 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:10px}.hgrid .card{margin:0;display:flex;flex-direction:column;gap:6px}.hgrid .card .actions{margin-top:auto}.hq{border-top:1px solid #E5E8EE;padding:2px 0}.hq summary{cursor:pointer;font-weight:700;padding:11px 0;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}.hq summary::-webkit-details-marker{display:none}.hq summary:after{content:"+";font-size:20px;color:#8E0008;font-weight:400}.hq[open] summary:after{content:"\2212"}.hq .ha{padding:0 0 12px;color:#394560;line-height:1.5}.hdl dt{font-weight:800;margin-top:10px}.hdl dd{margin:2px 0 0;color:#394560}.hwho{width:100%;border-collapse:collapse;font-size:14px}.hwho td,.hwho th{text-align:left;padding:9px 10px;border-top:1px solid #E5E8EE;vertical-align:top}.hwho th{font-size:12px;color:#5E6A7E;border-top:0}
 #helpbody>div,#helpbody>.card{margin-bottom:18px}#helpbody .fplist{max-height:min(52vh,440px)}#helpbody .hq{padding:0 4px}
 .dkb{display:inline-block;margin-top:10px;padding:8px 12px;border-radius:10px;background:#FFF4DF;border:1px solid #F0E2C9;color:#6B4A12;font-size:13px;line-height:1.4;max-width:720px}
+.fpbar{background:linear-gradient(180deg,#F7F9FD,#F2F5FB);border:1px solid #E4E9F3;border-radius:16px;padding:14px 14px 16px;margin-top:12px;gap:12px}
+.fpbar .in{background:#fff;border-radius:12px}
+.fplist{display:flex;flex-direction:column;gap:16px;margin-top:16px;padding:4px 8px 6px 2px;max-height:min(62vh,540px)}
+.fplist>*{margin:0!important}
+.fplist>.card,.fplist>.fprow{border:1px solid #E7EBF3;border-left:4px solid #B9C6E2;border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(25,35,70,.04);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.fplist>.card:hover,.fplist>.fprow:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(30,45,90,.10);border-left-color:#8E0008}
+.fprow{padding:14px 18px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center}
+.fprow .nm{font-weight:800;color:#172039}.fprow .mt{font-size:13px;color:#5E6A7E;margin-top:2px}
+.fplist>.card.pad{padding:16px 20px}
+.fplist::-webkit-scrollbar{width:8px}.fplist::-webkit-scrollbar-thumb{background:#D5DCEA;border-radius:99px}
+.fpcount{margin-top:12px;padding:8px 14px;background:#F5F7FB;border-radius:999px;font-size:12.5px}
+#helpbody>div,#helpbody>.card{margin-bottom:26px}
+#helpbody .hq summary{padding:4px 0}
+.fprow .btn.nmb{font-weight:800}
 @media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
@@ -360,9 +374,8 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div class="card pad rise"><div class="ct">Who checked in</div>
 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
 <div style="flex:2 1 220px"><label for="rcrid" class="lb" style="margin-top:0">Rehearsal</label><select id="rcrid" class="in"></select></div>
-<div style="flex:1 1 160px"><label for="rccamp" class="lb" style="margin-top:0">Campus</label><select id="rccamp" class="in"></select></div>
-<div style="flex:1 1 140px"><label for="rcpart" class="lb" style="margin-top:0">Part</label><select id="rcpart" class="in"></select></div></div>
-<div id="rcout"></div><div class="actions"><button id="rcx1" class="btn line sm" type="button">Clear</button></div></div>
+</div>
+<div id="rcout"></div></div>
 <div class="card pad rise"><div class="ct">Find a member</div>
 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
 <div style="flex:2 1 220px"><label for="rcq" class="lb" style="margin-top:0">Name</label><input id="rcq" class="in" autocomplete="off" placeholder="Type at least 2 letters, or tap a name above"></div>
@@ -717,27 +730,26 @@ async function loadRecords() {
     const cur = $('rcrid').value;
     $('rcrid').innerHTML = j.rehearsals.map(r => '<option value="' + esc(r.id) + '">' + esc(r.id + (r.date ? ' · ' + r.date : '') + ' · ' + r.count + ' present') + '</option>').join('') || '<option value="">Nothing yet</option>';
     if (cur) $('rcrid').value = cur;
-    const cc = $('rccamp').value;
-    $('rccamp').innerHTML = '<option value="">All campuses</option>' + j.campuses.map(c => '<option>' + esc(c) + '</option>').join('');
-    if (cc) $('rccamp').value = cc;
-    const pp = $('rcpart').value, pm = $('rcmp').value, mc = $('rcmc').value;
+    const pm = $('rcmp').value, mc = $('rcmc').value;
     const popt = '<option value="">All parts</option>' + (j.parts || []).map(x => '<option>' + esc(x) + '</option>').join('');
-    $('rcpart').innerHTML = popt; $('rcmp').innerHTML = popt;
+    $('rcmp').innerHTML = popt;
     $('rcmc').innerHTML = '<option value="">All campuses</option>' + j.campuses.map(c => '<option>' + esc(c) + '</option>').join('');
-    if (pp) $('rcpart').value = pp; if (pm) $('rcmp').value = pm; if (mc) $('rcmc').value = mc;
+    if (pm) $('rcmp').value = pm; if (mc) $('rcmc').value = mc;
     showRecords();
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
 async function showRecords() {
   const id = $('rcrid').value; if (!id) { $('rcout').innerHTML = ''; return; }
   try {
-    const j = await call({action: 'records.rehearsal', token, id, campus: $('rccamp').value, part: $('rcpart').value});
+    const j = await call({action: 'records.rehearsal', token, id});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('rcout').innerHTML = ''; return say('m13', j.error || 'Not available.', 'bad'); }
     say('m13', '');
-    $('rcout').innerHTML = '<p class="sub" style="margin:10px 0">' + esc(j.id + (j.date ? ' · ' + j.date : '')) + ' · ' + j.count + ' shown of ' + j.total + (j.count > j.shown ? ' (first ' + j.shown + ')' : '') + '</p>' +
-      '<p class="sub" style="margin:0 0 6px">Tap a name to open that member\'s record below.</p>' +
-      table(['Name', 'Campus', 'Part', 'Status'], j.rows.map(r => ['<button class="btn line sm" type="button" data-rcpick="' + esc(r.memberId) + '" data-rcname="' + esc(r.name) + '" style="padding:2px 10px">' + esc(r.name) + '</button>', esc(r.campus), esc(r.part || ''), esc(r.status)]), true);
+    const col = st => st === 'Present' ? NAVY : st === 'Absent' ? ATTN : SOFT;
+    fpPanel('rec', 'rcout', {bare: true, items: j.rows, empty: 'Nobody is listed for this rehearsal.',
+      before: '<p class="sub" style="margin:10px 0 0">' + esc(j.id + (j.date ? ' · ' + j.date : '')) + ' · ' + j.count + ' people' + (j.count > j.shown ? ' (first ' + j.shown + ')' : '') + '. Tap a name to open that member\'s record below.</p>',
+      fields: [{k: 'q', label: 'Search name', ph: 'Type a name', type: 'text', get: r => r.name}, {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus}, {k: 'part', label: 'Part', type: 'list', get: r => r.part || '(no part)'}, {k: 'status', label: 'Status', type: 'list', get: r => r.status}],
+      card: r => '<div class="fprow" style="border-left-color:' + col(r.status) + '"><div><button class="btn line sm nmb" type="button" data-rcpick="' + esc(r.memberId) + '" data-rcname="' + esc(r.name) + '">' + esc(r.name) + '</button><div class="mt">' + esc(r.campus) + ' · ' + esc(r.part || '(no part)') + '</div></div>' + stPill(r.status) + '</div>'});
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
 let rcT = null;
@@ -760,11 +772,8 @@ async function showMember(id) {
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
 $('rcrid').addEventListener('change', showRecords);
-$('rccamp').addEventListener('change', showRecords);
-$('rcpart').addEventListener('change', showRecords);
 $('rcmc').addEventListener('change', findMember);
 $('rcmp').addEventListener('change', findMember);
-$('rcx1').onclick = () => { $('rccamp').value = ''; $('rcpart').value = ''; if ($('rcrid').options.length) $('rcrid').selectedIndex = 0; showRecords(); };
 $('rcx').onclick = () => { $('rcq').value = ''; $('rcmc').value = ''; $('rcmp').value = ''; $('rcmatch').innerHTML = ''; $('rcmem').innerHTML = ''; say('m13', ''); $('rcq').focus(); };
 $('rcq').addEventListener('input', () => { clearTimeout(rcT); rcT = setTimeout(findMember, 300); });
 document.addEventListener('click', ev => {
@@ -1112,12 +1121,13 @@ function fpDraw(key) {
 function fpPanel(key, boxId, o) {
   const st = FP[key] = FP[key] || {v: {}}; st.o = o; st.box = boxId;
   const target = $(boxId);
-  if (!o.items.length) { target.innerHTML = '<div class="card pad rise"><div class="ct">' + esc(o.title) + '</div>' + (o.sub ? '<p class="sub">' + esc(o.sub) + '</p>' : '') + '<p class="sub">' + esc(o.empty || 'Nothing here.') + '</p>' + (o.after || '') + '</div>'; return; }
+  const opn = o.bare ? '<div>' : '<div class="card pad rise" data-n="' + o.items.length + '">', hd = o.bare ? '' : '<div class="ct">' + esc(o.title) + '</div>';
+  if (!o.items.length) { target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub">' + esc(o.sub) + '</p>' : '') + '<p class="sub">' + esc(o.empty || 'Nothing here.') + '</p>' + (o.after || '') + '</div>'; return; }
   o.fields.forEach(f => { if (f.type === 'list') f.opts = Array.from(new Set(o.items.map(it => f.get(it)).filter(Boolean))).sort(); });
   const dl = o.fields.filter(f => f.type === 'list').map(f => '<datalist id="fpd_' + key + '_' + f.k + '">' + f.opts.map(x => '<option value="' + esc(x) + '">').join('') + '</datalist>').join('');
   const bar = o.fields.map(f => { const id = 'fp_' + key + '_' + f.k; return '<div style="flex:' + (f.k === 'q' ? '2 1 200px' : '1 1 140px') + '"><label class="lb" for="' + id + '">' + esc(f.label) + '</label><input id="' + id + '" class="in" data-fp="' + key + '" data-k="' + f.k + '"' +
     (f.type === 'date' ? ' type="date"' : ' autocomplete="off" placeholder="' + esc(f.ph || (f.type === 'list' ? 'Type or choose' : '')) + '"' + (f.type === 'list' ? ' list="fpd_' + key + '_' + f.k + '"' : '')) + ' value="' + esc(st.v[f.k] || '') + '"></div>'; }).join('');
-  target.innerHTML = '<div class="card pad rise" data-n="' + o.items.length + '"><div class="ct">' + esc(o.title) + '</div>' + (o.sub ? '<p class="sub" style="margin:0 0 4px">' + esc(o.sub) + '</p>' : '') + dl +
+  target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub" style="margin:0 0 4px">' + esc(o.sub) + '</p>' : '') + dl +
     '<div class="fpbar">' + bar + '<button class="btn line sm" type="button" data-fpx="' + key + '">Clear</button></div><div class="fplist" id="fpl_' + key + '"></div><div class="fpcount"><span id="fpc_' + key + '"></span><span>Scroll inside this box</span></div>' + (o.after || '') + '</div>';
   fpDraw(key);
 }
@@ -1855,7 +1865,7 @@ function renderHelp() {
     card: k => '<div class="card pad" style="margin-top:0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><div style="flex:1 1 260px"><b>' + esc(TABHELP[k][0]) + '</b><div class="sub" style="margin:2px 0 0">' + esc(TABHELP[k][1]) + '</div></div>' + (TABDEF[k] ? '<button class="btn line sm" type="button" data-helpgo="' + TABDEF[k][0] + '">Open ' + esc(TABDEF[k][1]) + '</button>' : '') + '</div>'});
   fpPanel('hfaq', 'hb2', {title: 'How do I…?', sub: 'Short answers for the menus you have. Choose a question to open it.', items: faq, empty: 'No questions yet.',
     fields: [{k: 'q', label: 'Search questions', ph: 'For example: absence, add, report', type: 'text', get: f => txt(f.q, f.a)}, {k: 'topic', label: 'Topic', type: 'list', get: f => f.topic}],
-    card: f => '<details class="hq"><summary>' + esc(f.q) + '</summary><div class="ha">' + esc(f.a) + '</div></details>'});
+    card: f => '<div class="fprow" style="display:block"><details class="hq" style="border:0"><summary>' + esc(f.q) + '</summary><div class="ha">' + esc(f.a) + '</div></details></div>'});
   fpPanel('hwho', 'hb3', {title: 'Who does what', items: who, empty: '',
     fields: [{k: 'q', label: 'Search', ph: 'A role or a job', type: 'text', get: r => txt(r[0], r[1])}],
     card: r => '<div class="card pad" style="margin-top:0"><b>' + esc(r[0]) + '</b><div class="sub" style="margin:2px 0 0">' + esc(r[1]) + '</div></div>'});
