@@ -334,8 +334,16 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s17" class="pg hide">
+<div class="card pad rise hide npc"><div class="ct">Members without a part</div>
+<p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
+<div class="card pad rise"><div class="ct">Add a new member</div>
+<p class="sub" style="margin:0 0 4px">Added straight away, with no request. A reason is needed, it is written to the audit log, and Desk A and the Campus Music Director can see it.</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:2 1 220px"><label for="mbn" class="lb">Full name</label><input id="mbn" class="in" autocomplete="off" maxlength="100"></div><div style="flex:2 1 220px"><label for="mbe" class="lb">Email address</label><input id="mbe" class="in" type="email" autocomplete="off" maxlength="120"></div></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 160px"><label for="mbc" class="lb">Campus</label><select id="mbc" class="in"></select></div><div style="flex:1 1 160px"><label for="mbp" class="lb">Part</label><select id="mbp" class="in"></select></div><div style="flex:1 1 160px"><label for="mbt" class="lb">Phone (optional)</label><input id="mbt" class="in" autocomplete="off" maxlength="40"></div><div style="flex:1 1 160px"><label for="mbi" class="lb">Member ID (optional)</label><input id="mbi" class="in" autocomplete="off" maxlength="40" placeholder="Leave empty for the next one"></div></div>
+<label for="mbr" class="lb">Reason</label><input id="mbr" class="in" autocomplete="off" maxlength="300" placeholder="For example: joined the Ago campus on Sunday (10 to 300 characters)">
+<div class="actions"><button id="mbadd" class="btn red" type="button">Add member</button><button id="mbaddx" class="btn line" type="button">Clear</button></div></div>
 <div class="card pad rise"><div class="ct">Members</div>
-<p class="sub" id="mbsub">Find a member by name or Member ID. You can deactivate or reactivate them, or set the dates on their membership history. Each change needs a reason and is recorded; their Campus Music Director is told.</p>
+<p class="sub" id="mbsub">Find a member by name or Member ID.</p>
 <div style="display:flex;gap:8px;flex-wrap:wrap"><input id="mbq" class="in" placeholder="Name or Member ID" style="flex:1 1 220px" autocomplete="off"><button id="mbgo" class="btn red" type="button">Find</button><button id="mbx" class="btn line" type="button">Clear</button></div>
 <div id="mblist"></div></div>
 <p id="m17" class="s"></p>
@@ -570,7 +578,7 @@ try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { $('mblist').innerHTML = ''; say('m17', ''); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { $('mblist').innerHTML = ''; say('m17', ''); mbMeta(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 /** "Clear this page": empties the boxes and filters on a menu page, closes anything open on it and reloads it fresh. It never deletes saved data. */
 const CLEARABLE = ['s4', 's5', 's6', 's7', 's8', 's11', 's12', 's13', 's15', 's16', 's17'];
@@ -1605,7 +1613,7 @@ async function loadNoPart() {
     const j = await call({action: 'member.noPart', token});
     if (j.signedOut) { signedOutNow(); return; }
     const cards = document.querySelectorAll('.npc');
-    if (!j.ok || !j.rows.length) { cards.forEach(c => c.classList.add('hide')); return; }
+    if (!j.ok || !j.rows.length) { cards.forEach(c => { if (j.ok && c.closest('#s17')) { c.classList.remove('hide'); c.querySelector('.npsub').textContent = 'Every active member has a part.'; c.querySelector('.nplist').innerHTML = ''; } else c.classList.add('hide'); }); return; }
     const sub = j.rows.length + ' member' + (j.rows.length === 1 ? ' has' : 's have') + ' no part yet. Choose the part and save. Where the member once typed a part on the attendance form, it is already chosen for you; check it before you save.';
     const list = j.rows.map(r => '<div class="npr" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:9px 0;border-top:1px solid #EEF1F6"><div style="flex:2 1 200px"><b>' + esc(r.name) + '</b><div class="sub" style="margin:0">' + esc(r.campus) + ' · ' + esc(r.memberId) + (r.suggestion ? ' · from the attendance form' : '') + '</div></div>' +
       '<select class="in npp" style="flex:1 1 130px" data-npid="' + esc(r.memberId) + '"><option value="">Choose a part</option>' + j.parts.map(p => '<option' + (p === r.suggestion ? ' selected' : '') + '>' + esc(p) + '</option>').join('') + '</select>' +
@@ -1966,12 +1974,59 @@ async function loadMembers() {
     if (!j.ok) { $('mblist').innerHTML = ''; return say('m17', j.error || 'Not available.', 'bad'); }
     say('m17', j.matches.length ? '' : 'Nobody found.');
     const c = j.counts;
-    $('mblist').innerHTML = '<p class="sub" style="margin:10px 0 0">' + c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet.</p>' + j.matches.map(m => '<div style="border-top:1px solid var(--line);padding:8px 0;margin-top:8px"><b>' + esc(m.name) + '</b> · ' + esc(m.memberId) + ' · ' + esc(m.campus) + ' ' + stPill(m.status === 'Active' ? 'Active' : 'Not active') +
-      '<br><span class="s">' + (m.periods ? 'Active from ' + esc(m.from || '?') + (m.until ? ' until ' + esc(m.until) : ' (still active)') + (m.periods > 1 ? ' · ' + m.periods + ' periods' : '') : 'No history yet') + '</span>' +
-      '<div class="actions" style="margin:6px 0 0">' + (m.status === 'Active' ? '<button class="btn line" type="button" data-mb="deactivate" data-id="' + esc(m.memberId) + '">Deactivate…</button>' : '<button class="btn line" type="button" data-mb="reactivate" data-id="' + esc(m.memberId) + '">Reactivate…</button>') +
-      (j.historyReady ? '<button class="btn line" type="button" data-mb="history" data-id="' + esc(m.memberId) + '">Set dates…</button>' : '') + '</div></div>').join('');
+    MB.campuses = j.campuses || MB.campuses; MB.parts = j.parts || MB.parts; window.__mbm = {}; j.matches.forEach(m => { window.__mbm[m.memberId] = m; });
+    $('mblist').innerHTML = '<p class="sub" style="margin:10px 0 0">' + c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet.</p>' + j.matches.map(m => '<div class="mbrow" style="border-top:1px solid var(--line);padding:8px 0;margin-top:8px"><b>' + esc(m.name) + '</b> · ' + esc(m.memberId) + ' · ' + esc(m.campus) + ' ' + stPill(m.status === 'Active' ? 'Active' : 'Not active') +
+      '<br><span class="s">' + esc(m.part || '(no part)') + (m.email ? ' · ' + esc(m.email) : '') + '</span><br><span class="s">' + (m.periods ? 'Active from ' + esc(m.from || '?') + (m.until ? ' until ' + esc(m.until) : ' (still active)') + (m.periods > 1 ? ' · ' + m.periods + ' periods' : '') : 'No history yet') + '</span>' +
+      '<div class="actions" style="margin:6px 0 0">' + (m.status === 'Active' ? '<button class="btn red sm" type="button" data-mbedit="' + esc(m.memberId) + '">Edit details…</button><button class="btn line" type="button" data-mb="deactivate" data-id="' + esc(m.memberId) + '">Deactivate…</button>' : '<button class="btn line" type="button" data-mb="reactivate" data-id="' + esc(m.memberId) + '">Reactivate…</button>') +
+      (j.historyReady ? '<button class="btn line" type="button" data-mb="history" data-id="' + esc(m.memberId) + '">Set dates…</button>' : '') + '</div><div class="mbslot"></div></div>').join('');
   } catch (e) { say('m17', 'Network problem. Try again.', 'bad'); }
 }
+const MB = {campuses: [], parts: []};
+const mbOpts = (list, cur, first) => (first ? '<option value="">' + esc(first) + '</option>' : '') + list.map(x => '<option' + (String(x).toLowerCase() === String(cur || '').toLowerCase() ? ' selected' : '') + '>' + esc(x) + '</option>').join('');
+async function mbMeta() {
+  try {
+    const j = await call({action: 'member.find', token, q: ''});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) return;
+    MB.campuses = j.campuses || []; MB.parts = j.parts || [];
+    $('mbc').innerHTML = mbOpts(MB.campuses, '', 'Choose a campus'); $('mbp').innerHTML = mbOpts(MB.parts, '', 'Choose a part');
+    $('mbsub').textContent = j.counts.active + ' active, ' + j.counts.inactive + ' not active, ' + j.counts.noHistory + ' with no membership history yet. Find a member by name or Member ID to change their details, deactivate, reactivate or set their membership dates. Each change needs a reason and is recorded; the Campus Music Director and Desk A are told.';
+  } catch (e) {}
+}
+function mbEditForm(m) {
+  return '<div class="mbed" data-id="' + esc(m.memberId) + '" style="margin-top:8px;padding:12px;background:#F5F7FA;border-radius:12px">' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:2 1 200px"><label class="lb" style="margin-top:0">Full name</label><input class="in" data-f="name" value="' + esc(m.name) + '" maxlength="100"></div><div style="flex:2 1 200px"><label class="lb" style="margin-top:0">Email address</label><input class="in" data-f="email" type="email" value="' + esc(m.email) + '" maxlength="120"></div></div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1 1 150px"><label class="lb">Campus</label><select class="in" data-f="campus">' + mbOpts(MB.campuses, m.campus) + '</select></div><div style="flex:1 1 150px"><label class="lb">Part</label><select class="in" data-f="part">' + mbOpts(MB.parts, m.part, '(no part)') + '</select></div><div style="flex:1 1 150px"><label class="lb">Phone</label><input class="in" data-f="phone" value="' + esc(m.phone) + '" maxlength="40"></div></div>' +
+    '<label class="lb">Reason</label><input class="in" data-f="reason" maxlength="300" placeholder="Why is this being changed? (10 to 300 characters)">' +
+    '<div class="actions"><button class="btn red sm" type="button" data-mbsave="' + esc(m.memberId) + '">Save changes</button><button class="btn line sm" type="button" data-mbcancel="1">Cancel</button></div></div>';
+}
+document.addEventListener('click', async ev => {
+  const ed = ev.target.closest && ev.target.closest('[data-mbedit]');
+  if (ed) { const box = ed.closest('.mbrow').querySelector('.mbslot'); if (box.innerHTML) { box.innerHTML = ''; return; } const m = (window.__mbm || {})[ed.dataset.mbedit]; if (m) box.innerHTML = mbEditForm(m); return; }
+  if (ev.target.closest && ev.target.closest('[data-mbcancel]')) { ev.target.closest('.mbslot').innerHTML = ''; return; }
+  const sv = ev.target.closest && ev.target.closest('[data-mbsave]');
+  if (sv) {
+    const f = k => sv.closest('.mbed').querySelector('[data-f="' + k + '"]').value.trim(), reason = f('reason');
+    if (reason.length < 10) return say('m17', 'Give a reason of at least 10 characters.', 'bad');
+    sv.disabled = true; say('m17', 'Saving…');
+    const j = await call({action: 'member.edit', token, memberId: sv.dataset.mbsave, name: f('name'), email: f('email'), campus: f('campus'), part: f('part'), phone: f('phone'), reason, bypassReason: reason});
+    const msg = j.ok ? 'Done: ' + j.summary + (j.note ? ' (' + j.note + ')' : '') + '.' : (j.error || 'Could not save.');
+    if (j.ok) { await loadMembers(); loadNoPart(); } else sv.disabled = false;
+    say('m17', msg, j.ok ? 'ok' : 'bad'); return;
+  }
+  if (ev.target.id === 'mbadd') {
+    const b = ev.target, reason = $('mbr').value.trim();
+    if (!$('mbn').value.trim() || !$('mbc').value || !$('mbp').value) return say('m17', 'A new member needs a name, a campus and a part.', 'bad');
+    if (reason.length < 10) return say('m17', 'Give a reason of at least 10 characters.', 'bad');
+    b.disabled = true; say('m17', 'Adding…');
+    const j = await call({action: 'member.add', token, name: $('mbn').value.trim(), email: $('mbe').value.trim(), campus: $('mbc').value, part: $('mbp').value, phone: $('mbt').value.trim(), memberId: $('mbi').value.trim(), reason, bypassReason: reason});
+    b.disabled = false;
+    say('m17', j.ok ? 'Done: ' + j.summary + (j.note ? ' (' + j.note + ')' : '') + '.' : (j.error || 'Could not add.'), j.ok ? 'ok' : 'bad');
+    if (j.ok) { ['mbn', 'mbe', 'mbt', 'mbi', 'mbr'].forEach(i => { $(i).value = ''; }); $('mbc').value = ''; $('mbp').value = ''; mbMeta(); }
+    return;
+  }
+  if (ev.target.id === 'mbaddx') { ['mbn', 'mbe', 'mbt', 'mbi', 'mbr'].forEach(i => { $(i).value = ''; }); $('mbc').value = ''; $('mbp').value = ''; say('m17', ''); }
+});
 $('mbgo').onclick = loadMembers;
 $('mbx').onclick = () => { $('mbq').value = ''; $('mblist').innerHTML = ''; say('m17', ''); $('mbq').focus(); };
 $('mbq').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); loadMembers(); } };
@@ -1995,16 +2050,18 @@ document.addEventListener('click', async ev => {
       const from = prompt('Active From (yyyy-mm-dd). Leave empty to keep the date as it is:'); if (from === null) return;
       const until = prompt('Active Until (yyyy-mm-dd), the last day they were active. Leave empty if there is no end or to keep it:'); if (until === null) return;
       const reason = prompt('Why are the dates being set? (10 to 300 characters)'); if (!reason) return;
-      body = {action: 'member.history', token, memberId: id, from: from.trim(), until: until.trim(), reason};
+      body = {action: 'member.history', token, memberId: id, from: from.trim(), until: until.trim(), reason, bypassReason: reason};
     } else {
       const date = prompt((kind === 'deactivate' ? 'The last day they were active' : 'The day they came back') + ' (yyyy-mm-dd). Leave empty for today:'); if (date === null) return;
       const reason = prompt('Why? (10 to 300 characters). The Campus Music Director is told and can petition.'); if (!reason) return;
       if (!confirm((kind === 'deactivate' ? 'Deactivate ' : 'Reactivate ') + id + '? It changes the members list now.')) return;
-      body = {action: 'member.change', token, memberId: id, change: kind, date: date.trim(), reason};
+      body = {action: 'member.change', token, memberId: id, change: kind, date: date.trim(), reason, bypassReason: reason};
     }
     mb.disabled = true;
     const j = await call(body);
-    say('m17', j.ok ? 'Done: ' + j.summary + (j.note ? ' (' + j.note + ')' : '') + '.' : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if (j.ok) loadMembers(); else mb.disabled = false; return;
+    const msg2 = j.ok ? 'Done: ' + j.summary + (j.note ? ' (' + j.note + ')' : '') + '.' : (j.error || 'Could not save.');
+    if (j.ok) await loadMembers(); else mb.disabled = false;
+    say('m17', msg2, j.ok ? 'ok' : 'bad'); return;
   }
   const dq = ev.target.closest && ev.target.closest('[data-deact]');
   if (dq) {
