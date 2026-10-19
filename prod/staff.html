@@ -321,6 +321,22 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .drill:hover{opacity:.85}.drill:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px;border-radius:8px}
+
+.cbw{position:relative}.cbhost{display:block;position:relative}.cbhost .cbw{width:100%}
+.cbl{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;background:#fff;border:1px solid #E4D3D6;border-radius:14px;box-shadow:0 18px 40px rgba(142,0,8,.14),0 2px 6px rgba(23,32,57,.06);max-height:260px;overflow-y:auto;padding:6px;display:none}
+.cbl.on{display:block}
+.cbo{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:14px;color:#172039}
+.cbo small{color:#5E6A7E;font-size:12px}.cbo b{color:#8E0008}
+.cbo.hi,.cbo:hover{background:#FFF0F1}
+.cbo .ct2{background:#F5F7FB;color:#8E0008;border-radius:999px;font-size:11.5px;font-weight:800;padding:2px 8px;flex:none}
+.cbn{padding:10px 12px;color:#5E6A7E;font-size:13.5px}
+.mpk{background:linear-gradient(160deg,#fff 0%,#FFF8F8 60%,#F7F9FF 100%);border:1px solid #F0D5D8;border-radius:18px;padding:16px 16px 14px;margin-top:10px;box-shadow:0 8px 24px rgba(142,0,8,.06)}
+.mpk .row{display:flex;gap:12px;flex-wrap:wrap}.mpk .row>div{flex:1 1 150px}.mpk .row>.mw{flex:2 1 260px}
+.mpk .lb{margin-top:0}
+.mpk .cnt{font-size:12.5px;color:#5E6A7E;margin-top:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.mpk .cnt b{color:#8E0008}
+.mpick{margin-top:12px;border:1px solid #EBC4C8;border-left:5px solid #B6000A;border-radius:14px;background:#fff;padding:12px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.mpick .nm{font-weight:800;color:#172039}.mpick .mt{font-size:13px;color:#5E6A7E;margin-top:2px}
 </style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -499,9 +515,11 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 <div class="c2">
 <div id="rfor" class="card pad rise hide"><div class="ct">Enter an absence for a member</div><p class="sub">Global Admin and Assistant only. It is approved at once, before or after the rehearsal, until that rehearsal's attendance is published as official. Always give a reason.</p>
-<label for="rfq" class="lb">Find the member</label><input id="rfq" class="in" autocomplete="off" maxlength="60" placeholder="Name or Member ID (at least 2 letters)">
-<div id="rfmatch" style="display:flex;flex-direction:column;gap:6px;margin-top:6px"></div>
-<div id="rfpick" class="nt hide" style="margin-top:8px"></div>
+<div class="mpk"><div class="row"><div><label for="rfc" class="lb">Campus</label><input id="rfc" class="in" autocomplete="off" placeholder="Any campus"></div>
+<div><label for="rfp" class="lb">Part</label><input id="rfp" class="in" autocomplete="off" placeholder="Any part"></div>
+<div class="mw"><label for="rfq" class="lb">Member</label><input id="rfq" class="in" autocomplete="off" maxlength="60" placeholder="Start typing a name or Member ID"></div></div>
+<div class="cnt"><span id="rfcount">Loading members…</span><button type="button" class="btn line sm" id="rfclear">Clear filters</button></div>
+<div id="rfpick" class="mpick hide"></div></div>
 <label for="rfrh" class="lb">Rehearsal</label><select id="rfrh" class="in"></select>
 <p class="sub" style="margin:4px 0 0">Cancelled rehearsals and ones already published as official are not in this list.</p>
 <label for="rfreason" class="lb">Reason (10 to 300 characters)</label><textarea id="rfreason" class="in" rows="2" maxlength="300" placeholder="Why was or will this member be absent?" style="width:100%;font:inherit"></textarea>
@@ -1050,6 +1068,11 @@ function prWire(p, sel, more, done) {
     done(n);
   };
   q.oninput = run; c.onchange = pt.onchange = run; if (st) st.onchange = run;
+  // Drill down: each drop-down only offers values that still exist under the other filters.
+  const facet = (own, key) => () => { const f = {q: q.value.trim().toLowerCase(), c: c.value, p: pt.value}, cnt = {};
+    document.querySelectorAll(sel).forEach(el => { if ((f.q && el.dataset.k.indexOf(f.q) === -1) || (own !== 'c' && f.c && el.dataset.c !== f.c) || (own !== 'p' && f.p && el.dataset.p !== f.p)) return; const v = el.dataset[key]; if (v) cnt[v] = (cnt[v] || 0) + 1; });
+    return Object.keys(cnt).sort().map(v => ({v: v, label: v, n: cnt[v]})); };
+  c.__cbFn = facet('c', 'c'); pt.__cbFn = facet('p', 'p');
   $(p + 'x').onclick = () => { q.value = ''; c.value = ''; pt.value = ''; if (st) st.value = ''; run(); q.focus(); };
   run();
 }
@@ -1291,9 +1314,79 @@ async function sendRequest() {
     say('m12b', 'Request ' + j.id + ' sent.', 'ok'); loadPeople(true); setTimeout(function () { if (window.rbcFoldSet) rbcFoldSet('Ask for a change', false); }, 2200);
   } catch (e) { say('m12b', 'Network problem. Try again.', 'bad'); }
 }
+
+// ---- Type-ahead dropdown (suggests matches from the database as you type; you pick) ----
+// attach(input, optsFn, onPick): optsFn(typedText) returns [{v, label, sub, n}] already narrowed by the other filters.
+let CBOPEN = null;
+function cbAttach(inp, optsFn, onPick) {
+  if (inp.__cb) { inp.__cb.fn = optsFn; inp.__cb.pick = onPick; return; }
+  const w = document.createElement('div'); w.className = 'cbw'; inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
+  const box = document.createElement('div'); box.className = 'cbl'; box.setAttribute('role', 'listbox'); w.appendChild(box);
+  const st = inp.__cb = {fn: optsFn, pick: onPick, hi: -1, items: []};
+  inp.setAttribute('role', 'combobox'); inp.setAttribute('aria-autocomplete', 'list');
+  const draw = () => {
+    if (CBOPEN && CBOPEN !== box) CBOPEN.classList.remove('on');
+    CBOPEN = box;
+    const t = st.typed ? inp.value.split(',').pop().trim().toLowerCase() : '';
+    let all = st.fn(t) || [];
+    const hit = all.map(o => ({o: o, i: (o.label + ' ' + (o.sub || '')).toLowerCase().indexOf(t)})).filter(x => !t || x.i !== -1);
+    hit.sort((a, b) => (a.i === 0 ? 0 : 1) - (b.i === 0 ? 0 : 1));
+    st.items = hit.map(x => x.o).slice(0, 40); st.hi = st.items.length && t ? 0 : -1;
+    box.innerHTML = st.items.length ? st.items.map((o, i) => '<div class="cbo' + (i === st.hi ? ' hi' : '') + '" role="option" data-i="' + i + '"><span>' + hl(o.label, t) + (o.sub ? '<br><small>' + esc(o.sub) + '</small>' : '') + '</span>' + (o.n != null ? '<span class="ct2">' + o.n + '</span>' : '') + '</div>').join('') + (hit.length > 40 ? '<div class="cbn">Keep typing to narrow down…</div>' : '') : '<div class="cbn">No match. Try fewer letters, or clear the other filters.</div>';
+    box.classList.add('on');
+  };
+  const hl = (txt, t) => { const i = t ? txt.toLowerCase().indexOf(t) : -1; return i < 0 ? esc(txt) : esc(txt.slice(0, i)) + '<b>' + esc(txt.slice(i, i + t.length)) + '</b>' + esc(txt.slice(i + t.length)); };
+  const choose = i => { const o = st.items[i]; if (!o) return; box.classList.remove('on'); st.pick(o, inp); };
+  inp.addEventListener('focus', () => { st.typed = false; draw(); }); inp.addEventListener('input', () => { st.typed = true; draw(); });
+  inp.addEventListener('keydown', ev => {
+    if (!box.classList.contains('on')) { if (ev.key === 'ArrowDown') draw(); return; }
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); st.hi = Math.max(0, Math.min(st.items.length - 1, st.hi + (ev.key === 'ArrowDown' ? 1 : -1))); box.querySelectorAll('.cbo').forEach((e, i) => { e.classList.toggle('hi', i === st.hi); if (i === st.hi) e.scrollIntoView({block: 'nearest'}); }); }
+    else if (ev.key === 'Enter' && st.hi >= 0) { ev.preventDefault(); choose(st.hi); }
+    else if (ev.key === 'Escape') box.classList.remove('on');
+  });
+  box.addEventListener('mousedown', ev => { const e = ev.target.closest('.cbo'); if (e) { ev.preventDefault(); choose(+e.dataset.i); } });
+}
+document.addEventListener('click', ev => { if (CBOPEN && !(ev.target.closest && ev.target.closest('.cbw'))) { CBOPEN.classList.remove('on'); CBOPEN = null; } });
+
+// ---- Upgrade every plain drop-down and "type or choose" box to the same type-ahead picker ----
+function cbUpSelect(sel) {
+  if (sel.__cbUp || sel.multiple || sel.size > 1 || sel.hasAttribute('data-native') || sel.closest('.fplist,td,tr')) return;
+  sel.__cbUp = true;
+  const inp = document.createElement('input'); inp.className = sel.className; inp.type = 'text'; inp.autocomplete = 'off'; inp.id = (sel.id || 'cbs' + Math.random().toString(36).slice(2, 7)) + '__t';
+  const w0 = document.createElement('span'); w0.className = 'cbhost'; w0.style.cssText = sel.style.cssText; w0.style.display = 'block'; w0.style.minWidth = '0';
+  sel.parentNode.insertBefore(w0, sel); w0.appendChild(inp); w0.appendChild(sel); sel.style.display = 'none'; inp.style.width = '100%'; inp.style.maxWidth = 'none';
+  if (sel.id) document.querySelectorAll('label[for="' + sel.id + '"]').forEach(l => l.setAttribute('for', inp.id));
+  const label = () => { const o = sel.options[sel.selectedIndex]; return o && o.value !== '' ? o.text : ''; };
+  const ph = () => { const e = Array.from(sel.options).filter(o => o.value === '')[0]; return e ? e.text : 'Choose…'; };
+  const sync = () => { inp.value = label(); inp.placeholder = ph(); inp.disabled = sel.disabled; };
+  const d = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+  Object.defineProperty(sel, 'value', {get() { return d.get.call(sel); }, set(v) { d.set.call(sel, v); sync(); }, configurable: true});
+  new MutationObserver(sync).observe(sel, {childList: true, subtree: true, attributes: true, attributeFilter: ['disabled']});
+  sel.addEventListener('change', sync); sync();
+  cbAttach(inp, () => {
+    if (sel.__cbFn) return sel.__cbFn();
+    return Array.from(sel.options).filter(o => o.value !== '' && !o.disabled).map(o => ({v: o.value, label: o.text}));
+  }, o => { sel.value = o.v; sel.dispatchEvent(new Event('change', {bubbles: true})); });
+  // An "any" choice is always at the top, so you can go back to everything.
+  const any = Array.from(sel.options).filter(o => o.value === '')[0];
+  const keep = inp.__cb.fn; inp.__cb.fn = t => { const l = keep(t) || []; return any ? [{v: '', label: any.text}].concat(l) : l; };
+  inp.addEventListener('focus', () => inp.select());
+  inp.addEventListener('blur', () => setTimeout(() => { if (inp.value.trim() === '' && sel.value !== '') { sel.value = ''; sel.dispatchEvent(new Event('change', {bubbles: true})); } sync(); }, 120));
+}
+function cbUpList(inp) {
+  const id = inp.getAttribute('list'), dl = id && document.getElementById(id); if (!dl || inp.__cb) return;
+  inp.removeAttribute('list');
+  cbAttach(inp, () => Array.from(dl.options).map(o => ({v: o.value, label: o.value, sub: o.label && o.label !== o.value ? o.label : (o.textContent || '')})), o => { inp.value = o.v; inp.dispatchEvent(new Event('input', {bubbles: true})); inp.dispatchEvent(new Event('change', {bubbles: true})); });
+}
+function cbScan(root) {
+  (root || document).querySelectorAll('select.in').forEach(cbUpSelect);
+  (root || document).querySelectorAll('input.in[list]').forEach(cbUpList);
+}
+new MutationObserver(ms => { ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1 && !(n.classList && n.classList.contains('cbl'))) cbScan(n.matches && n.matches('select.in,input.in[list]') ? n.parentNode : n); })); }).observe(document.body, {childList: true, subtree: true});
+cbScan(document);
 // ---- Filter panel: the search filters stay put, the list scrolls inside the card ----
 const FP = {};
-function fpOk(f, it, v) {
+function fpOne(f, it, v) {
   if (!v) return true;
   if (f.type === 'date') { const ms = f.get(it); if (!ms) return false; const day = new Date(ms).toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}); return f.k.indexOf('from') === 0 ? day >= v : day <= v; }
   const gv = f.get(it), vl = String(v).trim().toLowerCase();
@@ -1301,6 +1394,13 @@ function fpOk(f, it, v) {
   // A chosen option (for example the campus Ago) must match exactly, so it does not also pick up Lagos Island.
   if (f.type === 'list' && (f.opts || []).some(x => String(x).toLowerCase() === vl)) return String(gv || '').toLowerCase() === vl;
   return String(gv || '').toLowerCase().indexOf(vl) !== -1;
+}
+// Different filters narrow together (intersection). Several values inside one list filter, split by a comma, mean either-or (union).
+function fpOk(f, it, v) {
+  if (!v) return true;
+  if (f.type !== 'list') return fpOne(f, it, v);
+  const terms = String(v).split(',').map(x => x.trim()).filter(Boolean);
+  return !terms.length || terms.some(t => fpOne(f, it, t));
 }
 function fpDraw(key) {
   const st = FP[key], o = st.o, box = document.getElementById('fpl_' + key); if (!box) return;
@@ -1316,17 +1416,30 @@ function fpPanel(key, boxId, o) {
   if (!o.items.length) { target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub">' + esc(o.sub) + '</p>' : '') + '<p class="sub">' + esc(o.empty || 'Nothing here.') + '</p>' + (o.after || '') + '</div>'; return; }
   o.fields.forEach(f => { if (f.sug) f.opts = Array.from(new Set([].concat.apply([], o.items.map(it => f.sug(it))).filter(Boolean))).sort(); });
   o.fields.forEach(f => { if (f.type === 'list') f.opts = f.optsAll ? f.optsAll.slice() : f.all ? f.all.slice() : Array.from(new Set([].concat.apply([], o.items.map(it => f.get(it))).filter(Boolean))).sort(); });
-  const dl = o.fields.filter(f => f.type === 'list' || f.sug).map(f => '<datalist id="fpd_' + key + '_' + f.k + '">' + f.opts.map(x => '<option value="' + esc(x) + '">').join('') + '</datalist>').join('');
+  const dl = '';
   let chipsHtml = '';
   if (o.chips) {
     const cf = o.fields.filter(f => f.k === o.chips)[0], cnt = {}; o.items.forEach(it => { [].concat(cf.get(it)).forEach(v => { cnt[v] = (cnt[v] || 0) + 1; }); });
     const keys = (cf.all || []).concat(Object.keys(cnt).filter(k => (cf.all || []).indexOf(k) === -1).sort()); keys.forEach(k => { cnt[k] = cnt[k] || 0; });
-    if (keys.length > 1) chipsHtml = '<div class="fpchips"><button type="button" class="fpchip' + (st.v[o.chips] ? '' : ' on') + '" data-fpchip="' + key + '|' + o.chips + '|">All roles<b>' + o.items.length + '</b></button>' + keys.map(v => '<button type="button" class="fpchip' + (st.v[o.chips] === v ? ' on' : '') + '" data-fpchip="' + key + '|' + o.chips + '|' + esc(v) + '">' + esc(v) + '<b>' + cnt[v] + '</b></button>').join('') + '</div>';
+    if (keys.length > 1) chipsHtml = '<div class="fpchips"><button type="button" class="fpchip' + (st.v[o.chips] ? '' : ' on') + '" data-fpchip="' + key + '|' + o.chips + '|">' + esc(o.chipsAll || 'All roles') + '<b>' + o.items.length + '</b></button>' + keys.map(v => '<button type="button" class="fpchip' + (st.v[o.chips] === v ? ' on' : '') + '" data-fpchip="' + key + '|' + o.chips + '|' + esc(v) + '">' + esc(v) + '<b>' + cnt[v] + '</b></button>').join('') + '</div>';
   }
   const bar = o.fields.map(f => { const id = 'fp_' + key + '_' + f.k; return '<div style="flex:' + (f.k === 'q' ? '2 1 200px' : '1 1 140px') + '"><label class="lb" for="' + id + '">' + esc(f.label) + '</label><input id="' + id + '" class="in" data-fp="' + key + '" data-k="' + f.k + '"' +
-    (f.type === 'date' ? ' type="date"' : ' autocomplete="off" placeholder="' + esc(f.ph || (f.type === 'list' || f.sug ? 'Type or choose' : '')) + '"' + (f.type === 'list' || f.sug ? ' list="fpd_' + key + '_' + f.k + '"' : '')) + ' value="' + esc(st.v[f.k] || '') + '"></div>'; }).join('');
+    (f.type === 'date' ? ' type="date"' : ' autocomplete="off" placeholder="' + esc(f.ph || (f.type === 'list' || f.sug ? 'Start typing…' : '')) + '"') + ' value="' + esc(st.v[f.k] || '') + '"></div>'; }).join('');
   target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub" style="margin:0 0 4px">' + esc(o.sub) + '</p>' : '') + dl +
     chipsHtml + '<div class="fpbar">' + bar + '<button class="btn line sm" type="button" data-fpx="' + key + '">Clear</button></div><div class="fplist" id="fpl_' + key + '"></div><div class="fpcount"><span id="fpc_' + key + '"></span><span>Scroll inside this box</span></div>' + (o.after || '') + '</div>';
+  o.fields.filter(f => f.type === 'list' || f.sug).forEach(f => {
+    const inp = document.getElementById('fp_' + key + '_' + f.k); if (!inp) return;
+    cbAttach(inp, () => {
+      // Drill down: only offer values that still exist once the OTHER filters are applied.
+      const left = o.items.filter(it => o.fields.every(g => g.k === f.k || fpOk(g, it, st.v[g.k])));
+      const have = String(inp.value || '').split(',').slice(0, -1).map(x => x.trim().toLowerCase());
+      const cnt = {}; left.forEach(it => { const vals = f.sug ? f.sug(it) : [].concat(f.get(it)); Array.from(new Set(vals.filter(Boolean))).forEach(v => { cnt[v] = (cnt[v] || 0) + 1; }); });
+      return Object.keys(cnt).sort().filter(v => have.indexOf(v.toLowerCase()) === -1).map(v => ({v: v, label: v, n: cnt[v]}));
+    }, (opt, el) => {
+      const pre = f.type === 'list' ? String(el.value || '').split(',').slice(0, -1).map(x => x.trim()).filter(Boolean) : [];
+      st.v[f.k] = pre.concat(opt.v).join(', '); el.value = st.v[f.k]; fpDraw(key);
+    });
+  });
   fpDraw(key);
   if (key === 'tasks' && typeof hfoldApply === 'function') hfoldApply();
 }
@@ -1834,7 +1947,7 @@ $('rhgeo').onclick = () => {
 };
 $('rhlat').addEventListener('input', () => { const m = $('rhlat').value.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*$/); if (m) { $('rhlat').value = m[1]; $('rhlon').value = m[2]; } });
 document.addEventListener('keydown', e => {
-  if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+  if (e.key !== 'Enter' || e.target.tagName !== 'INPUT' || e.target.__cb || e.defaultPrevented) return;
   const card = e.target.closest('.card'); if (!card) return;
   const after = [...card.querySelectorAll('button')].find(b => !b.disabled && !b.dataset.noenter && b.offsetParent && (e.target.compareDocumentPosition(b) & 4));
   if (after) { e.preventDefault(); after.click(); }
@@ -1988,12 +2101,13 @@ async function loadQueue() {
   } catch (e) { say('m7', 'Network problem. Try again.', 'bad'); }
 }
 /** Enter an absence for a member (Global Admin, Assistant). */
-let RF = {id: '', name: ''}, rfTimer = null;
+let RF = {id: '', name: ''};
 async function loadAbsAdmin() {
   try {
     const j = await call({action: 'absence.adminState', token});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('rfrev').classList.add('hide'); $('rfnote').classList.add('hide'); return; }
+    if (!RFM.length) rfLoad();
     const dt = ms => new Date(ms).toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'});
     const cur = $('rfrh').value;
     $('rfrh').innerHTML = j.rehearsals.length ? j.rehearsals.map(r => '<option value="' + esc(r.id) + '"' + (r.id === cur ? ' selected' : '') + '>' + esc(r.id) + ' · ' + esc(dt(r.startMs)) + ' (' + esc(r.when) + (r.processed ? ', day processed' : '') + ')</option>').join('') : '<option value="">No rehearsal is available</option>';
@@ -2010,20 +2124,41 @@ async function loadAbsAdmin() {
     } else nt.classList.add('hide');
   } catch (e) { /* the form still works */ }
 }
-function rfPick(id, name, line) { RF = {id: id, name: name}; $('rfmatch').innerHTML = ''; $('rfpick').classList.remove('hide'); $('rfpick').textContent = line; }
-$('rfq').oninput = () => {
-  clearTimeout(rfTimer); RF = {id: '', name: ''}; $('rfpick').classList.add('hide');
-  const v = $('rfq').value.trim(); if (v.length < 2) { $('rfmatch').innerHTML = ''; return; }
-  rfTimer = setTimeout(async () => {
-    const j = await call({action: 'member.find', token, q: v});
-    if (!j || !j.ok) { $('rfmatch').innerHTML = ''; return; }
-    const m = (j.matches || []).filter(x => String(x.status || 'Active') === 'Active');
-    $('rfmatch').innerHTML = m.length ? m.map(x => '<button type="button" class="btn line sm" style="text-align:left" data-rfm="' + esc(x.memberId) + '" data-n="' + esc(x.name) + '" data-l="' + esc(x.name + ' · ' + x.memberId + ' · ' + (x.campus || '-')) + '">' + esc(x.name) + ' · ' + esc(x.memberId) + ' · ' + esc(x.campus || '-') + '</button>').join('') : '<p class="sub">No active member matches.</p>';
-  }, 300);
-};
+// Enter-an-absence picker: Campus, Part and Member all come from the member list, and each narrows the others.
+let RFM = [];
+async function rfLoad() {
+  try {
+    const j = await call({action: 'member.list', token});
+    if (j && j.ok) RFM = (j.members || []).filter(m => String(m.status || 'Active') === 'Active');
+  } catch (e) { /* the box says so below */ }
+  rfCount();
+}
+function rfLeft(skip) {
+  const c = $('rfc').value.trim().toLowerCase(), p = $('rfp').value.trim().toLowerCase();
+  return RFM.filter(m => (skip === 'c' || !c || String(m.campus || '').toLowerCase() === c) && (skip === 'p' || !p || String(m.part || '').toLowerCase() === p));
+}
+function rfCount() {
+  const n = rfLeft().length; $('rfcount').innerHTML = RFM.length ? '<b>' + n + '</b> of ' + RFM.length + ' active members match' : 'No member list yet. Reload the page.';
+}
+function rfPick(m) {
+  RF = {id: m.memberId, name: m.name};
+  $('rfq').value = m.name; $('rfc').value = m.campus || ''; $('rfp').value = m.part || ''; rfCount();
+  const pk = $('rfpick'); pk.classList.remove('hide');
+  pk.innerHTML = '<div><div class="nm">' + esc(m.name) + '</div><div class="mt">' + esc(m.memberId) + ' · ' + esc(m.campus || '-') + ' · ' + esc(m.part || '-') + '</div></div><span class="pill p-ok">Chosen</span>';
+}
+function rfReset() { RF = {id: '', name: ''}; $('rfpick').classList.add('hide'); }
+function rfFacet(key, skip) {
+  const cnt = {}; rfLeft(skip).forEach(m => { const v = m[key]; if (v) cnt[v] = (cnt[v] || 0) + 1; });
+  return Object.keys(cnt).sort().map(v => ({v: v, label: v, n: cnt[v]}));
+}
+cbAttach($('rfc'), () => rfFacet('campus', 'c'), (o, el) => { el.value = o.v; rfReset(); rfCount(); });
+cbAttach($('rfp'), () => rfFacet('part', 'p'), (o, el) => { el.value = o.v; rfReset(); rfCount(); });
+cbAttach($('rfq'), t => rfLeft().map(m => ({v: m, label: m.name, sub: m.memberId + ' · ' + (m.campus || '-') + ' · ' + (m.part || '-')})), o => rfPick(o.v));
+$('rfq').addEventListener('input', () => { if (RF.id && $('rfq').value !== RF.name) rfReset(); });
+$('rfc').addEventListener('input', () => { rfReset(); rfCount(); });
+$('rfp').addEventListener('input', () => { rfReset(); rfCount(); });
+$('rfclear').onclick = () => { $('rfc').value = ''; $('rfp').value = ''; $('rfq').value = ''; rfReset(); rfCount(); };
 document.addEventListener('click', async ev => {
-  const p = ev.target.closest && ev.target.closest('[data-rfm]');
-  if (p) { rfPick(p.dataset.rfm, p.dataset.n, p.dataset.l); return; }
   const c = ev.target.closest && ev.target.closest('[data-rfcancel]');
   if (c) {
     const why = prompt('Why is this absence being cancelled? (10 to 300 characters)'); if (!why) return;
@@ -2039,7 +2174,7 @@ $('rfsend').onclick = async () => {
   try {
     const k = await call({action: 'absence.adminEnter', token, memberId: RF.id, rehearsalId: $('rfrh').value, reason: $('rfreason').value.trim()});
     say('m6b', k.ok ? 'Entered and approved for ' + RF.name + '. They and their Campus Music Director are told.' + (k.warning ? ' ' + k.warning : '') : (k.error || 'Could not enter it.'), k.ok ? 'ok' : 'bad');
-    if (k.ok) { $('rfreason').value = ''; $('rfq').value = ''; RF = {id: '', name: ''}; $('rfpick').classList.add('hide'); loadAbsAdmin(); }
+    if (k.ok) { $('rfreason').value = ''; $('rfq').value = ''; rfReset(); rfCount(); loadAbsAdmin(); }
   } catch (e) { say('m6b', 'Network problem. Try again.', 'bad'); }
   $('rfsend').disabled = false;
 };
@@ -2391,7 +2526,7 @@ async function loadDetailReqs() {
     if (!j || !j.ok) { $('mbdet').innerHTML = ''; return; }
     const reqs = j.requests || [];
     if (!reqs.length) { $('mbdet').innerHTML = ''; return; }
-    $('mbdet').innerHTML = '<div class="card pad rise"><div class="ct">Details to correct' + (j.waiting ? ' (' + j.waiting + ' waiting)' : '') + '</div><p class="sub">Members ask here when something in their own details is wrong. Find them below, use Edit to make the change, then mark the request Done. If it should not change, decline it and say why.</p>' + reqs.map(r => '<div style="border:1px solid var(--line);border-left:4px solid ' + (r.status === 'Waiting' ? '#E9A9AE' : r.status === 'Done' ? '#9CD3B8' : '#C9D0DC') + ';border-radius:14px;padding:12px 14px;margin-top:10px;display:flex;flex-direction:column;gap:6px">' +
+    const cardOf = r => '<div style="border:1px solid var(--line);border-left:4px solid ' + (r.status === 'Waiting' ? '#E9A9AE' : r.status === 'Done' ? '#9CD3B8' : '#C9D0DC') + ';border-radius:14px;padding:12px 14px;margin-top:10px;display:flex;flex-direction:column;gap:6px">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:16px">' + esc(r.name) + '</b>' + stPill(r.status === 'Not changed' ? 'Declined' : r.status) + '</div>' +
       '<div class="s" style="font-size:13px">' + esc(r.memberId) + ' · ' + esc(r.campus || '-') + ' · ' + esc(r.part || '-') + ' · ' + esc(tm(r.atMs)) + '</div>' +
       '<div style="font-size:15px">' + esc(r.kind) + ' should be: <b>' + esc(r.text) + '</b></div>' +
@@ -2399,7 +2534,16 @@ async function loadDetailReqs() {
       (r.kind === 'Email' && r.status === 'Waiting' ? '<div style="font-size:13px;background:#FFF4DF;color:#95621D;border-radius:8px;padding:8px 10px">Email is how this person signs in. Check with them outside the system that the request really came from them before you change it.</div>' : '') +
       (r.answer ? '<div class="s" style="font-size:13px">' + esc(r.answeredBy) + ': ' + esc(r.answer) + '</div>' : '') +
       (r.status === 'Waiting' && r.own ? '<div style="font-size:13px;background:#EEF1F6;color:#3C4558;border-radius:8px;padding:8px 10px">This is your own request. Someone else answers it.</div>' : '') +
-      (r.canAnswer ? '<div class="actions" style="margin:4px 0 0"><button class="btn red" type="button" data-dans="done" data-id="' + esc(r.id) + '">Mark done</button><button class="btn line" type="button" data-dans="declined" data-id="' + esc(r.id) + '">Decline</button></div>' : '') + '</div>').join('') + '</div>';
+      (r.canAnswer ? '<div class="actions" style="margin:4px 0 0"><button class="btn red" type="button" data-dans="done" data-id="' + esc(r.id) + '">Mark done</button><button class="btn line" type="button" data-dans="declined" data-id="' + esc(r.id) + '">Decline</button></div>' : '') + '</div>';
+    fpPanel('det', 'mbdet', {title: 'Details to correct' + (j.waiting ? ' (' + j.waiting + ' waiting)' : ''), sub: 'Members ask here when something in their own details is wrong. Find them below, use Edit to make the change, then mark the request Done. If it should not change, decline it and say why.',
+      items: reqs, chips: 'status', chipsAll: 'All requests', empty: 'Nothing to correct.',
+      fields: [
+        {k: 'q', label: 'Search', ph: 'Name, Member ID or what they asked for', get: r => [r.name, r.memberId, r.text, r.note].join(' ')},
+        {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus || ''},
+        {k: 'part', label: 'Part', type: 'list', get: r => r.part || ''},
+        {k: 'kind', label: 'What is wrong', type: 'list', get: r => r.kind || ''},
+        {k: 'status', label: 'Status', type: 'list', get: r => r.status === 'Not changed' ? 'Declined' : r.status, all: ['Waiting', 'Done', 'Declined']}],
+      card: cardOf});
   } catch (e) { $('mbdet').innerHTML = ''; }
 }
 document.addEventListener('click', async ev => {
