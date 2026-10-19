@@ -62,6 +62,7 @@ button[style*="background:none"]{box-shadow:none}
 .ov .bh .k{font-size:12px;letter-spacing:.02em;font-weight:900;color:#FFD9DC}
 .ov .bh .n{font-size:19px;font-weight:900;line-height:1.2;margin-top:2px}
 .ov .bb{padding:16px 22px 20px}
+.issue{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-top:10px}.issue i{width:30px;height:30px;border-radius:50%;background:var(--rose);color:var(--acc);font-weight:900;display:grid;place-items:center;flex:none;font-style:normal}.issue b{display:block}.issue span{font-size:13px;color:var(--mut)}
 .pillr{display:inline-block;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;background:var(--rose);color:var(--deep);margin:4px 6px 0 0}
 .hl{font-size:13px;font-weight:900;color:var(--acc);margin:14px 0 4px}
 .hl:first-child{margin-top:0}
@@ -339,10 +340,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <button id="send">Email me a code</button><p id="m1" class="s"></p>
 <div class="s">We send a 6-digit code to the email on file. It lasts 10 minutes. You can ask for another after 2 minutes.</div>
 <button type="button" id="shelp" class="ghost">Need help signing in?</button>
-<div id="shbox" class="note hide">
-<p><b>It says my email is not found.</b> Your email may not be on the staff list yet. Try your Member ID, or ask Desk A (the System Administrator) to check your row.</p>
-<p><b>I did not get the code.</b> Look in spam. You can ask for a new code after 2 minutes. Always use the newest email.</p>
-<p><b>Too many wrong codes.</b> After 5 wrong tries, sign-in is locked for 15 minutes.</p></div></div>
+</div>
 
 <div id="s2" class="card hide"><b>Enter the code</b>
 <p class="s">Use the newest email. Asking again is possible after the countdown on the first step.</p>
@@ -561,6 +559,12 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 
 <div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
 </main></div>
+<div id="shbox" class="ov hide" role="dialog" aria-modal="true" aria-labelledby="shtitle"><div class="box" style="max-width:37.5rem"><div class="bh" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><div class="k">SIGN-IN HELP</div><div class="n" id="shtitle">What went wrong?</div></div><button type="button" id="shx" aria-label="Close help" style="width:40px;height:40px;margin:0;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:20px;box-shadow:none">&times;</button></div><div class="bb">
+<div class="issue" style="margin-top:0"><i>1</i><div><b>It says my email is not found</b><span>Your email may not be on the staff list yet. Try your Member ID, or ask Desk A (the System Administrator) to check your row.</span></div></div>
+<div class="issue"><i>2</i><div><b>I did not get the code</b><span>Look in spam. You can ask for a new code after 2 minutes. Always use the newest email.</span></div></div>
+<div class="issue"><i>3</i><div><b>Too many wrong codes</b><span>After 5 wrong tries, sign-in is locked for 15 minutes.</span></div></div>
+<div class="issue"><i>4</i><div><b>I signed in but I cannot see my screens</b><span>Your role may not be set yet. The Global Admin or System Administrator can fix it.</span></div></div>
+<button type="button" id="shback" class="ghost">Back to sign in</button></div></div></div>
 <div id="welcome" class="ov hide" role="dialog" aria-modal="true" aria-labelledby="wtitle"><div class="box"><div class="bh"><div class="k">Welcome back</div><div class="n" id="wtitle"></div><div id="wroles"></div></div><div class="bb"><div id="wbody"></div><button id="wgot">Got it</button><button id="whelp" class="ghost">Open Help</button></div></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
@@ -2156,7 +2160,8 @@ function welcome() {
 }
 $('wgot').onclick = () => $('welcome').classList.add('hide');
 $('whelp').onclick = () => { $('welcome').classList.add('hide'); go('s9'); };
-$('shelp').onclick = () => $('shbox').classList.toggle('hide');
+$('shelp').onclick = () => $('shbox').classList.remove('hide');
+$('shx').onclick = $('shback').onclick = () => $('shbox').classList.add('hide');
 
 // Sign in with Google (optional: shown only when a Google client ID is set). The email code above stays as the backup.
 const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.googleusercontent.com';
