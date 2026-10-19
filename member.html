@@ -147,6 +147,8 @@ input.in{height:48px;padding:0 14px}
 .dh.done{border-left-color:#9CD3B8}.dh.no{border-left-color:#E9A9AE}.dh.wd{border-left-color:#C9CFDB}
 .cth,.kick{font-size:13px!important;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8E0008!important}
 .ptitle{color:#8E0008!important;font-size:28px!important;font-weight:900!important;letter-spacing:-.01em}
+.mfh{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px}.mfh:after{content:"";flex:none;width:9px;height:9px;border-right:2.5px solid #8E0008;border-bottom:2.5px solid #8E0008;transform:rotate(45deg);margin:-4px 4px 0;transition:transform .25s}
+.mshut>.mfh:after{transform:rotate(-45deg);margin-top:0}.mshut>*:not(:first-child){display:none!important}
 </style></head><body>
 <div id="outv">
  <div class="lp"><div class="lbrand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
@@ -622,4 +624,33 @@ $('dsend').onclick = async () => {
 };
 gisInit();
 if (token) { call({action: 'me.home', token}).then(j => { if (j && j.ok) { home = j; enter(j.name); } else signedOutNow(); }).catch(() => signedOutNow()); }
+
+(function () {
+  var KEY = 'rbcMFold', st = {};
+  try { st = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { st = {}; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  function build() {
+    document.querySelectorAll('#inv .card').forEach(function (card) {
+      if (card.dataset.mfold) return;
+      var first = card.firstElementChild; if (!first) return;
+      var bar = null;
+      if (first.classList.contains('cth') || first.classList.contains('kick')) bar = first;
+      else if (first.classList.contains('rowl') && first.querySelector('.cth')) bar = first;
+      if (!bar) return;
+      var title = (bar.querySelector('.cth') || bar).textContent.trim();
+      card.dataset.mfold = '1'; bar.classList.add('mfh'); bar.setAttribute('role', 'button'); bar.tabIndex = 0;
+      bar.setAttribute('aria-expanded', st[title] ? 'false' : 'true');
+      if (st[title]) card.classList.add('mshut');
+      var tog = function (ev) {
+        if (ev.target.closest && ev.target.closest('a,button,input')) return;
+        if (ev.type === 'keydown') { if (ev.key !== 'Enter' && ev.key !== ' ') return; ev.preventDefault(); }
+        var shut = card.classList.toggle('mshut'); bar.setAttribute('aria-expanded', shut ? 'false' : 'true'); if (shut) st[title] = 1; else delete st[title]; save();
+      };
+      bar.addEventListener('click', tog); bar.addEventListener('keydown', tog);
+    });
+  }
+  build();
+  var inv = document.getElementById('inv');
+  if (inv && window.MutationObserver) new MutationObserver(build).observe(inv, {childList: true, subtree: true});
+})();
 </script></body></html>
