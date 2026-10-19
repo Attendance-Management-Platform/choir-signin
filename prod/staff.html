@@ -639,25 +639,34 @@ let pending = 0, busyT = null;
 let ckRid = '';
 async function call(body) {
   let j = await call1(body);
-  // Check-in opened by this same Global Admin or Assistant: normally someone else validates. With no one else, they may do it with a reason.
-  if (j && j.needsOverride && !body.overrideReason) {
-    const why = prompt((j.overrideMessage || 'You opened check-in yourself, so normally a different person validates it. If no one else is available, you can do it yourself.') + '\n\nType your reason (10 to 300 characters). It is recorded and the Global Music Director and the Pastor in Charge see it:');
-    if (!why || why.trim().length < 10) return {ok: false, error: 'No reason of at least 10 characters was given, so nothing was saved.'};
-    j = await call1(Object.assign({}, body, {overrideReason: why.trim()}));
-  }
-  // The Global Admin or Assistant doing a step that belongs to a desk: the server asks for a reason, and we ask and send it again.
-  if (j && j.needsReason && !body.bypassReason) {
-    let msg = j.error || 'Give a reason.';
-    for (let i = 0; i < 3; i++) {
-      const why = prompt(msg + '\n\nType your reason (10 to 300 characters):');
-      if (!why || !why.trim()) return {ok: false, error: 'No reason was given, so nothing was saved.'};
-      if (why.trim().length < 10) { msg = 'That reason is too short. Use at least 10 characters.'; continue; }
-      j = await call1(Object.assign({}, body, {bypassReason: why.trim()}));
-      if (!(j && j.needsReason)) return j;
-      msg = j.error || 'Give a reason.';
+  // The server asks for a reason in two situations, and either can come first:
+  //  - needsReason: a Global Admin or Assistant doing a step that belongs to a desk (a "do it myself" reason).
+  //  - needsOverride: the same person validating or confirming their OWN check-in or hand-mark, or a day they opened.
+  // One reason is enough when both apply: it is recorded for both.
+  let b = body;
+  for (let round = 0; round < 4 && j; round++) {
+    if (j.needsReason && !b.bypassReason) {
+      let msg = j.error || 'Give a reason.', why = '';
+      for (let i = 0; i < 3; i++) {
+        why = prompt(msg + '\n\nType your reason (10 to 300 characters):');
+        if (!why || !why.trim()) return {ok: false, error: 'No reason was given, so nothing was saved.'};
+        if (why.trim().length >= 10) break;
+        msg = 'That reason is too short. Use at least 10 characters.'; why = '';
+      }
+      if (!why) return {ok: false, error: 'The reason was not accepted, so nothing was saved.'};
+      b = Object.assign({}, b, {bypassReason: why.trim()}); j = await call1(b); continue;
     }
-    return {ok: false, error: 'The reason was not accepted, so nothing was saved.'};
+    if (j.needsOverride && !b.overrideReason) {
+      let why = b.bypassReason || '';
+      if (!why) {
+        why = prompt((j.overrideMessage || 'You opened check-in yourself, so normally a different person validates it. If no one else is available, you can do it yourself.') + '\n\nType your reason (10 to 300 characters). It is recorded and the Global Music Director and the Pastor in Charge see it:');
+        if (!why || why.trim().length < 10) return {ok: false, error: 'No reason of at least 10 characters was given, so nothing was saved.'};
+      }
+      b = Object.assign({}, b, {overrideReason: why.trim()}); j = await call1(b); continue;
+    }
+    break;
   }
+  if (j && j.needsReason) return {ok: false, error: 'The reason was not accepted, so nothing was saved.'};
   return j;
 }
 async function call1(body) {
