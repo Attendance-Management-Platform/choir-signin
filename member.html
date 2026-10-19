@@ -3,158 +3,203 @@
 <title>CCW Choir Members</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap">
 <style>
-:root{--page:#F7F9FC;--fg:#172039;--text:#374052;--mut:#5E6A7E;--acc:#B6000A;--ok:#20775A;--bad:#AE2D37;--line:#E6E9EF;--rose:#FFF0F1;--deep:#8E0008;--ease:cubic-bezier(.2,.7,.2,1)}
+:root{--red:#B6000A;--acc:#B6000A;--deep:#8E0008;--fg:#172039;--ink:#172039;--text:#374052;--mut:#5E6A7E;--muted:#5E6A7E;--line:#E6E9EF;--rose:#FFF0F1;--page:#F7F9FC;--ok:#20775A;--bad:#AE2D37;--ease:cubic-bezier(.2,.7,.2,1)}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{font:15px/1.5 Lato,system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0;min-height:100vh;background:radial-gradient(520px 320px at 100% 100%,#FFE4E6 0,transparent 65%),var(--page)}
-.shell{display:block;min-height:100vh}
-/* the red panel: a header on a phone, a side panel on a computer */
-.side{position:relative;background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;padding:22px 20px;display:flex;flex-direction:column;gap:14px;border-radius:0 0 28px 28px}
-.brand{display:flex;align-items:center;gap:12px}
+body{font:15px/1.5 Lato,Arial,sans-serif;color:var(--ink);margin:0;min-height:100vh;background:radial-gradient(420px 260px at 100% 0,#FFE4E6 0,transparent 65%),var(--page)}
+button,input,textarea,select{font-family:inherit}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.hide{display:none!important}
+.s{color:var(--muted);font-size:.9rem}.ok{color:var(--ok)}.bad{color:var(--bad)}
+a{color:var(--red);font-weight:700;text-decoration:none}
+/* buttons */
+.btn{cursor:pointer;transition:transform .2s var(--ease),box-shadow .2s var(--ease),background-color .2s,border-color .2s,color .2s;font-size:16px;border-radius:12px;min-height:50px;padding:0 18px;width:100%;margin-top:10px;font-weight:700}
+.btn:hover{transform:translateY(-2px)}.btn:active{transform:translateY(0) scale(.98)}.btn[disabled]{opacity:.5;transform:none}
+.btn-red{border:0;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;box-shadow:0 4px 12px rgba(182,0,10,.25)}
+.btn-red:hover{box-shadow:0 10px 22px rgba(182,0,10,.35)}
+.btn-line{border:1px solid #D5DAE3;background:#fff;color:var(--ink)}
+.btn-line:hover{border-color:var(--red);color:var(--red);background:var(--rose)}
+.in{transition:border-color .2s,box-shadow .2s;width:100%;margin-top:6px;border:1px solid #D5DAE3;border-radius:12px;padding:12px 14px;font-size:16px;color:var(--ink);background:#fff}
+.in:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(182,0,10,.12);outline:0}
+input.in{height:48px;padding:0 14px}
+:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px}
+/* cards, pills */
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(20,35,61,.05);padding:18px}
+.lift{transition:transform .25s var(--ease),box-shadow .25s var(--ease),border-color .25s var(--ease)}
+@media (hover:hover){.lift:hover{transform:translateY(-3px);border-color:#E9A9AE;box-shadow:0 14px 30px rgba(142,0,8,.14),0 0 0 3px rgba(182,0,10,.10)}}
+.kick{font-size:12px;font-weight:900;color:var(--red);text-transform:uppercase;letter-spacing:.08em}
+.big{font-size:21px;font-weight:900;margin:2px 0}
+.pill{display:inline-block;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.p-ok{background:#EAF6EF;color:#20775A}.p-no{background:#FFF0F1;color:#AE2D37}.p-pend{background:#FFF4DF;color:#95621D}.p-app{background:#F1EAFB;color:#4B2A85}
+.note{background:#FFF4DF;color:#95621D;border-radius:10px;padding:10px 12px;font-size:14px}
+.good{background:#EAF6EF;color:#20775A;border-radius:10px;padding:10px 12px;font-size:14px}
+.info{background:#EDF3FB;color:#2F4F7E;border-radius:10px;padding:10px 12px;font-size:14px}
+.rise{animation:rise .55s var(--ease) both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.rowl{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.col{display:flex;flex-direction:column;gap:10px}
+
+/* ---------- signed out: the mockup's Sign in page ---------- */
+#outv{min-height:100vh;display:flex;flex-wrap:wrap}
+.lp{flex:1 1 480px;background:radial-gradient(520px 320px at 90% 8%,rgba(255,255,255,.14) 0,transparent 65%),linear-gradient(160deg,#C8101B,#8E0008);color:#fff;padding:22px 20px 26px;display:flex;flex-direction:column;gap:18px}
+.lbrand{display:flex;align-items:center;gap:12px}
 .tile{background:#fff;border-radius:14px;padding:6px 8px;display:flex}.tile img{height:40px;width:auto;display:block}
 .b1{font-weight:900;font-size:15px;line-height:1.2}.b2{font-size:11px;letter-spacing:.14em;font-weight:700;color:#FFD9DC}
-.hero{display:none}
-.user{display:none}
-body.in .user{display:block}
-.hello{font-size:24px;font-weight:900;line-height:1.15}.meta{font-size:14px;color:#FFE9EA}
-.so{display:none}
-body.in .so{display:inline-flex}
-.so{position:absolute;top:14px;right:14px;align-items:center;width:auto;margin:0;min-height:32px;height:32px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:13px;box-shadow:none}
-body.in .side{padding-top:52px}
-main{padding:16px 20px 110px;max-width:34rem;margin:0 auto;width:100%}
-.card{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(20,35,61,.05);padding:18px}
-.card>b:first-child,.k{font-size:12px;font-weight:900;color:var(--acc);letter-spacing:.08em;text-transform:uppercase}
-.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px}
-.grid{display:flex;flex-direction:column;gap:14px}
-.ptitle{display:none}
-button{font:inherit;font-weight:700;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;border:0;border-radius:12px;padding:.75rem 1rem;width:100%;margin-top:.6rem;min-height:50px;cursor:pointer;box-shadow:0 4px 12px rgba(182,0,10,.25);transition:transform .2s var(--ease),box-shadow .2s var(--ease),background-color .2s,border-color .2s,color .2s}
-button:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(182,0,10,.35)}button:active{transform:translateY(0) scale(.98)}button[disabled]{opacity:.5;transform:none}
-.line{border:1px solid #D5DAE3;background:#fff;color:var(--fg);box-shadow:none}
-.line:hover{border-color:var(--acc);color:var(--acc);background:var(--rose);box-shadow:none}
-input,textarea{font:inherit;width:100%;padding:.75rem .85rem;border-radius:12px;border:1px solid #D5DAE3;margin-top:.4rem;color:var(--fg);background:#fff;transition:border-color .2s,box-shadow .2s}
-input{height:48px;padding:0 14px;font-size:16px}
-input:focus,textarea:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(182,0,10,.12);outline:0}
-:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px}
-.s{color:var(--mut);font-size:.9rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.hide{display:none!important}
-.big{font-size:21px;font-weight:900;margin:.2rem 0}
-.pill{display:inline-block;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;margin-right:6px;white-space:nowrap}
-.p-ok{background:#EAF6EF;color:#20775A}.p-no{background:#FFF0F1;color:#AE2D37}.p-pend{background:#FFF4DF;color:#95621D}.p-app{background:#F1EAFB;color:#4B2A85}
-.note{background:#FFF4DF;color:#95621D;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:.6rem}
-.good{background:#EAF6EF;color:#20775A;border-radius:10px;padding:10px 12px;font-size:14px;margin-top:.6rem}
-.info{background:#EDF3FB;color:#2F4F7E;border-radius:10px;padding:10px 12px;font-size:14px}
-/* the menu: a bar along the bottom on a phone, a list in the red panel on a computer */
-.nav{display:none}
-body.in .nav{display:flex}
-.nav{position:fixed;left:0;right:0;bottom:0;gap:4px;background:#fff;border-top:1px solid var(--line);padding:8px 12px calc(14px + env(safe-area-inset-bottom));z-index:5}
-.tab{flex:1;margin:0;min-height:52px;background:transparent;color:var(--mut);box-shadow:none;border-radius:12px;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
-.tab:hover{background:var(--rose);color:var(--acc);box-shadow:none}
-.tab.on{color:var(--acc);background:var(--rose)}
-.tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-a{color:var(--acc);font-weight:700;text-decoration:none}
-.signwrap{padding:20px;display:flex;justify-content:center}
-.signcard{width:100%;max-width:26rem;padding:26px;display:flex;flex-direction:column;gap:14px}
-.signcard h1{font-size:26px;font-weight:900;color:var(--deep);margin:0}
-.or{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13px}.or span{flex:1;height:1px;background:var(--line)}
-.modal{position:fixed;inset:0;background:rgba(23,32,57,.58);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+.lhero{display:flex;flex-direction:column;gap:10px;max-width:460px}
+.lhero .h{font-size:26px;font-weight:900;line-height:1.15}.lhero .p{font-size:15px;color:#FFE9EA}
+.rp{flex:1 1 480px;display:flex;align-items:center;justify-content:center;padding:24px 16px 40px;background:radial-gradient(520px 320px at 100% 100%,#FFE4E6 0,transparent 65%),var(--page)}
+.sc{width:100%;max-width:420px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px rgba(142,0,8,.10);padding:28px;display:flex;flex-direction:column;gap:14px}
+.sc h1{font-size:26px;font-weight:900;color:var(--deep);margin:0}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}.or span{flex:1;height:1px;background:var(--line)}
+.sc .btn{margin-top:0}
+.modal{position:fixed;inset:0;background:rgba(23,32,57,.58);display:flex;align-items:center;justify-content:center;padding:20px;z-index:30}
 .mbox{width:100%;max-width:600px;background:#fff;border-radius:20px;box-shadow:0 30px 70px rgba(10,15,30,.4);overflow:hidden;max-height:90vh;overflow-y:auto}
 .mhead{background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.mx{width:40px;height:40px;margin:0;padding:0;min-height:0;border-radius:50%;background:rgba(255,255,255,.18);font-size:20px;box-shadow:none}
+.mx{width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer}
 .issue{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:12px}
-.issue i{width:30px;height:30px;border-radius:50%;background:var(--rose);color:var(--acc);font-weight:900;display:grid;place-items:center;flex:none;font-style:normal}
+.issue i{width:30px;height:30px;border-radius:50%;background:var(--rose);color:var(--red);font-weight:900;display:grid;place-items:center;flex:none;font-style:normal}
+
+/* ---------- signed in ---------- */
+#inv{min-height:100vh}
+.mhdr{position:relative;background:linear-gradient(135deg,#C8101B,#8E0008);color:#fff;padding:50px 20px 26px;display:flex;align-items:center;gap:14px;border-radius:0 0 28px 28px}
+.hello{font-size:24px;font-weight:900;line-height:1.15}.hsub{font-size:14px;color:#FFE9EA}
+.so{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+.mhdr .so{position:absolute;top:14px;right:16px}
+.sb{display:contents}
+.sbrand,.dtop,.sbfoot,.tiles{display:none}
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;gap:4px;background:#fff;border-top:1px solid var(--line);padding:8px 12px calc(14px + env(safe-area-inset-bottom));z-index:5}
+.nv{flex:1;border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:52px;cursor:pointer;border-radius:12px;transition:background-color .2s var(--ease),color .2s var(--ease)}
+.nv:hover{background:var(--rose);color:var(--red)}.nv.on{color:var(--red)}
+.nv svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mainw{padding:18px 20px 110px;max-width:34rem;margin:0 auto}
+.ptitle{display:none}
+.grid{display:flex;flex-direction:column;gap:14px}
+.rq{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.rq:first-child{border-top:0}
+.rq b{font-size:15px}
+.rq .s{font-size:13px}
+.steps li{margin:4px 0}
+
 @media (min-width:900px){
-  .shell{display:grid;grid-template-columns:minmax(320px,5fr) 7fr}
-  .side{position:sticky;top:0;height:100vh;border-radius:0;padding:48px 48px 40px;gap:26px;background:radial-gradient(520px 320px at 90% 8%,rgba(255,255,255,.14) 0,transparent 65%),linear-gradient(160deg,#C8101B,#8E0008)}
-  body.in .side{padding-top:48px}
+  #outv .lp{padding:48px 56px;gap:28px;min-height:100vh}
   .tile{border-radius:16px;padding:8px 10px}.tile img{height:54px}
   .b1{font-size:18px}.b2{font-size:12px}
-  .hero{display:flex;flex-direction:column;gap:14px;margin-top:auto;max-width:460px}
-  body.in .hero{display:none}
-  .hero .h{font-size:40px;font-weight:900;line-height:1.1}.hero .p{font-size:17px;color:#FFE9EA}
-  .user .hello{font-size:28px}.user .meta{font-size:15px}
-  .so{top:auto;bottom:40px;left:48px;right:auto;height:44px;min-height:44px;padding:0 22px;font-size:14px}
-  .so:hover{background:rgba(255,255,255,.3);color:#fff}
-  .nav{position:static;flex-direction:column;gap:6px;background:none;border:0;padding:0;margin-top:6px}
-  .tab{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;min-height:48px;padding:0 16px;font-size:15px;color:#fff;background:rgba(255,255,255,.12);width:100%;max-width:300px}
-  .tab:hover{background:rgba(255,255,255,.26);color:#fff;transform:translateX(4px)}
-  .tab.on{background:#fff;color:var(--acc)}
-  main{max-width:64rem;width:100%;margin:0;padding:48px 56px 56px;align-self:start}
-  .signwrap{padding:56px 40px;align-items:center;min-height:100vh}
-  .signcard{padding:34px;border-radius:20px;box-shadow:0 18px 50px rgba(142,0,8,.10)}
-  .ptitle{display:block;font-size:30px;font-weight:900;color:var(--deep);margin:0 0 20px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  .lhero{margin-top:auto}
+  .lhero .h{font-size:40px;line-height:1.1}.lhero .p{font-size:17px}
+  .rp{padding:40px 24px}
+  .mhdr{display:none}
+  #inv{display:flex}
+  .sb{display:flex;flex-direction:column;gap:4px;width:250px;flex:none;background:#fff;border-right:1px solid var(--line);padding:18px 14px;position:sticky;top:0;height:100vh}
+  .sbrand{display:block;padding:2px 6px 16px}
+  .nav{position:static;flex-direction:column;gap:4px;background:none;border:0;padding:0}
+  .nv{flex:none;flex-direction:row;justify-content:flex-start;gap:10px;height:auto;padding:11px 12px;font-size:15px;color:var(--text);border-radius:10px}
+  .nv:hover{transform:translateX(4px)}
+  .nv.on{background:var(--rose);color:var(--red);box-shadow:inset 0 0 0 1px #F3C9CC}
+  .sbfoot{display:block;margin-top:auto;border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:var(--muted);line-height:1.6}
+  .mainw{flex:1;min-width:0;max-width:none;margin:0;padding:22px 28px 40px}
+  .dtop{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+  .dtop .tt{flex:1 1 320px}
+  .dtop .tt .t1{font-size:26px;font-weight:900;color:var(--deep);letter-spacing:.01em}
+  .dtop .tt .t2{font-size:15px;color:var(--muted)}
+  .chip{display:flex;align-items:center;gap:10px}
+  .av{width:44px;height:44px;border-radius:50%;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:900}
+  .chip .so{height:40px;padding:0 14px;background:#fff;border:1px solid #D5DAE3;color:var(--ink);font-size:14px}
+  .chip .so:hover{border-color:var(--red);color:var(--red);background:var(--rose)}
+  .ptitle{display:block;font-size:22px;font-weight:900;margin:0 0 14px;color:var(--ink)}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px}
+  .tl{background:#FFF6F6;border:1px solid #F3D3D5;border-radius:14px;padding:14px 16px}
+  .tl.am{background:#FFF4DF;border-color:#F0E2C9}
+  .tl .a{font-size:13px;color:var(--muted);font-weight:700}.tl .n{font-size:26px;font-weight:900;color:var(--deep);line-height:1.2}.tl .c{font-size:12px;color:var(--muted)}
+  .tl.am .a,.tl.am .n,.tl.am .c{color:#95621D}
+  .grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:20px;align-items:start}
   .grid .wide{grid-column:1 / -1}
-  .card{padding:24px;border-radius:20px;box-shadow:0 18px 50px rgba(142,0,8,.06)}
-  #attlist{display:grid!important;grid-template-columns:1fr 1fr;gap:14px!important}
+  .card{padding:22px 24px;border-radius:18px}
+  .big{font-size:26px}
+  #attlist{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px!important}
 }
-@media (max-width:899px){.hero{display:none}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
-<div class="shell">
-<aside class="side">
-<button id="out" class="so">Sign out</button>
-<div class="brand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
-<div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. Check in at rehearsal, ask to be excused, and see your own attendance.</div></div>
-<div class="user"><div id="who" class="hello"></div><div id="meta" class="meta"></div></div>
-<nav id="nav" class="nav">
-<button id="t1" class="tab on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
-<button id="t2" class="tab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"/></svg>Requests</button>
-<button id="t3" class="tab"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Attendance</button>
-<button id="t4" class="tab"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profile</button>
-</nav>
-</aside>
-
-<main>
-<div id="signin" class="signwrap"><div class="card signcard">
-<div><h1>Sign in</h1><div class="s" style="font-size:15px;margin-top:4px">Press Sign in with Google. If your email is on the choir list, you are in. No code to wait for.</div></div>
-<div id="gbtn" style="min-height:44px"></div>
-<div class="s">Share an email with someone else in the choir? Type your Member ID in the box below first, then press the Google button.</div>
-<div class="or"><span></span>No Google account? Use an email code<span></span></div>
-<p id="m1" class="s" style="margin:0"></p>
-<label for="mid" style="font-size:14px;font-weight:900;margin-bottom:-6px">Member ID</label>
-<input id="mid" autocomplete="off" placeholder="For example M014">
-<button id="mailcode" style="margin-top:0;height:52px">Email me a code</button>
-<div id="codebox" class="hide"><label for="code" style="font-size:14px;font-weight:900">The 6-digit code</label><input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"><button id="codego" class="line">Sign in with the code</button></div>
-<div class="s">We send a 6-digit code to the email on file. It lasts 10 minutes. Check-in itself needs Google.</div>
-<button id="help" class="line" style="margin-top:0;min-height:46px">Need help signing in?</button>
-<div class="info">After sign in you land on <b>Home</b>. Staff with a role use the <b>CCW Choir Staff</b> page for their role screens.</div>
-</div></div>
-
-<div id="app" class="hide">
-<h2 id="ptitle" class="ptitle">Home</h2>
-<div id="v1" class="grid">
-<div class="card"><b>Next rehearsal</b>
-<div id="rh" class="big">Loading…</div><div id="rhs" class="s"></div>
-<div id="state"></div>
-<div id="consent" class="hide"><p class="s">To confirm you are at rehearsal, this page checks your phone's location once. It is sent once to confirm you are at the venue, then thrown away. It is never stored. Only "location confirmed" is recorded, and only for the rehearsal day. A record that you agreed is kept.</p><button id="agree">I agree</button></div>
-<button id="ci" class="hide">Check in with Google</button>
-<button id="req" class="hide">Request an absence</button>
-<div id="regoogle" class="hide"><p class="s">For your safety, press this once more to confirm it is you.</p><div id="gbtn2" style="margin:.4rem 0"></div></div>
-<p id="m2" class="s"></p></div>
-<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b>My requests</b><a id="seeall" href="#">See all</a></div><div id="mini" class="s" style="margin-top:6px">Loading…</div></div>
-<a id="attlink" href="#" class="card s wide" style="display:block;color:var(--mut);font-weight:400"><span id="attline">Loading…</span></a>
+<div id="outv">
+ <div class="lp"><div class="lbrand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
+  <div class="lhero rise"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. Check in at rehearsal, ask to be excused, and see your own attendance.</div></div></div>
+ <div class="rp"><div class="sc rise" style="animation-delay:.1s">
+  <div><h1>Sign in</h1><div class="s" style="font-size:15px;margin-top:4px">Press Sign in with Google. If your email is on the choir list, you are in. No code to wait for.</div></div>
+  <div id="gbtn" style="min-height:44px;display:flex;justify-content:center"></div>
+  <div class="s">Share an email with someone else in the choir? Type your Member ID in the box below first, then press the Google button.</div>
+  <div class="or"><span></span>No Google account? Use an email code<span></span></div>
+  <div id="m1" class="s"></div>
+  <label for="mid" style="font-size:14px;font-weight:900;margin-bottom:-8px">Member ID</label>
+  <input id="mid" class="in" autocomplete="off" placeholder="For example M014">
+  <button id="mailcode" class="btn btn-red">Email me a code</button>
+  <div id="codebox" class="hide"><label for="code" style="font-size:14px;font-weight:900">The 6-digit code</label><input id="code" class="in" inputmode="numeric" autocomplete="one-time-code" placeholder="123456"><button id="codego" class="btn btn-line">Sign in with the code</button></div>
+  <div class="s">We send a 6-digit code to the email on file. It lasts 10 minutes. Check-in itself needs Google.</div>
+  <button id="help" class="btn btn-line" style="min-height:46px;font-size:15px">Need help signing in?</button>
+  <div class="info">After sign in you land on <b>Home</b>. Staff with a role use the <b>CCW Choir Staff</b> page for their role screens.</div>
+ </div></div>
 </div>
 
-<div id="v2" class="grid hide">
-<div class="card"><b>Ask to be excused</b><p id="rinfo" class="s"></p>
-<div id="rform" class="hide"><label class="s" for="rreason">Reason (10 to 300 characters)</label><textarea id="rreason" rows="3" maxlength="300"></textarea><p class="s">Only the people who decide your request can read this.</p><button id="rsend">Send request</button></div>
-<p id="m3" class="s"></p>
-<p class="s">Late? Ask the Global Admin or Assistant to send it for you.</p></div>
-<div class="card"><b>My requests</b><div id="rmine"></div></div>
-</div>
+<div id="inv" class="hide">
+  <div class="mhdr"><button class="so" id="out2">Sign out</button><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b2" style="line-height:1.3">CELEBRATION CHURCH WORSHIP<br>LAGOS REGION CHOIR</div><div id="hello" class="hello"></div><div id="hsub" class="hsub"></div></div></div>
+ <div class="sb">
+  <div class="sbrand"><img src="logo.png" alt="CCW logo" style="height:58px;width:auto;display:block"><div style="font-weight:900;font-size:15px;margin-top:6px;line-height:1.15">CELEBRATION<br>CHURCH WORSHIP</div><div style="font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:700">LAGOS REGION CHOIR</div></div>
+  <nav class="nav">
+   <button id="t1" class="nv on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
+   <button id="t2" class="nv"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"/></svg>Requests</button>
+   <button id="t3" class="nv"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Attendance</button>
+   <button id="t4" class="nv"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profile</button>
+  </nav>
+  <div class="sbfoot"><b style="color:var(--ink)">Need help?</b><br>No phone, camera or location? Tell your Campus Music Director or Desk D and they will mark you by hand.</div>
+ </div>
+ <div class="mainw">
+  <div class="dtop"><div class="tt"><div class="t1">LAGOS REGION CHOIR</div><div class="t2">Check in, ask to be excused and follow your own attendance.</div></div><div class="chip"><div id="av" class="av"></div><div style="line-height:1.25"><b id="dname" style="font-size:14px"></b><div id="dsub" style="font-size:12px;color:var(--muted)"></div></div><button class="so" id="out">Sign out</button></div></div>
+  <h2 id="ptitle" class="ptitle">Home</h2>
+  <div id="app" style="margin-top:16px">
 
-<div id="v3" class="grid hide">
-<div id="attsum" class="card hide wide" style="display:flex;align-items:center;gap:16px"><div id="attpct" style="font-size:40px;font-weight:900;color:var(--deep)"></div><div id="attsub" class="s"></div></div>
-<p id="m4" class="s wide"></p>
-<div id="attlist" class="wide" style="display:flex;flex-direction:column;gap:10px"></div>
-<p class="s wide">Only you can see this page. It shows rehearsals once they are published.</p>
-</div>
+   <div id="v1">
+    <div id="tiles" class="tiles"></div>
+    <div class="grid">
+     <div class="card lift rise col"><div class="kick">Next rehearsal</div>
+      <div id="rh" class="big">Loading…</div><div id="rhs" class="s" style="font-size:15px"></div>
+      <div id="state" class="col"></div>
+      <div id="consent" class="hide"><p class="s">To confirm you are at rehearsal, this page checks your phone's location once. It is sent once to confirm you are at the venue, then thrown away. It is never stored. Only "location confirmed" is recorded, and only for the rehearsal day. A record that you agreed is kept.</p><button id="agree" class="btn btn-red">I agree</button></div>
+      <button id="ci" class="btn btn-red hide" style="margin-top:0">Check in with Google</button>
+      <button id="req" class="btn btn-red hide" style="margin-top:0">Request an absence</button>
+      <div id="regoogle" class="hide"><p class="s">For your safety, press this once more to confirm it is you.</p><div id="gbtn2" style="margin:.4rem 0"></div></div>
+      <div id="m2" class="s"></div></div>
+     <div class="card lift rise" style="animation-delay:.08s"><div class="rowl"><div style="font-size:16px;font-weight:900">My requests</div><a id="seeall" href="#" style="font-size:14px">See all</a></div><div id="mini" style="margin-top:6px">Loading…</div></div>
+     <a id="attlink" href="#" class="card lift wide rise s" style="display:block;font-size:14px;font-weight:400;animation-delay:.16s"><span id="attline">Loading…</span></a>
+    </div>
+   </div>
 
-<div id="v4" class="grid hide">
-<div class="card" id="prof" style="line-height:2;font-size:15px"></div>
-<div class="card"><b>Something wrong?</b><p class="s">You cannot edit these yourself. Tell Desk A or your Campus Music Director to correct your email, part or campus.</p></div>
-</div>
-</div>
-</main>
+   <div id="v2" class="hide">
+    <div class="grid">
+     <div class="card col"><div style="font-size:18px;font-weight:900">Request an absence</div>
+      <div><div style="font-size:14px;font-weight:900">Which rehearsal?</div><div id="rwhich" class="in" style="background:#F7F9FC;height:auto"></div></div>
+      <div id="rinfo" class="good"></div>
+      <div id="rform" class="hide"><label for="rreason" style="font-size:14px;font-weight:900">Reason</label><textarea id="rreason" class="in" rows="3" maxlength="300" placeholder="At least 10 characters"></textarea><div class="s" style="margin-top:4px">Only the people who decide your request can read this.</div>
+       <div style="font-size:14px;font-weight:900;margin-top:12px">What happens next</div><ol class="steps s" style="margin:4px 0 0;padding-left:20px"><li>Your Campus Music Director checks it.</li><li>The Global Admin approves or rejects it.</li><li>You can withdraw it while it is still pending.</li></ol>
+       <button id="rsend" class="btn btn-red">Send request</button></div>
+      <div id="m3" class="s"></div>
+      <div class="s">Late request? Ask the Global Admin or Assistant to send it for you.</div></div>
+     <div class="col"><div style="font-size:18px;font-weight:900">My requests</div><div id="rmine" class="col"></div></div>
+    </div>
+   </div>
+
+   <div id="v3" class="hide">
+    <div id="attsum" class="card hide rise" style="display:flex;align-items:center;gap:16px;margin-bottom:14px"><div id="attpct" style="font-size:40px;font-weight:900;color:var(--deep)"></div><div id="attsub" class="s" style="font-size:14px"></div></div>
+    <div id="m4" class="s"></div>
+    <div id="attlist" class="col"></div>
+    <div class="s" style="margin-top:12px">Only you can see this page. It shows rehearsals once they are published.</div>
+   </div>
+
+   <div id="v4" class="hide">
+    <div class="grid">
+     <div class="card rise" id="prof" style="line-height:2;font-size:15px"></div>
+     <div class="card rise col"><div style="font-size:16px;font-weight:900">Something wrong?</div><div class="s" style="font-size:14px">You cannot edit these yourself. Tell Desk A or your Campus Music Director to correct your email, part or campus.</div></div>
+    </div>
+   </div>
+  </div>
+ </div>
 </div>
 
 <div id="helpbox" class="modal hide"><div class="mbox">
@@ -164,17 +209,21 @@ a{color:var(--acc);font-weight:700;text-decoration:none}
 <div class="issue"><i>2</i><div><b>My Member ID does not match</b><div class="s">Ask your Campus Music Director for your ID. It looks like M014.</div></div></div>
 <div class="issue"><i>3</i><div><b>It says I am not active</b><div class="s">Only active members can sign in. Desk A can check your status.</div></div></div>
 <div class="issue"><i>4</i><div><b>I signed in but I cannot see my screens</b><div class="s">Your role may not be set yet. The Global Admin or System Administrator can fix it.</div></div></div>
-<button id="helpback" class="line">Back to sign in</button>
+<button id="helpback" class="btn btn-line">Back to sign in</button>
 </div></div></div>
 <script>
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyPAYTBNK11xxnOyjI3wfNRIE64Os2wqJJ4jFoyJ6uDVVIkX-qiYYd-kt1DYT4eYVxo/exec';
 const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.googleusercontent.com';
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
-let token = '', gTok = '', gAt = 0, home = null, abs = null, onFresh = null, reading = null;
+let token = '', gTok = '', gAt = 0, home = null, abs = null, att = null, onFresh = null, reading = null;
 try { token = sessionStorage.getItem('rbcMTok') || ''; } catch (e) {}
 const say = (id, t, k) => { $(id).textContent = t || ''; $(id).className = 's' + (k ? ' ' + k : ''); };
-const when = ms => new Date(Number(ms)).toLocaleString([], {weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'});
+const D = ms => new Date(Number(ms));
+const dlong = ms => D(ms).toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'short', year: 'numeric'});
+const dshort = ms => D(ms).toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'});
+const tm = ms => D(ms).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', hour12: false});
+const dtm = ms => dshort(ms) + ', ' + tm(ms);
 async function call(body) {
   for (let i = 0; i < 3; i++) {
     try {
@@ -187,23 +236,25 @@ async function call(body) {
 }
 function signedOutNow(msg) {
   token = ''; try { sessionStorage.removeItem('rbcMTok'); } catch (e) {}
-  document.body.classList.remove('in'); $('app').classList.add('hide'); $('signin').classList.remove('hide'); say('m1', msg || '', msg ? 'bad' : '');
+  $('inv').classList.add('hide'); $('outv').classList.remove('hide'); say('m1', msg || '', msg ? 'bad' : '');
 }
+const TITLES = ['', 'Home', 'My requests', 'My attendance', 'My profile'];
 function tab(n) {
   [1, 2, 3, 4].forEach(i => { $('v' + i).classList.toggle('hide', n !== i); $('t' + i).classList.toggle('on', n === i); });
-  $('ptitle').textContent = ['', 'Home', 'My requests', 'My attendance', 'My profile'][n];
-  window.scrollTo(0, 0);
+  $('ptitle').textContent = TITLES[n]; window.scrollTo(0, 0);
   if (n === 1) loadHome(); else if (n === 2) loadReqs(); else if (n === 3) loadAtt(); else drawProfile();
 }
 [1, 2, 3, 4].forEach(i => $('t' + i).onclick = () => tab(i));
 $('req').onclick = () => tab(2); $('seeall').onclick = e => { e.preventDefault(); tab(2); }; $('attlink').onclick = e => { e.preventDefault(); tab(3); };
+$('out').onclick = $('out2').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
 const pill = s => '<span class="pill ' + ({Approved: 'p-ok', Rejected: 'p-no', Pending: 'p-pend', Appeal: 'p-app', Withdrawn: 'p-pend'}[s] || 'p-pend') + '">' + esc(s) + '</span>';
+const short = n => { const p = String(n || '').trim().split(/\s+/); return p.length > 1 ? p[0] + ' ' + p[p.length - 1].charAt(0) + '.' : (p[0] || ''); };
 
 // ---- sign in ----
 async function googleDone(resp) {
   say('m1', 'Checking with Google…');
   try {
-    const j = await call({action: 'signin.google', idToken: resp.credential});
+    const j = await call({action: 'signin.google', idToken: resp.credential, memberId: $('mid').value.trim()});
     if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
     token = j.token; gTok = resp.credential; gAt = Date.now(); try { sessionStorage.setItem('rbcMTok', token); } catch (e) {}
     enter(j.name);
@@ -219,8 +270,29 @@ function gisInit() {
   } catch (e) { say('m1', 'Google sign-in is not available right now.', 'bad'); } };
   document.head.appendChild(gs);
 }
-function enter(name) { document.body.classList.add('in'); $('signin').classList.add('hide'); $('app').classList.remove('hide'); $('who').textContent = name ? 'Hello, ' + name : ''; tab(1); }
-$('out').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
+function enter(name) { $('outv').classList.add('hide'); $('inv').classList.remove('hide'); setWho({name: name}); tab(1); }
+function setWho(h) {
+  const sub = [h.campus ? h.campus + ' Campus' : '', h.part || ''].filter(Boolean).join(' · ') || 'Choir Member';
+  $('hello').textContent = 'Hello, ' + short(h.name); $('hsub').textContent = sub;
+  $('dname').textContent = h.name || ''; $('dsub').textContent = sub;
+  $('av').textContent = String(h.name || '?').trim().split(/\s+/).map(w => w.charAt(0)).slice(0, 2).join('').toUpperCase();
+}
+$('mailcode').onclick = async () => {
+  const id = $('mid').value.trim();
+  if (!id) return say('m1', 'Type your Member ID first, for example M014.', 'bad');
+  say('m1', 'Sending the code…');
+  try { const j = await call({action: 'signin.start', memberId: id}); if (!j.ok) return say('m1', j.error || 'Could not send a code.', 'bad'); say('m1', j.message || 'A code is on its way to the email on file.', 'ok'); $('codebox').classList.remove('hide'); }
+  catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
+};
+$('codego').onclick = async () => {
+  say('m1', 'Checking the code…');
+  try { const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
+    if (!j.ok) return say('m1', j.error || 'That code did not work.', 'bad');
+    token = j.token; try { sessionStorage.setItem('rbcMTok', token); } catch (e) {} enter(j.name); }
+  catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
+};
+$('help').onclick = () => $('helpbox').classList.remove('hide');
+$('helpx').onclick = $('helpback').onclick = () => $('helpbox').classList.add('hide');
 
 // ---- home ----
 async function loadHome() {
@@ -229,41 +301,55 @@ async function loadHome() {
     const [h, a] = await Promise.all([call({action: 'me.home', token}), call({action: 'absence.state', token})]);
     if (h.signedOut || a.signedOut) return signedOutNow('Please sign in again.');
     if (!h.ok) return say('m2', h.error || 'Not available.', 'bad');
-    home = h; abs = a.ok ? a : null; $('who').textContent = 'Hello, ' + (h.name || ''); $('meta').textContent = [h.campus, h.part].filter(Boolean).join(' · ') || 'Choir Member';
-    drawHome();
+    home = h; abs = a.ok ? a : null; setWho(h); drawHome(); loadAttLine();
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 }
+const subOf = r => r.status === 'Approved' ? 'Counted as excused' : r.status === 'Pending' ? 'Waiting for your Campus Music Director' : r.status === 'Rejected' ? (r.canAppeal ? 'Rejected · you can appeal' : 'Rejected') : r.status === 'Appeal' ? 'Appeal with the Global Music Director' : r.status === 'Withdrawn' ? 'You withdrew this request' : '';
 function drawHome() {
   const h = home, rh = h.rehearsal, a = abs;
   const mineReq = rh && a ? a.mine.filter(r => r.rehearsalId === rh.id && r.status !== 'Withdrawn')[0] : null;
   ['ci', 'req', 'consent', 'regoogle'].forEach(i => $(i).classList.add('hide'));
   $('state').innerHTML = '';
-  if (!rh) { $('rh').textContent = 'No rehearsal is set up yet'; $('rhs').textContent = ''; }
+  let status = 'Not open yet';
+  if (!rh) { $('rh').textContent = 'No rehearsal is set up yet'; $('rhs').textContent = ''; status = '-'; }
   else {
-    $('rh').textContent = when(rh.startMs); $('rhs').textContent = rh.venue || '';
+    $('rh').textContent = dlong(rh.startMs); $('rhs').textContent = tm(rh.startMs) + (rh.venue ? ' · ' + rh.venue : '');
     let m = h.mine;
     if (m === 'none' && mineReq && mineReq.status === 'Approved') m = 'excused';
-    if (m === 'waiting') $('state').innerHTML = '<p><span class="pill p-pend">Waiting for a yes</span></p><p class="s">You are checked in. Your Campus MD or Desk D now says yes that you are in the room. You do nothing more.</p>';
-    else if (m === 'checked') $('state').innerHTML = '<p><span class="pill p-ok">Checked in</span></p><p class="s">A Desk D team member will check it. It counts once that is done.</p>';
-    else if (m === 'notroom') $('state').innerHTML = '<p><span class="pill p-no">Not in the room</span></p><p class="s">You were marked as not in the room. If that is wrong, tell your Campus MD or Desk D.</p>';
-    else if (m === 'excused') $('state').innerHTML = '<p><span class="pill p-app">Excused</span></p><p class="s">Your absence request for this rehearsal was approved.</p>';
-    else if (h.staffOnly) $('state').innerHTML = '<div class="note">You are signed in for staff duties. Check-in and requests are for choir members.</div>';
-    else if (rh.finished) $('state').innerHTML = '<p class="s">This rehearsal has finished.</p>';
+    const set = html => { $('state').innerHTML = html; };
+    if (m === 'waiting') { status = 'Waiting for a yes'; set('<div><span class="pill p-pend">Waiting for a yes</span></div><div class="s" style="font-size:14px">You are checked in. Your Campus MD or Desk D now says yes that you are in the room. You do nothing more.</div>'); }
+    else if (m === 'checked') { status = 'Checked in'; set('<div><span class="pill p-ok">Checked in</span></div><div class="s" style="font-size:14px">A Desk D team member will check it. It counts once that is done.</div>'); }
+    else if (m === 'notroom') { status = 'Not in the room'; set('<div><span class="pill p-no">Not in the room</span></div><div class="s" style="font-size:14px">You were marked as not in the room. If that is wrong, tell your Campus MD or Desk D.</div>'); }
+    else if (m === 'excused') { status = 'Excused'; set('<div><span class="pill p-app">Excused</span></div><div class="s" style="font-size:14px">Your absence request for this rehearsal was approved.</div>'); }
+    else if (h.staffOnly) { status = '-'; set('<div class="note">You are signed in for staff duties. Check-in and requests are for choir members.</div>'); }
+    else if (rh.finished) { status = 'Finished'; set('<div class="s" style="font-size:14px">This rehearsal has finished.</div>'); }
     else if (rh.checkInOpen) {
-      $('state').innerHTML = '<div class="good"><b>Check-in is open.</b> It uses your phone location, so you must be at the venue. No QR needed.</div>';
+      status = 'Open now';
+      set('<div class="good"><b>Check-in is open.</b> It uses your phone location, so you must be at the venue. No QR needed.</div><div class="s" style="font-size:13px">Cannot use Google? Scan the QR in the room instead. No phone or location? Tell your Campus MD or Desk D.</div>');
       let agreed = false; try { agreed = localStorage.getItem('rbcConsent') === '1'; } catch (e) {}
       $(agreed ? 'ci' : 'consent').classList.remove('hide');
-      $('state').insertAdjacentHTML('beforeend', '<p class="s">Cannot use Google? Scan the QR in the room instead. No phone or location? Tell your Campus MD or Desk D.</p>');
     } else {
-      if (mineReq) $('state').innerHTML = '<p>' + pill(mineReq.status) + '</p><p class="s">Your request for this rehearsal.</p>';
-      else if (a && a.rehearsal && a.rehearsal.open) { $('state').innerHTML = '<div class="note">Absence requests close ' + esc(when(a.rehearsal.closeMs)) + '. Check-in opens 1 hour before the start.</div>'; }
-      else $('state').innerHTML = '<p class="s">Check-in opens 1 hour before the start.</p>';
+      if (mineReq) { status = mineReq.status; set('<div>' + pill(mineReq.status) + '</div><div class="s" style="font-size:14px">Your request for this rehearsal.</div>'); }
+      else if (a && a.rehearsal && a.rehearsal.open) set('<div class="note">Absence requests close ' + esc(dtm(a.rehearsal.closeMs)) + ' (36 hours before). Check-in opens 1 hour before the start.</div>');
+      else set('<div class="s" style="font-size:14px">Check-in opens 1 hour before the start.</div>');
     }
     if (!h.staffOnly && !rh.finished && !mineReq && m === 'none' && a && a.rehearsal && a.rehearsal.open) $('req').classList.remove('hide');
   }
-  const recent = a ? a.mine.slice(0, 3) : [];
-  loadAttLine();
-  $('mini').innerHTML = recent.length ? recent.map(r => '<div style="padding:6px 0">' + pill(r.status) + ' <span class="s">' + esc(when(r.rehearsalStartMs)) + '</span></div>').join('') : 'You have no requests yet.';
+  const mine = a ? a.mine : [], recent = mine.slice(0, 3);
+  $('mini').innerHTML = recent.length ? recent.map(r => '<div class="rq"><div><b>' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</b><div class="s">' + esc(subOf(r)) + '</div></div>' + pill(r.status) + '</div>').join('') : '<div class="s">You have no requests yet.</div>';
+  const pend = mine.filter(r => r.status === 'Pending').length;
+  window.__tiles = {when: rh ? dshort(rh.startMs) : '-', time: rh ? tm(rh.startMs) + (rh.venue ? ' · ' + rh.venue : '') : '', status: status, pend: pend};
+  drawTiles();
+}
+function drawTiles() {
+  const t = window.__tiles || {}, pct = att && att.of ? Math.round(100 * att.attended / att.of) + '%' : '-';
+  $('tiles').innerHTML = '<div class="tl"><div class="a">Next rehearsal</div><div class="n">' + esc(t.when) + '</div><div class="c">' + esc(t.time) + '</div></div>' +
+    '<div class="tl"><div class="a">Check-in</div><div class="n">' + esc(t.status) + '</div><div class="c">For the next rehearsal</div></div>' +
+    '<div class="tl"><div class="a">My attendance</div><div class="n">' + esc(pct) + '</div><div class="c">' + (att && att.of ? att.attended + ' of ' + att.of + ' rehearsals' : 'Shows once published') + '</div></div>' +
+    '<div class="tl am"><div class="a">Requests waiting</div><div class="n">' + (t.pend || 0) + '</div><div class="c">Pending a decision</div></div>';
+}
+async function loadAttLine() {
+  try { const j = await call({action: 'me.attendance', token}); if (j.ok) { att = j; $('attline').innerHTML = j.of ? 'Attendance so far this year: <b style="color:var(--ink)">' + j.attended + ' of ' + j.of + ' rehearsals</b>' : 'Your attendance will show here once rehearsals are published.'; drawTiles(); } } catch (e) { /* the line stays as it was */ }
 }
 $('agree').onclick = () => { try { localStorage.setItem('rbcConsent', '1'); } catch (e) {} drawHome(); };
 function deviceId() {
@@ -295,13 +381,19 @@ async function loadReqs() {
     if (!j.ok) { $('rmine').innerHTML = ''; return say('m3', j.error || 'Not available.', 'bad'); }
     abs = j; const rh = j.rehearsal;
     const live = j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
-    $('rinfo').textContent = rh ? 'Next rehearsal: ' + when(rh.startMs) + '. Requests ' + (rh.open ? 'are open until ' + when(rh.closeMs) + '.' : 'are closed. Please contact the Global Admin or Assistant Global Admin.') : 'No rehearsal is open for requests yet.';
+    $('rwhich').textContent = rh ? dlong(rh.startMs) + ', ' + tm(rh.startMs) : 'No rehearsal is open for requests yet';
+    const box = $('rinfo');
+    if (!rh) { box.className = 'note'; box.textContent = 'There is no rehearsal to ask about yet.'; }
+    else if (rh.open) { box.className = 'good'; box.textContent = 'You are in time. Requests close ' + dtm(rh.closeMs) + '.'; }
+    else { box.className = 'note'; box.textContent = 'Requests for this rehearsal are closed. Please contact the Global Admin or Assistant Global Admin.'; }
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
     say('m3', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
-    $('rmine').innerHTML = j.mine.length ? j.mine.map(r => '<div style="border-top:1px solid var(--line);padding:10px 0;margin-top:8px">' + pill(r.status) + ' <span class="s">' + esc(when(r.rehearsalStartMs)) + (r.late ? ' · late' : '') + '</span><br><span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>' +
-      (r.canWithdraw ? '<button class="line" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '') + (r.canAppeal ? '<button class="line" data-ap="' + esc(r.requestId) + '">Appeal</button>' : '') + '</div>').join('') : '<p class="s">You have no requests yet.</p>';
+    $('rmine').innerHTML = j.mine.length ? j.mine.map(r => '<div class="card lift col" style="gap:8px"><div class="rowl"><div><div style="font-size:16px;font-weight:900">' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</div><div class="s">' + esc(subOf(r)) + (r.late ? ' · late' : '') + '</div></div>' + pill(r.status) + '</div>' +
+      (r.reason ? '<div class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div>' : '') +
+      (r.canAppeal ? '<label for="ap' + esc(r.requestId) + '" style="font-size:14px;font-weight:900">Why are you appealing?</label><textarea id="ap' + esc(r.requestId) + '" class="in" rows="3" maxlength="300"></textarea><button class="btn btn-red" style="margin-top:0" data-ap="' + esc(r.requestId) + '">Send appeal</button><div class="s">Appeals go to the Global Music Director first, then the Pastor.</div>' : '') +
+      (r.canWithdraw ? '<button class="btn btn-line" style="margin-top:0" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '') + '</div>').join('') : '<div class="s">You have no requests yet.</div>';
     $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => {
-      if (b.dataset.ap) { const why = prompt('Why should this be looked at again? (10 to 300 characters)'); if (!why) return; const a = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m3', a.ok ? 'Appeal sent.' : (a.error || 'Could not appeal.'), a.ok ? 'ok' : 'bad'); loadReqs(); return; }
+      if (b.dataset.ap) { const why = ($('ap' + b.dataset.ap).value || '').trim(); if (why.length < 10) return say('m3', 'Please give a reason of at least 10 characters.', 'bad'); const a2 = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m3', a2.ok ? 'Appeal sent.' : (a2.error || 'Could not appeal.'), a2.ok ? 'ok' : 'bad'); loadReqs(); return; }
       const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m3', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadReqs(); });
   } catch (e) { say('m3', 'Network problem. Try again.', 'bad'); }
 }
@@ -312,10 +404,7 @@ $('rsend').onclick = async () => {
   $('rsend').disabled = false;
 };
 
-async function loadAttLine() {
-  try { const j = await call({action: 'me.attendance', token}); if (j.ok) { att = j; $('attline').innerHTML = j.of ? 'Attendance so far: <b style="color:var(--fg)">' + j.attended + ' of ' + j.of + ' rehearsals</b>' : 'Your attendance will show here once rehearsals are published.'; } } catch (e) { /* the line stays as it was */ }
-}
-let att = null;
+// ---- attendance and profile ----
 async function loadAtt() {
   say('m4', 'Loading…'); $('attlist').innerHTML = ''; $('attsum').classList.add('hide');
   try {
@@ -326,32 +415,17 @@ async function loadAtt() {
     if (!j.of) { say('m4', 'Your attendance will show here once rehearsals are published.'); return; }
     $('attsum').classList.remove('hide');
     $('attpct').textContent = Math.round(100 * j.attended / j.of) + '%';
-    $('attsub').innerHTML = '<b style="color:var(--fg)">' + j.attended + ' of ' + j.of + '</b> rehearsals<br>' + j.excused + ' excused · ' + j.absent + ' absent';
-    $('attlist').innerHTML = j.rehearsals.map(r => '<div class="card row"><div><b>' + esc(r.date || r.id) + '</b><div class="s">' + esc(r.id) + '</div></div><span class="pill ' + ({Present: 'p-ok', Excused: 'p-app', Absent: 'p-no'}[r.status] || 'p-pend') + '">' + esc(r.status || '') + '</span></div>').join('');
+    $('attsub').innerHTML = '<b style="color:var(--ink)">' + j.attended + ' of ' + j.of + '</b> rehearsals<br>' + j.excused + ' excused · ' + j.absent + ' absent';
+    const fd = s => { const d = new Date(String(s) + 'T12:00:00'); return isNaN(d) ? String(s || '') : d.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'}); };
+    $('attlist').innerHTML = j.rehearsals.map(r => '<div class="card lift rowl" style="padding:12px 16px"><div><b>' + esc(fd(r.date) || r.id) + '</b><div class="s" style="font-size:13px">' + esc(r.id) + '</div></div><span class="pill ' + ({Present: 'p-ok', Excused: 'p-app', Absent: 'p-no'}[r.status] || 'p-pend') + '">' + esc(r.status || '') + '</span></div>').join('');
+    drawTiles();
   } catch (e) { say('m4', 'Network problem. Try again.', 'bad'); }
 }
 function drawProfile() {
   const h = home;
   if (!h) { loadHome().then(drawProfile); return; }
-  $('prof').innerHTML = '<b style="font-size:18px">' + esc(h.name) + '</b><br><span class="s">Member ID</span> ' + esc(h.memberId) + '<br><span class="s">Campus</span> ' + esc(h.campus || '-') + '<br><span class="s">Part</span> ' + esc(h.part || '-') + '<br><span class="s">Email</span> ' + esc(h.email || '-');
+  $('prof').innerHTML = '<b style="font-size:18px">' + esc(h.name) + '</b><br><span class="s">Member ID</span> ' + esc(h.memberId) + '<br><span class="s">Campus</span> ' + esc(h.campus || '-') + '<br><span class="s">Section</span> ' + esc(h.part || '-') + '<br><span class="s">Email</span> ' + esc(h.email || '-') + '<br><span class="s">Status</span> <span class="pill p-ok">Active</span>';
 }
-
-$('mailcode').onclick = async () => {
-  const id = $('mid').value.trim();
-  if (!id) return say('m1', 'Type your Member ID first, for example M014.', 'bad');
-  say('m1', 'Sending the code…');
-  try { const j = await call({action: 'signin.start', memberId: id}); if (!j.ok) return say('m1', j.error || 'Could not send a code.', 'bad'); say('m1', j.message || 'A code is on its way to the email on file.', 'ok'); $('codebox').classList.remove('hide'); }
-  catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
-};
-$('codego').onclick = async () => {
-  say('m1', 'Checking the code…');
-  try { const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
-    if (!j.ok) return say('m1', j.error || 'That code did not work.', 'bad');
-    token = j.token; try { sessionStorage.setItem('rbcMTok', token); } catch (e) {} enter(j.name); }
-  catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
-};
-$('help').onclick = () => $('helpbox').classList.remove('hide');
-$('helpx').onclick = $('helpback').onclick = () => $('helpbox').classList.add('hide');
 gisInit();
-if (token) { call({action: 'me.home', token}).then(j => { if (j && j.ok) enter(j.name); else signedOutNow(); }).catch(() => signedOutNow()); }
+if (token) { call({action: 'me.home', token}).then(j => { if (j && j.ok) { home = j; enter(j.name); } else signedOutNow(); }).catch(() => signedOutNow()); }
 </script></body></html>
