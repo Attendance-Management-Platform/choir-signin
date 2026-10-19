@@ -641,7 +641,7 @@ async function call(body) {
   let j = await call1(body);
   // Check-in opened by this same Global Admin or Assistant: normally someone else validates. With no one else, they may do it with a reason.
   if (j && j.needsOverride && !body.overrideReason) {
-    const why = prompt('You opened check-in yourself, so normally a different person validates it. If no one else is available, you can do it yourself.\n\nType your reason (10 to 300 characters). It is recorded and the Global Music Director and the Pastor in Charge see it:');
+    const why = prompt((j.overrideMessage || 'You opened check-in yourself, so normally a different person validates it. If no one else is available, you can do it yourself.') + '\n\nType your reason (10 to 300 characters). It is recorded and the Global Music Director and the Pastor in Charge see it:');
     if (!why || why.trim().length < 10) return {ok: false, error: 'No reason of at least 10 characters was given, so nothing was saved.'};
     j = await call1(Object.assign({}, body, {overrideReason: why.trim()}));
   }
