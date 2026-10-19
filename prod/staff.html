@@ -180,6 +180,12 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 #helpbody>div,#helpbody>.card{margin-bottom:26px}
 #helpbody .hq summary{padding:4px 0}
 .fprow .btn.nmb{font-weight:800}
+.fpchips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.fpchip{border:1px solid #DCE3F0;background:#fff;color:#2B3447;border-radius:999px;padding:7px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;box-shadow:none;transform:none;width:auto;min-height:0;transition:background .15s,border-color .15s}
+.fpchip b{margin-left:6px;color:#8E0008}.fpchip:hover{background:#FFF7F7;border-color:#E9B8BC}
+.fpchip.on{background:#172039;border-color:#172039;color:#fff}.fpchip.on b{color:#FFD9DC}
+.tkrow .nm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tkn{display:inline-block;min-width:26px;text-align:center;border-radius:999px;background:#F5F7FB;color:#172039;font-size:12px;font-weight:900;padding:2px 8px}
+.tkside{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 @media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
@@ -401,6 +407,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s10" class="pg hide">
+<div id="htasks"></div>
 <div id="hcharts"></div>
 <div id="hgrid" class="stats rise"></div>
 <div id="hqr"></div>
@@ -620,6 +627,27 @@ function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
   document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); }
 function ownerLabel(k) { k = String(k || ''); if (/^desk /.test(k)) return 'Desk ' + k.slice(5).split('/').map(x => x.toUpperCase()).join(' or '); if (/^campus md /.test(k)) return 'the ' + k.slice(10).replace(/\b\w/g, c => c.toUpperCase()) + ' Campus Music Director'; if (k === 'campus md') return 'the Campus Music Directors'; return 'the usual role'; }
+const TKLEV = {now: ['Now', '#B4474D', 'p-no'], soon: ['Today', '#D9A441', 'p-pend'], info: ['For your attention', '#A9B4C6', 'p-info']};
+function drawTasks(list) {
+  const box = $('htasks'); if (!box) return;
+  if (!list || !list.length) { box.innerHTML = Object.keys(myBypass || {}).length || myRoles.length ? '<div class="card pad rise"><div class="ct">Needs attention</div><p class="sub" style="margin:0">Nothing is waiting today. Well done.</p></div>' : ''; return; }
+  const others = list.some(t => !t.mine);
+  const has = k => myTabs.indexOf(k) !== -1;
+  const goBtn = t => {
+    let g = t.go, attr = '', label = t.mine ? 'Open' : 'Do it instead';
+    if (g === 'noPart') g = ['members', 'requests', 'people'].filter(has)[0] || '';
+    if (g === 'reports:streak') return has('reports') ? '<button class="btn line sm" type="button" data-anpreset="streak">See who</button>' : '';
+    return g && has(g) ? '<button class="btn ' + (t.mine ? 'red' : 'line') + ' sm" type="button" data-taskgo="' + esc(g) + '">' + label + '</button>' : '';
+  };
+  fpPanel('tasks', 'htasks', {title: 'Needs attention', sub: 'What is waiting today, and who it is waiting for.' + (others ? ' Work that is not yours is shown so you can follow it up; "Do it instead" opens it with a reason and tells the owner.' : ''),
+    items: list, chips: 'owner', empty: 'Nothing is waiting today.',
+    fields: [{k: 'q', label: 'Search', ph: 'A task, a desk, a campus', type: 'text', get: t => [t.title, t.detail, t.owner, t.campus].join(' ')},
+      {k: 'owner', label: 'Waiting for', type: 'list', get: t => t.owner},
+      {k: 'level', label: 'How urgent', type: 'list', get: t => TKLEV[t.level][0]}],
+    card: t => '<div class="fprow tkrow" style="border-left-color:' + TKLEV[t.level][1] + '"><div style="flex:1 1 260px"><div class="nm">' + esc(t.title) + (t.count > 1 ? '<span class="tkn">' + t.count + '</span>' : '') + '</div><div class="mt">' + esc(t.detail) + '</div></div>' +
+      '<div class="tkside"><span class="pill ' + (t.mine ? 'p-ok' : 'p-val') + '">' + esc(t.owner) + '</span><span class="pill ' + TKLEV[t.level][2] + '">' + TKLEV[t.level][0] + '</span>' + goBtn(t) + '</div></div>'});
+}
+document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-taskgo]'); if (b && TABDEF[b.dataset.taskgo]) go(TABDEF[b.dataset.taskgo][0]); });
 function stPill(t) { const k = /approv|valid|accept/i.test(t) ? 'p-ok' : /reject|declin|cancel/i.test(t) ? 'p-no' : /withdr/i.test(t) ? 'p-info' : 'p-pend'; return '<span class="pill ' + k + '">' + esc(t) + '</span>'; }
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -713,7 +741,7 @@ function homeCharts(c, drill, canSee) {
     '<div class="c3 card kpi" style="--kc:' + SOFT + '"><div class="kk">Excused</div><div class="kv">' + L.excused + '</div><div class="ks">approved absences</div></div>' +
     '<div class="c7 card pad"><div class="ct">Last ' + c.series.length + ' rehearsals</div><div class="grow" style="display:flex;align-items:center"><div style="width:100%">' + colChart(c.series.map(p => ({name: p.id, value: p.rate})), {unit: '%', drill: drill, label: 'Attendance rate, last rehearsals'}) + '</div></div>' + (canSee ? '<p class="sub" style="margin:6px 0 0">Older rehearsals, months and years are in Reports.</p>' : '') + '</div>' +
     '<div class="c5 card pad"><div class="ct">Last rehearsal</div><div class="grow" style="display:flex;align-items:center;justify-content:center">' + statusDonut({present: L.present, absent: L.absent, excused: L.excused}) + '</div></div>' +
-    '<div class="c7 card pad"><div class="ct">By campus · last rehearsal</div>' + rankBars(camps, {unit: '%', drill: drill}) + '</div>' + attn +
+    '<div class="c12 card pad"><div class="ct">By campus · last rehearsal</div>' + rankBars(camps, {unit: '%', drill: drill}) + '</div>' +
     '</div>';
 }
 let rpState = null, rpPick = null;
@@ -1125,13 +1153,20 @@ function fpPanel(key, boxId, o) {
   if (!o.items.length) { target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub">' + esc(o.sub) + '</p>' : '') + '<p class="sub">' + esc(o.empty || 'Nothing here.') + '</p>' + (o.after || '') + '</div>'; return; }
   o.fields.forEach(f => { if (f.type === 'list') f.opts = Array.from(new Set(o.items.map(it => f.get(it)).filter(Boolean))).sort(); });
   const dl = o.fields.filter(f => f.type === 'list').map(f => '<datalist id="fpd_' + key + '_' + f.k + '">' + f.opts.map(x => '<option value="' + esc(x) + '">').join('') + '</datalist>').join('');
+  let chipsHtml = '';
+  if (o.chips) {
+    const cf = o.fields.filter(f => f.k === o.chips)[0], cnt = {}; o.items.forEach(it => { const v = cf.get(it); cnt[v] = (cnt[v] || 0) + 1; });
+    const keys = Object.keys(cnt).sort();
+    if (keys.length > 1) chipsHtml = '<div class="fpchips"><button type="button" class="fpchip' + (st.v[o.chips] ? '' : ' on') + '" data-fpchip="' + key + '|' + o.chips + '|">All<b>' + o.items.length + '</b></button>' + keys.map(v => '<button type="button" class="fpchip' + (st.v[o.chips] === v ? ' on' : '') + '" data-fpchip="' + key + '|' + o.chips + '|' + esc(v) + '">' + esc(v) + '<b>' + cnt[v] + '</b></button>').join('') + '</div>';
+  }
   const bar = o.fields.map(f => { const id = 'fp_' + key + '_' + f.k; return '<div style="flex:' + (f.k === 'q' ? '2 1 200px' : '1 1 140px') + '"><label class="lb" for="' + id + '">' + esc(f.label) + '</label><input id="' + id + '" class="in" data-fp="' + key + '" data-k="' + f.k + '"' +
     (f.type === 'date' ? ' type="date"' : ' autocomplete="off" placeholder="' + esc(f.ph || (f.type === 'list' ? 'Type or choose' : '')) + '"' + (f.type === 'list' ? ' list="fpd_' + key + '_' + f.k + '"' : '')) + ' value="' + esc(st.v[f.k] || '') + '"></div>'; }).join('');
   target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub" style="margin:0 0 4px">' + esc(o.sub) + '</p>' : '') + dl +
-    '<div class="fpbar">' + bar + '<button class="btn line sm" type="button" data-fpx="' + key + '">Clear</button></div><div class="fplist" id="fpl_' + key + '"></div><div class="fpcount"><span id="fpc_' + key + '"></span><span>Scroll inside this box</span></div>' + (o.after || '') + '</div>';
+    chipsHtml + '<div class="fpbar">' + bar + '<button class="btn line sm" type="button" data-fpx="' + key + '">Clear</button></div><div class="fplist" id="fpl_' + key + '"></div><div class="fpcount"><span id="fpc_' + key + '"></span><span>Scroll inside this box</span></div>' + (o.after || '') + '</div>';
   fpDraw(key);
 }
 document.addEventListener('input', ev => { const t = ev.target; if (t && t.dataset && t.dataset.fp) { FP[t.dataset.fp].v[t.dataset.k] = t.value; fpDraw(t.dataset.fp); } });
+document.addEventListener('click', ev => { const ch = ev.target.closest && ev.target.closest('[data-fpchip]'); if (ch) { const p = ch.dataset.fpchip.split('|'), st2 = FP[p[0]]; st2.v[p[1]] = p.slice(2).join('|'); fpPanel(p[0], st2.box, st2.o); } });
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-fpx]'); if (!b) return; const st = FP[b.dataset.fpx]; st.v = {}; fpPanel(b.dataset.fpx, st.box, st.o); });
 const pFields = [
   {k: 'q', label: 'Search', ph: 'Name, request number, words', type: 'text', get: r => [r.id, r.kindName, r.askedBy, r.askedByRole, r.subjectName, r.subjectEmail, r.target, r.reason, pDetail(r)].join(' ')},
@@ -1404,6 +1439,7 @@ async function loadHome() {
     const mch = (j.memberChanges || []).length ? '<div class="card pad rise"><div class="ct">Membership changes</div>' + j.memberChanges.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + (has('changes') ? '<div class="actions"><button class="btn line" type="button" data-go="s16">Open Changes and updates</button></div>' : '') + '</div>' : '';
     const pth = t.petitions && t.petitions.waiting ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.petitions.waiting + ' petition(s) waiting for your answer</div><div class="actions"><button class="btn red" type="button" data-go="s16">Open Changes and updates</button></div></div>' : '';
     $('hcharts').innerHTML = pth + awh + bph + mch + crh + homeCharts(t.charts, has('reports'), has('reports'));
+    drawTasks(j.tasks || []);
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
     // the QR stand-in
