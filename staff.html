@@ -162,6 +162,7 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .g .who b{font-weight:900}.g .who .s{display:block;font-size:13px}
 .gv{grid-template-columns:36px 1.1fr 1.7fr 1.5fr}
 .calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}.calh{font-size:12px;font-weight:700;color:#5E6A7E;text-align:center}.calc{min-height:64px;border:1px solid #E5E8EE;border-radius:8px;background:#fff;color:#172039;box-shadow:none;transform:none;padding:4px;text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;overflow:hidden;width:auto}.calc:hover{background:#FFF7F7}.calx{border:0;background:none;cursor:default}.cald{font-size:12px;font-weight:700;color:#172039}.caltoday{border-color:#B3262F}.calp{font-size:10px;line-height:1.2;border-radius:6px;padding:1px 4px;background:#EEF1F6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fpbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:10px 0 12px;border-bottom:1px solid #E5E8EE}.fpbar .lb{margin-top:0}.fplist{max-height:min(62vh,520px);overflow-y:auto;overscroll-behavior:contain;margin-top:10px;padding-right:6px}.fplist>.card{margin-top:0;margin-bottom:10px}.fpcount{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:8px;font-size:13px;color:#5E6A7E}.caltip{position:fixed;z-index:60;max-width:260px;background:#172039;color:#fff;border-radius:10px;padding:8px 11px;font-size:12.5px;line-height:1.4;box-shadow:0 8px 24px rgba(10,16,36,.25);pointer-events:none}.caltip b{color:#fff}.calfree{background:#FAFBFD}.calact{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 @media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
@@ -328,8 +329,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 
 <div id="s16" class="pg hide">
 <div id="chpet"></div>
-<div class="card pad rise"><div class="ct">What changed</div>
-<p class="sub" id="chsub"></p><div id="chlist"></div></div>
+<div id="chbox"></div>
 <p id="m16" class="s"></p>
 </div>
 
@@ -990,14 +990,37 @@ async function loadCalendar(m) {
     }
     $('calgrid').innerHTML = h; $('caltitle').textContent = j.month; $('calday').innerHTML = '';
     window.__cal = j;
-    document.querySelectorAll('[data-cal]').forEach(b => b.onclick = () => {
-      const es = (j.entries[b.dataset.cal] || []);
-      $('calday').innerHTML = '<div class="ct" style="margin-top:14px">' + esc(b.dataset.cal) + '</div>' + (es.length ? es.map(e => e.type === 'rehearsal'
-        ? '<p class="sub" style="margin:6px 0 0"><b>' + esc(e.id) + '</b> · ' + esc(e.status) + (e.startMs ? ' · ' + esc(new Date(e.startMs).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})) : '') + (e.venue ? ' · ' + esc(e.venue) : '') + (e.description ? ' · ' + esc(e.description) : '') + '</p>'
-        : '<p class="sub" style="margin:6px 0 0">' + esc(e.label) + '</p>').join('') : '<p class="sub">Nothing on this day.</p>');
+    const lt = ms => new Date(ms).toLocaleTimeString('en-GB', {timeZone: 'Africa/Lagos', hour: '2-digit', minute: '2-digit'});
+    const tip = day => { const es = j.entries[day] || []; return '<b>' + esc(day) + '</b>' + (es.length ? es.map(e => '<br>' + (e.type === 'rehearsal' ? esc(e.id) + ' · ' + esc(e.status) + (e.startMs ? ' · ' + esc(lt(e.startMs)) : '') + (e.venue ? '<br>' + esc(e.venue) : '') + (e.description ? '<br>' + esc(e.description) : '') : esc(e.label))).join('') : '<br>Nothing planned. Click to see what you can do.'); };
+    let tp = document.getElementById('caltip'); if (!tp) { tp = document.createElement('div'); tp.id = 'caltip'; tp.className = 'caltip hide'; tp.setAttribute('role', 'tooltip'); document.body.appendChild(tp); }
+    const hideTip = () => tp.classList.add('hide');
+    document.querySelectorAll('[data-cal]').forEach(b => {
+      const day = b.dataset.cal, es = j.entries[day] || [];
+      if (!es.length) b.classList.add('calfree');
+      const showTip = () => { tp.innerHTML = tip(day); tp.classList.remove('hide'); const r = b.getBoundingClientRect(), w = tp.offsetWidth, h = tp.offsetHeight; tp.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px'; tp.style.top = (r.top - h - 8 > 8 ? r.top - h - 8 : r.bottom + 8) + 'px'; };
+      b.onmouseenter = showTip; b.onfocus = showTip; b.onmouseleave = hideTip; b.onblur = hideTip;
+      b.onclick = () => {
+        hideTip();
+        const isPast = day < j.today, has = k => myTabs.indexOf(k) !== -1, rehs = es.filter(e => e.type === 'rehearsal' && e.status !== 'Cancelled'), live = rehs.filter(e => e.status === 'Planned' || e.status === 'Open');
+        const acts = [];
+        if (!isPast && !rehs.length && has('rehearsal')) acts.push('<button class="btn red sm" type="button" data-calmake="' + esc(day) + '">Set up a rehearsal on this day</button>');
+        if (live.length && has('rehearsal')) acts.push('<button class="btn line sm" type="button" data-calgo="s8">Open ' + esc(live[0].id) + ' to edit it</button>');
+        if (!isPast && live.length && has('absence')) acts.push('<button class="btn line sm" type="button" data-calgo="s6">Ask to be absent for ' + esc(live[0].id) + '</button>');
+        if (!isPast && has('people') && ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge'].some(r => myRoles.indexOf(r) !== -1)) acts.push('<button class="btn line sm" type="button" data-calaway="' + esc(day) + '">Put in an away notice from this day</button>');
+        $('calday').innerHTML = '<div class="ct" style="margin-top:14px">' + esc(day) + '</div>' + (es.length ? es.map(e => e.type === 'rehearsal'
+          ? '<p class="sub" style="margin:6px 0 0"><b>' + esc(e.id) + '</b> · ' + esc(e.status) + (e.startMs ? ' · ' + esc(lt(e.startMs)) : '') + (e.venue ? ' · ' + esc(e.venue) : '') + (e.description ? ' · ' + esc(e.description) : '') + '</p>'
+          : '<p class="sub" style="margin:6px 0 0">' + esc(e.label) + '</p>').join('') : '<p class="sub">' + (isPast ? 'Nothing was on this day.' : 'Nothing is planned on this day.') + '</p>') +
+          (acts.length ? '<div class="calact">' + acts.join('') + '</div>' : '') + (isPast ? '' : '<p class="sub" style="margin:8px 0 0">Setting up a rehearsal in place of Desk B needs a reason, and Desk B is told.</p>');
+      };
     });
   } catch (e) { say('m14', 'Network problem. Try again.', 'bad'); }
 }
+document.addEventListener('click', ev => {
+  const t = ev.target.closest && ev.target.closest('[data-calmake],[data-calgo],[data-calaway]'); if (!t) return;
+  if (t.dataset.calmake) { window.__rhPref = t.dataset.calmake; go('s8'); }
+  else if (t.dataset.calaway) { window.__awPref = t.dataset.calaway; go('s12'); }
+  else go(t.dataset.calgo);
+});
 function calShift(n) { const [y, m] = (calMonth || new Date().toISOString().slice(0, 7)).split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); loadCalendar(d.toISOString().slice(0, 7)); }
 $('calprev').onclick = () => calShift(-1); $('calnext').onclick = () => calShift(1);
 
@@ -1060,6 +1083,39 @@ async function sendRequest() {
     say('m12b', 'Request ' + j.id + ' sent.', 'ok'); loadPeople(true); setTimeout(function () { if (window.rbcFoldSet) rbcFoldSet('Ask for a change', false); }, 2200);
   } catch (e) { say('m12b', 'Network problem. Try again.', 'bad'); }
 }
+// ---- Filter panel: the search filters stay put, the list scrolls inside the card ----
+const FP = {};
+function fpOk(f, it, v) {
+  if (!v) return true;
+  if (f.type === 'date') { const ms = f.get(it); if (!ms) return false; const day = new Date(ms).toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}); return f.k.indexOf('from') === 0 ? day >= v : day <= v; }
+  return String(f.get(it) || '').toLowerCase().indexOf(String(v).trim().toLowerCase()) !== -1;
+}
+function fpDraw(key) {
+  const st = FP[key], o = st.o, box = document.getElementById('fpl_' + key); if (!box) return;
+  const left = o.items.filter(it => o.fields.every(f => fpOk(f, it, st.v[f.k])));
+  box.innerHTML = left.length ? left.map(o.card).join('') : '<p class="sub" style="margin:8px 0">Nothing matches. Clear the filters to see everything.</p>';
+  document.getElementById('fpc_' + key).textContent = 'Showing ' + left.length + ' of ' + o.items.length;
+}
+function fpPanel(key, boxId, o) {
+  const st = FP[key] = FP[key] || {v: {}}; st.o = o; st.box = boxId;
+  const target = $(boxId);
+  if (!o.items.length) { target.innerHTML = '<div class="card pad rise"><div class="ct">' + esc(o.title) + '</div>' + (o.sub ? '<p class="sub">' + esc(o.sub) + '</p>' : '') + '<p class="sub">' + esc(o.empty || 'Nothing here.') + '</p>' + (o.after || '') + '</div>'; return; }
+  o.fields.forEach(f => { if (f.type === 'list') f.opts = Array.from(new Set(o.items.map(it => f.get(it)).filter(Boolean))).sort(); });
+  const dl = o.fields.filter(f => f.type === 'list').map(f => '<datalist id="fpd_' + key + '_' + f.k + '">' + f.opts.map(x => '<option value="' + esc(x) + '">').join('') + '</datalist>').join('');
+  const bar = o.fields.map(f => { const id = 'fp_' + key + '_' + f.k; return '<div style="flex:' + (f.k === 'q' ? '2 1 200px' : '1 1 140px') + '"><label class="lb" for="' + id + '">' + esc(f.label) + '</label><input id="' + id + '" class="in" data-fp="' + key + '" data-k="' + f.k + '"' +
+    (f.type === 'date' ? ' type="date"' : ' autocomplete="off" placeholder="' + esc(f.ph || (f.type === 'list' ? 'Type or choose' : '')) + '"' + (f.type === 'list' ? ' list="fpd_' + key + '_' + f.k + '"' : '')) + ' value="' + esc(st.v[f.k] || '') + '"></div>'; }).join('');
+  target.innerHTML = '<div class="card pad rise" data-n="' + o.items.length + '"><div class="ct">' + esc(o.title) + '</div>' + (o.sub ? '<p class="sub" style="margin:0 0 4px">' + esc(o.sub) + '</p>' : '') + dl +
+    '<div class="fpbar">' + bar + '<button class="btn line sm" type="button" data-fpx="' + key + '">Clear</button></div><div class="fplist" id="fpl_' + key + '"></div><div class="fpcount"><span id="fpc_' + key + '"></span><span>Scroll inside this box</span></div>' + (o.after || '') + '</div>';
+  fpDraw(key);
+}
+document.addEventListener('input', ev => { const t = ev.target; if (t && t.dataset && t.dataset.fp) { FP[t.dataset.fp].v[t.dataset.k] = t.value; fpDraw(t.dataset.fp); } });
+document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-fpx]'); if (!b) return; const st = FP[b.dataset.fpx]; st.v = {}; fpPanel(b.dataset.fpx, st.box, st.o); });
+const pFields = [
+  {k: 'q', label: 'Search', ph: 'Name, request number, words', type: 'text', get: r => [r.id, r.kindName, r.askedBy, r.askedByRole, r.subjectName, r.subjectEmail, r.target, r.reason, pDetail(r)].join(' ')},
+  {k: 'kind', label: 'What it is about', type: 'list', get: r => r.kindName},
+  {k: 'by', label: 'Asked by', type: 'list', get: r => r.askedBy},
+  {k: 'from', label: 'From', type: 'date', get: r => Date.parse(r.raisedAt) || 0},
+  {k: 'to', label: 'To', type: 'date', get: r => Date.parse(r.raisedAt) || 0}];
 function pWhen(t) { return t ? String(t).replace('T', ' ').replace('Z', ' UTC') : ''; }
 function pDetail(r) {
   const d = r.details || {}, bits = [];
@@ -1088,13 +1144,13 @@ async function loadPeople(keepMsg) {
     $('pkind').innerHTML = j.kinds.map(k => '<option value="' + esc(k.kind) + '">' + esc(k.name) + '</option>').join('') || '<option value="">Nothing you can ask for</option>';
     if (cur && j.kinds.some(k => k.kind === cur)) $('pkind').value = cur;
     if (!$('pform').innerHTML) drawPForm();
-    $('pwait').innerHTML = '<div class="card pad rise"><div class="ct">Waiting for your answer</div>' + (j.waiting.length ? j.waiting.map(r => pCard(r,
+    fpPanel('wait', 'pwait', {title: 'Waiting for your answer', items: j.waiting, fields: pFields, empty: 'Nothing is waiting for you.', card: r => pCard(r,
       (r.standIn ? '<p class="sub" style="margin:4px 0 0"><b>You are the stand-in for this one request</b> (the ' + esc(r.standInFor || 'usual approver') + ' is away or has not answered in 48 hours). Your answer is recorded as a stand-in answer.</p>' : '') + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center"><button class="btn red sm" type="button" data-yes="' + esc(r.id) + '">Yes</button>' +
-      '<input class="in" style="flex:1 1 200px;max-width:340px" placeholder="Reason, if you say no" data-why="' + esc(r.id) + '"><button class="btn warn sm" type="button" data-no="' + esc(r.id) + '">Say no</button></div>')).join('') : '<p class="sub">Nothing is waiting for you.</p>') + '</div>';
-    $('pready').innerHTML = j.ready.length ? '<div class="card pad rise"><div class="ct">Approved and ready to carry out</div><p class="sub">Carrying out changes the real list. It is checked first and recorded.</p>' +
-      j.ready.map(r => pCard(r, '<p class="sub" style="margin:4px 0 0">You carry this out as: ' + esc(r.as || '') + '</p><div style="margin-top:12px">' + (r.download ? '<button class="btn red sm" type="button" data-dl="' + esc(r.id) + '">Download (once)</button>' : '<button class="btn red sm" type="button" data-carry="' + esc(r.id) + '">Carry out</button>') + '</div>')).join('') + '</div>' : '';
+      '<input class="in" style="flex:1 1 200px;max-width:340px" placeholder="Reason, if you say no" data-why="' + esc(r.id) + '"><button class="btn warn sm" type="button" data-no="' + esc(r.id) + '">Say no</button></div>')});
+    fpPanel('ready', 'pready', {title: 'Approved and ready to carry out', sub: 'Carrying out changes the real list. It is checked first and recorded.', items: j.ready, fields: pFields, empty: 'Nothing is ready to carry out.', card: r => pCard(r, '<p class="sub" style="margin:4px 0 0">You carry this out as: ' + esc(r.as || '') + '</p><div style="margin-top:12px">' + (r.download ? '<button class="btn red sm" type="button" data-dl="' + esc(r.id) + '">Download (once)</button>' : '<button class="btn red sm" type="button" data-carry="' + esc(r.id) + '">Carry out</button>') + '</div>')});
+    if (!j.ready.length) $('pready').innerHTML = '';
     loadAway();
-    $('pmine').innerHTML = '<div class="card pad rise"><div class="ct">Requests you asked for</div>' + (j.mine.length ? j.mine.map(r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : '')).join('') : '<p class="sub">You have not asked for anything yet.</p>') + '</div>';
+    fpPanel('mine', 'pmine', {title: 'Requests you asked for', items: j.mine, fields: pFields, empty: 'You have not asked for anything yet.', card: r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : '')});
   } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); }
 }
 async function loadAway() {
@@ -1105,6 +1161,7 @@ async function loadAway() {
     const mine = (j.mine || []).map(n => '<p class="sub" style="margin:6px 0 0">You are away ' + esc(n.start) + ' to ' + esc(n.end) + ' (' + esc(n.reason) + ') <button class="btn line sm" type="button" data-awayend="1">I am back</button></p>').join('');
     $('paw').innerHTML = '<div class="card pad rise"><div class="ct">Being away</div><p class="sub">If you will be away for days, put in a short notice so others can act in the right order. A day or two with nothing due needs no notice. It ends by itself.' + (who.length ? ' <b>Away now: ' + esc(who.join(', ')) + '.</b>' : '') + '</p>' + mine +
       (j.saving ? '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px"><div style="flex:1 1 140px"><label class="lb" for="awstart" style="margin-top:0">First day</label><input id="awstart" class="in" type="date"></div><div style="flex:1 1 140px"><label class="lb" for="awend" style="margin-top:0">Last day</label><input id="awend" class="in" type="date"></div><div style="flex:2 1 200px"><label class="lb" for="awwhy" style="margin-top:0">Reason</label><input id="awwhy" class="in" maxlength="200"></div><button class="btn red sm" type="button" id="awgo">Put in notice</button></div>' : '') + '</div>';
+    if (window.__awPref && $('awstart')) { $('awstart').value = window.__awPref; window.__awPref = ''; if ($('awend')) $('awend').focus(); }
   } catch (e) { $('paw').innerHTML = ''; }
 }
 document.addEventListener('click', async ev => {
@@ -1457,6 +1514,7 @@ function rhOpenForm(mode, id) {
     $('rhlate').value = r.lateAfterMin; $('rhvenue').value = r.venue ? r.venue.name : ''; $('rhdesc').value = r.description || '';
     $('rhsave').disabled = !!r.checkInOpen; say('m8', r.checkInOpen ? 'Close check-in before changing this rehearsal.' : (r.editedBy ? 'Last edited by the ' + r.editedByRole + '. Only that role or higher can change it now.' : ''));
   } else { $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; $('rhvenue').value = ''; $('rhdesc').value = ''; $('rhsave').disabled = false; say('m8', ''); }
+  if (!r && window.__rhPref) { $('rhdate').value = window.__rhPref; window.__rhPref = ''; }
   $('rhlat').value = ''; $('rhlon').value = '';
   $('rhform').classList.remove('hide'); $('rhprev').classList.remove('hide'); rhPreview();
   if (!r && rhState.liveCount >= rhState.max) { $('rhsave').disabled = true; say('m8', 'Three rehearsals are already planned. Finish or cancel one before making another.', 'bad'); }
@@ -1816,7 +1874,7 @@ if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTab
   var st = {};
   try { st = JSON.parse(localStorage.getItem('rbcFold') || '{}') || {}; } catch (e) { st = {}; }
   function save() { try { localStorage.setItem('rbcFold', JSON.stringify(st)); } catch (e) {} }
-  function count(card) { return card.querySelectorAll(':scope > .fb > .fbi > .card').length; }
+  function count(card) { return card.dataset.n ? Number(card.dataset.n) : card.querySelectorAll(':scope > .fb > .fbi > .card').length; }
   function paint(card, head, title, open) {
     card.classList.toggle('shut', !open);
     head.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -1875,12 +1933,22 @@ async function loadChanges() {
   try {
     const j = await call({action: 'changes.state', token});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('chlist').innerHTML = ''; $('chpet').innerHTML = ''; return say('m16', j.error || 'Not available.', 'bad'); }
+    if (!j.ok) { $('chbox').innerHTML = ''; $('chpet').innerHTML = ''; return say('m16', j.error || 'Not available.', 'bad'); }
     say('m16', '');
-    $('chsub').textContent = 'The last ' + j.days + ' days: ' + j.counts.admin + ' admin, ' + j.counts.operations + ' operations, ' + j.counts.bypasses + ' done by an admin instead of the usual desk or role.' + (j.petitionTo ? ' If you disagree with a change, send a petition to the ' + j.petitionTo + '.' : '');
-    $('chlist').innerHTML = j.changes.length ? j.changes.map(c => '<div style="border-top:1px solid var(--line);padding:8px 0"><span class="pill ' + (c.bypass ? 'p-pend' : c.area === 'Admin' ? 'p-val' : 'p-info') + '">' + (c.bypass ? 'Done instead' : esc(c.area)) + '</span> <b>' + esc(c.label) + '</b> · ' + esc(c.recordId) + ' · ' + esc(c.by) + ' · ' + esc(tm(c.atMs)) +
-      (c.detail ? '<br><span class="s">' + esc(c.detail) + '</span>' : '') + (c.reason ? '<br><span class="s">Reason: ' + esc(c.reason) + '</span>' : '') +
-      (j.petitionTo ? '<br><button class="btn line" type="button" style="margin-top:6px" data-pet="' + esc(c.label + ' ' + c.recordId) + '">Petition about this</button>' : '') + '</div>').join('') : '<p class="sub">Nothing has changed in this time.</p>';
+    const rid = c => (String(c.recordId || '') + ' ' + String(c.detail || '')).match(/\bR\d{3,}\b/);
+    fpPanel('chg', 'chbox', {title: 'What changed', sub: 'The last ' + j.days + ' days: ' + j.counts.admin + ' admin, ' + j.counts.operations + ' operations, ' + j.counts.bypasses + ' done by an admin instead of the usual desk or role.' + (j.petitionTo ? ' If you disagree with a change, send a petition to the ' + j.petitionTo + '.' : ''),
+      items: j.changes, empty: 'Nothing has changed in this time.',
+      fields: [
+        {k: 'q', label: 'Search', ph: 'Name, ID, reason, words', type: 'text', get: c => [c.label, c.recordId, c.by, c.detail, c.reason, c.area].join(' ')},
+        {k: 'kind', label: 'Kind', type: 'list', get: c => c.bypass ? 'Done instead' : c.area},
+        {k: 'what', label: 'What was done', type: 'list', get: c => c.label},
+        {k: 'reh', label: 'Rehearsal', ph: 'For example R001', type: 'list', get: c => (rid(c) || [''])[0]},
+        {k: 'by', label: 'Done by', type: 'list', get: c => c.by},
+        {k: 'from', label: 'From', type: 'date', get: c => c.atMs},
+        {k: 'to', label: 'To', type: 'date', get: c => c.atMs}],
+      card: c => '<div class="card pad" style="margin-top:0"><span class="pill ' + (c.bypass ? 'p-pend' : c.area === 'Admin' ? 'p-val' : 'p-info') + '">' + (c.bypass ? 'Done instead' : esc(c.area)) + '</span> <b>' + esc(c.label) + '</b> · ' + esc(c.recordId) + ' · ' + esc(c.by) + ' · ' + esc(tm(c.atMs)) +
+        (c.detail ? '<br><span class="s">' + esc(c.detail) + '</span>' : '') + (c.reason ? '<br><span class="s">Reason: ' + esc(c.reason) + '</span>' : '') +
+        (j.petitionTo ? '<br><button class="btn line" type="button" style="margin-top:6px" data-pet="' + esc(c.label + ' ' + c.recordId) + '">Petition about this</button>' : '') + '</div>'});
     $('chpet').innerHTML = j.petitions.length ? '<div class="card pad rise"><div class="ct">Petitions' + (j.counts.waiting ? ' (' + j.counts.waiting + ' waiting for you)' : '') + '</div>' + j.petitions.map(p => '<div style="border-top:1px solid var(--line);padding:8px 0">' + stPill(p.status) + ' <b>' + esc(p.from) + '</b> to the ' + esc(p.to) + ' · ' + esc(tm(p.atMs)) +
       '<br><span class="s">' + esc(p.text) + (p.about ? ' · about: ' + esc(p.about) : '') + '</span>' + (p.answer ? '<br><span class="s">' + esc(p.answeredBy) + ': ' + esc(p.answer) + '</span>' : '') +
       (p.canAnswer ? '<div class="actions" style="margin:6px 0 0"><button class="btn red" type="button" data-pans="upheld" data-id="' + esc(p.id) + '">Uphold</button><button class="btn line" type="button" data-pans="declined" data-id="' + esc(p.id) + '">Decline</button></div>' : '') + '</div>').join('') +
