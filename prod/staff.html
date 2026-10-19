@@ -322,10 +322,14 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div class="card pad rise"><div class="ct">Who checked in</div>
 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
 <div style="flex:2 1 220px"><label for="rcrid" class="lb" style="margin-top:0">Rehearsal</label><select id="rcrid" class="in"></select></div>
-<div style="flex:1 1 160px"><label for="rccamp" class="lb" style="margin-top:0">Campus</label><select id="rccamp" class="in"></select></div></div>
+<div style="flex:1 1 160px"><label for="rccamp" class="lb" style="margin-top:0">Campus</label><select id="rccamp" class="in"></select></div>
+<div style="flex:1 1 140px"><label for="rcpart" class="lb" style="margin-top:0">Part</label><select id="rcpart" class="in"></select></div></div>
 <div id="rcout"></div></div>
 <div class="card pad rise"><div class="ct">Find a member</div>
-<label for="rcq" class="lb" style="margin-top:8px">Name</label><input id="rcq" class="in" autocomplete="off" placeholder="Type at least 2 letters">
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
+<div style="flex:2 1 220px"><label for="rcq" class="lb" style="margin-top:0">Name</label><input id="rcq" class="in" autocomplete="off" placeholder="Type at least 2 letters, or tap a name above"></div>
+<div style="flex:1 1 160px"><label for="rcmc" class="lb" style="margin-top:0">Campus</label><select id="rcmc" class="in"></select></div>
+<div style="flex:1 1 140px"><label for="rcmp" class="lb" style="margin-top:0">Part</label><select id="rcmp" class="in"></select></div></div>
 <div class="actions"><button id="rcx" class="btn line sm" type="button">Clear</button></div><div id="rcmatch"></div><div id="rcmem"></div></div>
 <p id="m13" class="s"></p>
 </div>
@@ -579,12 +583,34 @@ function bars(rows, drill) {
   return rows.map(r => '<div style="margin:8px 0"' + (drill ? ' class="drill" role="button" tabindex="0" data-sc="campus" data-key="' + esc(r.campus) + '" title="Open the ' + esc(r.campus) + ' report"' : '') + '><div style="display:flex;justify-content:space-between;font-size:14px"><span>' + esc(r.campus) + '</span><b>' + r.present + ' of ' + r.active + ' · ' + r.rate + '%</b></div>' +
     '<div style="background:#EEF1F6;border-radius:99px;height:10px"><div style="width:' + Math.min(100, r.rate) + '%;height:10px;border-radius:99px;background:' + (r.rate >= 70 ? '#20775A' : '#95621D') + '"></div></div></div>').join('') || '<p class="sub">No campus figures yet.</p>';
 }
+function ring(rate, color) {
+  const R = 52, C = 2 * Math.PI * R, f = Math.max(0, Math.min(100, rate)) / 100 * C;
+  return '<svg viewBox="0 0 130 130" width="150" height="150" role="img" aria-label="Attendance rate ' + rate + ' percent" style="flex:none"><circle cx="65" cy="65" r="' + R + '" fill="none" stroke="#EEF1F6" stroke-width="14"/>' +
+    '<circle cx="65" cy="65" r="' + R + '" fill="none" stroke="' + color + '" stroke-width="14" stroke-linecap="round" stroke-dasharray="' + f + ' ' + C + '" transform="rotate(-90 65 65)"/>' +
+    '<text x="65" y="64" text-anchor="middle" font-size="21" font-weight="900" fill="#151B2D">' + rate + '%</text><text x="65" y="84" text-anchor="middle" font-size="11" fill="#5E6A7E">were present</text></svg>';
+}
+function rateColor(r) { return r >= 85 ? '#20775A' : r >= 70 ? '#95621D' : '#8E0008'; }
 function homeCharts(c, drill) {
   if (!c) return '';
   if (!c.series.length) return '<div class="card pad rise"><div class="ct">Attendance</div><p class="sub">No official attendance yet. It appears here once a rehearsal has been processed and published to ATTENDANCE SUMMARY and ATTENDANCE LOG.</p></div>';
-  return '<div class="stats rise"><div class="card pad" style="flex:1 1 320px"><div class="ct">Present, last ' + c.series.length + ' rehearsals</div>' + lineChart(c.series, drill) + '</div>' +
-    '<div class="card pad" style="flex:1 1 320px"><div class="ct">' + (c.last ? 'Last rehearsal by campus (' + esc(c.last.id) + ')' : 'By campus') + '</div>' + bars(c.campuses, drill) +
-    '<p class="sub" style="margin-top:8px">Official attendance, from ATTENDANCE SUMMARY and ATTENDANCE LOG. Rate is Present out of the members eligible that day.</p></div></div>';
+  const L = c.last || {present: 0, eligible: 0, absent: 0, excused: 0, rate: 0};
+  const fig = (n, label, col) => '<div style="flex:1 1 70px;min-width:70px;border-left:4px solid ' + col + ';padding:2px 0 2px 10px"><div style="font-size:24px;font-weight:900;line-height:1.1">' + n + '</div><div class="sub" style="margin:0">' + label + '</div></div>';
+  const parts = (c.parts || []).slice().sort((a, b) => b.present - a.present), pmax = Math.max(1, ...parts.map(x => x.present));
+  const trend = c.series.length > 1 ? '<div class="ct" style="margin-top:16px;font-size:13px">Recent rehearsals</div><div style="display:flex;align-items:flex-end;gap:10px;height:96px;margin-top:6px">' +
+    c.series.map(p => '<div' + (drill ? ' class="drill" role="button" tabindex="0" data-sc="rehearsal" data-key="' + esc(p.id) + '" title="Open the ' + esc(p.id) + ' report"' : '') + ' style="flex:1;min-width:0;text-align:center;cursor:' + (drill ? 'pointer' : 'default') + '"><div style="font-size:11px;font-weight:800;color:' + rateColor(p.rate) + '">' + p.rate + '%</div><div style="height:' + Math.max(6, Math.round(p.rate * 0.6)) + 'px;background:' + rateColor(p.rate) + ';border-radius:6px 6px 0 0;margin:2px auto 0;max-width:38px"></div><div style="font-size:11px;color:#5E6A7E;margin-top:3px">' + esc(p.id) + '</div></div>').join('') + '</div>'
+    : '<p class="sub" style="margin-top:12px">A trend of recent rehearsals appears here from the second published rehearsal.</p>';
+  const left = '<div class="card pad" style="flex:1 1 340px"><div class="ct">Last rehearsal · ' + esc(L.id || '') + (L.date ? ' · ' + esc(L.date) : '') + '</div>' +
+    '<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:6px">' + ring(L.rate, rateColor(L.rate)) +
+    '<div style="display:flex;flex-direction:column;gap:10px;flex:1 1 150px">' + fig(L.present, 'Present of ' + L.eligible + ' members', '#20775A') + '<div style="display:flex;gap:12px">' + fig(L.absent, 'Absent', '#8E0008') + fig(L.excused, 'Excused', '#95621D') + '</div></div></div>' + trend +
+    (parts.length ? '<div class="ct" style="margin-top:16px;font-size:13px">Present by part</div>' + parts.map(x => '<div style="display:flex;align-items:center;gap:10px;margin:5px 0;font-size:13px"><span style="width:78px;flex:none">' + esc(x.part) + '</span><div style="flex:1;background:#EEF1F6;border-radius:99px;height:8px"><div style="width:' + Math.round(100 * x.present / pmax) + '%;height:8px;border-radius:99px;background:#2F4F7E"></div></div><b style="width:28px;text-align:right">' + x.present + '</b></div>').join('') : '') + '</div>';
+  const camps = c.campuses.slice().sort((a, b) => b.rate - a.rate);
+  const right = '<div class="card pad" style="flex:1 1 340px"><div class="ct">' + (c.last ? 'By campus · ' + esc(c.last.id) : 'By campus') + '</div>' +
+    (camps.map((r, i) => '<div' + (drill ? ' class="drill" role="button" tabindex="0" data-sc="campus" data-key="' + esc(r.campus) + '" title="Open the ' + esc(r.campus) + ' report"' : '') + ' style="cursor:' + (drill ? 'pointer' : 'default') + ';display:flex;align-items:center;gap:12px;padding:9px 0;border-top:' + (i ? '1px solid #EEF1F6' : '0') + '">' +
+      '<div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;gap:8px;font-size:14px"><b>' + esc(r.campus) + '</b><span class="sub" style="margin:0">' + r.present + ' of ' + r.active + '</span></div>' +
+      '<div style="background:#EEF1F6;border-radius:99px;height:8px;margin-top:5px"><div style="width:' + Math.min(100, r.rate) + '%;height:8px;border-radius:99px;background:' + rateColor(r.rate) + '"></div></div></div>' +
+      '<span style="flex:none;min-width:54px;text-align:center;font-weight:900;font-size:13px;color:' + rateColor(r.rate) + ';background:#F5F7FA;border-radius:99px;padding:4px 8px">' + r.rate + '%</span></div>').join('') || '<p class="sub">No campus figures yet.</p>') +
+    '<p class="sub" style="margin-top:8px">Best attendance first. Green is 85% or more, amber 70% or more. Official attendance, from ATTENDANCE SUMMARY and ATTENDANCE LOG.</p></div>';
+  return '<div class="stats rise">' + left + right + '</div>';
 }
 let rpState = null, rpPick = null;
 function drillTo(scope, key) { rpPick = {scope, key}; go('s11'); }
@@ -603,18 +629,24 @@ async function loadRecords() {
     const cc = $('rccamp').value;
     $('rccamp').innerHTML = '<option value="">All campuses</option>' + j.campuses.map(c => '<option>' + esc(c) + '</option>').join('');
     if (cc) $('rccamp').value = cc;
+    const pp = $('rcpart').value, pm = $('rcmp').value, mc = $('rcmc').value;
+    const popt = '<option value="">All parts</option>' + (j.parts || []).map(x => '<option>' + esc(x) + '</option>').join('');
+    $('rcpart').innerHTML = popt; $('rcmp').innerHTML = popt;
+    $('rcmc').innerHTML = '<option value="">All campuses</option>' + j.campuses.map(c => '<option>' + esc(c) + '</option>').join('');
+    if (pp) $('rcpart').value = pp; if (pm) $('rcmp').value = pm; if (mc) $('rcmc').value = mc;
     showRecords();
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
 async function showRecords() {
   const id = $('rcrid').value; if (!id) { $('rcout').innerHTML = ''; return; }
   try {
-    const j = await call({action: 'records.rehearsal', token, id, campus: $('rccamp').value});
+    const j = await call({action: 'records.rehearsal', token, id, campus: $('rccamp').value, part: $('rcpart').value});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('rcout').innerHTML = ''; return say('m13', j.error || 'Not available.', 'bad'); }
     say('m13', '');
     $('rcout').innerHTML = '<p class="sub" style="margin:10px 0">' + esc(j.id + (j.date ? ' · ' + j.date : '')) + ' · ' + j.count + ' shown of ' + j.total + (j.count > j.shown ? ' (first ' + j.shown + ')' : '') + '</p>' +
-      table(['Name', 'Campus', 'Part', 'Status'], j.rows.map(r => [r.name, r.campus, r.part || '', r.status]));
+      '<p class="sub" style="margin:0 0 6px">Tap a name to open that member\'s record below.</p>' +
+      table(['Name', 'Campus', 'Part', 'Status'], j.rows.map(r => ['<button class="btn line sm" type="button" data-rcpick="' + esc(r.memberId) + '" data-rcname="' + esc(r.name) + '" style="padding:2px 10px">' + esc(r.name) + '</button>', esc(r.campus), esc(r.part || ''), esc(r.status)]), true);
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
 let rcT = null;
@@ -622,9 +654,9 @@ async function findMember() {
   const q = $('rcq').value.trim(); $('rcmem').innerHTML = '';
   if (q.length < 2) { $('rcmatch').innerHTML = ''; return; }
   try {
-    const j = await call({action: 'records.member', token, q});
+    const j = await call({action: 'records.member', token, q, campus: $('rcmc').value, part: $('rcmp').value});
     if (j.signedOut) { signedOutNow(); return; }
-    $('rcmatch').innerHTML = j.ok ? (j.matches.length ? j.matches.map(m => '<button class="btn line sm" style="margin:6px 6px 0 0" type="button" data-rcm="' + esc(m.memberId) + '">' + esc(m.name) + ' · ' + esc(m.campus) + '</button>').join('') : '<p class="sub">No match.</p>') : '';
+    $('rcmatch').innerHTML = j.ok ? (j.matches.length ? j.matches.map(m => '<button class="btn line sm" style="margin:6px 6px 0 0" type="button" data-rcm="' + esc(m.memberId) + '">' + esc(m.name) + ' · ' + esc(m.campus) + (m.part ? ' · ' + esc(m.part) : '') + '</button>').join('') : '<p class="sub">No match.</p>') : '';
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
 async function showMember(id) {
@@ -632,15 +664,22 @@ async function showMember(id) {
     const j = await call({action: 'records.member', token, memberId: id});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) return say('m13', j.error || 'Not available.', 'bad');
-    $('rcmem').innerHTML = '<div class="card pad" style="margin-top:12px"><b>' + esc(j.member.name) + '</b><p class="sub" style="margin:4px 0 8px">' + esc(j.member.campus) + ' · present at ' + j.attended + ' of ' + j.of + ' published rehearsals</p>' +
+    $('rcmem').innerHTML = '<div class="card pad" style="margin-top:12px"><b>' + esc(j.member.name) + '</b><p class="sub" style="margin:4px 0 8px">' + esc(j.member.campus) + (j.member.part ? ' · ' + esc(j.member.part) : '') + ' · present at ' + j.attended + ' of ' + j.of + ' published rehearsals</p>' +
       table(['Rehearsal', 'Date', 'Status'], j.rehearsals.map(r => [r.id, r.date || '', r.status])) + '</div>';
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
 $('rcrid').addEventListener('change', showRecords);
 $('rccamp').addEventListener('change', showRecords);
-$('rcx').onclick = () => { $('rcq').value = ''; $('rcmatch').innerHTML = ''; $('rcmem').innerHTML = ''; say('m13', ''); $('rcq').focus(); };
+$('rcpart').addEventListener('change', showRecords);
+$('rcmc').addEventListener('change', findMember);
+$('rcmp').addEventListener('change', findMember);
+$('rcx').onclick = () => { $('rcq').value = ''; $('rcmc').value = ''; $('rcmp').value = ''; $('rcmatch').innerHTML = ''; $('rcmem').innerHTML = ''; say('m13', ''); $('rcq').focus(); };
 $('rcq').addEventListener('input', () => { clearTimeout(rcT); rcT = setTimeout(findMember, 300); });
-document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-rcm]'); if (b) showMember(b.dataset.rcm); });
+document.addEventListener('click', ev => {
+  const b = ev.target.closest && ev.target.closest('[data-rcm]'); if (b) showMember(b.dataset.rcm);
+  const k = ev.target.closest && ev.target.closest('[data-rcpick]');
+  if (k) { if (window.rbcFoldSet) rbcFoldSet('Find a member', true); $('rcq').value = k.dataset.rcname; $('rcmc').value = ''; $('rcmp').value = ''; $('rcmatch').innerHTML = ''; showMember(k.dataset.rcpick); $('rcq').scrollIntoView({behavior: 'smooth', block: 'center'}); }
+});
 
 // ---- Process attendance ----
 let prState = null;
@@ -1040,9 +1079,9 @@ function fillKeys() {
   const list = sc === 'rehearsal' ? o.rehearsals.map(r => [r.id, r.id + (r.date ? ' · ' + r.date : '') + ' · ' + r.present + ' present']) : sc === 'month' ? o.months.map(m => [m, m]) : o.campuses.map(c => [c, c]);
   $('rpkey').innerHTML = list.map(x => '<option value="' + esc(x[0]) + '">' + esc(x[1]) + '</option>').join('') || '<option value="">Nothing yet</option>';
 }
-function table(cols, rows) {
+function table(cols, rows, raw) {
   return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr>' + cols.map(c => '<th style="text-align:left;padding:8px 10px;font-size:12px;color:#5E6A7E;border-bottom:1px solid #E6E9EF">' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
-    rows.map(r => '<tr>' + r.map(v => '<td style="padding:9px 10px;border-top:1px solid #E6E9EF">' + esc(v) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
+    rows.map(r => '<tr>' + r.map(v => '<td style="padding:9px 10px;border-top:1px solid #E6E9EF">' + (raw ? v : esc(v)) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
 }
 async function showReport() {
   const key = $('rpkey').value; if (!key) { $('rpout').innerHTML = '<div class="card pad"><p class="sub">There is nothing to report yet.</p></div>'; return; }
@@ -1555,7 +1594,7 @@ if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTab
 </script><script>
 (function () {
   var NOFOLD = ['Choose a report', 'Mark a member by hand', 'Request an absence'];
-  var SHUT = ['Ask for a change', 'Late request for a member', 'What happens next', 'Safety settings', 'Find a member', 'Being away'];
+  var SHUT = ['Ask for a change', 'Late request for a member', 'What happens next', 'Safety settings', 'Being away'];
   var LIST = ['Waiting for your answer', 'Requests you asked for', 'Approved and ready to carry out'];
   var st = {};
   try { st = JSON.parse(localStorage.getItem('rbcFold') || '{}') || {}; } catch (e) { st = {}; }
