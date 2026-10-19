@@ -310,7 +310,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
 <div style="flex:1 1 160px"><label for="rpscope" class="lb" style="margin-top:0">Report</label><select id="rpscope" class="in"><option value="rehearsal">Rehearsal (daily)</option><option value="month">Month</option><option value="campus">Campus</option></select></div>
 <div style="flex:2 1 220px"><label for="rpkey" class="lb" style="margin-top:0">Which one</label><select id="rpkey" class="in"></select></div>
-<div id="rpdl" class="hide"><button id="rpcsv" class="btn red" type="button">Download CSV</button></div></div></div>
+<div id="rpdl" class="hide"><button id="rpcsv" class="btn red" type="button">Download CSV</button></div><div><button id="rpx" class="btn line" type="button">Clear</button></div></div></div>
 <div id="rpout"></div>
 <p id="m11" class="s"></p>
 </div>
@@ -1247,19 +1247,36 @@ async function showReport() {
     const j = await call({action: 'reports.summary', token, scope: $('rpscope').value, key});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('rpout').innerHTML = ''; return say('m11', j.error || 'Not available.', 'bad'); }
-    const s = j.summary;
-    $('rpout').innerHTML = '<div class="card pad rise"><div class="ct">' + esc(s.title) + '</div><div class="stats" style="margin-top:10px">' +
-      s.tiles.map(t => '<div class="card stat" style="margin:0"><div class="k" style="color:#2F4F7E">' + esc(t[0]) + '</div><div class="v">' + esc(t[1]) + '</div></div>').join('') + '</div></div>' +
-      '<div class="card pad rise">' + table(s.columns, s.rows) + (s.rows2 ? '<div style="margin-top:14px"></div>' + table(s.columns2, s.rows2) : '') + '<p class="sub" style="margin-top:10px">' + esc(s.note) + '</p></div>';
-    // drill down: a campus name opens that campus; a rehearsal id opens that rehearsal
-    const sc = $('rpscope').value, first = document.querySelector('#rpout table tbody');
-    if (first) first.querySelectorAll('tr').forEach(tr => { const td = tr.firstChild, v = td.textContent; const to = sc === 'rehearsal' ? 'campus' : 'rehearsal';
-      if (v) { td.className = 'drill'; td.style.cssText += ';cursor:pointer;color:#8E0008;font-weight:700;text-decoration:underline'; td.title = 'Open ' + v; td.onclick = () => { $('rpscope').value = to; fillKeys(); $('rpkey').value = v; showReport(); }; } });
+    const s = j.summary, sc = $('rpscope').value;
+    const T = {}; s.tiles.forEach(t => { T[t[0]] = t[1]; });
+    const pc = v => parseFloat(String(v)) || 0, kp = (k, v, sub, col) => '<div class="c3 card kpi" style="--kc:' + col + '"><div class="kk">' + esc(k) + '</div><div class="kv">' + esc(v) + '</div>' + (sub ? '<div class="ks">' + esc(sub) + '</div>' : '') + '</div>';
+    let tiles = '', body = '';
+    if (sc === 'rehearsal') {
+      const rate = pc(T['Rate']), present = Number(T['Present']) || 0, absent = Number(T['Absent']) || 0, exc = Number(T['Excused']) || 0;
+      tiles = kp('Attendance rate', T['Rate'], 'of ' + T['Eligible members'] + ' eligible members', rateColor(rate)) + kp('Present', present, '', NAVY) + kp('Absent', absent, 'no approved reason', ATTN) + kp('Excused', exc, 'approved absences', SOFT);
+      const camps = s.rows.map(r => ({name: r[0], value: Number(r[3]) || 0, a: r[2], b: r[1]})).sort((a, b) => b.value - a.value);
+      const parts = s.rows2 || [], pmax = Math.max(1, ...parts.map(p => Number(p[1]) || 0));
+      body = '<div class="c5 card pad"><div class="ct">Who was there</div><div style="display:flex;justify-content:center">' + statusDonut({present: present, absent: absent, excused: exc}) + '</div></div>' +
+        '<div class="c7 card pad"><div class="ct">By campus</div>' + rankBars(camps, {unit: '%', drill: true}) + '</div>' +
+        (parts.length ? '<div class="c12 card pad"><div class="ct">Present by part</div>' + rankBars(parts.map(p => ({name: p[0], value: Number(p[1]) || 0})), {unit: ' '}) + '</div>' : '');
+    } else {
+      const rate = pc(T['Average rate']);
+      tiles = s.tiles.map((t, i) => kp(t[0], t[1], '', i === s.tiles.length - 1 ? rateColor(rate) : NAVY)).join('');
+      const ri = s.columns.indexOf('Rate %');
+      body = '<div class="c12 card pad"><div class="ct">Attendance rate by rehearsal</div>' + colChart(s.rows.map(r => ({name: r[0], value: Number(r[ri]) || 0})), {unit: '%', single: true, drill: true, label: s.title}) + '</div>';
+    }
+    const fig = '<details class="c12 card pad" style="cursor:default"><summary style="cursor:pointer;font-weight:800;font-size:15px">Figures behind the charts</summary><div style="margin-top:10px">' + table(s.columns, s.rows) + (s.rows2 ? '<div style="margin-top:14px"></div>' + table(s.columns2, s.rows2) : '') + '</div></details>';
+    $('rpout').innerHTML = '<div class="card pad rise" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><div class="ct" style="margin:0">' + esc(s.title) + '</div><button class="btn line sm" type="button" data-rpclear="1">Clear this result</button></div>' +
+      '<div class="dash rise">' + tiles + body + fig + '</div><p class="sub" style="margin:8px 4px 0">' + esc(s.note) + '</p>';
+    document.querySelectorAll('#rpout .drill').forEach(e => { const f = () => { const to = e.dataset.sc; $('rpscope').value = to; fillKeys(); $('rpkey').value = e.dataset.key; showReport(); }; e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
     say('m11', '');
   } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
 }
 $('rpscope').onchange = () => { fillKeys(); showReport(); };
 $('rpkey').onchange = showReport;
+function rpClear() { $('rpout').innerHTML = ''; say('m11', ''); }
+$('rpx').onclick = rpClear;
+document.addEventListener('click', ev => { if (ev.target.closest && ev.target.closest('[data-rpclear]')) rpClear(); });
 $('rpcsv').onclick = async () => {
   say('m11', 'Preparing…');
   try {
