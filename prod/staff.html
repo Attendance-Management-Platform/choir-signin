@@ -2332,11 +2332,15 @@ async function loadDetailReqs() {
     if (!j || !j.ok) { $('mbdet').innerHTML = ''; return; }
     const reqs = j.requests || [];
     if (!reqs.length) { $('mbdet').innerHTML = ''; return; }
-    $('mbdet').innerHTML = '<div class="card pad rise"><div class="ct">Details to correct' + (j.waiting ? ' (' + j.waiting + ' waiting)' : '') + '</div><p class="sub">Members ask here when something in their own details is wrong. Find them below, use Edit to make the change, then mark the request Done. If it should not change, decline it and say why.</p>' + reqs.map(r => '<div style="border-top:1px solid var(--line);padding:8px 0">' + stPill(r.status === 'Not changed' ? 'Declined' : r.status) + ' <b>' + esc(r.name) + '</b> · ' + esc(r.memberId) + ' · ' + esc(r.campus || '-') + ' · ' + esc(r.part || '-') + ' · ' + esc(tm(r.atMs)) +
-      '<br><span class="s">' + esc(r.kind) + ' should be: <b>' + esc(r.text) + '</b>' + (r.note ? ' · note: ' + esc(r.note) : '') + (r.kind === 'Email' ? '<br>Before changing an email, check with the member outside the system that the request really came from them.' : '') + '</span>' +
-      (r.answer ? '<br><span class="s">' + esc(r.answeredBy) + ': ' + esc(r.answer) + '</span>' : '') +
-      (r.status === 'Waiting' && r.own ? '<br><span class="s">This is your own request. Someone else answers it.</span>' : '') +
-      (r.canAnswer ? '<div class="actions" style="margin:6px 0 0"><button class="btn red" type="button" data-dans="done" data-id="' + esc(r.id) + '">Mark done</button><button class="btn line" type="button" data-dans="declined" data-id="' + esc(r.id) + '">Decline</button></div>' : '') + '</div>').join('') + '</div>';
+    $('mbdet').innerHTML = '<div class="card pad rise"><div class="ct">Details to correct' + (j.waiting ? ' (' + j.waiting + ' waiting)' : '') + '</div><p class="sub">Members ask here when something in their own details is wrong. Find them below, use Edit to make the change, then mark the request Done. If it should not change, decline it and say why.</p>' + reqs.map(r => '<div style="border:1px solid var(--line);border-left:4px solid ' + (r.status === 'Waiting' ? '#E9A9AE' : r.status === 'Done' ? '#9CD3B8' : '#C9D0DC') + ';border-radius:14px;padding:12px 14px;margin-top:10px;display:flex;flex-direction:column;gap:6px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:16px">' + esc(r.name) + '</b>' + stPill(r.status === 'Not changed' ? 'Declined' : r.status) + '</div>' +
+      '<div class="s" style="font-size:13px">' + esc(r.memberId) + ' · ' + esc(r.campus || '-') + ' · ' + esc(r.part || '-') + ' · ' + esc(tm(r.atMs)) + '</div>' +
+      '<div style="font-size:15px">' + esc(r.kind) + ' should be: <b>' + esc(r.text) + '</b></div>' +
+      (r.note ? '<div class="s" style="font-size:13px">Member\'s note: ' + esc(r.note) + '</div>' : '') +
+      (r.kind === 'Email' && r.status === 'Waiting' ? '<div style="font-size:13px;background:#FFF4DF;color:#95621D;border-radius:8px;padding:8px 10px">Email is how this person signs in. Check with them outside the system that the request really came from them before you change it.</div>' : '') +
+      (r.answer ? '<div class="s" style="font-size:13px">' + esc(r.answeredBy) + ': ' + esc(r.answer) + '</div>' : '') +
+      (r.status === 'Waiting' && r.own ? '<div style="font-size:13px;background:#EEF1F6;color:#3C4558;border-radius:8px;padding:8px 10px">This is your own request. Someone else answers it.</div>' : '') +
+      (r.canAnswer ? '<div class="actions" style="margin:4px 0 0"><button class="btn red" type="button" data-dans="done" data-id="' + esc(r.id) + '">Mark done</button><button class="btn line" type="button" data-dans="declined" data-id="' + esc(r.id) + '">Decline</button></div>' : '') + '</div>').join('') + '</div>';
   } catch (e) { $('mbdet').innerHTML = ''; }
 }
 document.addEventListener('click', async ev => {
