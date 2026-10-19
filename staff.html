@@ -2268,7 +2268,7 @@ if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTab
 </script><script>
 (function () {
   var NOFOLD = ['Mark a member by hand', 'Request an absence'];
-  var SHUT = ['Figures behind the chart', 'Ask for a change', 'Enter an absence for a member', 'What happens next', 'Safety settings', 'Being away'];
+  var SHUT = ['Figures behind the chart', 'Ask for a change', 'What happens next', 'Safety settings', 'Being away'];
   var LIST = ['Waiting for your answer', 'Requests you asked for', 'Approved and ready to carry out'];
   var st = {};
   try { st = JSON.parse(localStorage.getItem('rbcFold') || '{}') || {}; } catch (e) { st = {}; }
