@@ -68,7 +68,7 @@ button[style*="background:none"]{box-shadow:none}
 <p class="s">You only see your own information. No phone, camera or location? Tell your Campus MD or Desk D and they will mark you.</p></div>
 
 <div id="app" class="hide">
-<div class="top"><div><div class="s">Signed in as</div><div id="who" style="font-weight:900;font-size:18px"></div></div><button id="out" class="line">Sign out</button></div>
+<div class="top"><div><div class="s">Signed in as</div><div id="who" style="font-weight:900;font-size:18px"></div><div id="meta" class="s"></div></div><button id="out" class="line">Sign out</button></div>
 <div class="tabs"><button id="t1" class="tab on">Home</button><button id="t2" class="tab">Requests</button></div>
 
 <div id="v1">
@@ -155,7 +155,7 @@ async function loadHome() {
     const [h, a] = await Promise.all([call({action: 'me.home', token}), call({action: 'absence.state', token})]);
     if (h.signedOut || a.signedOut) return signedOutNow('Please sign in again.');
     if (!h.ok) return say('m2', h.error || 'Not available.', 'bad');
-    home = h; abs = a.ok ? a : null; $('who').textContent = h.name || '';
+    home = h; abs = a.ok ? a : null; $('who').textContent = h.name || ''; $('meta').textContent = [h.campus, h.part].filter(Boolean).join(' · ');
     drawHome();
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 }
