@@ -342,6 +342,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
 <div id="s11" class="pg hide">
+<div id="rpoutlook"></div>
 <div class="card pad rise"><div class="ct">Build a report</div>
 <p class="sub" style="margin:4px 0 8px">Choose what you want to know, how to break it down and for which period. Nothing is drawn until you press Show.</p>
 <div id="anpre" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
@@ -785,6 +786,12 @@ async function anLoad() {
   if (!ANC || !ANC.series || !ANC.series.length) return;
   const id = ANREH || (ANC.last && ANC.last.id) || ANC.series[ANC.series.length - 1].id;
   try {
+    if (/^day:/.test(id)) {
+      const date = id.slice(4), ids = ANC.series.filter(x => x.date === date).map(x => x.id), rows = [];
+      for (const rid of ids) { if (!ANCACHE[rid]) { const j = await call({action: 'records.rehearsal', token, id: rid}); if (!j.ok) return; ANCACHE[rid] = {id: rid, date: j.date || '', rows: j.rows || [], total: j.total || (j.rows || []).length}; } rows.push.apply(rows, ANCACHE[rid].rows); }
+      ANROWS = {id: 'All on ' + date, date, rows, total: rows.length}; ANCAMP = rows.some(r => r.campus === ANCAMP) ? ANCAMP : '';
+      anRedraw(); return;
+    }
     if (!ANCACHE[id]) { const j = await call({action: 'records.rehearsal', token, id}); if (!j.ok) return; ANCACHE[id] = {id, date: j.date || '', rows: j.rows || [], total: j.total || (j.rows || []).length}; }
     ANROWS = ANCACHE[id]; ANCAMP = ANROWS.rows.some(r => r.campus === ANCAMP) ? ANCAMP : '';
     anRedraw();
@@ -794,8 +801,8 @@ document.addEventListener('change', ev => {
   const el = ev.target; if (!el || (el.id !== 'anreh' && el.id !== 'ancamp') || !ANC) return;
   const v = String(el.value || '').trim();
   if (el.id === 'anreh') {
-    const last = ANC.last && ANC.last.id, hit = ANC.series.filter(x => x.id.toLowerCase() === v.toLowerCase())[0];
-    if (!v) ANREH = ''; else if (hit) ANREH = hit.id === last ? '' : hit.id; else { anRedraw(); return; }
+    const last = ANC.last && ANC.last.id, hit = ANC.series.filter(x => x.id.toLowerCase() === v.toLowerCase())[0], dm = /^all on (\d{4}-\d\d-\d\d)$/i.exec(v), dh = dm && anDays(ANC).indexOf(dm[1]) !== -1 ? dm[1] : '';
+    if (!v) ANREH = ''; else if (dh) ANREH = 'day:' + dh; else if (hit) ANREH = hit.id === last ? '' : hit.id; else { anRedraw(); return; }
     ANROWS = null; anRedraw(); anLoad();
   } else {
     const hit = ANROWS ? ANROWS.rows.filter(r => String(r.campus).toLowerCase() === v.toLowerCase())[0] : null;
@@ -822,6 +829,7 @@ function drawNotes(items) {
   box.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
 }
 let ANC = null, ANREH = '', ANCAMP = '', ANROWS = null, ANCACHE = {};
+function anDays(c) { const n = {}; (c.series || []).forEach(x => { if (x.date) n[x.date] = (n[x.date] || 0) + 1; }); return Object.keys(n).filter(d => n[d] > 1).sort().reverse(); }
 function homeCharts(c, drill, canSee, canPick) {
   ANC = c;
   if (!c) return '';
@@ -837,7 +845,7 @@ function homeCharts(c, drill, canSee, canPick) {
   const TB = [['ov', 'Overview'], ['tr', 'Trend'], ['cp', 'By campus']].concat(parts ? [['pt', 'By part']] : []);
   const tab = TB.some(x => x[0] === ANTAB) ? ANTAB : 'ov', hid = k => tab === k ? '' : ' hidden';
   const rid = ANROWS ? ANROWS.id : (last.id || '');
-  const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="Type or choose" onfocus="this.select()" value="' + esc(rid) + '"><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + '</datalist></div>' +
+  const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="Type or choose" onfocus="this.select()" value="' + esc(rid) + '"><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + anDays(c).map(d => '<option value="All on ' + esc(d) + '">Whole day, ' + c.series.filter(x => x.date === d).length + ' rehearsals</option>').join('') + '</datalist></div>' +
     (ANROWS ? '<div class="anpick"><label class="lb" for="ancamp">Campus</label><input id="ancamp" class="in" list="ancampl" autocomplete="off" placeholder="All campuses" onfocus="this.select()" value="' + esc(ANCAMP) + '"><datalist id="ancampl">' + Array.from(new Set(ANROWS.rows.map(r => r.campus).filter(Boolean))).sort().map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' : '') + '</div>' : '';
   const kp = (k, v, s, col) => '<div class="kpi" style="--kc:' + col + '"><div class="kk">' + k + '</div><div class="kv">' + v + '</div><div class="ks">' + s + '</div></div>';
   const kpis = '<div class="kpis">' + kp('Attendance rate', L.rate + '%', esc(L.id || '') + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + ' pts'), rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'approved absences', SOFT) + '</div>';
@@ -1367,12 +1375,30 @@ document.addEventListener('click', async ev => {
 $('pkind').addEventListener('change', drawPForm);
 $('psend').addEventListener('click', sendRequest);
 
+async function loadOutlook() {
+  const box = $('rpoutlook'); if (!box) return;
+  try {
+    const j = await call({action: 'reports.outlook', token});
+    if (!j.ok) { box.innerHTML = ''; return; }
+    const o = j.outlook, kp = (k, v, s, col) => '<div class="kpi" style="--kc:' + col + '"><div class="kk">' + k + '</div><div class="kv">' + v + '</div><div class="ks">' + s + '</div></div>';
+    if (!o.ready) { box.innerHTML = '<div class="card anl rise"><div class="anh"><div><div class="ct">Outlook</div><p class="sub">' + esc(o.message) + '</p></div></div></div>'; return; }
+    const tr = {up: ['Rising', '#20775A'], down: ['Falling', '#B4474D'], steady: ['Steady', '#2F4F86']}[o.trend];
+    const under = o.campuses.filter(c => c.under70), ar = o.atRisk;
+    box.innerHTML = '<div class="card anl rise"><div class="anh"><div><div class="ct">Outlook for the next rehearsal</div><p class="sub">A guide worked out from ' + esc(o.basedOn.join(', ')) + '. It is not a promise.</p></div></div>' +
+      '<div class="kpis" style="margin-top:22px">' + kp('Expected attendance', o.expected + '%', 'likely between ' + o.low + '% and ' + o.high + '%', rateColor(o.expected)) +
+      kp('About', o.people, 'of ' + o.eligible + ' members', NAVY) + kp('Direction', tr[0], 'over the last rehearsals', tr[1]) +
+      kp('Drifting', ar.count, 'missed 2 of the last 3', ATTN) + '</div>' +
+      '<div class="anr" style="grid-template-columns:1fr 1fr"><div class="anbox"><div class="ct" style="margin-bottom:8px">Campuses likely under 70%</div>' + (under.length ? under.map(c => '<span class="pill p-no">' + esc(c.campus) + ' · about ' + c.expected + '%</span>').join('') : '<p class="sub" style="margin:0">None expected.</p>') + '</div>' +
+      '<div class="anbox"><div class="ct" style="margin-bottom:8px">Members who may be drifting</div>' + (ar.count ? (ar.names ? ar.names.map(n => '<span class="pill p-pend">' + esc(n) + '</span>').join('') : Object.keys(ar.byCampus).sort().map(c => '<span class="pill p-pend">' + esc(c) + ' · ' + ar.byCampus[c] + '</span>').join('')) : '<p class="sub" style="margin:0">No one right now.</p>') + '</div></div></div>';
+  } catch (e) { box.innerHTML = ''; }
+}
 async function loadReports() {
   say('m11', 'Loading…');
   try {
     const j = await call({action: 'reports.state', token});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) return say('m11', j.error || 'Not available.', 'bad');
+    loadOutlook();
     rpState = j; $('rpdl').classList.toggle('hide', !j.canDownload); say('m11', j.empty || '');
     if (rpPick) { $('rpscope').value = rpPick.scope; }
     fillKeys(); if (rpPick) { $('rpkey').value = rpPick.key; rpPick = null; }
