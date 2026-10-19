@@ -163,6 +163,7 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .gv{grid-template-columns:36px 1.1fr 1.7fr 1.5fr}
 .calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:12px}.calh{font-size:12px;font-weight:700;color:#5E6A7E;text-align:center}.calc{min-height:64px;border:1px solid #E5E8EE;border-radius:8px;background:#fff;color:#172039;box-shadow:none;transform:none;padding:4px;text-align:left;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:2px;overflow:hidden;width:auto}.calc:hover{background:#FFF7F7}.calx{border:0;background:none;cursor:default}.cald{font-size:12px;font-weight:700;color:#172039}.caltoday{border-color:#B3262F}.calp{font-size:10px;line-height:1.2;border-radius:6px;padding:1px 4px;background:#EEF1F6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fpbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:10px 0 12px;border-bottom:1px solid #E5E8EE}.fpbar .lb{margin-top:0}.fplist{max-height:min(62vh,520px);overflow-y:auto;overscroll-behavior:contain;margin-top:10px;padding-right:6px}.fplist>.card{margin-top:0;margin-bottom:10px}.fpcount{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:8px;font-size:13px;color:#5E6A7E}.caltip{position:fixed;z-index:60;max-width:260px;background:#172039;color:#fff;border-radius:10px;padding:8px 11px;font-size:12.5px;line-height:1.4;box-shadow:0 8px 24px rgba(10,16,36,.25);pointer-events:none}.caltip b{color:#fff}.calfree{background:#FAFBFD}.calact{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.hgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-top:10px}.hgrid .card{margin:0;display:flex;flex-direction:column;gap:6px}.hgrid .card .actions{margin-top:auto}.hq{border-top:1px solid #E5E8EE;padding:2px 0}.hq summary{cursor:pointer;font-weight:700;padding:11px 0;list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}.hq summary::-webkit-details-marker{display:none}.hq summary:after{content:"+";font-size:20px;color:#8E0008;font-weight:400}.hq[open] summary:after{content:"\2212"}.hq .ha{padding:0 0 12px;color:#394560;line-height:1.5}.hdl dt{font-weight:800;margin-top:10px}.hdl dd{margin:2px 0 0;color:#394560}.hwho{width:100%;border-collapse:collapse;font-size:14px}.hwho td,.hwho th{text-align:left;padding:9px 10px;border-top:1px solid #E5E8EE;vertical-align:top}.hwho th{font-size:12px;color:#5E6A7E;border-top:0}
 @media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
@@ -337,15 +338,13 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div class="card pad rise hide npc"><div class="ct">Members without a part</div>
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
 <div class="card pad rise"><div class="ct">Add a new member</div>
-<p class="sub" style="margin:0 0 4px">Added straight away, with no request. A reason is needed, it is written to the audit log, and Desk A and the Campus Music Director can see it.</p>
-<div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:2 1 220px"><label for="mbn" class="lb">Full name</label><input id="mbn" class="in" autocomplete="off" maxlength="100"></div><div style="flex:2 1 220px"><label for="mbe" class="lb">Email address</label><input id="mbe" class="in" type="email" autocomplete="off" maxlength="120"></div></div>
-<div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 160px"><label for="mbc" class="lb">Campus</label><select id="mbc" class="in"></select></div><div style="flex:1 1 160px"><label for="mbp" class="lb">Part</label><select id="mbp" class="in"></select></div><div style="flex:1 1 160px"><label for="mbt" class="lb">Phone (optional)</label><input id="mbt" class="in" autocomplete="off" maxlength="40"></div><div style="flex:1 1 160px"><label for="mbi" class="lb">Member ID (optional)</label><input id="mbi" class="in" autocomplete="off" maxlength="40" placeholder="Leave empty for the next one"></div></div>
+<p class="sub" style="margin:0 0 4px">Added straight away, with no request. The Member ID is made for you. A reason is needed, it is written to the audit log, and Desk A and the Campus Music Director can see it.</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 160px"><label for="mbfn" class="lb">First name</label><input id="mbfn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbmn" class="lb">Middle name (optional)</label><input id="mbmn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbln" class="lb">Last name</label><input id="mbln" class="in" autocomplete="off" maxlength="50"></div></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:2 1 220px"><label for="mbe" class="lb">Email address</label><input id="mbe" class="in" type="email" autocomplete="off" maxlength="120"></div><div style="flex:1 1 160px"><label for="mbt" class="lb">Phone (optional)</label><input id="mbt" class="in" autocomplete="off" maxlength="40"></div></div>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 200px"><label for="mbc" class="lb">Campus</label><select id="mbc" class="in"></select></div><div id="mbncw" class="hide" style="flex:1 1 200px"><label for="mbnc" class="lb">New campus name</label><input id="mbnc" class="in" autocomplete="off" maxlength="40"></div><div style="flex:1 1 160px"><label for="mbp" class="lb">Part</label><select id="mbp" class="in"></select></div><div id="mbiw" class="hide" style="flex:1 1 160px"><label for="mbi" class="lb">Member ID</label><input id="mbi" class="in" autocomplete="off" maxlength="40"></div></div>
 <label for="mbr" class="lb">Reason</label><input id="mbr" class="in" autocomplete="off" maxlength="300" placeholder="For example: joined the Ago campus on Sunday (10 to 300 characters)">
 <div class="actions"><button id="mbadd" class="btn red" type="button">Add member</button><button id="mbaddx" class="btn line" type="button">Clear</button></div></div>
-<div class="card pad rise"><div class="ct">Members</div>
-<p class="sub" id="mbsub">Find a member by name or Member ID.</p>
-<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="mbq" class="in" placeholder="Name or Member ID" style="flex:1 1 220px" autocomplete="off"><button id="mbgo" class="btn red" type="button">Find</button><button id="mbx" class="btn line" type="button">Clear</button></div>
-<div id="mblist"></div></div>
+<div id="mbbox"></div>
 <p id="m17" class="s"></p>
 </div>
 
@@ -549,7 +548,7 @@ const ICON = {
 };
 const PAGEHEAD = {
   s16: ['Changes and updates', 'What was changed in the system and by whom, and petitions about changes. Admin and operations are shown apart.'],
-  s17: ['Members', 'Deactivate or reactivate a member, and catch up their membership dates. Every change has a reason and is recorded.'],
+  s17: ['Members', 'Add members, edit details, fill in parts, deactivate or reactivate. Every change has a reason and is recorded.'],
   s15: ['Process attendance', 'Turn the checked check-ins and approved absences of a held rehearsal into Present, Excused and Absent.'],
   s14: ['Calendar', 'Rehearsals by month. Senior roles also see who is away and who is covering.'],
   s13: ['Attendance records', 'The official record of each rehearsal, and one member\'s record, from ATTENDANCE LOG. Empty until a rehearsal has been published.'],
@@ -562,7 +561,7 @@ const PAGEHEAD = {
   s6: ['Absence', 'Ask to be excused before the cut-off, and follow your requests.'],
   s7: ['Requests', 'Requests waiting for you to validate or decide.'],
   s8: ['Rehearsals', 'Make a rehearsal. Members check in with the QR code.'],
-  s9: ['Help', 'What you can do, what you cannot do, and who to ask.']
+  s9: ['Help', 'Find answers, see what each menu does, and who to ask.']
 };
 const MENU = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>';
 function drawTabs() {
@@ -578,7 +577,7 @@ try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { $('mblist').innerHTML = ''; say('m17', ''); mbMeta(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 /** "Clear this page": empties the boxes and filters on a menu page, closes anything open on it and reloads it fresh. It never deletes saved data. */
 const CLEARABLE = ['s4', 's5', 's6', 's7', 's8', 's11', 's12', 's13', 's15', 's16', 's17'];
@@ -1766,30 +1765,45 @@ $('verify').onclick = async () => {
 $('back').onclick = () => show('s1');
 // ---- Help and the once-a-day welcome (text is built from the tabs the server gave this person) ----
 const TABHELP = {
-  process: ['Process attendance', 'After a rehearsal, write the people who were present (checked check-ins) to PROCESSED ATTENDANCE. Excused and Absent are worked out later, when the rehearsal is published to the official attendance. The Global Admin and the Assistant Global Admin can put one person Present or take them off Present later, with a reason.'],
-  calendar: ['See the calendar', 'See rehearsals by month (planned, open, held, cancelled). The Global Admin, Assistant Global Admin, Global Music Director and Pastor in Charge also see away notices and desk cover. It only shows; nothing is changed here.'],
-  qr: ['Show the QR', 'Show the check-in QR code of the open rehearsal so members can scan it. Campus Music Directors do this for their own campus. Desk D, the Assistant Global Admin and the Global Admin can after the Global Admin or Assistant Global Admin switches on "Campus Music Director is away" on the Home page.'],
-  checkins: ['Check the check-ins', 'See who has checked in and mark each check-in as checked. Late and hand-marked ones come first. Some roles can only look. Nobody checks their own.'],
-  hand: ['Mark a member by hand', 'For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.'],
-  records: ['See attendance records', 'See who checked in for each rehearsal (names, campus, part, late) and look up one member. Only the Global Admin and the Assistant Global Admin see names.'],
-  people: ['Ask for changes to people and access', 'Ask for a change to the choir list or to who holds a role, say yes to a request, and arrange cover for a desk that is away. Nobody says yes to their own request. Each request is recorded.'],
-  reports: ['See reports', 'See check-in summaries by rehearsal, month or campus, with charts. The Global Admin and the Assistant Global Admin can download them; every download is recorded.'],
-  rehearsal: ['Run rehearsals', 'Make, change or cancel a rehearsal, set the venue, and open check-in. Times are Lagos time. At most three rehearsals can be planned at once.'],
-  absence: ['Send your absence request', 'If you are a choir member, ask to be excused before the cut-off, 36 hours before the rehearsal.'],
-  requests: ['Handle absence requests', 'Campus Music Directors validate requests. People who decide approve or reject. The reason is shown only so you can decide.']
+  home: ['Home', 'See what needs you today: the next rehearsal, check-ins to validate, requests waiting, attendance charts and anything that needs attention.'],
+  rehearsal: ['Rehearsal', 'Set up, change or cancel a rehearsal, set the venue, and open or close check-in. Times are Lagos time and at most three can be planned at once.'],
+  calendar: ['Calendar', 'See rehearsals by month. Hover a date for the details; click a date to set up a rehearsal, ask to be absent or put in an away notice, depending on your role.'],
+  qr: ['QR', 'Show the check-in QR code of the open rehearsal so members can scan it.'],
+  checkins: ['Check-ins', 'See who has checked in and mark each one as checked. Late and hand-marked ones come first. Nobody checks their own.'],
+  hand: ['By hand', 'Mark a member who has no phone, camera or location. It is labelled "marked by hand" and checked by someone else.'],
+  absence: ['Absence', 'Ask to be excused from the next rehearsal. Requests close 36 hours before it starts.'],
+  requests: ['Requests', 'Validate or decide absence requests, and see members without a part for your campus.'],
+  process: ['Process', 'After a rehearsal, process attendance, then publish it to the official attendance. The Global Admin and Assistant can correct one person with a reason.'],
+  records: ['Records', 'See who checked in for each rehearsal, filter by campus or part, and look up one member.'],
+  reports: ['Reports', 'See charts and figures by rehearsal, month, year, campus and part. Build your own report from the filters. Downloads are recorded.'],
+  members: ['Members', 'Add a member, edit details, fill a missing part, deactivate or reactivate. Done straight away with a reason; Desk A and the Campus Music Director are told.'],
+  people: ['People', 'Ask for a change to a role or access, answer requests waiting for you, carry out approved changes, arrange desk cover, and put in an away notice.'],
+  changes: ['Changes', 'See what has changed in the last two weeks, including steps done by an admin instead of the usual desk, and send a petition if you disagree.']
 };
-const NOTHAVE = {
-  process: 'Process attendance',
-  calendar: 'See the calendar',
-  qr: 'Show the QR (that is for Campus Music Directors, and others only when the Campus Music Director is not available)',
-  checkins: 'Check other people\'s check-ins',
-  hand: 'Mark members by hand',
-  rehearsal: 'Make or change rehearsals',
-  requests: 'Decide absence requests',
-  reports: 'See or download reports',
-  people: 'Ask for or answer changes to people and access',
-  records: 'See who checked in (names)'
-};
+const FAQ = [
+  {t: ['rehearsal', 'calendar'], q: 'How do I set up a rehearsal?', a: 'Open Rehearsal (or click an empty future date in the Calendar), choose the date, start and finish times, and the venue, then save. Times are Lagos time and at most three rehearsals can be planned at once. If it is normally Desk B\'s job and you are the Global Admin or Assistant, you give a reason and Desk B is told.'},
+  {t: ['rehearsal'], q: 'How do I open and close check-in?', a: 'On the Rehearsal page, use Open check-in. It can open from one hour before the start. Use Close check-in when the rehearsal has started and everyone is in.'},
+  {t: ['qr'], q: 'How do I show the QR code?', a: 'Open QR while check-in is open and hold the screen up so members can scan it with their phone. They must be at the venue.'},
+  {t: ['checkins'], q: 'How do I check the check-ins?', a: 'Open Check-ins, look at each name and mark it checked. Late and hand-marked ones are shown first. You cannot check your own. Undoing a check needs a reason.'},
+  {t: ['hand'], q: 'Someone cannot check in on their phone. What now?', a: 'Open By hand, find them and mark them present. It is labelled "marked by hand" and someone else checks it.'},
+  {t: ['absence'], q: 'How do I ask to be absent?', a: 'Open Absence and give your reason (10 to 300 characters). You can ask until 36 hours before the rehearsal. Only you and the people who decide can see the reason.'},
+  {t: ['requests'], q: 'How do I answer an absence request?', a: 'A Campus Music Director validates requests from their own campus. The Global Admin or Assistant decides. Open Requests, read the reason, and approve or reject.'},
+  {t: ['members'], q: 'How do I add a new member?', a: 'Open Members and fill in Add a new member: first name, last name (middle name is optional), email, campus, part, and a reason. The Member ID is made for you. It is done straight away and recorded.'},
+  {t: ['members'], q: 'How do I edit, deactivate or reactivate a member?', a: 'On Members, use the filters (search, campus, part, status) to find the person, then choose Edit details, Deactivate or Reactivate. Each needs a reason. Nobody is deleted, and nobody changes their own record.'},
+  {t: ['members', 'requests', 'people'], q: 'A member has no part. What do I do?', a: 'Open the Members without a part list (on Members, Requests or People). Choose the part and save. If the member once typed a part on the attendance form, it is already chosen for you; check it first.'},
+  {t: ['members'], q: 'How do I add a new campus?', a: 'Only the System Administrator can. In Add a new member, choose "Add a new campus" at the end of the Campus list, type the name, and add the first member there.'},
+  {t: ['people'], q: 'How do I ask for a change to a role or access?', a: 'Open People, choose what the change is about under Ask for a change, give the details and a reason, and send it. A different, higher person says yes, then the right role carries it out.'},
+  {t: ['people'], q: 'How do I say yes or no to a request?', a: 'Open People and find the request under Waiting for your answer. Use the filters to narrow the list, then choose Yes, or give a reason and choose Say no. Nobody answers their own request.'},
+  {t: ['people', 'calendar'], q: 'How do I say I will be away?', a: 'On People, open Being away, give the first and last day and a reason (14 days at most). It ends by itself. You can also start from a date in the Calendar.'},
+  {t: ['changes'], q: 'How do I see what changed, and disagree with it?', a: 'Open Changes and use the filters (rehearsal, date, who did it, kind). Choose Petition about this and give your reason. The right person answers.'},
+  {t: ['process'], q: 'How do I process attendance after a rehearsal?', a: 'Open Process once check-in is closed and every check-in is checked. Process the rehearsal, then publish it to the official attendance. If one person is wrong, the Global Admin or Assistant can correct them with a reason.'},
+  {t: ['reports'], q: 'How do I build a report?', a: 'Open Reports. Use a ready-made button, or choose what to show, how to break it down and the period, then press Show. Nothing is drawn until you do. Use Clear to start again.'},
+  {t: ['reports', 'records'], q: 'Can I download figures?', a: 'The Global Admin and Assistant can download as CSV. Every download is recorded in the audit log. A Campus Music Director asks for one through People and gets a single download.'},
+  {t: ['records'], q: 'How do I look up who attended?', a: 'Open Records. Pick a rehearsal to see who was there, or look up one member. Filter by campus or part. Names are shown only to the Global Admin and Assistant.'},
+  {t: [], q: 'Why am I asked for a reason?', a: 'When the Global Admin or Assistant does a step that normally belongs to a desk or another role, they give a reason. It is recorded and the desk that was skipped is told.'},
+  {t: [], q: 'Why can I not approve or check my own work?', a: 'No one checks, approves or changes their own record. Another person always does, so nothing can be done in secret.'},
+  {t: [], q: 'I cannot sign in.', a: 'Use your Member ID and the code sent to your email, or sign in with Google. If it still fails, speak to the person named under Need more help.'}
+];
 const LADDER = [
   ['Pastor in Charge', 'the Global Music Director'],
   ['Global Music Director', 'the Pastor in Charge'],
@@ -1805,17 +1819,36 @@ function contactFor() {
 }
 function can() { return myTabs.filter(k => TABHELP[k]); }
 function renderHelp() {
-  const t = myTabs, miss = Object.keys(NOTHAVE).filter(k => t.indexOf(k) === -1);
+  const t = myTabs, shown = can(), faq = FAQ.filter(f => !f.t.length || f.t.some(k => t.indexOf(k) !== -1));
+  const sec = (h, inner) => '<div class="card pad rise" data-hsec><div class="ct">' + h + '</div>' + inner + '</div>';
   $('helpbody').innerHTML =
-    '<div class="hl">You are signed in as</div><div>' + esc(myName || 'a staff member') + '</div>' +
-    '<div>' + (myRoles.length ? myRoles.map(r => '<span class="pillr">' + esc(r) + '</span>').join('') : '') + '</div>' +
-    '<div class="hl">What you can do</div><ul class="hp">' + can().map(k => '<li><b>' + esc(TABHELP[k][0]) + '.</b> ' + esc(TABHELP[k][1]) + '</li>').join('') + '</ul>' +
-    '<div class="hl">What you cannot do</div><ul class="hp">' + miss.map(k => '<li>' + esc(NOTHAVE[k]) + '</li>').join('') +
-    '<li>Check, validate or approve your own check-in or request.</li>' +
-    '<li>Change the member list, roles or access. For now, Desk A (the System Administrator) does that.</li></ul>' +
-    '<div class="hl">When something needs someone else</div><p style="margin:.2rem 0">Speak to ' + esc(contactFor()) + '. For a sign-in or system problem, speak to Desk A (the System Administrator).</p>' +
-    '<div class="hl">Good to know</div><ul class="hp"><li>Everything you do is recorded with your name and the time.</li><li>Undoing a check needs a reason.</li><li>Sign out when you finish on a shared phone.</li></ul>';
+    '<div class="card pad rise"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><div class="sub" style="margin:0">You are signed in as</div><div style="font-size:20px;font-weight:900">' + esc(myName || 'a staff member') + '</div>' +
+      '<div>' + myRoles.filter(r => r !== 'Choir Member').map(r => '<span class="pillr">' + esc(r) + '</span>').join('') + '</div></div>' +
+      '<div style="flex:1 1 260px;max-width:420px"><label for="hsq" class="lb" style="margin-top:0">Search help</label><input id="hsq" class="in" type="search" autocomplete="off" placeholder="For example: absence, report, member"></div></div></div>' +
+    '<p id="hsn" class="sub hide" style="margin:10px 4px">Nothing in Help matches that. Try a shorter word.</p>' +
+    sec('Your menus', '<div class="hgrid">' + shown.map(k => '<div class="card pad" data-h="' + esc((TABHELP[k][0] + ' ' + TABHELP[k][1]).toLowerCase()) + '"><b>' + esc(TABHELP[k][0]) + '</b><span class="sub" style="margin:0">' + esc(TABHELP[k][1]) + '</span>' + (TABDEF[k] ? '<div class="actions"><button class="btn line sm" type="button" data-helpgo="' + TABDEF[k][0] + '">Open ' + esc(TABDEF[k][1]) + '</button></div>' : '') + '</div>').join('') + '</div>') +
+    sec('How do I…?', faq.map(f => '<details class="hq" data-h="' + esc((f.q + ' ' + f.a).toLowerCase()) + '"><summary>' + esc(f.q) + '</summary><div class="ha">' + esc(f.a) + '</div></details>').join('')) +
+    sec('Who does what', '<div style="overflow-x:auto"><table class="hwho"><thead><tr><th>Who</th><th>Looks after</th></tr></thead><tbody>' + [
+      ['Desk A', 'The choir list: adding, editing, deactivating and reactivating members, and filling in parts.'],
+      ['Desk B', 'Rehearsals: setting them up, opening check-in, and the attendance records.'],
+      ['Desk C', 'Absence requests, processing attendance and downloads.'],
+      ['Desk D', 'The QR code, check-in and marking members by hand.'],
+      ['Campus Music Director', 'Their own campus: shows the QR, validates absence requests, sees changes about their campus.'],
+      ['Global Admin and Assistant Global Admin', 'Can do any desk\'s job with a reason (the desk is told). Decide absence requests and approve downloads.'],
+      ['Global Music Director and Pastor in Charge', 'See everything, and answer petitions and top-role requests.'],
+      ['System Administrator', 'Carries out role and access changes, and adds new campuses.']].map(r => '<tr data-h="' + esc((r[0] + ' ' + r[1]).toLowerCase()) + '"><td><b>' + esc(r[0]) + '</b></td><td>' + esc(r[1]) + '</td></tr>').join('') + '</tbody></table></div>') +
+    sec('Rules that always apply', '<ul class="hp" data-h="rules always apply recorded audit own work reason"><li>Everything you do is recorded with your name and the time.</li><li>Nobody checks, approves or changes their own work or record.</li><li>Nothing is deleted. A member who leaves is made inactive.</li><li>When an admin does a desk\'s step, they give a reason and that desk is told.</li><li>Sign out when you finish on a shared phone.</li></ul>') +
+    sec('Words you will see', '<dl class="hdl"><div data-h="part section"><dt>Part (Section)</dt><dd>Soprano, Alto, Tenor or Bass. The same thing as the Section column in the member list.</dd></div><div data-h="eligible"><dt>Eligible</dt><dd>A member who was active at the time of that rehearsal.</dd></div><div data-h="excused absent present"><dt>Present, Excused, Absent</dt><dd>Present: checked in and checked. Excused: an approved absence request. Absent: neither.</dd></div><div data-h="official attendance published"><dt>Official attendance</dt><dd>The final record, published after a rehearsal is processed. All reports are drawn from it.</dd></div><div data-h="done instead bypass"><dt>Done instead</dt><dd>A step the Global Admin or Assistant did in place of the usual desk, with a reason.</dd></div><div data-h="petition"><dt>Petition</dt><dd>A recorded objection to a change, answered by the right person.</dd></div></dl>') +
+    sec('Need more help?', '<p style="margin:.2rem 0" data-h="help contact">Speak to ' + esc(contactFor()) + '. For a sign-in or system problem, speak to the System Administrator.</p>');
+  const q = $('hsq');
+  q.oninput = () => {
+    const v = q.value.trim().toLowerCase(); let any = false;
+    document.querySelectorAll('#helpbody [data-h]').forEach(e => { const hit = !v || e.dataset.h.indexOf(v) !== -1; e.style.display = hit ? '' : 'none'; if (hit) any = true; });
+    document.querySelectorAll('#helpbody [data-hsec]').forEach(s => { const vis = !v || Array.from(s.querySelectorAll('[data-h]')).some(e => e.style.display !== 'none'); s.style.display = vis ? '' : 'none'; });
+    $('hsn').classList.toggle('hide', any);
+  };
 }
+document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-helpgo]'); if (b) go(b.dataset.helpgo); });
 function today() { try { return new Date().toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}); } catch (e) { return new Date().toISOString().slice(0, 10); } }
 function welcome() {
   const key = today() + '|' + myName;
@@ -1964,35 +1997,34 @@ async function loadChanges() {
   } catch (e) { say('m16', 'Network problem. Try again.', 'bad'); }
 }
 /** Members: find, deactivate, reactivate, catch up the dates. */
+const MB = {campuses: [], parts: [], canAdd: false};
+const mbOpts = (list, cur, first) => (first ? '<option value="">' + esc(first) + '</option>' : '') + list.map(x => '<option' + (String(x).toLowerCase() === String(cur || '').toLowerCase() ? ' selected' : '') + '>' + esc(x) + '</option>').join('');
+const mbFields = [
+  {k: 'q', label: 'Search', ph: 'Name, Member ID, email or phone', type: 'text', get: m => [m.name, m.memberId, m.email, m.phone].join(' ')},
+  {k: 'campus', label: 'Campus', type: 'list', get: m => m.campus},
+  {k: 'part', label: 'Part', type: 'list', get: m => m.part || '(no part)'},
+  {k: 'status', label: 'Status', type: 'list', get: m => m.status}];
+function mbCard(m) {
+  return '<div class="card pad mbrow" style="margin-top:0"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b>' + esc(m.name) + '</b><span class="pill ' + (m.status === 'Active' ? 'p-ok' : 'p-pend') + '">' + esc(m.status || '') + '</span></div>' +
+    '<span class="s">' + esc(m.memberId) + ' · ' + esc(m.campus) + ' · ' + esc(m.part || '(no part)') + (m.email ? ' · ' + esc(m.email) : '') + '</span><br><span class="s">' + (m.periods ? 'Active from ' + esc(m.from || '?') + (m.until ? ' until ' + esc(m.until) : ' (still active)') + (m.periods > 1 ? ' · ' + m.periods + ' periods' : '') : 'No history yet') + '</span>' +
+    '<div class="actions" style="margin:6px 0 0">' + (m.status === 'Active' ? '<button class="btn red sm" type="button" data-mbedit="' + esc(m.memberId) + '">Edit details…</button><button class="btn line sm" type="button" data-mb="deactivate" data-id="' + esc(m.memberId) + '">Deactivate…</button>' : '<button class="btn line sm" type="button" data-mb="reactivate" data-id="' + esc(m.memberId) + '">Reactivate…</button>') +
+    (MB.history ? '<button class="btn line sm" type="button" data-mb="history" data-id="' + esc(m.memberId) + '">Set dates…</button>' : '') + '</div><div class="mbslot"></div></div>';
+}
 async function loadMembers() {
-  const q = $('mbq').value.trim();
-  if (q.length < 2) { $('mblist').innerHTML = ''; return say('m17', ''); }
-  say('m17', 'Looking…');
   try {
-    const j = await call({action: 'member.find', token, q});
+    const j = await call({action: 'member.list', token});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('mblist').innerHTML = ''; return say('m17', j.error || 'Not available.', 'bad'); }
-    say('m17', j.matches.length ? '' : 'Nobody found.');
+    if (!j.ok) { $('mbbox').innerHTML = ''; return say('m17', j.error || 'Not available.', 'bad'); }
+    MB.campuses = j.campuses || []; MB.parts = j.parts || []; MB.canAdd = !!j.canAddCampus; MB.history = !!j.historyReady; window.__mbm = {}; j.members.forEach(m => { window.__mbm[m.memberId] = m; });
+    const cur = $('mbc').value;
+    $('mbc').innerHTML = mbOpts(MB.campuses, cur, 'Choose a campus') + '<option value="__new__"' + (MB.canAdd ? '' : ' disabled') + '>+ Add a new campus' + (MB.canAdd ? '…' : ' (System Administrator only)') + '</option>';
+    $('mbp').innerHTML = mbOpts(MB.parts, $('mbp').value, 'Choose a part');
     const c = j.counts;
-    MB.campuses = j.campuses || MB.campuses; MB.parts = j.parts || MB.parts; window.__mbm = {}; j.matches.forEach(m => { window.__mbm[m.memberId] = m; });
-    $('mblist').innerHTML = '<p class="sub" style="margin:10px 0 0">' + c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet.</p>' + j.matches.map(m => '<div class="mbrow" style="border-top:1px solid var(--line);padding:8px 0;margin-top:8px"><b>' + esc(m.name) + '</b> · ' + esc(m.memberId) + ' · ' + esc(m.campus) + ' ' + stPill(m.status === 'Active' ? 'Active' : 'Not active') +
-      '<br><span class="s">' + esc(m.part || '(no part)') + (m.email ? ' · ' + esc(m.email) : '') + '</span><br><span class="s">' + (m.periods ? 'Active from ' + esc(m.from || '?') + (m.until ? ' until ' + esc(m.until) : ' (still active)') + (m.periods > 1 ? ' · ' + m.periods + ' periods' : '') : 'No history yet') + '</span>' +
-      '<div class="actions" style="margin:6px 0 0">' + (m.status === 'Active' ? '<button class="btn red sm" type="button" data-mbedit="' + esc(m.memberId) + '">Edit details…</button><button class="btn line" type="button" data-mb="deactivate" data-id="' + esc(m.memberId) + '">Deactivate…</button>' : '<button class="btn line" type="button" data-mb="reactivate" data-id="' + esc(m.memberId) + '">Reactivate…</button>') +
-      (j.historyReady ? '<button class="btn line" type="button" data-mb="history" data-id="' + esc(m.memberId) + '">Set dates…</button>' : '') + '</div><div class="mbslot"></div></div>').join('');
+    fpPanel('mem', 'mbbox', {title: 'Members', sub: c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet. Use the filters to find someone, then edit their details, deactivate, reactivate or set their membership dates. Each change needs a reason and is recorded; the Campus Music Director and Desk A are told.',
+      items: j.members, fields: mbFields, empty: 'There are no members yet.', card: mbCard});
   } catch (e) { say('m17', 'Network problem. Try again.', 'bad'); }
 }
-const MB = {campuses: [], parts: []};
-const mbOpts = (list, cur, first) => (first ? '<option value="">' + esc(first) + '</option>' : '') + list.map(x => '<option' + (String(x).toLowerCase() === String(cur || '').toLowerCase() ? ' selected' : '') + '>' + esc(x) + '</option>').join('');
-async function mbMeta() {
-  try {
-    const j = await call({action: 'member.find', token, q: ''});
-    if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) return;
-    MB.campuses = j.campuses || []; MB.parts = j.parts || [];
-    $('mbc').innerHTML = mbOpts(MB.campuses, '', 'Choose a campus'); $('mbp').innerHTML = mbOpts(MB.parts, '', 'Choose a part');
-    $('mbsub').textContent = j.counts.active + ' active, ' + j.counts.inactive + ' not active, ' + j.counts.noHistory + ' with no membership history yet. Find a member by name or Member ID to change their details, deactivate, reactivate or set their membership dates. Each change needs a reason and is recorded; the Campus Music Director and Desk A are told.';
-  } catch (e) {}
-}
+const mbMeta = loadMembers;
 function mbEditForm(m) {
   return '<div class="mbed" data-id="' + esc(m.memberId) + '" style="margin-top:8px;padding:12px;background:#F5F7FA;border-radius:12px">' +
     '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:2 1 200px"><label class="lb" style="margin-top:0">Full name</label><input class="in" data-f="name" value="' + esc(m.name) + '" maxlength="100"></div><div style="flex:2 1 200px"><label class="lb" style="margin-top:0">Email address</label><input class="in" data-f="email" type="email" value="' + esc(m.email) + '" maxlength="120"></div></div>' +
@@ -2000,6 +2032,8 @@ function mbEditForm(m) {
     '<label class="lb">Reason</label><input class="in" data-f="reason" maxlength="300" placeholder="Why is this being changed? (10 to 300 characters)">' +
     '<div class="actions"><button class="btn red sm" type="button" data-mbsave="' + esc(m.memberId) + '">Save changes</button><button class="btn line sm" type="button" data-mbcancel="1">Cancel</button></div></div>';
 }
+function mbClearAdd() { ['mbfn', 'mbmn', 'mbln', 'mbe', 'mbt', 'mbi', 'mbnc', 'mbr'].forEach(i => { $(i).value = ''; }); $('mbc').value = ''; $('mbp').value = ''; $('mbncw').classList.add('hide'); }
+document.addEventListener('change', ev => { if (ev.target.id === 'mbc') $('mbncw').classList.toggle('hide', ev.target.value !== '__new__'); });
 document.addEventListener('click', async ev => {
   const ed = ev.target.closest && ev.target.closest('[data-mbedit]');
   if (ed) { const box = ed.closest('.mbrow').querySelector('.mbslot'); if (box.innerHTML) { box.innerHTML = ''; return; } const m = (window.__mbm || {})[ed.dataset.mbedit]; if (m) box.innerHTML = mbEditForm(m); return; }
@@ -2015,21 +2049,21 @@ document.addEventListener('click', async ev => {
     say('m17', msg, j.ok ? 'ok' : 'bad'); return;
   }
   if (ev.target.id === 'mbadd') {
-    const b = ev.target, reason = $('mbr').value.trim();
-    if (!$('mbn').value.trim() || !$('mbc').value || !$('mbp').value) return say('m17', 'A new member needs a name, a campus and a part.', 'bad');
+    const b = ev.target, reason = $('mbr').value.trim(), isNew = $('mbc').value === '__new__';
+    if (!$('mbfn').value.trim() || !$('mbln').value.trim()) return say('m17', 'A new member needs a first name and a last name.', 'bad');
+    if (!$('mbc').value || (isNew && !$('mbnc').value.trim()) || !$('mbp').value) return say('m17', 'Choose a campus and a part.', 'bad');
     if (reason.length < 10) return say('m17', 'Give a reason of at least 10 characters.', 'bad');
     b.disabled = true; say('m17', 'Adding…');
-    const j = await call({action: 'member.add', token, name: $('mbn').value.trim(), email: $('mbe').value.trim(), campus: $('mbc').value, part: $('mbp').value, phone: $('mbt').value.trim(), memberId: $('mbi').value.trim(), reason, bypassReason: reason});
+    const j = await call({action: 'member.add', token, firstName: $('mbfn').value.trim(), middleName: $('mbmn').value.trim(), lastName: $('mbln').value.trim(), email: $('mbe').value.trim(), campus: isNew ? '' : $('mbc').value, newCampus: isNew ? $('mbnc').value.trim() : '', part: $('mbp').value, phone: $('mbt').value.trim(), memberId: $('mbi').value.trim(), reason, bypassReason: reason});
     b.disabled = false;
-    say('m17', j.ok ? 'Done: ' + j.summary + (j.note ? ' (' + j.note + ')' : '') + '.' : (j.error || 'Could not add.'), j.ok ? 'ok' : 'bad');
-    if (j.ok) { ['mbn', 'mbe', 'mbt', 'mbi', 'mbr'].forEach(i => { $(i).value = ''; }); $('mbc').value = ''; $('mbp').value = ''; mbMeta(); }
+    if (!j.ok && /member ID/i.test(j.error || '')) $('mbiw').classList.remove('hide');
+    const msg = j.ok ? 'Done: ' + j.summary + (j.note ? ' (' + j.note + ')' : '') + '.' : (j.error || 'Could not add.');
+    if (j.ok) { mbClearAdd(); await loadMembers(); }
+    say('m17', msg, j.ok ? 'ok' : 'bad');
     return;
   }
-  if (ev.target.id === 'mbaddx') { ['mbn', 'mbe', 'mbt', 'mbi', 'mbr'].forEach(i => { $(i).value = ''; }); $('mbc').value = ''; $('mbp').value = ''; say('m17', ''); }
+  if (ev.target.id === 'mbaddx') { mbClearAdd(); say('m17', ''); }
 });
-$('mbgo').onclick = loadMembers;
-$('mbx').onclick = () => { $('mbq').value = ''; $('mblist').innerHTML = ''; say('m17', ''); $('mbq').focus(); };
-$('mbq').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); loadMembers(); } };
 document.addEventListener('click', async ev => {
   const pb = ev.target.closest && ev.target.closest('[data-pet]');
   if (pb) {
