@@ -195,7 +195,21 @@ input.in{height:48px;padding:0 14px}
    <div id="v4" class="hide">
     <div class="grid">
      <div class="card rise" id="prof" style="line-height:2;font-size:15px"></div>
-     <div class="card rise col"><div style="font-size:16px;font-weight:900">Something wrong?</div><div class="s" style="font-size:14px">You cannot edit these yourself. Tell Desk A or your Campus Music Director to correct your email, part or campus.</div></div>
+     <div class="card rise col" id="wrong"><div style="font-size:16px;font-weight:900">Something wrong?</div><div class="s" style="font-size:14px">You cannot edit these yourself. Ask Desk A to correct your name, email, campus or section.</div>
+      <button id="dask" class="btn btn-red" type="button">Ask Desk A to correct my details</button>
+      <div id="dform" class="hide" style="margin-top:6px">
+       <label class="s" for="dkind" style="font-weight:700;display:block;margin-top:8px">What is wrong?</label>
+       <select id="dkind" class="in"><option value="">Choose one</option><option>Name</option><option>Email</option><option>Campus</option><option>Section</option><option>Other</option></select>
+       <label class="s" for="dtext" style="font-weight:700;display:block;margin-top:10px">What it should be</label>
+       <input id="dtext" class="in" maxlength="200" autocomplete="off" placeholder="Write the correct detail">
+       <label class="s" for="dnote" style="font-weight:700;display:block;margin-top:10px">Anything Desk A should know (optional)</label>
+       <input id="dnote" class="in" maxlength="200" autocomplete="off">
+       <div id="m5" class="s" style="margin-top:8px"></div>
+       <button id="dsend" class="btn btn-red" type="button">Send to Desk A</button>
+       <button id="dcancel" class="btn btn-line" type="button">Cancel</button>
+      </div>
+      <div id="dlist" class="col" style="gap:10px;margin-top:8px"></div>
+     </div>
     </div>
    </div>
   </div>
@@ -242,7 +256,7 @@ const TITLES = ['', 'Home', 'My requests', 'My attendance', 'My profile'];
 function tab(n) {
   [1, 2, 3, 4].forEach(i => { $('v' + i).classList.toggle('hide', n !== i); $('t' + i).classList.toggle('on', n === i); });
   $('ptitle').textContent = TITLES[n]; window.scrollTo(0, 0);
-  if (n === 1) loadHome(); else if (n === 2) loadReqs(); else if (n === 3) loadAtt(); else drawProfile();
+  if (n === 1) loadHome(); else if (n === 2) loadReqs(); else if (n === 3) loadAtt(); else { drawProfile(); loadDetails(); }
 }
 [1, 2, 3, 4].forEach(i => $('t' + i).onclick = () => tab(i));
 $('req').onclick = () => tab(2); $('seeall').onclick = e => { e.preventDefault(); tab(2); }; $('attlink').onclick = e => { e.preventDefault(); tab(3); };
@@ -426,6 +440,36 @@ function drawProfile() {
   if (!h) { loadHome().then(drawProfile); return; }
   $('prof').innerHTML = '<b style="font-size:18px">' + esc(h.name) + '</b><br><span class="s">Member ID</span> ' + esc(h.memberId) + '<br><span class="s">Campus</span> ' + esc(h.campus || '-') + '<br><span class="s">Section</span> ' + esc(h.part || '-') + '<br><span class="s">Email</span> ' + esc(h.email || '-') + '<br><span class="s">Status</span> <span class="pill p-ok">Active</span>';
 }
+let dreq = [];
+async function loadDetails() {
+  try {
+    const j = await call({action: 'me.details', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) return;
+    dreq = j.requests || [];
+    $('dask').classList.toggle('hide', j.canAsk === false || !$('dform').classList.contains('hide'));
+    $('dlist').innerHTML = dreq.map(r => {
+      const st = r.status === 'Waiting' ? '<span class="pill p-pend">Waiting for Desk A</span>' : r.status === 'Done' ? '<span class="pill p-ok">Done</span>' : '<span class="pill p-no">Not changed</span>';
+      return '<div style="border-top:1px solid #E6E9F0;padding-top:10px"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><b>' + esc(r.kind) + '</b>' + st + '</div><div class="s" style="font-size:14px">Should be: ' + esc(r.text) + '</div>' +
+        (r.answer ? '<div class="s" style="font-size:14px">Desk A: ' + esc(r.answer) + '</div>' : '') + '<div class="s" style="font-size:12px">Sent ' + esc(dtm(r.atMs)) + '</div></div>';
+    }).join('');
+  } catch (e) {}
+}
+$('dask').onclick = () => { $('dform').classList.remove('hide'); $('dask').classList.add('hide'); say('m5', ''); };
+$('dcancel').onclick = () => { $('dform').classList.add('hide'); $('dask').classList.remove('hide'); say('m5', ''); };
+$('dsend').onclick = async () => {
+  const kind = $('dkind').value, text = $('dtext').value.trim();
+  if (!kind) return say('m5', 'Choose what is wrong.', 'bad');
+  if (text.length < 2) return say('m5', 'Write what it should be.', 'bad');
+  $('dsend').disabled = true; say('m5', 'Sending...');
+  try {
+    const j = await call({action: 'me.details.ask', token, kind, text, note: $('dnote').value.trim()});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { say('m5', j.error || 'Could not send.', 'bad'); }
+    else { $('dform').classList.add('hide'); $('dkind').value = ''; $('dtext').value = ''; $('dnote').value = ''; say('m5', ''); await loadDetails(); $('dask').classList.remove('hide'); }
+  } catch (e) { say('m5', 'Network problem. Try again.', 'bad'); }
+  $('dsend').disabled = false;
+};
 gisInit();
 if (token) { call({action: 'me.home', token}).then(j => { if (j && j.ok) { home = j; enter(j.name); } else signedOutNow(); }).catch(() => signedOutNow()); }
 </script></body></html>

@@ -407,6 +407,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 200px"><label for="mbc" class="lb">Campus</label><select id="mbc" class="in"></select></div><div id="mbncw" class="hide" style="flex:1 1 200px"><label for="mbnc" class="lb">New campus name</label><input id="mbnc" class="in" autocomplete="off" maxlength="40"></div><div style="flex:1 1 160px"><label for="mbp" class="lb">Part</label><select id="mbp" class="in"></select></div><div id="mbiw" class="hide" style="flex:1 1 160px"><label for="mbi" class="lb">Member ID</label><input id="mbi" class="in" autocomplete="off" maxlength="40"></div></div>
 <label for="mbr" class="lb">Reason</label><input id="mbr" class="in" autocomplete="off" maxlength="300" placeholder="For example: joined the Ago campus on Sunday (10 to 300 characters)">
 <div class="actions"><button id="mbadd" class="btn red" type="button">Add member</button><button id="mbaddx" class="btn line" type="button">Clear</button></div></div>
+<div id="mbdet"></div>
 <div id="mbbox"></div>
 <p id="m17" class="s"></p>
 </div>
@@ -1613,10 +1614,11 @@ async function loadHome() {
       j.bypasses.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '<br><span class="s">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</span></p>').join('') + '</div>' : '';
     const mch = (j.memberChanges || []).length ? '<div class="nt"><div class="ct">Membership changes</div>' + j.memberChanges.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + (has('changes') ? '<div class="actions"><button class="btn line" type="button" data-go="s16">Open Changes and updates</button></div>' : '') + '</div>' : '';
     const pth = t.petitions && t.petitions.waiting ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.petitions.waiting + ' petition(s) waiting for your answer</div><div class="actions"><button class="btn red" type="button" data-go="s16">Open Changes and updates</button></div></div>' : '';
+    const dth = t.details && t.details.waiting ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.details.waiting + ' member(s) asked for their details to be corrected</div><div class="actions"><button class="btn red" type="button" data-go="s17">Open Members</button></div></div>' : '';
     ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
     $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'), has('records'));
     if (has('records')) anLoad();
-    drawNotes([['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
+    drawNotes([['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
     hfoldApply();
     drawTasks(j.tasks || []);
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
@@ -2317,11 +2319,38 @@ async function loadMembers() {
     const cur = $('mbc').value;
     $('mbc').innerHTML = mbOpts(MB.campuses, cur, 'Choose a campus') + '<option value="__new__"' + (MB.canAdd ? '' : ' disabled') + '>+ Add a new campus' + (MB.canAdd ? '…' : ' (System Administrator only)') + '</option>';
     $('mbp').innerHTML = mbOpts(MB.parts, $('mbp').value, 'Choose a part');
+    loadDetailReqs();
     const c = j.counts;
     fpPanel('mem', 'mbbox', {title: 'Members', sub: c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet. Use the filters to find someone, then edit their details, deactivate, reactivate or set their membership dates. Each change needs a reason and is recorded; the Campus Music Director and Desk A are told.',
       items: j.members, fields: mbFields, empty: 'There are no members yet.', card: mbCard});
   } catch (e) { say('m17', 'Network problem. Try again.', 'bad'); }
 }
+/** Members who asked Desk A to correct their own details (Desk A, Global Admin, Assistant). */
+async function loadDetailReqs() {
+  try {
+    const j = await call({action: 'details.list', token});
+    if (!j || !j.ok) { $('mbdet').innerHTML = ''; return; }
+    const reqs = j.requests || [];
+    if (!reqs.length) { $('mbdet').innerHTML = ''; return; }
+    $('mbdet').innerHTML = '<div class="card pad rise"><div class="ct">Details to correct' + (j.waiting ? ' (' + j.waiting + ' waiting)' : '') + '</div><p class="sub">Members ask here when something in their own details is wrong. Find them below, use Edit to make the change, then mark the request Done. If it should not change, decline it and say why.</p>' + reqs.map(r => '<div style="border-top:1px solid var(--line);padding:8px 0">' + stPill(r.status === 'Not changed' ? 'Declined' : r.status) + ' <b>' + esc(r.name) + '</b> · ' + esc(r.memberId) + ' · ' + esc(r.campus || '-') + ' · ' + esc(r.part || '-') + ' · ' + esc(tm(r.atMs)) +
+      '<br><span class="s">' + esc(r.kind) + ' should be: <b>' + esc(r.text) + '</b>' + (r.note ? ' · note: ' + esc(r.note) : '') + (r.kind === 'Email' ? '<br>Before changing an email, check with the member outside the system that the request really came from them.' : '') + '</span>' +
+      (r.answer ? '<br><span class="s">' + esc(r.answeredBy) + ': ' + esc(r.answer) + '</span>' : '') +
+      (r.status === 'Waiting' && r.own ? '<br><span class="s">This is your own request. Someone else answers it.</span>' : '') +
+      (r.canAnswer ? '<div class="actions" style="margin:6px 0 0"><button class="btn red" type="button" data-dans="done" data-id="' + esc(r.id) + '">Mark done</button><button class="btn line" type="button" data-dans="declined" data-id="' + esc(r.id) + '">Decline</button></div>' : '') + '</div>').join('') + '</div>';
+  } catch (e) { $('mbdet').innerHTML = ''; }
+}
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('[data-dans]');
+  if (!b) return;
+  let reason = '';
+  if (b.dataset.dans === 'declined') { reason = prompt('Why is this not being changed? (10 to 300 characters)'); if (!reason) return; }
+  else { reason = prompt('Optional: say what you changed (or leave empty)') || ''; }
+  b.disabled = true;
+  const j = await call({action: 'details.answer', token, id: b.dataset.id, decision: b.dataset.dans, reason: reason.trim()});
+  if (j && j.signedOut) { signedOutNow(); return; }
+  say('m17', j && j.ok ? (b.dataset.dans === 'done' ? 'Marked done. The member can see it.' : 'Declined. The member can see why.') : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
+  loadDetailReqs();
+});
 const mbMeta = loadMembers;
 function mbEditForm(m) {
   return '<div class="mbed" data-id="' + esc(m.memberId) + '" style="margin-top:8px;padding:12px;background:#F5F7FA;border-radius:12px">' +
