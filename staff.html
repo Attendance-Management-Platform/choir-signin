@@ -218,7 +218,7 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .nt{border:1px solid #EFE3CC;border-radius:16px;padding:18px 20px;margin:0 0 14px;background:#fff}.nt:last-child{margin-bottom:0}.nt .ct{font-size:16px}
 @media(max-width:899px){.anl .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.anl .anr{grid-template-columns:1fr}}
 @media(max-width:480px){.anl,.ntc{padding:20px 16px}.anl .kpis{gap:12px}.anl .kpi .kv{font-size:26px}}
-.anpick{min-width:200px}.anpick .in{height:40px;border-radius:999px;padding:0 16px;font-weight:700}
+.anpicks{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}.anpick{min-width:170px;flex:0 1 200px}.anpick .in{height:40px;border-radius:999px;padding:0 16px;font-weight:700}
 @media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
@@ -675,6 +675,8 @@ function drawTasks(list) {
   if ((!list || !list.length) && !OVER) { box.innerHTML = Object.keys(myBypass || {}).length || myRoles.length ? '<div class="card pad rise"><div class="ct">Needs attention</div><p class="sub" style="margin:0">Nothing is waiting today. Well done.</p></div>' : ''; return; }
   const others = list.some(t => !t.mine);
   const has = k => myTabs.indexOf(k) !== -1;
+  const OVR = ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge'].some(r => (myRoles || []).indexOf(r) !== -1);
+  const nudgeBtn = t => OVR && !t.mine ? '<button class="btn line sm" type="button" data-nudge="' + esc(t.id) + '">Remind</button>' : '';
   const goBtn = t => {
     let g = t.go, attr = '', label = t.mine ? 'Open' : 'Do it instead';
     if (g === 'noPart') g = ['members', 'requests', 'people'].filter(has)[0] || '';
@@ -684,13 +686,22 @@ function drawTasks(list) {
   fpPanel('tasks', 'htasks', {title: 'Needs attention', sub: 'What is waiting today, and who it is waiting for.' + (others ? ' Work that is not yours is shown so you can follow it up; "Do it instead" opens it with a reason and tells the owner.' : ''),
     items: list || [], chips: 'role', empty: 'Nothing is waiting today.',
     fields: [{k: 'q', label: 'Search', ph: 'A task, a desk, a campus', type: 'text', get: t => [t.title, t.detail, t.owner, t.campus].join(' ')},
-      {k: 'role', label: 'Role', type: 'list', get: roleOf, all: OVER ? ['Global Admin', 'Assistant Global Admin', 'Desk A', 'Desk B', 'Desk C', 'Desk D', 'Campus MD'] : null},
+      {k: 'role', label: 'Role', type: 'list', get: roleOf, optsAll: OVER ? ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge', 'System Administrator', 'Desk A', 'Desk B', 'Desk C', 'Desk D', 'Campus MD'] : null},
       {k: 'rehearsal', label: 'Rehearsal', type: 'list', get: t => t.rehearsal ? [t.rehearsal] : [], ph: 'R001, R002…'},
       {k: 'owner', label: 'Desk or campus', type: 'list', get: t => t.owner === 'You' ? 'You' : t.owner},
       {k: 'level', label: 'How urgent', type: 'list', get: t => TKLEV[t.level][0]}],
     card: t => '<div class="fprow tkrow tk-' + t.level + '" style="border-left-color:' + TKLEV[t.level][1] + '"><div style="flex:1 1 260px"><div class="nm">' + esc(t.title) + (t.count > 1 ? '<span class="tkn">' + t.count + '</span>' : '') + '</div><div class="mt">' + esc(t.detail) + '</div></div>' +
-      '<div class="tkside">' + (t.rehearsal ? '<span class="pill p-info">' + esc(t.rehearsal) + '</span>' : '') + '<span class="pill ' + (t.mine ? 'p-ok' : 'p-val') + '">' + esc(t.owner) + '</span><span class="pill ' + TKLEV[t.level][2] + '">' + TKLEV[t.level][0] + '</span>' + goBtn(t) + '</div></div>'});
+      '<div class="tkside">' + (t.nudge ? '<span class="pill p-pend">' + (t.mine ? 'Reminder from ' : 'Reminded by ') + esc(t.nudge.by) + ' · ' + esc(tm(t.nudge.atMs)) + '</span>' : '') + (t.rehearsal ? '<span class="pill p-info">' + esc(t.rehearsal) + '</span>' : '') + '<span class="pill ' + (t.mine ? 'p-ok' : 'p-val') + '">' + esc(t.owner) + '</span><span class="pill ' + TKLEV[t.level][2] + '">' + TKLEV[t.level][0] + '</span>' + nudgeBtn(t) + goBtn(t) + '</div></div>'});
 }
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('[data-nudge]'); if (!b) return;
+  b.disabled = true;
+  try {
+    const j = await call({action: 'home.nudge', token, taskId: b.dataset.nudge});
+    if (j.signedOut) { signedOutNow(); return; }
+    await loadHome(); say('m10', j.ok ? 'Reminder sent. ' + (j.summary || '') : (j.error || 'Could not send the reminder.'), j.ok ? 'ok' : 'bad');
+  } catch (e) { b.disabled = false; say('m10', 'Network problem. Try again.', 'bad'); }
+});
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-taskgo]'); if (b && TABDEF[b.dataset.taskgo]) go(TABDEF[b.dataset.taskgo][0]); });
 function stPill(t) { const k = /approv|valid|accept/i.test(t) ? 'p-ok' : /reject|declin|cancel/i.test(t) ? 'p-no' : /withdr/i.test(t) ? 'p-info' : 'p-pend'; return '<span class="pill ' + k + '">' + esc(t) + '</span>'; }
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
@@ -767,21 +778,29 @@ function heat(cols, rows, cells, label, rate) {
       return '<td style="background:' + bg(v) + ';color:' + fg(v) + '"' + (x && x.title ? ' title="' + esc(x.title) + '"' : '') + '>' + (x ? esc(x.t) : '–') + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table></div><p class="sub" style="margin:8px 0 0">Darker means higher' + (rate ? '; red means under 70%' : '') + '. A dash means no one in that group.</p>';
 }
 let ANTAB = 'ov';
-document.addEventListener('change', async ev => {
-  const sel = ev.target; if (!sel || sel.id !== 'anreh' || !ANC) return;
-  const id = sel.value, last = ANC.last && ANC.last.id; ANREH = id === last ? '' : id;
-  const redraw = ov => { $('hcharts').innerHTML = homeCharts(ANC, myTabs.indexOf('reports') !== -1, myTabs.indexOf('reports') !== -1, ov, true); wireHome(); };
-  if (id === last) return redraw(null);
-  sel.disabled = true;
+function anTally(rows) { const n = {present: 0, absent: 0, excused: 0}; rows.forEach(r => { const k = String(r.status || '').toLowerCase(); if (n[k] !== undefined) n[k]++; }); n.total = rows.length; n.rate = rows.length ? Math.round(n.present / rows.length * 1000) / 10 : 0; return n; }
+function anGroup(rows, key, blank) { const g = {}; rows.forEach(r => { const k = r[key] || blank; (g[k] = g[k] || []).push(r); }); return Object.keys(g).map(k => { const t = anTally(g[k]); return {name: k, value: t.rate, a: t.present, b: t.total}; }).sort((x, y) => y.value - x.value); }
+function anRedraw() { if (!ANC) return; try { const ae = document.activeElement; if (ae && /^an(reh|camp)$/.test(ae.id)) ae.blur(); } catch (e) {} $('hcharts').innerHTML = homeCharts(ANC, myTabs.indexOf('reports') !== -1, myTabs.indexOf('reports') !== -1, myTabs.indexOf('records') !== -1); wireHome(); }
+async function anLoad() {
+  if (!ANC || !ANC.series || !ANC.series.length) return;
+  const id = ANREH || (ANC.last && ANC.last.id) || ANC.series[ANC.series.length - 1].id;
   try {
-    const j = await call({action: 'records.rehearsal', token, id});
-    if (!j.ok) { sel.disabled = false; return; }
-    const rows = j.rows || [], cnt = {present: 0, absent: 0, excused: 0}, cm = {};
-    rows.forEach(r => { const k = String(r.status || '').toLowerCase(); if (cnt[k] !== undefined) cnt[k]++; const c = cm[r.campus] = cm[r.campus] || {a: 0, b: 0}; c.b++; if (k === 'present') c.a++; });
-    const tot = rows.length || 1, sr = (ANC.series.filter(x => x.id === id)[0]) || {};
-    redraw({L: {id, date: sr.date || j.date || '', present: cnt.present, absent: cnt.absent, excused: cnt.excused, eligible: j.total || rows.length, rate: Math.round(cnt.present / tot * 1000) / 10},
-      camps: Object.keys(cm).map(k => ({name: k, value: Math.round(cm[k].a / cm[k].b * 1000) / 10, a: cm[k].a, b: cm[k].b})).sort((x, y) => y.value - x.value)});
-  } catch (e) { sel.disabled = false; }
+    if (!ANCACHE[id]) { const j = await call({action: 'records.rehearsal', token, id}); if (!j.ok) return; ANCACHE[id] = {id, date: j.date || '', rows: j.rows || [], total: j.total || (j.rows || []).length}; }
+    ANROWS = ANCACHE[id]; ANCAMP = ANROWS.rows.some(r => r.campus === ANCAMP) ? ANCAMP : '';
+    anRedraw();
+  } catch (e) { /* the numbers from the summary stay on screen */ }
+}
+document.addEventListener('change', ev => {
+  const el = ev.target; if (!el || (el.id !== 'anreh' && el.id !== 'ancamp') || !ANC) return;
+  const v = String(el.value || '').trim();
+  if (el.id === 'anreh') {
+    const last = ANC.last && ANC.last.id, hit = ANC.series.filter(x => x.id.toLowerCase() === v.toLowerCase())[0];
+    if (!v) ANREH = ''; else if (hit) ANREH = hit.id === last ? '' : hit.id; else { anRedraw(); return; }
+    ANROWS = null; anRedraw(); anLoad();
+  } else {
+    const hit = ANROWS ? ANROWS.rows.filter(r => String(r.campus).toLowerCase() === v.toLowerCase())[0] : null;
+    ANCAMP = v && hit ? hit.campus : ''; anRedraw();
+  }
 });
 function wireHome() {
   document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
@@ -802,28 +821,35 @@ function drawNotes(items) {
     items.map((x, i) => '<div class="ntp" data-p="' + x[0] + '"' + (i ? ' hidden' : '') + '>' + x[2] + '</div>').join('') + '</div>';
   box.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
 }
-let ANC = null, ANREH = '';
-function homeCharts(c, drill, canSee, ov, canPick) {
+let ANC = null, ANREH = '', ANCAMP = '', ANROWS = null, ANCACHE = {};
+function homeCharts(c, drill, canSee, canPick) {
   ANC = c;
   if (!c) return '';
   if (!c.series.length) return '<div class="card pad rise"><div class="ct">Attendance</div><p class="sub">No official attendance yet. It appears here once a rehearsal has been processed and published to ATTENDANCE SUMMARY and ATTENDANCE LOG.</p></div>';
-  const L = ov ? ov.L : (c.last || {present: 0, eligible: 0, absent: 0, excused: 0, rate: 0});
-  const camps = ov ? ov.camps : c.campuses.slice().sort((a, b) => b.rate - a.rate).map(r => ({name: r.campus, value: r.rate, a: r.present, b: r.active}));
-  const prev = c.series.length > 1 ? c.series[c.series.length - 2] : null, delta = (prev && !ov) ? (Math.round((L.rate - prev.rate) * 10) / 10) : null;
-  const at = c.attention || {lowCampuses: [], streak: 0, who: []};
-  const none = !at.lowCampuses.length && !at.streak;
-  const id = (L.id || '') + (L.date ? ' · ' + L.date : '');
-  const TB = [['ov', 'Overview'], ['tr', 'Trend'], ['cp', 'By campus']];
-  return '<div class="card anl rise"><div class="anh"><div><div class="ct">Analytics</div><p class="sub">Official attendance' + (id ? ' · ' + esc(id) : '') + '</p></div>' +
-    (canPick && c.series.length > 1 ? '<div class="anpick"><label class="lb" for="anreh">Rehearsal</label><select id="anreh" class="in">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '"' + (x.id === (ANREH || (c.last && c.last.id)) ? ' selected' : '') + '>' + esc(x.id + (x.date ? ' · ' + x.date : '')) + '</option>').join('') + '</select></div>' : '') + '<div class="fpchips antabs">' + TB.map(x => '<button type="button" class="fpchip' + (ANTAB === x[0] ? ' on' : '') + '" data-antab="' + x[0] + '">' + x[1] + '</button>').join('') + '</div></div>' +
-    '<div class="anp" data-p="ov"' + (ANTAB === 'ov' ? '' : ' hidden') + '><div class="kpis">' +
-    '<div class="kpi" style="--kc:' + rateColor(L.rate) + '"><div class="kk">Attendance rate</div><div class="kv">' + L.rate + '%</div><div class="ks">' + esc(L.id || '') + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + ' pts') + '</div></div>' +
-    '<div class="kpi" style="--kc:' + NAVY + '"><div class="kk">Present</div><div class="kv">' + L.present + '</div><div class="ks">of ' + L.eligible + ' members</div></div>' +
-    '<div class="kpi" style="--kc:' + ATTN + '"><div class="kk">Absent</div><div class="kv">' + L.absent + '</div><div class="ks">no approved reason</div></div>' +
-    '<div class="kpi" style="--kc:' + SOFT + '"><div class="kk">Excused</div><div class="kv">' + L.excused + '</div><div class="ks">approved absences</div></div></div>' +
-    '<div class="anbox" style="margin-top:22px"><div class="ct" style="margin-bottom:6px">Last rehearsal</div><div style="display:flex;justify-content:center">' + statusDonut({present: L.present, absent: L.absent, excused: L.excused}) + '</div></div></div>' +
-    '<div class="anp" data-p="tr"' + (ANTAB === 'tr' ? '' : ' hidden') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">Last ' + c.series.length + ' rehearsals</div>' + colChart(c.series.map(p => ({name: p.id, value: p.rate})), {unit: '%', drill: drill, label: 'Attendance rate, last rehearsals'}) + '</div></div>' +
-    '<div class="anp" data-p="cp"' + (ANTAB === 'cp' ? '' : ' hidden') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">By campus · last rehearsal</div>' + rankBars(camps, {unit: '%', drill: drill}) + '</div></div></div>';
+  const last = c.last || {id: '', date: '', present: 0, eligible: 0, absent: 0, excused: 0, rate: 0};
+  let L = last, camps = c.campuses.slice().sort((a, b) => b.rate - a.rate).map(r => ({name: r.campus, value: r.rate, a: r.present, b: r.active})), parts = null, delta = null;
+  const rows = ANROWS ? (ANCAMP ? ANROWS.rows.filter(r => r.campus === ANCAMP) : ANROWS.rows) : null;
+  if (rows) {
+    const t = anTally(rows), sr = c.series.filter(x => x.id === ANROWS.id)[0] || {};
+    L = {id: ANROWS.id, date: sr.date || ANROWS.date || '', present: t.present, absent: t.absent, excused: t.excused, eligible: t.total, rate: t.rate};
+    camps = anGroup(ANCAMP ? rows : ANROWS.rows, 'campus', 'No campus'); parts = anGroup(rows, 'part', 'No part');
+  } else { const prev = c.series.length > 1 ? c.series[c.series.length - 2] : null; delta = prev ? (Math.round((L.rate - prev.rate) * 10) / 10) : null; }
+  const TB = [['ov', 'Overview'], ['tr', 'Trend'], ['cp', 'By campus']].concat(parts ? [['pt', 'By part']] : []);
+  const tab = TB.some(x => x[0] === ANTAB) ? ANTAB : 'ov', hid = k => tab === k ? '' : ' hidden';
+  const rid = ANROWS ? ANROWS.id : (last.id || '');
+  const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="Type or choose" onfocus="this.select()" value="' + esc(rid) + '"><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + '</datalist></div>' +
+    (ANROWS ? '<div class="anpick"><label class="lb" for="ancamp">Campus</label><input id="ancamp" class="in" list="ancampl" autocomplete="off" placeholder="All campuses" onfocus="this.select()" value="' + esc(ANCAMP) + '"><datalist id="ancampl">' + Array.from(new Set(ANROWS.rows.map(r => r.campus).filter(Boolean))).sort().map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' : '') + '</div>' : '';
+  const kp = (k, v, s, col) => '<div class="kpi" style="--kc:' + col + '"><div class="kk">' + k + '</div><div class="kv">' + v + '</div><div class="ks">' + s + '</div></div>';
+  const kpis = '<div class="kpis">' + kp('Attendance rate', L.rate + '%', esc(L.id || '') + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + ' pts'), rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'approved absences', SOFT) + '</div>';
+  const idl = (L.id || '') + (L.date ? ' · ' + L.date : '') + (ANCAMP ? ' · ' + ANCAMP : '');
+  const cpBody = ANCAMP ? kpis + '<div class="anbox" style="margin-top:22px"><div class="ct" style="margin-bottom:8px">' + esc(ANCAMP) + ' · by part</div>' + rankBars(parts, {unit: '%', drill: false}) + '</div>'
+    : '<div class="anbox"><div class="ct" style="margin-bottom:8px">By campus · ' + esc(L.id || 'last rehearsal') + '</div>' + rankBars(camps, {unit: '%', drill: drill}) + '</div>';
+  return '<div class="card anl rise"><div class="anh"><div><div class="ct">Analytics</div><p class="sub">Official attendance' + (idl ? ' · ' + esc(idl) : '') + '</p></div>' + pick + '</div>' +
+    '<div class="fpchips antabs" style="margin-top:16px">' + TB.map(x => '<button type="button" class="fpchip' + (tab === x[0] ? ' on' : '') + '" data-antab="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
+    '<div class="anp" data-p="ov"' + hid('ov') + '>' + kpis + '<div class="anbox" style="margin-top:22px"><div class="ct" style="margin-bottom:6px">' + (ANCAMP ? esc(ANCAMP) + ' · ' : '') + esc(L.id || 'Last rehearsal') + '</div><div style="display:flex;justify-content:center">' + statusDonut({present: L.present, absent: L.absent, excused: L.excused}) + '</div></div></div>' +
+    '<div class="anp" data-p="tr"' + hid('tr') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">Last ' + c.series.length + ' rehearsals</div>' + colChart(c.series.map(p => ({name: p.id, value: p.rate})), {unit: '%', drill: drill, label: 'Attendance rate, last rehearsals'}) + '</div></div>' +
+    '<div class="anp" data-p="cp"' + hid('cp') + '>' + cpBody + '</div>' +
+    (parts ? '<div class="anp" data-p="pt"' + hid('pt') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">By part · ' + esc((ANCAMP ? ANCAMP + ' · ' : '') + (L.id || '')) + '</div>' + rankBars(parts, {unit: '%', drill: false}) + '</div></div>' : '') + '</div>';
 }
 let rpState = null, rpPick = null;
 function drillTo(scope, key) { rpPick = {scope, key}; go('s11'); }
@@ -1235,7 +1261,7 @@ function fpPanel(key, boxId, o) {
   const target = $(boxId);
   const opn = o.bare ? '<div>' : '<div class="card pad rise" data-n="' + o.items.length + '">', hd = o.bare ? '' : '<div class="ct">' + esc(o.title) + '</div>';
   if (!o.items.length) { target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub">' + esc(o.sub) + '</p>' : '') + '<p class="sub">' + esc(o.empty || 'Nothing here.') + '</p>' + (o.after || '') + '</div>'; return; }
-  o.fields.forEach(f => { if (f.type === 'list') f.opts = f.all ? f.all.slice() : Array.from(new Set([].concat.apply([], o.items.map(it => f.get(it))).filter(Boolean))).sort(); });
+  o.fields.forEach(f => { if (f.type === 'list') f.opts = f.optsAll ? f.optsAll.slice() : f.all ? f.all.slice() : Array.from(new Set([].concat.apply([], o.items.map(it => f.get(it))).filter(Boolean))).sort(); });
   const dl = o.fields.filter(f => f.type === 'list').map(f => '<datalist id="fpd_' + key + '_' + f.k + '">' + f.opts.map(x => '<option value="' + esc(x) + '">').join('') + '</datalist>').join('');
   let chipsHtml = '';
   if (o.chips) {
@@ -1522,8 +1548,9 @@ async function loadHome() {
       j.bypasses.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '<br><span class="s">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</span></p>').join('') + '</div>' : '';
     const mch = (j.memberChanges || []).length ? '<div class="nt"><div class="ct">Membership changes</div>' + j.memberChanges.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + (has('changes') ? '<div class="actions"><button class="btn line" type="button" data-go="s16">Open Changes and updates</button></div>' : '') + '</div>' : '';
     const pth = t.petitions && t.petitions.waiting ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.petitions.waiting + ' petition(s) waiting for your answer</div><div class="actions"><button class="btn red" type="button" data-go="s16">Open Changes and updates</button></div></div>' : '';
-    ANREH = '';
-    $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'), null, has('records'));
+    ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
+    $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'), has('records'));
+    if (has('records')) anLoad();
     drawNotes([['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
     drawTasks(j.tasks || []);
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
