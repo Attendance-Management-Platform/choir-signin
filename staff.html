@@ -451,7 +451,7 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 <div id="s17" class="pg hide">
 <div class="card pad rise hide npc"><div class="ct">Members without a part</div>
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
-<div class="card pad rise"><div class="ct">Add a new member</div>
+<div id="mbaddcard" class="card pad rise"><div class="ct">Add a new member</div>
 <p class="sub" style="margin:0 0 4px">Added straight away, with no request. The Member ID is made for you. A reason is needed, it is written to the audit log, and Desk A and the Campus Music Director can see it.</p>
 <div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 160px"><label for="mbfn" class="lb">First name</label><input id="mbfn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbmn" class="lb">Middle name (optional)</label><input id="mbmn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbln" class="lb">Last name</label><input id="mbln" class="in" autocomplete="off" maxlength="50"></div></div>
 <div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:2 1 220px"><label for="mbe" class="lb">Email address</label><input id="mbe" class="in" type="email" autocomplete="off" maxlength="120"></div><div style="flex:1 1 160px"><label for="mbt" class="lb">Phone (optional)</label><input id="mbt" class="in" autocomplete="off" maxlength="40"></div></div>
@@ -2641,7 +2641,12 @@ async function loadMembers() {
   try {
     const j = await call({action: 'member.list', token});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('mbbox').innerHTML = ''; return say('m17', j.error || 'Not available.', 'bad'); }
+    if (!j.ok) {
+      // Desk A and the System Administrator open this menu only for the requests to correct details; the member list and adding are for the admins.
+      $('mbbox').innerHTML = ''; $('mbaddcard').classList.add('hide'); loadDetailReqs();
+      return say('m17', /do not have this page/i.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad');
+    }
+    $('mbaddcard').classList.remove('hide');
     MB.campuses = j.campuses || []; MB.parts = j.parts || []; MB.canAdd = !!j.canAddCampus; MB.history = !!j.historyReady; window.__mbm = {}; j.members.forEach(m => { window.__mbm[m.memberId] = m; });
     const cur = $('mbc').value;
     $('mbc').innerHTML = mbOpts(MB.campuses, cur, 'Choose a campus') + '<option value="__new__"' + (MB.canAdd ? '' : ' disabled') + '>+ Add a new campus' + (MB.canAdd ? '…' : ' (System Administrator only)') + '</option>';
@@ -2653,20 +2658,32 @@ async function loadMembers() {
   } catch (e) { say('m17', 'Network problem. Try again.', 'bad'); }
 }
 /** Members who asked Desk A to correct their own details (Desk A, Global Admin, Assistant). */
+let DETSYS = false;
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('[data-dsedit]'); if (!b) return;
+  const slot = b.closest('div[style]').parentNode.querySelector('.mbslot'); if (!slot) return;
+  if (slot.innerHTML) { slot.innerHTML = ''; return; }
+  const j = await call({action: 'member.find', token, memberId: b.dataset.dsedit});
+  if (j && j.signedOut) { signedOutNow(); return; }
+  const m = j && j.ok ? (j.members || []).filter(x => x.memberId === b.dataset.dsedit)[0] : null;
+  if (!m) return say('m17', (j && j.error) || 'That member could not be opened.', 'bad');
+  MB.campuses = j.campuses || []; MB.parts = j.parts || []; slot.innerHTML = mbEditForm(m);
+});
 async function loadDetailReqs() {
   try {
     const j = await call({action: 'details.list', token});
     if (!j || !j.ok) { $('mbdet').innerHTML = ''; return; }
-    const reqs = j.requests || [];
+    const reqs = j.requests || []; DETSYS = j.sysEdit === true;
     if (!reqs.length) { $('mbdet').innerHTML = ''; return; }
     const cardOf = r => '<div style="border:1px solid var(--line);border-left:4px solid ' + (r.status === 'Waiting' ? '#E9A9AE' : r.status === 'Done' ? '#9CD3B8' : '#C9D0DC') + ';border-radius:14px;padding:12px 14px;margin-top:10px;display:flex;flex-direction:column;gap:6px">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:16px">' + esc(r.name) + '</b>' + stPill(r.status === 'Not changed' ? 'Declined' : r.status) + '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:16px">' + esc(r.name) + '</b><span>' + (r.goesTo && r.goesTo !== 'Desk A' ? '<span class="pill p-info" style="margin-right:6px">Goes to ' + esc(r.goesTo) + '</span>' : '') + stPill(r.status === 'Not changed' ? 'Declined' : r.status) + '</span></div>' +
       '<div class="s" style="font-size:13px">' + esc(r.memberId) + ' · ' + esc(r.campus || '-') + ' · ' + esc(r.part || '-') + ' · ' + esc(tm(r.atMs)) + '</div>' +
       '<div style="font-size:15px">' + esc(r.kind) + ' should be: <b>' + esc(r.text) + '</b></div>' +
       (r.note ? '<div class="s" style="font-size:13px">Member\'s note: ' + esc(r.note) + '</div>' : '') +
       (r.kind === 'Email' && r.status === 'Waiting' ? '<div style="font-size:13px;background:#FFF4DF;color:#95621D;border-radius:8px;padding:8px 10px">Email is how this person signs in. Check with them outside the system that the request really came from them before you change it.</div>' : '') +
       (r.answer ? '<div class="s" style="font-size:13px">' + esc(r.answeredBy) + ': ' + esc(r.answer) + '</div>' : '') +
       (r.status === 'Waiting' && r.own ? '<div style="font-size:13px;background:#EEF1F6;color:#3C4558;border-radius:8px;padding:8px 10px">This is your own request. Someone else answers it.</div>' : '') +
+      (r.canAnswer && DETSYS ? '<div class="actions" style="margin:4px 0 0"><button class="btn line" type="button" data-dsedit="' + esc(r.memberId) + '">Edit details…</button></div><div class="mbslot"></div>' : '') +
       (r.canAnswer ? '<div class="actions" style="margin:4px 0 0"><button class="btn red" type="button" data-dans="done" data-id="' + esc(r.id) + '">Mark done</button><button class="btn line" type="button" data-dans="declined" data-id="' + esc(r.id) + '">Decline</button></div>' : '') + '</div>';
     fpPanel('det', 'mbdet', {title: 'Details to correct' + (j.waiting ? ' (' + j.waiting + ' waiting)' : ''), sub: 'Members ask here when something in their own details is wrong. Find them below, use Edit to make the change, then mark the request Done. If it should not change, decline it and say why.',
       items: reqs, chips: 'status', chipsAll: 'All requests', empty: 'Nothing to correct.',

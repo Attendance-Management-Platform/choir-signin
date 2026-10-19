@@ -149,6 +149,15 @@ input.in{height:48px;padding:0 14px}
 .ptitle{color:#8E0008!important;font-size:28px!important;font-weight:900!important;letter-spacing:-.01em}
 .mfh{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px}.mfh:after{content:"";flex:none;width:9px;height:9px;border-right:2.5px solid #8E0008;border-bottom:2.5px solid #8E0008;transform:rotate(45deg);margin:-4px 4px 0;transition:transform .25s}
 .mshut>.mfh:after{transform:rotate(-45deg);margin-top:0}.mshut>*:not(:first-child){display:none!important}
+#sbtog{display:none}
+@media (min-width:900px){
+  #sbtog{display:flex;align-items:center;gap:10px;border:0;background:none;color:var(--ink);font-weight:800;font-size:14px;padding:6px 8px 12px;cursor:pointer;border-radius:10px}
+  #sbtog:hover{color:var(--red)}#sbtog svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+  .sb{transition:width .25s var(--ease)}
+  .sb.min{width:72px;padding:18px 10px;align-items:stretch}
+  .sb.min .sbrand,.sb.min .sbfoot{display:none}.sb.min #sbtog span{display:none}.sb.min #sbtog{justify-content:center;padding:6px 0 14px}
+  .sb.min .nv{font-size:0;justify-content:center;gap:0;padding:12px 0}.sb.min .nv:hover{transform:none}
+}
 </style></head><body>
 <div id="outv">
  <div class="lp"><div class="lbrand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
@@ -171,7 +180,8 @@ input.in{height:48px;padding:0 14px}
 
 <div id="inv" class="hide">
   <div class="mhdr"><button class="so" id="out2">Sign out</button><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b2" style="line-height:1.3">CELEBRATION CHURCH WORSHIP<br>LAGOS REGION CHOIR</div><div id="hello" class="hello"></div><div id="hsub" class="hsub"></div></div></div>
- <div class="sb">
+ <div class="sb" id="sb">
+  <button id="sbtog" type="button" aria-label="Hide menu" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Hide menu</span></button>
   <div class="sbrand"><img src="logo.png" alt="CCW logo" style="height:58px;width:auto;display:block"><div style="font-weight:900;font-size:15px;margin-top:6px;line-height:1.15">CELEBRATION<br>CHURCH WORSHIP</div><div style="font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:700">LAGOS REGION CHOIR</div></div>
   <nav class="nav">
    <button id="t1" class="nv on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
@@ -227,17 +237,17 @@ input.in{height:48px;padding:0 14px}
    <div id="v4" class="hide">
     <div class="grid">
      <div class="card rise" id="prof" style="line-height:2;font-size:15px"></div>
-     <div class="card rise col" id="wrong"><div class="cth">Something wrong?</div><div class="s" style="font-size:14px">You cannot edit these yourself. Ask Desk A to correct your name, email, campus or section.</div>
-      <button id="dask" class="btn btn-red" type="button">Ask Desk A to correct my details</button>
+     <div class="card rise col" id="wrong"><div class="cth">Something wrong?</div><div class="s" style="font-size:14px">You cannot edit these yourself. Ask <span class="dgo">Desk A</span> to correct your name, email, campus or section.</div>
+      <button id="dask" class="btn btn-red" type="button">Ask <span class="dgo">Desk A</span> to correct my details</button>
       <div id="dform" class="hide" style="margin-top:6px">
        <label class="s" for="dkind" style="font-weight:700;display:block;margin-top:8px">What is wrong?</label>
        <select id="dkind" class="in"><option value="">Choose one</option><option>Name</option><option>Email</option><option>Campus</option><option>Section</option><option>Other</option></select>
        <label class="s" for="dtext" style="font-weight:700;display:block;margin-top:10px">What it should be</label>
        <input id="dtext" class="in" maxlength="200" autocomplete="off" placeholder="Write the correct detail">
-       <label class="s" for="dnote" style="font-weight:700;display:block;margin-top:10px">Anything Desk A should know (optional)</label>
+       <label class="s" for="dnote" style="font-weight:700;display:block;margin-top:10px">Anything <span class="dgo">Desk A</span> should know (optional)</label>
        <input id="dnote" class="in" maxlength="200" autocomplete="off">
        <div id="m5" class="s" style="margin-top:8px"></div>
-       <button id="dsend" class="btn btn-red" type="button">Send to Desk A</button>
+       <button id="dsend" class="btn btn-red" type="button">Send to <span class="dgo">Desk A</span></button>
        <button id="dcancel" class="btn btn-line" type="button">Cancel</button>
       </div>
       <div id="dlist" class="col" style="gap:10px;margin-top:8px"></div>
@@ -580,18 +590,20 @@ function drawProfile() {
   $('prof').innerHTML = '<b style="font-size:18px">' + esc(h.name) + '</b><br><span class="s">Member ID</span> ' + esc(h.memberId) + '<br><span class="s">Campus</span> ' + esc(h.campus || '-') + '<br><span class="s">Section</span> ' + esc(h.part || '-') + '<br><span class="s">Email</span> ' + esc(h.email || '-') + '<br><span class="s">Status</span> <span class="pill p-ok">Active</span>';
 }
 let dreq = [];
+let DGO = 'Desk A';
 async function loadDetails() {
   try {
     const j = await call({action: 'me.details', token});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) return;
     dreq = j.requests || [];
+    DGO = j.goesTo || 'Desk A'; document.querySelectorAll('.dgo').forEach(e => { e.textContent = DGO; });
     $('dask').classList.toggle('hide', j.canAsk === false || !$('dform').classList.contains('hide'));
     const dCard = r => {
-      const st = r.status === 'Waiting' ? '<span class="pill p-pend">Waiting for Desk A</span>' : r.status === 'Done' ? '<span class="pill p-ok">Done</span>' : r.status === 'Withdrawn' ? '<span class="pill p-pend" style="background:#EEF1F6;color:#4A5568">Withdrawn</span>' : '<span class="pill p-no">Not changed</span>';
+      const st = r.status === 'Waiting' ? '<span class="pill p-pend">Waiting for ' + esc(DGO) + '</span>' : r.status === 'Done' ? '<span class="pill p-ok">Done</span>' : r.status === 'Withdrawn' ? '<span class="pill p-pend" style="background:#EEF1F6;color:#4A5568">Withdrawn</span>' : '<span class="pill p-no">Not changed</span>';
       return '<div class="dh ' + (r.status === 'Done' ? 'done' : r.status === 'Waiting' ? '' : r.status === 'Withdrawn' ? 'wd' : 'no') + '"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><b>' + esc(r.kind) + '</b>' + st + '</div><div class="s" style="font-size:14px">Should be: ' + esc(r.text) + '</div>' +
         (r.note ? '<div class="s" style="font-size:14px">Your note: ' + esc(r.note) + '</div>' : '') +
-        (r.answer ? '<div class="s" style="font-size:14px">Desk A: ' + esc(r.answer) + '</div>' : '') + '<div class="s" style="font-size:12px">Sent ' + esc(dtm(r.atMs)) + '</div>' +
+        (r.answer ? '<div class="s" style="font-size:14px">' + esc(DGO.charAt(0).toUpperCase() + DGO.slice(1)) + ': ' + esc(r.answer) + '</div>' : '') + '<div class="s" style="font-size:12px">Sent ' + esc(dtm(r.atMs)) + '</div>' +
         (r.status === 'Waiting' ? '<div><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dw="' + esc(r.id) + '">Withdraw this request</button></div>' : '') +
         (r.status === 'Not changed' ? '<div><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dagain="' + esc(r.id) + '">Ask again</button></div>' : '') + '</div>';
     };
@@ -652,5 +664,14 @@ if (token) { call({action: 'me.home', token}).then(j => { if (j && j.ok) { home 
   build();
   var inv = document.getElementById('inv');
   if (inv && window.MutationObserver) new MutationObserver(build).observe(inv, {childList: true, subtree: true});
+})();
+
+(function () {
+  var sb = document.getElementById('sb'), tg = document.getElementById('sbtog'); if (!sb || !tg) return;
+  document.querySelectorAll('#sb .nv').forEach(function (b) { b.title = b.textContent.trim(); });
+  function paint(min) { sb.classList.toggle('min', min); tg.setAttribute('aria-expanded', min ? 'false' : 'true'); tg.setAttribute('aria-label', min ? 'Show menu' : 'Hide menu'); tg.querySelector('span').textContent = min ? 'Show menu' : 'Hide menu'; }
+  var m = false; try { m = localStorage.getItem('rbcMSb') === '1'; } catch (e) {}
+  paint(m);
+  tg.addEventListener('click', function () { var n = !sb.classList.contains('min'); paint(n); try { localStorage.setItem('rbcMSb', n ? '1' : '0'); } catch (e) {} });
 })();
 </script></body></html>
