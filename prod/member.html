@@ -145,6 +145,8 @@ input.in{height:48px;padding:0 14px}
 .mfpg button[disabled]{opacity:.4;cursor:default}
 .dh{border:1px solid var(--line);border-left:4px solid #E9A9AE;border-radius:14px;background:#fff;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
 .dh.done{border-left-color:#9CD3B8}.dh.no{border-left-color:#E9A9AE}.dh.wd{border-left-color:#C9CFDB}
+.cth,.kick{font-size:13px!important;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8E0008!important}
+.ptitle{color:#8E0008!important;font-size:28px!important;font-weight:900!important;letter-spacing:-.01em}
 </style></head><body>
 <div id="outv">
  <div class="lp"><div class="lbrand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
@@ -194,14 +196,14 @@ input.in{height:48px;padding:0 14px}
       <button id="req" class="btn btn-red hide" style="margin-top:0">Request an absence</button>
       <div id="regoogle" class="hide"><p class="s">For your safety, press this once more to confirm it is you.</p><div id="gbtn2" style="margin:.4rem 0"></div></div>
       <div id="m2" class="s"></div></div>
-     <div class="card lift rise" style="animation-delay:.08s"><div class="rowl"><div style="font-size:16px;font-weight:900">My requests</div><a id="seeall" href="#" style="font-size:14px">See all</a></div><div id="mini" style="margin-top:6px">Loading…</div></div>
+     <div class="card lift rise" style="animation-delay:.08s"><div class="rowl"><div class="cth">My requests</div><a id="seeall" href="#" style="font-size:14px">See all</a></div><div id="mini" style="margin-top:6px">Loading…</div></div>
      <a id="attlink" href="#" class="card lift wide rise s" style="display:block;font-size:14px;font-weight:400;animation-delay:.16s"><span id="attline">Loading…</span></a>
     </div>
    </div>
 
    <div id="v2" class="hide">
     <div class="grid">
-     <div class="card col"><div style="font-size:18px;font-weight:900">Request an absence</div>
+     <div class="card col"><div class="cth">Request an absence</div>
       <div><div style="font-size:14px;font-weight:900">Which rehearsal?</div><div id="rwhich" class="in" style="background:#F7F9FC;height:auto"></div></div>
       <div id="rinfo" class="good"></div>
       <div id="rform" class="hide"><label for="rreason" style="font-size:14px;font-weight:900">Reason</label><textarea id="rreason" class="in" rows="3" maxlength="300" placeholder="At least 10 characters"></textarea><div class="s" style="margin-top:4px">Only the people who decide your request can read this.</div>
@@ -223,7 +225,7 @@ input.in{height:48px;padding:0 14px}
    <div id="v4" class="hide">
     <div class="grid">
      <div class="card rise" id="prof" style="line-height:2;font-size:15px"></div>
-     <div class="card rise col" id="wrong"><div style="font-size:16px;font-weight:900">Something wrong?</div><div class="s" style="font-size:14px">You cannot edit these yourself. Ask Desk A to correct your name, email, campus or section.</div>
+     <div class="card rise col" id="wrong"><div class="cth">Something wrong?</div><div class="s" style="font-size:14px">You cannot edit these yourself. Ask Desk A to correct your name, email, campus or section.</div>
       <button id="dask" class="btn btn-red" type="button">Ask Desk A to correct my details</button>
       <div id="dform" class="hide" style="margin-top:6px">
        <label class="s" for="dkind" style="font-weight:700;display:block;margin-top:8px">What is wrong?</label>
