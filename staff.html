@@ -1278,6 +1278,8 @@ function fpOk(f, it, v) {
   if (f.type === 'date') { const ms = f.get(it); if (!ms) return false; const day = new Date(ms).toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}); return f.k.indexOf('from') === 0 ? day >= v : day <= v; }
   const gv = f.get(it), vl = String(v).trim().toLowerCase();
   if (Array.isArray(gv)) { const ex = (f.opts || []).some(x => x.toLowerCase() === vl); return gv.some(x => ex ? String(x).toLowerCase() === vl : String(x).toLowerCase().indexOf(vl) !== -1); }
+  // A chosen option (for example the campus Ago) must match exactly, so it does not also pick up Lagos Island.
+  if (f.type === 'list' && (f.opts || []).some(x => String(x).toLowerCase() === vl)) return String(gv || '').toLowerCase() === vl;
   return String(gv || '').toLowerCase().indexOf(vl) !== -1;
 }
 function fpDraw(key) {
