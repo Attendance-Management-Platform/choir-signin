@@ -364,6 +364,8 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s12" class="pg hide">
+<div class="card pad rise hide npc"><div class="ct">Members without a part</div>
+<p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
 <div id="paw"></div>
 <div id="pwait"></div>
 <div id="pready"></div>
@@ -472,8 +474,8 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s7" class="pg hide">
-<div id="npc" class="card pad rise hide"><div class="ct">Members without a part</div>
-<p class="sub" id="npsub" style="margin:0 0 6px"></p><div id="nplist"></div><p id="mnp" class="s"></p></div>
+<div class="card pad rise hide npc"><div class="ct">Members without a part</div>
+<p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
 <div id="qsum"></div>
 <div class="card rise tblc"><div class="tblh"><span>Waiting for your decision</span><span id="qcount" class="s"></span></div>
 <div id="qfind" class="hide" style="padding:0 20px 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="qq" class="in" placeholder="Search a name" style="flex:2 1 160px;max-width:260px" autocomplete="off"><select id="qc" class="in" style="flex:1 1 120px;max-width:170px"></select><select id="qr" class="in" style="flex:1 1 170px;max-width:240px"></select><select id="qt" class="in" style="flex:1 1 150px;max-width:210px"></select><button id="qx" class="btn line sm" type="button">Clear</button><button id="qall" class="btn line sm" type="button">Tick all shown</button></div>
@@ -1073,6 +1075,7 @@ function pCard(r, extra) {
     '<p class="sub" style="margin:4px 0 0">Reason: ' + esc(r.reason) + '</p>' + (extra || '') + '</div>';
 }
 async function loadPeople(keepMsg) {
+  loadNoPart();
   if (!keepMsg) say('m12b', '');
   say('m12', 'Loading…');
   try {
@@ -1284,7 +1287,7 @@ async function loadHome() {
     if (t.checkins) h += link('checkins', tile('Check-ins to validate', t.checkins.waiting, '<span class="pill p-pend">' + t.checkins.flagged + ' flagged</span><span class="pill p-val">' + t.checkins.validated + ' checked</span>', '#20775A'));
     if (t.requests) h += link('requests', tile('Requests waiting', t.requests.waiting, '<span class="pill p-pend">' + t.requests.late + ' late</span>' + (t.requests.flagged ? '<span class="pill p-no">' + t.requests.flagged + ' absent, no request' + (t.requests.hoursLeft ? ' · ' + t.requests.hoursLeft + ' h left' : '') + (t.requests.lapsed ? ' · ' + t.requests.lapsed + ' time is up' : '') + '</span>' : ''), '#95621D'));
     if (t.access) h += link('people', tile('People and access', t.access.waiting, '<span class="pill p-pend">' + t.access.waiting + ' for your answer</span><span class="pill p-val">' + t.access.ready + ' ready to carry out</span>', '#2F4F7E'));
-    if (t.noPart) h += link('requests', tile('Members without a part', t.noPart.count, '<span class="pill p-pend">choose a part for each</span>', '#95621D'));
+    if (t.noPart) h += link(has('requests') ? 'requests' : 'people', tile('Members without a part', t.noPart.count, '<span class="pill p-pend">choose a part for each</span>', '#95621D'));
     if (t.appeals) h += link('requests', tile('Appeals waiting for you', t.appeals.waiting, '', '#95621D'));
     if (t.email) h += '<div class="card stat">' + tile('Emails left today', t.email.left, '<span class="s">' + t.email.reserve + ' are kept for sign-in codes</span>', '#2F4F7E') + '</div>';
     if (t.counts) h += '<div class="card stat">' + tile('Active members', t.counts.members, '<span class="pill p-val">' + t.counts.campuses + ' campuses</span>', '#2F4F7E') + '</div>';
@@ -1519,30 +1522,32 @@ async function loadAbsence() {
 const FLABEL = {validate: 'Was excused', approve: 'Excuse', reject: 'Not excused'};
 const OPLABEL = {validate: 'Validate', approve: 'Approve', reject: 'Reject', delegate: 'Hand to a Campus MD', 'appeal-approve': 'Approve appeal', 'appeal-reject': 'Reject appeal'};
 
-// ---- Members without a part (Requests page) ----
+// ---- Members without a part (Requests page, and People and access for Desk A) ----
+function npSay(t, kind) { document.querySelectorAll('.mnp').forEach(e => { e.textContent = t || ''; e.className = 's mnp' + (kind ? ' ' + kind : ''); }); }
 async function loadNoPart() {
   try {
     const j = await call({action: 'member.noPart', token});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok || !j.rows.length) { $('npc').classList.add('hide'); return; }
-    $('npc').classList.remove('hide');
-    $('npsub').textContent = j.rows.length + ' member' + (j.rows.length === 1 ? ' has' : 's have') + ' no part yet. Choose the part and save. Where the member once typed a part on the attendance form, it is already chosen for you; check it before you save.';
-    $('nplist').innerHTML = j.rows.map(r => '<div class="npr" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:9px 0;border-top:1px solid #EEF1F6"><div style="flex:2 1 200px"><b>' + esc(r.name) + '</b><div class="sub" style="margin:0">' + esc(r.campus) + ' · ' + esc(r.memberId) + (r.suggestion ? ' · from the attendance form' : '') + '</div></div>' +
+    const cards = document.querySelectorAll('.npc');
+    if (!j.ok || !j.rows.length) { cards.forEach(c => c.classList.add('hide')); return; }
+    const sub = j.rows.length + ' member' + (j.rows.length === 1 ? ' has' : 's have') + ' no part yet. Choose the part and save. Where the member once typed a part on the attendance form, it is already chosen for you; check it before you save.';
+    const list = j.rows.map(r => '<div class="npr" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:9px 0;border-top:1px solid #EEF1F6"><div style="flex:2 1 200px"><b>' + esc(r.name) + '</b><div class="sub" style="margin:0">' + esc(r.campus) + ' · ' + esc(r.memberId) + (r.suggestion ? ' · from the attendance form' : '') + '</div></div>' +
       '<select class="in npp" style="flex:1 1 130px" data-npid="' + esc(r.memberId) + '"><option value="">Choose a part</option>' + j.parts.map(p => '<option' + (p === r.suggestion ? ' selected' : '') + '>' + esc(p) + '</option>').join('') + '</select>' +
       '<button class="btn red sm" type="button" data-npsave="' + esc(r.memberId) + '"' + (j.saving ? '' : ' disabled') + '>Save</button></div>').join('');
-  } catch (e) { $('npc').classList.add('hide'); }
+    cards.forEach(c => { c.classList.remove('hide'); c.querySelector('.npsub').textContent = sub; c.querySelector('.nplist').innerHTML = list; });
+  } catch (e) { document.querySelectorAll('.npc').forEach(c => c.classList.add('hide')); }
 }
 document.addEventListener('click', async ev => {
   const b = ev.target.closest && ev.target.closest('[data-npsave]'); if (!b) return;
-  const id = b.dataset.npsave, sel = document.querySelector('[data-npid="' + id + '"]'), part = sel ? sel.value : '';
-  if (!part) return say('mnp', 'Choose a part first.', 'bad');
-  b.disabled = true; say('mnp', 'Saving…');
+  const id = b.dataset.npsave, sel = b.closest('.npr').querySelector('select'), part = sel ? sel.value : '';
+  if (!part) return npSay('Choose a part first.', 'bad');
+  b.disabled = true; npSay('Saving…');
   try {
     const j = await call({action: 'member.setPart', token, memberId: id, part});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { b.disabled = false; return say('mnp', j.error || 'Not saved.', 'bad'); }
-    say('mnp', j.summary + '.', 'ok'); loadNoPart();
-  } catch (e) { b.disabled = false; say('mnp', 'Network problem. Try again.', 'bad'); }
+    if (!j.ok) { b.disabled = false; return npSay(j.error || 'Not saved.', 'bad'); }
+    await loadNoPart(); npSay(j.summary + '.', 'ok');
+  } catch (e) { b.disabled = false; npSay('Network problem. Try again.', 'bad'); }
 });
 async function loadQueue() {
   loadNoPart();
