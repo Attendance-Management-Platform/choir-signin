@@ -479,7 +479,8 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 <div id="qsum"></div>
 <div class="card rise tblc"><div class="tblh"><span>Waiting for your decision</span><span id="qcount" class="s"></span></div>
 <div id="qfind" class="hide" style="padding:0 20px 10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input id="qq" class="in" placeholder="Search a name" style="flex:2 1 160px;max-width:260px" autocomplete="off"><select id="qc" class="in" style="flex:1 1 120px;max-width:170px"></select><select id="qr" class="in" style="flex:1 1 170px;max-width:240px"></select><select id="qt" class="in" style="flex:1 1 150px;max-width:210px"></select><button id="qx" class="btn line sm" type="button">Clear</button><button id="qall" class="btn line sm" type="button">Tick all shown</button></div>
-<div id="qrows"></div>
+<div id="qrows" style="max-height:62vh;overflow-y:auto;overscroll-behavior:contain"></div>
+<div id="qpg" style="display:none;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 20px;border-top:1px solid var(--line)"><button id="qprev" class="btn line sm" type="button">Previous</button><span id="qpgt" class="s"></span><button id="qnext" class="btn line sm" type="button">Next</button></div>
 <div id="qbar" class="foot hide"><span>Tick several, then confirm once. For absences nobody asked for, you give one reason for all the ticked ones.</span><span class="actions" style="margin:0"><button id="qvtick" class="btn line" type="button">Validate ticked (0)</button><button id="qatick" class="btn red" type="button">Approve ticked (0)</button></span></div>
 <p id="m7" class="s" style="padding:12px 20px;margin:0"></p></div>
 </div>
@@ -1602,8 +1603,9 @@ async function loadQueue() {
         '<div class="qact">' + btns + '</div></div>';
     }).join('');
     const rowsEl = () => Array.from($('qrows').querySelectorAll('.qrow'));
-    const shown = () => rowsEl().filter(e => e.style.display !== 'none');
-    const ticked = () => Array.from($('qrows').querySelectorAll('.qtick:checked')).filter(x => x.closest('.qrow').style.display !== 'none');
+    let qpage = 0; const QPS = 8;
+    const shown = () => rowsEl().filter(e => e.dataset.m === '1');
+    const ticked = () => Array.from($('qrows').querySelectorAll('.qtick:checked')).filter(x => x.closest('.qrow').dataset.m === '1');
     const upd = () => {
       const t = ticked(), v = t.filter(x => x.dataset.v).length, a = t.filter(x => x.dataset.a).length;
       $('qvtick').textContent = 'Validate ticked (' + v + ')'; $('qvtick').disabled = v === 0;
@@ -1612,10 +1614,21 @@ async function loadQueue() {
     };
     const filt = () => {
       const q = $('qq').value.trim().toLowerCase(), c = $('qc').value, t = $('qt').value, rr = $('qr').value;
-      rowsEl().forEach(e => { e.style.display = (!q || e.dataset.k.indexOf(q) !== -1) && (!c || e.dataset.c === c) && (!rr || e.dataset.r === rr) && (!t || e.dataset.t === t) ? '' : 'none'; });
+      rowsEl().forEach(e => { e.dataset.m = (!q || e.dataset.k.indexOf(q) !== -1) && (!c || e.dataset.c === c) && (!rr || e.dataset.r === rr) && (!t || e.dataset.t === t) ? '1' : ''; });
       $('qcount').textContent = items.length ? 'Showing ' + shown().length + ' of ' + items.length + '.' : '';
-      upd();
+      qpage = 0; draw();
     };
+    const draw = () => {
+      const m = shown(), pages = Math.max(1, Math.ceil(m.length / QPS));
+      qpage = Math.max(0, Math.min(pages - 1, qpage));
+      rowsEl().forEach(e => { e.style.display = 'none'; });
+      m.slice(qpage * QPS, qpage * QPS + QPS).forEach(e => { e.style.display = ''; });
+      $('qpg').style.display = m.length <= QPS ? 'none' : 'flex';
+      $('qpgt').textContent = 'Page ' + (qpage + 1) + ' of ' + pages + ' · ' + m.length + ' request' + (m.length === 1 ? '' : 's');
+      $('qprev').disabled = qpage === 0; $('qnext').disabled = qpage >= pages - 1;
+      $('qrows').scrollTop = 0; upd();
+    };
+    $('qprev').onclick = () => { qpage--; draw(); }; $('qnext').onclick = () => { qpage++; draw(); };
     $('qq').oninput = filt; $('qc').onchange = $('qr').onchange = $('qt').onchange = filt;
     $('qx').onclick = () => { $('qq').value = ''; $('qc').value = ''; $('qr').value = ''; $('qt').value = ''; rowsEl().forEach(e => { const b = e.querySelector('.qtick'); if (b) b.checked = false; }); filt(); };
     $('qall').onclick = () => { shown().forEach(e => { const b = e.querySelector('.qtick'); if (b) b.checked = true; }); upd(); };
