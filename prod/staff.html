@@ -480,14 +480,12 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 
 <div id="s5" class="pg hide">
 <div class="two">
-<div class="c1"><div class="card pad rise"><div class="ct">Mark a member by hand</div><p class="sub">For someone with no phone, camera or location. It is labelled "marked by hand" and checked by someone else.</p>
-<label for="hid" class="lb">Member ID</label><input id="hid" class="in" autocomplete="off" placeholder="Member ID">
-<div class="actions"><button id="hmark" class="btn red" type="button">Mark present</button></div><p id="m5" class="s"></p></div></div>
+<div class="c1"><div id="rollbox"></div><p id="m5" class="s"></p></div>
 <div class="c2"><div class="card pad rise" style="animation-delay:.06s"><div class="ct">What happens next</div>
 <div class="step" style="margin-top:8px"><span>1. You mark the member present</span><span class="pill p-pend">Marked by hand</span></div>
 <div class="step"><span>2. Someone else checks it</span><span class="pill p-val">Checked</span></div>
 <div class="step"><span>3. It counts in attendance</span><span class="pill p-ok">Recorded</span></div>
-<div class="note" style="margin-top:10px">Only people on the choir list can be marked. You cannot mark yourself.</div></div></div>
+<div class="note" style="margin-top:10px">Only people on the choir list can be marked. You cannot mark yourself. Your campus Music Director or Desk D marks until 4 hours after the rehearsal ends. Excused is for the Global Admin or Assistant only, with a reason.</div></div></div>
 </div></div>
 
 <div id="s6" class="pg hide">
@@ -583,7 +581,7 @@ async function call(body) {
   return j;
 }
 async function call1(body) {
-  if (ckRid && /^(validate\.|late\.|handmark|room\.)/.test(String(body.action))) body.rehearsalId = ckRid;
+  if (ckRid && /^(validate\.|late\.|handmark|room\.|roll\.)/.test(String(body.action))) body.rehearsalId = ckRid;
   if (++pending === 1) busyT = setTimeout(() => $('busy').classList.remove('hide'), 400);
   try {
     const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
@@ -645,7 +643,7 @@ try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('
 function go(v) {
   clearTimeout(timer);
   if (v === 's3') return start();
-  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
 /** "Clear this page": empties the boxes and filters on a menu page, closes anything open on it and reloads it fresh. It never deletes saved data. */
 const CLEARABLE = ['s4', 's5', 's6', 's7', 's8', 's11', 's12', 's13', 's15', 's16', 's17'];
@@ -1976,11 +1974,39 @@ $('rsend').onclick = async () => {
   catch (e) { say('m6', 'Network problem. Try again.', 'bad'); }
   $('rsend').disabled = false;
 };
-$('hmark').onclick = async () => {
-  if (!$('hid').value.trim()) return say('m5', 'Enter the Member ID.', 'bad');
-  try { const k = await call({action: 'handmark', token, memberId: $('hid').value.trim()}); say('m5', k.ok ? 'Marked present (by hand).' : (k.error || 'Could not mark.'), k.ok ? 'ok' : 'bad'); if (k.ok) $('hid').value = ''; }
-  catch (e) { say('m5', 'Network problem. Try again.', 'bad'); }
-};
+const ROLLLAB = {'': ['Not marked', 'p-pend'], present: ['Present', 'p-ok'], absent: ['Absent', 'p-no'], excused: ['Excused', 'p-val'], notroom: ['Not in room', 'p-no']};
+async function loadRoll() {
+  const box = $('rollbox'); if (!box) return;
+  try {
+    const j = await call({action: 'roll.list', token, rehearsalId: (typeof ckRid !== 'undefined' && ckRid) ? ckRid : undefined});
+    if (j && j.signedOut) { signedOutNow(); return; }
+    if (!j || !j.ok) { box.innerHTML = '<div class="card pad rise"><div class="ct">Roll call</div><p class="sub">' + esc((j && j.error) || 'Not available.') + '</p></div>'; return; }
+    const c = j.counts || {};
+    fpPanel('roll', 'rollbox', {title: 'Roll call', sub: c.present + ' present · ' + c.absent + ' absent · ' + c.excused + ' excused · ' + c.none + ' not marked.' + (j.campus ? ' You see your own campus.' : '') + (j.window && !j.window.open ? ' The window is closed for you.' : ''),
+      items: j.rows, empty: 'No members to show.',
+      fields: [{k: 'q', label: 'Search', ph: 'A name or ID', type: 'text', get: r => r.name + ' ' + r.memberId},
+        {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus},
+        {k: 'part', label: 'Part', type: 'list', get: r => r.part},
+        {k: 'state', label: 'State', type: 'list', get: r => ROLLLAB[r.state || ''][0], all: ['Not marked', 'Present', 'Absent', 'Excused', 'Not in room']}],
+      card: r => '<div class="fprow"><div style="flex:1 1 220px"><div class="nm">' + esc(r.name || r.memberId) + '</div><div class="mt">' + esc(r.memberId) + (r.campus ? ' · ' + esc(r.campus) : '') + (r.part ? ' · ' + esc(r.part) : '') + '</div></div>' +
+        '<div class="tkside"><span class="pill ' + ROLLLAB[r.state || ''][1] + '">' + ROLLLAB[r.state || ''][0] + '</span>' + (r.how && r.state ? '<span class="pill p-pend">' + esc(r.how === 'hand' ? 'by hand' : r.how === 'approved' ? 'approved request' : r.how) + '</span>' : '') + (r.validated && r.state === 'present' ? '<span class="pill p-val">checked</span>' : '') +
+        (r.canPresent ? '<button class="btn red sm" type="button" data-roll="present" data-id="' + esc(r.memberId) + '">Present</button>' : '') +
+        (r.canAbsent ? '<button class="btn line sm" type="button" data-roll="absent" data-id="' + esc(r.memberId) + '">Absent</button>' : '') +
+        (r.canExcused ? '<button class="btn line sm" type="button" data-roll="excused" data-id="' + esc(r.memberId) + '">Excused</button>' : '') +
+        (r.canTakeBack ? '<button class="btn line sm" type="button" data-roll="clear" data-id="' + esc(r.memberId) + '">Take back</button>' : '') + '</div></div>'});
+  } catch (e) { box.innerHTML = ''; }
+}
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('[data-roll]'); if (!b) return;
+  b.disabled = true;
+  const body = {action: 'roll.mark', token, memberId: b.dataset.id, mark: b.dataset.roll, rehearsalId: (typeof ckRid !== 'undefined' && ckRid) ? ckRid : undefined};
+  if (b.dataset.roll === 'excused') { const why = prompt('Why is this member excused? (10 to 300 characters)'); if (!why) { b.disabled = false; return; } body.reason = why.trim(); }
+  const j = await call(body);
+  if (j && j.signedOut) { signedOutNow(); return; }
+  if (j && j.needsReason) { b.disabled = false; return; }
+  await loadRoll();
+  say('m5', j && j.ok ? (j.summary || 'Saved.') : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
+});
 function say(id, text, cls) { $(id).textContent = text; $(id).className = 's ' + (cls || ''); }
 let cd = null;
 function cool(ms) {
