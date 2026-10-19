@@ -1982,7 +1982,7 @@ async function loadRoll() {
     if (j && j.signedOut) { signedOutNow(); return; }
     if (!j || !j.ok) { box.innerHTML = '<div class="card pad rise"><div class="ct">Roll call</div><p class="sub">' + esc((j && j.error) || 'Not available.') + '</p></div>'; return; }
     const c = j.counts || {};
-    fpPanel('roll', 'rollbox', {title: 'Roll call', sub: c.present + ' present · ' + c.absent + ' absent · ' + c.excused + ' excused · ' + c.none + ' not marked.' + (j.campus ? ' You see your own campus.' : '') + (j.window && !j.window.open ? ' The window is closed for you.' : ''),
+    fpPanel('roll', 'rollbox', {title: 'Roll call', sub: c.present + ' present · ' + c.absent + ' absent · ' + c.excused + ' excused · ' + c.none + ' not marked.' + (j.campus ? ' You see your own campus.' : '') + (j.window ? (j.campus ? (j.window.mdOpen ? ' It is your turn to mark.' : ' It is not your turn to mark now.') : (j.window.deskOpen ? ' It is Desk D\'s turn to mark.' : j.window.open ? ' You can check the Campus MDs\' marks. Desk D marks from 45 minutes before the end.' : ' The roll call is closed.')) : ''),
       items: j.rows, empty: 'No members to show.',
       fields: [{k: 'q', label: 'Search', ph: 'A name or ID', type: 'text', get: r => r.name + ' ' + r.memberId},
         {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus},
