@@ -204,6 +204,20 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .pg .ct{letter-spacing:.2px}
 .pg .pill{box-shadow:inset 0 0 0 1px rgba(23,32,57,.06)}
 @media(max-width:480px){#htasks .card{padding:20px 16px}#htasks .tkrow{padding:14px 14px}#htasks .tkside{justify-content:flex-start}#htasks .ct{font-size:18px}}
+.anl,.ntc{padding:26px 28px;border:1px solid #E3E9F5;background:linear-gradient(160deg,#fff 0%,#F7F9FF 100%);box-shadow:0 18px 44px rgba(30,45,90,.08);position:relative;overflow:hidden}
+.anl::before,.ntc::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(90deg,#2F4F86,#172039 45%,#8E0008)}
+.ntc::before{background:linear-gradient(90deg,#D9A441,#B6000A)}
+.anh{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.anh .ct{font-size:20px;color:#172039}.anh .sub{margin:4px 0 0}
+.anl .antabs,.ntc .nttabs{margin-top:0}
+.anl .anp,.ntc .ntp{margin-top:22px}.anl .anp[hidden],.ntc .ntp[hidden]{display:none}
+.anl .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.anl .kpi{margin:0;padding:18px 20px;border:1px solid #E7ECF6;border-top:5px solid var(--kc,#2F4F7E);border-radius:18px;background:#fff;box-shadow:0 8px 22px rgba(30,45,90,.06)}
+.anl .kpi .kv{font-size:32px}
+.anl .anr{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;margin-top:24px;align-items:center}
+.anl .anbox{border:1px solid #E7ECF6;border-radius:18px;background:#fff;padding:20px 22px}
+.nt{border:1px solid #EFE3CC;border-radius:16px;padding:18px 20px;margin:0 0 14px;background:#fff}.nt:last-child{margin-bottom:0}.nt .ct{font-size:16px}
+@media(max-width:899px){.anl .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.anl .anr{grid-template-columns:1fr}}
+@media(max-width:480px){.anl,.ntc{padding:20px 16px}.anl .kpis{gap:12px}.anl .kpi .kv{font-size:26px}}
 @media(max-width:480px){.calc{min-height:48px;padding:2px}.calp{font-size:9px;padding:1px 2px}}
 .gq{grid-template-columns:36px 1.5fr 1.1fr .9fr 1.7fr}
 .foot{padding:12px 20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
@@ -425,8 +439,9 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 </div>
 
 <div id="s10" class="pg hide">
-<div id="htasks"></div>
 <div id="hcharts"></div>
+<div id="htasks"></div>
+<div id="hnotes"></div>
 <div id="hgrid" class="stats rise"></div>
 <div id="hqr"></div>
 <p id="m10" class="s"></p>
@@ -742,6 +757,23 @@ function heat(cols, rows, cells, label, rate) {
     rows.map((r, i) => '<tr><th class="rl">' + esc(r) + '</th>' + cols.map((c, j) => { const x = cells[i][j]; const v = x ? x.v : null;
       return '<td style="background:' + bg(v) + ';color:' + fg(v) + '"' + (x && x.title ? ' title="' + esc(x.title) + '"' : '') + '>' + (x ? esc(x.t) : '–') + '</td>'; }).join('') + '</tr>').join('') + '</tbody></table></div><p class="sub" style="margin:8px 0 0">Darker means higher' + (rate ? '; red means under 70%' : '') + '. A dash means no one in that group.</p>';
 }
+let ANTAB = 'ov';
+document.addEventListener('click', ev => {
+  const b = ev.target.closest && ev.target.closest('[data-antab],[data-nttab]'); if (!b) return;
+  const at = b.dataset.antab !== undefined, root = b.closest(at ? '.anl' : '.ntc'), v = at ? b.dataset.antab : b.dataset.nttab;
+  if (at) ANTAB = v;
+  root.querySelectorAll(at ? '[data-antab]' : '[data-nttab]').forEach(x => x.classList.toggle('on', x === b));
+  root.querySelectorAll(at ? '.anp' : '.ntp').forEach(x => { x.hidden = x.dataset.p !== v; });
+});
+function drawNotes(items) {
+  const box = $('hnotes'); if (!box) return;
+  items = items.filter(x => x[2]);
+  if (!items.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="card ntc rise"><div class="anh"><div><div class="ct">Updates</div><p class="sub">Notices and recent changes.</p></div>' +
+    (items.length > 1 ? '<div class="fpchips nttabs">' + items.map((x, i) => '<button type="button" class="fpchip' + (i ? '' : ' on') + '" data-nttab="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' : '') + '</div>' +
+    items.map((x, i) => '<div class="ntp" data-p="' + x[0] + '"' + (i ? ' hidden' : '') + '>' + x[2] + '</div>').join('') + '</div>';
+  box.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
+}
 function homeCharts(c, drill, canSee) {
   if (!c) return '';
   if (!c.series.length) return '<div class="card pad rise"><div class="ct">Attendance</div><p class="sub">No official attendance yet. It appears here once a rehearsal has been processed and published to ATTENDANCE SUMMARY and ATTENDANCE LOG.</p></div>';
@@ -750,19 +782,18 @@ function homeCharts(c, drill, canSee) {
   const prev = c.series.length > 1 ? c.series[c.series.length - 2] : null, delta = prev ? (Math.round((L.rate - prev.rate) * 10) / 10) : null;
   const at = c.attention || {lowCampuses: [], streak: 0, who: []};
   const none = !at.lowCampuses.length && !at.streak;
-  const attn = '<div class="c5 card pad"><div class="ct">Needs attention</div>' + (none ? '<p class="sub" style="margin:0">Nothing needs attention right now. Every campus is at 70% or more and no one has missed three in a row.</p>' :
-    (at.lowCampuses.length ? '<p class="sub" style="margin:0 0 6px">Under 70% at ' + esc(L.id || 'the last rehearsal') + '</p><div style="display:flex;gap:8px;flex-wrap:wrap">' + at.lowCampuses.map(x => '<span class="pill p-no">' + esc(x.campus) + ' · ' + x.rate + '%</span>').join('') + '</div>' : '') +
-    (at.streak ? '<p class="sub" style="margin:12px 0 4px"><b>' + at.streak + '</b> member' + (at.streak === 1 ? ' has' : 's have') + ' missed 3 or more rehearsals in a row.</p>' + ((at.who || []).length ? '<p class="sub" style="margin:0">' + at.who.map(x => esc(x.name) + ' (' + esc(x.campus) + ', ' + x.streak + ')').join(' · ') + '</p>' : '') : '') +
-    (canSee && at.streak ? '<div class="actions"><button class="btn line sm" type="button" data-anpreset="streak">See who</button></div>' : '')) + '</div>';
-  return '<div class="dash rise">' +
-    '<div class="c3 card kpi" style="--kc:' + rateColor(L.rate) + '"><div class="kk">Attendance rate</div><div class="kv">' + L.rate + '%</div><div class="ks">' + esc(L.id || '') + (L.date ? ' · ' + esc(L.date) : '') + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + ' pts') + '</div></div>' +
-    '<div class="c3 card kpi" style="--kc:' + NAVY + '"><div class="kk">Present</div><div class="kv">' + L.present + '</div><div class="ks">of ' + L.eligible + ' members</div></div>' +
-    '<div class="c3 card kpi" style="--kc:' + ATTN + '"><div class="kk">Absent</div><div class="kv">' + L.absent + '</div><div class="ks">no approved reason</div></div>' +
-    '<div class="c3 card kpi" style="--kc:' + SOFT + '"><div class="kk">Excused</div><div class="kv">' + L.excused + '</div><div class="ks">approved absences</div></div>' +
-    '<div class="c7 card pad"><div class="ct">Last ' + c.series.length + ' rehearsals</div><div class="grow" style="display:flex;align-items:center"><div style="width:100%">' + colChart(c.series.map(p => ({name: p.id, value: p.rate})), {unit: '%', drill: drill, label: 'Attendance rate, last rehearsals'}) + '</div></div>' + (canSee ? '<p class="sub" style="margin:6px 0 0">Older rehearsals, months and years are in Reports.</p>' : '') + '</div>' +
-    '<div class="c5 card pad"><div class="ct">Last rehearsal</div><div class="grow" style="display:flex;align-items:center;justify-content:center">' + statusDonut({present: L.present, absent: L.absent, excused: L.excused}) + '</div></div>' +
-    '<div class="c12 card pad"><div class="ct">By campus · last rehearsal</div>' + rankBars(camps, {unit: '%', drill: drill}) + '</div>' +
-    '</div>';
+  const id = (L.id || '') + (L.date ? ' · ' + L.date : '');
+  const TB = [['ov', 'Overview'], ['tr', 'Trend'], ['cp', 'By campus']];
+  return '<div class="card anl rise"><div class="anh"><div><div class="ct">Analytics</div><p class="sub">Official attendance' + (id ? ' · ' + esc(id) : '') + '</p></div>' +
+    '<div class="fpchips antabs">' + TB.map(x => '<button type="button" class="fpchip' + (ANTAB === x[0] ? ' on' : '') + '" data-antab="' + x[0] + '">' + x[1] + '</button>').join('') + '</div></div>' +
+    '<div class="anp" data-p="ov"' + (ANTAB === 'ov' ? '' : ' hidden') + '><div class="kpis">' +
+    '<div class="kpi" style="--kc:' + rateColor(L.rate) + '"><div class="kk">Attendance rate</div><div class="kv">' + L.rate + '%</div><div class="ks">' + esc(L.id || '') + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + ' pts') + '</div></div>' +
+    '<div class="kpi" style="--kc:' + NAVY + '"><div class="kk">Present</div><div class="kv">' + L.present + '</div><div class="ks">of ' + L.eligible + ' members</div></div>' +
+    '<div class="kpi" style="--kc:' + ATTN + '"><div class="kk">Absent</div><div class="kv">' + L.absent + '</div><div class="ks">no approved reason</div></div>' +
+    '<div class="kpi" style="--kc:' + SOFT + '"><div class="kk">Excused</div><div class="kv">' + L.excused + '</div><div class="ks">approved absences</div></div></div>' +
+    '<div class="anbox" style="margin-top:22px"><div class="ct" style="margin-bottom:6px">Last rehearsal</div><div style="display:flex;justify-content:center">' + statusDonut({present: L.present, absent: L.absent, excused: L.excused}) + '</div></div></div>' +
+    '<div class="anp" data-p="tr"' + (ANTAB === 'tr' ? '' : ' hidden') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">Last ' + c.series.length + ' rehearsals</div>' + colChart(c.series.map(p => ({name: p.id, value: p.rate})), {unit: '%', drill: drill, label: 'Attendance rate, last rehearsals'}) + '</div></div>' +
+    '<div class="anp" data-p="cp"' + (ANTAB === 'cp' ? '' : ' hidden') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">By campus · last rehearsal</div>' + rankBars(camps, {unit: '%', drill: drill}) + '</div></div></div>';
 }
 let rpState = null, rpPick = null;
 function drillTo(scope, key) { rpPick = {scope, key}; go('s11'); }
@@ -1447,18 +1478,19 @@ async function loadHome() {
     $('hgrid').innerHTML = h || '<div class="card pad"><div class="ct">Welcome</div><p class="sub">Nothing is waiting for you here. Use the menu for your tabs.</p></div>';
     document.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     const cr = t.cancelReminder;
-    const crh = cr ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + esc(cr.id) + (cr.kind === 'last' ? '' : ' held as planned?') + '</div><p class="sub">' +
+    const crh = cr ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + esc(cr.id) + (cr.kind === 'last' ? '' : ' held as planned?') + '</div><p class="sub">' +
       (cr.kind === 'last' ? 'A held rehearsal can be cancelled only within 36 hours of its end. About ' + cr.hoursLeft + ' hour(s) are left. After that it cannot be cancelled.' : 'If ' + esc(cr.id) + ' must be cancelled, do it now. A held rehearsal can be cancelled only within 36 hours of its end, and the Global Music Director and the Pastor in Charge must both say yes.') +
       '</p>' + (has('people') ? '<div class="actions"><button class="btn line" type="button" data-go="s12">Open People and access</button></div>' : '') + '</div>' : '';
     const awl = t.away ? Object.keys(t.away.away || {}).filter(r => t.away.away[r]) : [];
     const FN = {rehearsal: 'Set up rehearsals', qr: 'Show the QR', records: 'See attendance records'};
-    const awh = (awl.length ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Away now: ' + esc(awl.join(', ')) + '</div><p class="sub">If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.</p></div>' : '') +
-      ((j.openFunctions || []).length ? '<div class="card pad rise" style="background:#E6F2EC;border-color:#CBE2D6"><div class="ct">Opened to you for a short time</div><p class="sub">' + esc(j.openFunctions.map(f => FN[f] || f).join(', ')) + '. It ends by itself.</p></div>' : '');
-    const bph = (j.bypasses || []).length ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Done by an admin instead of the usual desk or role</div><p class="sub">The Global Admin or Assistant did these themselves, each with a reason. The desk or role it belongs to does not need to do them again.</p>' +
+    const awh = (awl.length ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Away now: ' + esc(awl.join(', ')) + '</div><p class="sub">If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.</p></div>' : '') +
+      ((j.openFunctions || []).length ? '<div class="nt" style="background:#E6F2EC;border-color:#CBE2D6"><div class="ct">Opened to you for a short time</div><p class="sub">' + esc(j.openFunctions.map(f => FN[f] || f).join(', ')) + '. It ends by itself.</p></div>' : '');
+    const bph = (j.bypasses || []).length ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Done by an admin instead of the usual desk or role</div><p class="sub">The Global Admin or Assistant did these themselves, each with a reason. The desk or role it belongs to does not need to do them again.</p>' +
       j.bypasses.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '<br><span class="s">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</span></p>').join('') + '</div>' : '';
-    const mch = (j.memberChanges || []).length ? '<div class="card pad rise"><div class="ct">Membership changes</div>' + j.memberChanges.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + (has('changes') ? '<div class="actions"><button class="btn line" type="button" data-go="s16">Open Changes and updates</button></div>' : '') + '</div>' : '';
-    const pth = t.petitions && t.petitions.waiting ? '<div class="card pad rise" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.petitions.waiting + ' petition(s) waiting for your answer</div><div class="actions"><button class="btn red" type="button" data-go="s16">Open Changes and updates</button></div></div>' : '';
-    $('hcharts').innerHTML = pth + awh + bph + mch + crh + homeCharts(t.charts, has('reports'), has('reports'));
+    const mch = (j.memberChanges || []).length ? '<div class="nt"><div class="ct">Membership changes</div>' + j.memberChanges.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + (has('changes') ? '<div class="actions"><button class="btn line" type="button" data-go="s16">Open Changes and updates</button></div>' : '') + '</div>' : '';
+    const pth = t.petitions && t.petitions.waiting ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.petitions.waiting + ' petition(s) waiting for your answer</div><div class="actions"><button class="btn red" type="button" data-go="s16">Open Changes and updates</button></div></div>' : '';
+    $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'));
+    drawNotes([['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
     drawTasks(j.tasks || []);
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
