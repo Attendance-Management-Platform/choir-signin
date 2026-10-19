@@ -777,7 +777,7 @@ async function prFlagCard(id) {
     (anchor ? (h => anchor.insertAdjacentHTML('beforebegin', h)) : (h => $('prdetail').insertAdjacentHTML('beforeend', h)))('<div id="prflagcard" class="card pad" style="margin-top:16px"><div class="ct">Absence answers</div>' +
       (f.campuses.length ? '<div style="overflow-x:auto"><table class="tbl" style="margin:6px 0 0"><thead><tr><th>Campus</th><th>With the Campus MD</th><th>With the Global Admin</th><th>Excused</th><th>Not excused</th><th>Time is up</th></tr></thead><tbody>' + f.campuses.map(c => '<tr><td><b>' + esc(c.campus) + '</b></td><td>' + c.waiting + '</td><td>' + c.validated + '</td><td>' + c.excused + '</td><td>' + c.notExcused + '</td><td>' + c.lapsed + '</td></tr>').join('') + '</tbody></table></div>' : '<p class="sub">Nobody is waiting for an answer for ' + esc(id) + '.</p>') +
       '<p class="sub">Each absent member with no request goes to their Campus MD, who has 48 hours. Anyone not excused in time stays Absent.</p>' +
-      (f.canChase ? '<div class="actions"><button class="btn line" type="button" data-prflag="' + esc(id) + '">Send the absence list again</button></div>' : '') + '</div>');
+      (f.canChase ? '<div class="actions"><button class="btn line" type="button" data-prflag="' + esc(id) + '">Send the absence list again</button><button class="btn line" type="button" data-prremind="' + esc(id) + '">Remind the Campus MDs now</button></div><p class="sub" style="margin:6px 0 0">Each Campus MD with absences waiting is emailed a count and the time left (no names). They are also reminded automatically at 24 and 6 hours left, once switched on. At most one email per person per day.</p>' : '') + '</div>');
   } catch (e) { /* the status card is only extra information */ }
 }
 document.addEventListener('click', async ev => {
@@ -799,6 +799,23 @@ document.addEventListener('click', async ev => {
     try { const j = await call({action: 'process.resolve', token, rehearsalId: $('prdetail').dataset.id, sourceRow: rs.dataset.row, choice, memberId: memberId.trim(), reason, activeFrom});
       if (j.signedOut) { signedOutNow(); return; }
       say('m15', j.ok ? 'Done: ' + j.summary + '.' : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if (j.ok) prOpen($('prdetail').dataset.id, true); else rs.disabled = false; } catch (e) { rs.disabled = false; say('m15', 'Network problem. Try again.', 'bad'); }
+    return;
+  }
+  const rm = ev.target.closest && ev.target.closest('[data-prremind]');
+  if (rm) {
+    if (!confirm('Email a reminder to each Campus MD who still has absences waiting? (In practice mode nothing goes to them. You get one preview instead.)')) return;
+    rm.disabled = true;
+    try { const j = await call({action: 'absence.remind', token, rehearsalId: rm.dataset.prremind}); if (j.signedOut) { signedOutNow(); return; }
+      const bits = [];
+      if (j.ok) {
+        bits.push(j.practice ? (j.sent ? 'Practice mode: nothing was sent to the Campus MDs. A preview of ' + j.wouldSend.length + ' reminder(s) was emailed to you.' : 'Practice mode: nothing was sent.') : j.sent + ' reminder(s) sent.');
+        if (!j.practice && j.skipped && j.skipped.today) bits.push(j.skipped.today + ' already reminded today.');
+        if (j.noMd && j.noMd.length) bits.push('No Campus MD with an email for: ' + j.noMd.join(', ') + '.');
+        if (j.later) bits.push(j.later + ' wait for tomorrow (daily email limit).');
+        if (!j.wouldSend.length && !j.sent) bits.push('Nobody needs a reminder now.');
+      }
+      say('m15', j.ok ? bits.join(' ') : (j.error || 'Could not send.'), j.ok ? 'ok' : 'bad'); } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
+    rm.disabled = false;
     return;
   }
   const fl = ev.target.closest && ev.target.closest('[data-prflag]');
