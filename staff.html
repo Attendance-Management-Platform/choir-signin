@@ -2596,6 +2596,17 @@ if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTab
 })();
 
 /** Changes and updates, and petitions. */
+/** Which menu to open to put a change right: only menus this person has. */
+function chWhere(c) {
+  const t = (c.label + ' ' + c.detail).toLowerCase(), k = /validat|room|check-in|hand/.test(t) ? 'checkins' : /absence/.test(t) ? 'absence' : /process|attendance/.test(t) ? 'process' : /rehearsal/.test(t) ? 'rehearsal' : /member|detail/.test(t) ? 'members' : /access|role|away/.test(t) ? 'people' : '';
+  return k && myTabs.indexOf(k) !== -1 ? k : '';
+}
+document.addEventListener('click', async ev => {
+  const u = ev.target.closest && ev.target.closest('[data-undo]'); if (!u) return;
+  const text = prompt('Why should this be undone? (10 to 300 characters). The System Administrator sees this.'); if (!text) return;
+  const j = await call({action: 'petition.send', kind: 'undo', token, text, about: u.dataset.undo});
+  say('m16', j.ok ? 'Sent: ' + j.summary + '.' : (j.error || 'Could not send.'), j.ok ? 'ok' : 'bad'); if (j.ok) loadChanges();
+});
 async function loadChanges() {
   say('m16', 'Loading…');
   try {
@@ -2616,11 +2627,13 @@ async function loadChanges() {
         {k: 'to', label: 'To', type: 'date', get: c => c.atMs}],
       card: c => '<div class="card pad" style="margin-top:0"><span class="pill ' + (c.bypass ? 'p-pend' : c.area === 'Admin' ? 'p-val' : 'p-info') + '">' + (c.bypass ? 'Done instead' : esc(c.area)) + '</span> <b>' + esc(c.label) + '</b> · ' + esc(c.recordId) + ' · ' + esc(c.by) + ' · ' + esc(tm(c.atMs)) +
         (c.detail ? '<br><span class="s">' + esc(c.detail) + '</span>' : '') + (c.reason ? '<br><span class="s">Reason: ' + esc(c.reason) + '</span>' : '') +
-        (j.petitionTo ? '<br><button class="btn line" type="button" style="margin-top:6px" data-pet="' + esc(c.label + ' ' + c.recordId) + '">Petition about this</button>' : '') + '</div>'});
-    $('chpet').innerHTML = j.petitions.length ? '<div class="card pad rise"><div class="ct">Petitions' + (j.counts.waiting ? ' (' + j.counts.waiting + ' waiting for you)' : '') + '</div>' + j.petitions.map(p => '<div style="border-top:1px solid var(--line);padding:8px 0">' + stPill(p.status) + ' <b>' + esc(p.from) + '</b> to the ' + esc(p.to) + ' · ' + esc(tm(p.atMs)) +
+        '<div class="actions" style="margin:6px 0 0">' + (j.petitionTo ? '<button class="btn line sm" type="button" data-pet="' + esc(c.label + ' ' + c.recordId) + '">Petition about this</button>' : '') +
+        (j.undoTo ? '<button class="btn red sm" type="button" data-undo="' + esc(c.label + ' ' + c.recordId + (c.by ? ' by ' + c.by : '')) + '">Ask the ' + esc(j.undoTo) + ' to undo this</button>' : '') +
+        (chWhere(c) ? '<button class="btn line sm" type="button" data-taskgo="' + chWhere(c) + '">Where to undo it</button>' : '') + '</div></div>'});
+    $('chpet').innerHTML = j.petitions.length ? '<div class="card pad rise"><div class="ct">Petitions' + (j.counts.waiting ? ' (' + j.counts.waiting + ' waiting for you)' : '') + '</div>' + j.petitions.map(p => '<div style="border-top:1px solid var(--line);padding:8px 0">' + (p.to === 'System Administrator' ? '<span class="pill p-info">Undo request</span> ' + stPill(p.status === 'Upheld' ? 'Done' : p.status === 'Declined' ? 'Declined' : p.status) : stPill(p.status)) + ' <b>' + esc(p.from) + '</b> to the ' + esc(p.to) + ' · ' + esc(tm(p.atMs)) +
       '<br><span class="s">' + esc(p.text) + (p.about ? ' · about: ' + esc(p.about) : '') + '</span>' + (p.answer ? '<br><span class="s">' + esc(p.answeredBy) + ': ' + esc(p.answer) + '</span>' : '') +
-      (p.canAnswer ? '<div class="actions" style="margin:6px 0 0"><button class="btn red" type="button" data-pans="upheld" data-id="' + esc(p.id) + '">Uphold</button><button class="btn line" type="button" data-pans="declined" data-id="' + esc(p.id) + '">Decline</button></div>' : '') + '</div>').join('') +
-      '<p class="sub">Upholding a petition is the recorded decision. The change itself is put right with the normal tool (for example Members or People and access).</p></div>' : '';
+      (p.canAnswer ? '<div class="actions" style="margin:6px 0 0"><button class="btn red" type="button" data-pans="upheld" data-id="' + esc(p.id) + '">' + (p.to === 'System Administrator' ? 'Undone' : 'Uphold') + '</button><button class="btn line" type="button" data-pans="declined" data-id="' + esc(p.id) + '">' + (p.to === 'System Administrator' ? 'Not undone' : 'Decline') + '</button></div>' : '') + '</div>').join('') +
+      '<p class="sub">Upholding a petition is the recorded decision. The change itself is put right with the normal tool (for example Members or People and access). For an undo request, carry the undo out first, then press Undone and say what you did.</p></div>' : '';
   } catch (e) { say('m16', 'Network problem. Try again.', 'bad'); }
 }
 /** Members: find, deactivate, reactivate, catch up the dates. */
