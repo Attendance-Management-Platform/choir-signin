@@ -2331,7 +2331,7 @@ async function loadNoPart() {
     const j = await call({action: 'member.noPart', token});
     if (j.signedOut) { signedOutNow(); return; }
     const cards = document.querySelectorAll('.npc');
-    if (!j.ok || !j.rows.length) { cards.forEach(c => { if (j.ok && c.closest('#s17')) { c.classList.remove('hide'); c.querySelector('.npsub').textContent = 'Every active member has a part.'; c.querySelector('.nplist').innerHTML = ''; } else c.classList.add('hide'); }); return; }
+    if (!j.ok || !j.rows.length) { cards.forEach(c => c.classList.add('hide')); return; }
     const sub = j.rows.length + ' member' + (j.rows.length === 1 ? ' has' : 's have') + ' no part yet. Choose the part and save. Where the member once typed a part on the attendance form, it is already chosen for you; check it before you save.';
     const list = j.rows.map(r => '<div class="npr" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:9px 0;border-top:1px solid #EEF1F6"><div style="flex:2 1 200px"><b>' + esc(r.name) + '</b><div class="sub" style="margin:0">' + esc(r.campus) + ' · ' + esc(r.memberId) + (r.suggestion ? ' · from the attendance form' : '') + '</div></div>' +
       '<select class="in npp" style="flex:1 1 130px" data-npid="' + esc(r.memberId) + '"><option value="">Choose a part</option>' + j.parts.map(p => '<option' + (p === r.suggestion ? ' selected' : '') + '>' + esc(p) + '</option>').join('') + '</select>' +
