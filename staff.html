@@ -1004,6 +1004,7 @@ function drillTo(scope, key) { rpPick = {scope, key}; go('s11'); }
 
 // ---- Attendance records ----
 async function loadRecords() {
+  delete FP.rec; // the filters always start empty when the page is opened
   say('m13', 'Loading…');
   try {
     const j = await call({action: 'records.state', token});
@@ -1054,7 +1055,7 @@ async function showMember(id) {
       table(['Rehearsal', 'Date', 'Status'], j.rehearsals.map(r => [r.id, r.date || '', r.status])) + '</div>';
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
-$('rcrid').addEventListener('change', showRecords);
+$('rcrid').addEventListener('change', () => { delete FP.rec; showRecords(); });
 $('rcmc').addEventListener('change', findMember);
 $('rcmp').addEventListener('change', findMember);
 $('rcx').onclick = () => { $('rcq').value = ''; $('rcmc').value = ''; $('rcmp').value = ''; $('rcmatch').innerHTML = ''; $('rcmem').innerHTML = ''; say('m13', ''); $('rcq').focus(); };
@@ -1413,7 +1414,7 @@ function cbWrap(inp) {
   inp.style.cssText = 'width:100%;max-width:none;margin-top:0'; if (!inp.placeholder) inp.placeholder = ' ';
   inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
   const x = document.createElement('button'); x.type = 'button'; x.className = 'cbx'; x.tabIndex = -1; x.setAttribute('aria-label', 'Clear this box'); x.innerHTML = '&times;';
-  x.addEventListener('mousedown', ev => { ev.preventDefault(); inp.value = ''; inp.dispatchEvent(new Event('input', {bubbles: true})); inp.dispatchEvent(new Event('change', {bubbles: true})); inp.focus(); });
+  x.addEventListener('mousedown', ev => { ev.preventDefault(); inp.value = ''; inp.dispatchEvent(new Event('input', {bubbles: true})); inp.dispatchEvent(new Event('change', {bubbles: true})); inp.focus(); if (inp.__cb && inp.__cb.open) inp.__cb.open(); });
   w.appendChild(x); return w;
 }
 function cbAttach(inp, optsFn, onPick) {
@@ -1435,6 +1436,7 @@ function cbAttach(inp, optsFn, onPick) {
   };
   const hl = (txt, t) => { const i = t ? txt.toLowerCase().indexOf(t) : -1; return i < 0 ? esc(txt) : esc(txt.slice(0, i)) + '<b>' + esc(txt.slice(i, i + t.length)) + '</b>' + esc(txt.slice(i + t.length)); };
   const choose = i => { const o = st.items[i]; if (!o) return; box.classList.remove('on'); st.picking = true; try { st.pick(o, inp); } finally { st.picking = false; } box.classList.remove('on'); if (CBOPEN === box) CBOPEN = null; };
+  st.open = () => { st.typed = false; draw(); };
   inp.addEventListener('focus', () => { st.typed = false; draw(); }); inp.addEventListener('input', () => { if (st.picking) return; st.typed = true; draw(); });
   inp.addEventListener('keydown', ev => {
     if (!box.classList.contains('on')) { if (ev.key === 'ArrowDown') draw(); return; }
