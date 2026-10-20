@@ -2111,7 +2111,7 @@ async function loadRows() {
     $('ckrid').innerHTML = choices.map(x => '<option value="' + esc(x.id) + '"' + (x.id === j.rehearsalId ? ' selected' : '') + '>' + esc(x.id) + ' · ' + esc(new Date(x.startMs).toLocaleDateString('en-GB')) + (x.finished ? ' (finished)' : '') + '</option>').join('');
     $('ckrid').onchange = () => { ckRid = $('ckrid').value; loadRows(); };
     const c = j.counts || {waiting: 0, clean: 0, flagged: 0, validated: 0};
-    say('m4', j.processed ? esc(j.rehearsalId || 'This rehearsal') + ' has been processed. Nothing is waiting to be checked; this list is only a record.' : (j.rows.length ? '' : 'No check-ins yet.'));
+    say('m4', j.published ? esc(j.rehearsalId || 'This rehearsal') + ' has been published, so it is final and no longer listed here. You can see it on Records.' : j.processed ? esc(j.rehearsalId || 'This rehearsal') + ' has been processed. Nothing is waiting to be checked; this list is only a record.' : (j.rows.length ? '' : 'No check-ins yet.'));
     $('vsum').textContent = c.waiting + ' waiting (' + c.clean + ' clean, ' + c.flagged + ' flagged) · ' + c.validated + ' checked';
     $('vbar').classList.toggle('hide', !j.rows.length || j.processed === true);
     $('vall').textContent = 'Validate all clean (' + c.clean + ')';
