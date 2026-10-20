@@ -757,8 +757,15 @@ function drawTabs() {
   $('who').innerHTML = myName ? '<b>' + esc(myName) + '</b>' + (myRoles.length ? '<span class="s">' + esc(myRoles.join(', ')) + '</span>' : '') : '<b>Signed in</b>';
 }
 try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('rail-open'); } catch (e) {}
+/** Every search and filter box starts empty when a menu page is opened from another page. Choices made on a page are not remembered. */
+function filtersReset() {
+  Object.keys(FP).forEach(k => { delete FP[k]; });
+  ['prq', 'rcq'].forEach(id => { const e = $(id); if (e) e.value = ''; });
+  ['prst', 'prsrc', 'rcmc', 'rcmp', 'pkind'].forEach(id => { const e = $(id); if (e && e.value !== '') { e.value = ''; e.dispatchEvent(new Event('change', {bubbles: true})); } });
+}
 function go(v) {
   clearTimeout(timer);
+  { const cur = Array.from(document.querySelectorAll('.pg')).filter(x => !x.classList.contains('hide'))[0]; if (!cur || cur.id !== v) filtersReset(); }
   if (v === 's3') return start();
   show(v); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
 }
