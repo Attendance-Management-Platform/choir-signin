@@ -2640,20 +2640,23 @@ document.addEventListener('click', async ev => {
 /** "What you can undo": a folded card that tells each role, in plain words, what it can reverse, how, and what is final. */
 function undoGuideHtml() {
   const has = r => myRoles.indexOf(r) !== -1;
-  const sup = has('Global Admin') || has('Assistant Global Admin'), ga = has('Global Admin');
-  const doer = sup || has('Campus Music Director') || ['Desk B', 'Desk C', 'Desk D'].some(has) || myRoles.some(r => /^Desk [BCD]/.test(r));
+  const ga = has('Global Admin'), sup = ga || has('Assistant Global Admin'), A = has('Desk A'), B = has('Desk B'), C = has('Desk C'), D = has('Desk D'), md = has('Campus Music Director');
   const top = has('Global Music Director') || has('Pastor in Charge'), sysa = has('System Administrator');
   const row = (what, ans, how) => '<div class="ugr"><div class="ugw"><b>' + esc(what) + '</b><span class="pill ' + (ans === 'Yes' ? 'p-ok' : ans === 'No' ? 'p-no' : 'p-pend') + '">' + esc(ans) + '</span></div><div class="ugh">' + how + '</div></div>';
   let can = '', ask = '';
-  if (doer) {
-    can += row('A validated check-in', 'Yes', 'Open <b>Check-ins</b>. Find the person under <b>Checked</b> and press <b>Undo</b>. Give a reason of 5 to 200 characters. ' + (sup ? 'You can undo any check-in.' : 'You can undo any check-in that you were allowed to validate.'));
-    can += row('A late or on-time mark', 'Yes', 'Open <b>Check-ins</b> and press <b>Mark late</b> (or on time) again. The change is recorded.');
+  if (sup || C || D || md) {
+    const scope = sup ? 'You can undo any check-in.' : [D ? 'ordinary check-ins, and hand-marks made by a Campus Music Director (never Desk D\'s own marks)' : '', C ? 'any hand-marked entry' : '', md ? 'hand-marks Desk D made for members of your own campus' : ''].filter(Boolean).join('; ');
+    can += row('A validated check-in', 'Yes', 'Open <b>Check-ins</b>. Find the person under <b>Checked</b> and press <b>Undo</b>. Give a reason of 5 to 200 characters. ' + (sup ? scope : 'You can undo ' + scope + '.'));
   }
+  if (sup || C || D) can += row('A late or on-time mark', 'Once', 'Open <b>Check-ins</b> and press <b>Mark late</b> (or on time) with a reason. Each entry can be corrected only once, so it cannot be changed back afterwards. Check before you press.');
+  if (sup || A) can += row('A member change', 'Yes', 'Open <b>Members</b>, find the member and edit again, or deactivate or reactivate with a reason. Each change is recorded and the Campus Music Director is told.');
+  if (sup || B) can += row('Rehearsal details you saved', 'Yes', 'Open <b>Rehearsals</b>, choose the rehearsal and save the right date, times or venue. Each save is recorded.');
   if (ga) can += row('An absence the Assistant entered', 'Yes', 'Open the Change log, find the card, press <b>Where to undo it</b>, then <b>Cancel this absence</b> with a reason of 10 to 300 characters. It only works while the day is not yet published as official or cancelled.');
-  if (sup) can += row('Work a desk or Campus Music Director did', 'Partly', 'Open the Change log, find the card and press <b>Where to undo it</b>. It takes you to the page where that work is done, and you undo it there with the normal button. Validations and late marks can be undone. The items below cannot.');
+  if (sup) can += row('Work a desk or Campus Music Director did', 'Partly', 'Open the Change log, find the card and press <b>Where to undo it</b>. It takes you to the page where that work is done, and you undo it there with the normal button. The items marked No below cannot be undone.');
   if (top) ask += row('Any change you think was wrong', 'Ask', 'You do not undo it yourself. In the Change log press <b>Ask the System Administrator to undo this</b> on that card and type why. You can also send a <b>petition</b> to the Global Admin. You see the answer on the same page.');
   if (sysa) ask += row('An undo request from the Global Music Director or the Pastor in Charge', 'Do it', 'Open the Change log and read the request under <b>Petitions</b>. Carry the undo out with the normal tool (for example Check-ins or Members), then press <b>Undone</b> and write what you did. Or press <b>Not undone</b> and say why.');
-  if (!doer && !top && !sysa) ask += row('A change you think was wrong', 'Ask', 'Tell the person who made it, or your Campus Music Director. They can reverse it or pass it on.');
+  if ((A || B || C || D || md) && !sup) ask += row('Anything else you think was wrong', 'Ask', 'Tell the Global Admin or the Assistant. They can reverse most things, and everything they do is recorded with a reason.');
+  if (!can && !ask) ask += row('A change you think was wrong', 'Ask', 'Tell the person who made it, or your Campus Music Director. They can reverse it or pass it on.');
   const fin = row('A cancelled rehearsal', 'No', 'A rehearsal is only cancelled when two people agree, so one person cannot reverse it.') +
     row('A processed day', 'No', 'It cannot be reopened, because the absence lists have already gone to the Campus Music Directors. You can correct one person at a time in <b>Process attendance</b> with a reason.') +
     row('A day published to the official attendance', 'No', 'In practice mode the System Administrator clears it from the script editor. After go-live it is final, and mistakes are corrected one person at a time.') +
