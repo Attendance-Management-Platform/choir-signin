@@ -377,9 +377,12 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 .chf{display:flex;gap:6px 22px;flex-wrap:wrap;margin-top:8px;font-size:13px}.chf i,.chr i{display:block;font-style:normal;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:var(--mut);margin-bottom:1px}
 .chd{margin-top:8px;font-size:13px;line-height:1.45;color:var(--fg)}
 .chr{margin-top:8px;padding:8px 10px;background:rgba(217,164,65,.12);border-radius:10px;font-size:13px;line-height:1.45}
-.ug summary{cursor:pointer;list-style:none;font-size:15px}.ug summary::-webkit-details-marker{display:none}.ug summary::before{content:"\25B8";display:inline-block;margin-right:8px;color:var(--acc)}.ug[open] summary::before{content:"\25BE"}
-.ugs{margin:14px 0 6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:var(--mut)}
-.ugr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 8px}.ugw{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ugw .pill{margin-left:auto}.ugh{margin-top:6px;font-size:13px;line-height:1.5;color:var(--fg)}
+.ugnav{margin:0 0 12px}.ugsec{margin:0 0 12px;background:var(--page)}.ugg{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
+.ugt{position:relative;border:1px solid var(--line);border-radius:16px;padding:14px 16px;background:linear-gradient(160deg,#fff 55%,var(--tint,#fff));box-shadow:0 4px 18px rgba(20,35,61,.05);transition:transform .15s ease,box-shadow .15s ease}
+.ugt:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,35,61,.10)}.ugt:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:var(--ac,#B6000A)}
+.ugt.ok{--ac:#20775A;--tint:#EAF6F0}.ugt.warn{--ac:#C98A1B;--tint:#FFF5E2}.ugt.ask{--ac:#2F4F7E;--tint:#EAF0FA}.ugt.no{--ac:#AE2D37;--tint:#FCECEE}
+.ugtop{display:flex;align-items:center;gap:10px}.ugtop b{font-size:14.5px;line-height:1.3;flex:1}.ugi{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;background:var(--ac)}
+.ugk{margin:12px 0 4px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:var(--mut)}.ugh{font-size:13px;line-height:1.55;color:var(--fg)}
 </style></head><body class="out">
 <div style="background:#172039;color:#fff;text-align:center;font-size:12px;padding:5px 8px">TEST copy: fake data only. The real choir uses the production page.</div><div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -1566,6 +1569,13 @@ function fpPanel(key, boxId, o) {
 }
 document.addEventListener('input', ev => { const t = ev.target; if (t && t.dataset && t.dataset.fp) { FP[t.dataset.fp].v[t.dataset.k] = t.value; FP[t.dataset.fp].lim = 0; fpDraw(t.dataset.fp); } });
 document.addEventListener('click', ev => { const gt = ev.target.closest && ev.target.closest('[data-gotab]'); if (gt) go(gt.dataset.gotab); });
+document.addEventListener('click', ev => {
+  const j = ev.target.closest && ev.target.closest('[data-ugjump]'); if (!j) return;
+  const nav = j.parentNode, all = Array.from(nav.querySelectorAll('[data-ugjump]')).map(x => x.dataset.ugjump);
+  all.forEach(t => window.rbcFoldSet && window.rbcFoldSet(t, t === j.dataset.ugjump));
+  nav.querySelectorAll('.fpchip').forEach(x => x.classList.toggle('on', x === j));
+  const c = Array.from(document.querySelectorAll('.fold')).filter(x => x.dataset.title === j.dataset.ugjump && nav.parentNode.contains(x))[0]; if (c && c.scrollIntoView) c.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+});
 document.addEventListener('click', ev => { const mo = ev.target.closest && ev.target.closest('[data-fpmore]'); if (!mo) return; const st3 = FP[mo.dataset.fpmore]; st3.lim = (st3.lim || st3.o.page) + st3.o.page; fpDraw(mo.dataset.fpmore); });
 document.addEventListener('click', ev => { const cr = ev.target.closest && ev.target.closest('[data-chrange]'); if (!cr) return; chDays = Number(cr.dataset.chrange) || 7; delete FP.chg; loadChanges(); });
 document.addEventListener('click', ev => { const ch = ev.target.closest && ev.target.closest('[data-fpchip]'); if (ch) { const p = ch.dataset.fpchip.split('|'), st2 = FP[p[0]]; st2.v[p[1]] = p.slice(2).join('|'); st2.lim = 0; fpPanel(p[0], st2.box, st2.o); } });
@@ -2569,7 +2579,7 @@ if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTab
 </script><script>
 (function () {
   var NOFOLD = ['Mark a member by hand', 'Request an absence'];
-  var SHUT = ['Figures behind the chart', 'Ask for a change', 'What happens next', 'Safety settings', 'Being away'];
+  var SHUT = ['What you can undo', 'Final, and cannot be undone', 'Figures behind the chart', 'Ask for a change', 'What happens next', 'Safety settings', 'Being away'];
   var LIST = ['Waiting for your answer', 'Requests you asked for', 'Approved and ready to carry out'];
   var st = {};
   try { st = JSON.parse(localStorage.getItem('rbcFold') || '{}') || {}; } catch (e) { st = {}; }
@@ -2646,7 +2656,8 @@ function undoGuideHtml() {
   const has = r => myRoles.indexOf(r) !== -1;
   const ga = has('Global Admin'), sup = ga || has('Assistant Global Admin'), A = has('Desk A'), B = has('Desk B'), C = has('Desk C'), D = has('Desk D'), md = has('Campus Music Director');
   const top = has('Global Music Director') || has('Pastor in Charge'), sysa = has('System Administrator');
-  const row = (what, ans, how) => '<div class="ugr"><div class="ugw"><b>' + esc(what) + '</b><span class="pill ' + (ans === 'Yes' ? 'p-ok' : ans === 'No' ? 'p-no' : 'p-pend') + '">' + esc(ans) + '</span></div><div class="ugh">' + how + '</div></div>';
+  const TONE = {Yes: ['ok', '✓'], Once: ['warn', '1'], Partly: ['warn', '◐'], Ask: ['ask', '?'], 'Do it': ['ask', '→'], No: ['no', '✕']};
+  const row = (what, ans, how) => { const t = TONE[ans] || ['ask', '?']; return '<div class="ugt ' + t[0] + '"><div class="ugtop"><span class="ugi">' + t[1] + '</span><b>' + esc(what) + '</b><span class="pill ' + (ans === 'Yes' ? 'p-ok' : ans === 'No' ? 'p-no' : 'p-pend') + '">' + esc(ans) + '</span></div><div class="ugk">How</div><div class="ugh">' + how + '</div></div>'; };
   let can = '', ask = '';
   if (sup || C || D || md) {
     const scope = sup ? 'You can undo any check-in.' : [D ? 'ordinary check-ins, and hand-marks made by a Campus Music Director (never Desk D\'s own marks)' : '', C ? 'any hand-marked entry' : '', md ? 'hand-marks Desk D made for members of your own campus' : ''].filter(Boolean).join('; ');
@@ -2666,12 +2677,12 @@ function undoGuideHtml() {
     row('A processed day', 'No', 'It cannot be reopened, because the absence lists have already gone to the Campus Music Directors. You can correct one person at a time in <b>Process attendance</b> with a reason.') +
     row('A day published to the official attendance', 'No', 'In practice mode the System Administrator clears it from the script editor. After go-live it is final, and mistakes are corrected one person at a time.') +
     row('An email already sent', 'No', 'A sent email cannot be taken back. Send a short correction instead.');
-  return '<details class="card pad ug"><summary><span class="ct" style="margin:0;display:inline">What you can undo</span><span class="s"> · for ' + esc(myRoles.filter(r => r !== 'Choir Member').join(', ') || 'your role') + '</span></summary>' +
-    '<p class="sub" style="margin:10px 0 4px">Every undo is recorded with your name, the time and your reason. Nothing is ever deleted.</p>' +
-    (can ? '<div class="ugs">You can undo</div>' + can : '') + (ask ? '<div class="ugs">' + (sysa && !top ? 'Your part' : 'Ask for an undo') + '</div>' + ask : '') +
-    '<div class="ugs">Final, and cannot be undone</div>' + fin + '</details>';
+  const cnt = h => (h.match(/class="ugt /g) || []).length, canT = 'You can undo', askT = sysa && !top ? 'Your part' : 'Ask for an undo', finT = 'Final, and cannot be undone';
+  const secs = [[canT, can], [askT, ask], [finT, fin]].filter(x => x[1]);
+  const sec = x => '<div class="card pad ugsec"><div class="ct">' + esc(x[0]) + '</div><div class="ugg">' + x[1] + '</div></div>';
+  return '<div class="card pad ug"><div class="ct">What you can undo</div><p class="sub" style="margin:0 0 10px">For ' + esc(myRoles.filter(r => r !== 'Choir Member').join(', ') || 'your role') + '. Every undo is recorded with your name, the time and your reason. Nothing is ever deleted.</p>' +
+    '<div class="fpchips ugnav">' + secs.map(x => '<button type="button" class="fpchip' + (x === secs[0] ? ' on' : '') + '" data-ugjump="' + esc(x[0]) + '">' + esc(x[0]) + '<b>' + cnt(x[1]) + '</b></button>').join('') + '</div>' + secs.map(sec).join('') + '</div>';
 }
-let chDays = 7;
 async function loadChanges() {
   say('m16', 'Loading…');
   try {
@@ -2679,7 +2690,7 @@ async function loadChanges() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('chbox').innerHTML = ''; $('chpet').innerHTML = ''; return say('m16', j.error || 'Not available.', 'bad'); }
     say('m16', '');
-    { const g = $('chundo'), was = g.querySelector('details') && g.querySelector('details').open; g.innerHTML = undoGuideHtml(); if (was) g.querySelector('details').open = true; }
+    $('chundo').innerHTML = undoGuideHtml();
     $('chrange').innerHTML = '<div class="fpchips" style="margin:0 0 10px">' + [[1, 'Today'], [7, '7 days'], [30, '30 days'], [90, '90 days'], [365, 'A year']].map(r => '<button type="button" class="fpchip' + (j.days === r[0] ? ' on' : '') + '" data-chrange="' + r[0] + '">' + r[1] + '</button>').join('') + '</div>';
     const rid = c => (String(c.recordId || '') + ' ' + String(c.detail || '')).match(/\bR\d{3,}\b/);
     fpPanel('chg', 'chbox', {title: 'What changed', sub: (j.days === 1 ? 'Today: ' : 'The last ' + j.days + ' days: ') + j.counts.admin + ' admin, ' + j.counts.operations + ' operations, ' + j.counts.bypasses + ' done by an admin instead of the usual desk or role.' + (j.petitionTo ? ' If you disagree with a change, send a petition to the ' + j.petitionTo + '.' : ''),
