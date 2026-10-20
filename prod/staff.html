@@ -383,6 +383,9 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 .ugt.ok{--ac:#20775A;--tint:#EAF6F0}.ugt.warn{--ac:#C98A1B;--tint:#FFF5E2}.ugt.ask{--ac:#2F4F7E;--tint:#EAF0FA}.ugt.no{--ac:#AE2D37;--tint:#FCECEE}
 .ugtop{display:flex;align-items:center;gap:10px}.ugtop b{font-size:14.5px;line-height:1.3;flex:1}.ugi{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;background:var(--ac)}
 .ugk{margin:12px 0 4px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:var(--mut)}.ugh{font-size:13px;line-height:1.55;color:var(--fg)}
+#helpbody #hb1 .fplist,#helpbody #hb2 .fplist,#helpbody #hb3 .fplist,#helpbody #hb4 .fplist,.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}.tgrid{margin-top:6px}
+#helpbody .fplist>.ugt{margin:0}#helpbody .ugt summary{list-style:none;cursor:pointer}#helpbody .ugt summary::-webkit-details-marker{display:none}#helpbody .ugt .ugtop b{flex:1}
+.hnav{margin:0 0 14px}
 </style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -1103,12 +1106,14 @@ function prDraw() {
   $('prfind').style.display = 'flex';
   $('prcount').textContent = j.rehearsals.length ? 'Showing ' + Math.min(prShown, hit.length) + ' of ' + hit.length + (hit.length !== j.rehearsals.length ? ' (' + j.rehearsals.length + ' held in all)' : '') + ', newest first.' : '';
   $('prmore').classList.toggle('hide', hit.length <= prShown);
-  $('prlist').innerHTML = j.rehearsals.length ? hit.slice(0, prShown).map(r => '<div class="card pad" style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><b>' + esc(r.id) + ' · ' + esc(r.date) + '</b><span>' + (r.sources && r.sources.length ? r.sources : [r.source]).map(x => '<span class="pill p-info">' + esc(prSrc(x)) + '</span>').join(' ') + ' ' +
-      (r.processed ? '<span class="pill p-ok">Processed</span>' : (r.blocked ? '<span class="pill p-pend">Not ready</span>' : r.unchecked ? '<span class="pill p-info">Not yet looked at</span>' : '<span class="pill p-val">Ready</span>')) + '</span></div>' +
-      (r.counts ? '<p class="sub" style="margin:6px 0 0">' + r.counts.present + ' present · ' + r.counts.excused + ' excused · ' + r.counts.absent + ' absent · ' + r.counts.late + ' late</p>' : '') +
-      (r.unchecked ? '<p class="sub" style="margin:6px 0 0">The counts are worked out when you open it.</p>' : '') +
-      (r.review ? '<p class="sub" style="margin:6px 0 0">' + r.review + ' form row(s) need a look</p>' : '') + (r.blocked ? '<p class="sub" style="margin:6px 0 0">' + esc(r.blocked) + '</p>' : '') +
-      '<div style="margin-top:10px"><button class="btn ' + (r.processed ? 'line' : 'red') + ' sm" type="button" data-pr="' + esc(r.id) + '" data-prdone="' + (r.processed ? '1' : '0') + '">' + (r.processed ? 'See the result' : 'Preview') + '</button></div></div>').join('') + (hit.length ? '' : '<p class="sub">No rehearsal matches. Clear the search or the filters.</p>') : '<p class="sub">No rehearsal has been held yet. A day taken on a Google Form shows here too, once it has an attendance sheet on the REHEARSALS tab.</p>';
+  $('prlist').innerHTML = j.rehearsals.length ? '<div class="tgrid">' + hit.slice(0, prShown).map(r => {
+    const st = r.processed ? ['ok', '✓', 'Processed', 'p-ok'] : r.blocked ? ['warn', '!', 'Not ready', 'p-pend'] : r.unchecked ? ['ask', '?', 'Not yet looked at', 'p-info'] : ['ask', '→', 'Ready', 'p-val'];
+    const srcs = (r.sources && r.sources.length ? r.sources : [r.source]).map(x => '<span class="pill p-info">' + esc(prSrc(x)) + '</span>').join(' ');
+    const body = '<div>' + srcs + '</div>' + (r.counts ? '<p class="sub" style="margin:8px 0 0">' + r.counts.present + ' present · ' + r.counts.excused + ' excused · ' + r.counts.absent + ' absent · ' + r.counts.late + ' late</p>' : '') +
+      (r.unchecked ? '<p class="sub" style="margin:6px 0 0">The counts are worked out when you open it.</p>' : '') + (r.review ? '<p class="sub" style="margin:6px 0 0">' + r.review + ' form row(s) need a look</p>' : '') + (r.blocked ? '<p class="sub" style="margin:6px 0 0">' + esc(r.blocked) + '</p>' : '');
+    return tile({tone: st[0], icon: st[1], title: r.id + ' · ' + r.date, pill: st[2], pillCls: st[3], body: body,
+      actions: '<button class="btn ' + (r.processed ? 'line' : 'red') + ' sm" type="button" data-pr="' + esc(r.id) + '" data-prdone="' + (r.processed ? '1' : '0') + '">' + (r.processed ? 'See the result' : 'Preview') + '</button>'});
+  }).join('') + '</div>' + (hit.length ? '' : '<p class="sub">No rehearsal matches. Clear the search or the filters.</p>') : '<p class="sub">No rehearsal has been held yet. A day taken on a Google Form shows here too, once it has an attendance sheet on the REHEARSALS tab.</p>';
 }
 $('prq').oninput = () => { prShown = 10; prDraw(); };
 $('prq').onchange = () => { prShown = 10; prDraw(); const e = prState && prState.rehearsals.filter(r => r.id.toLowerCase() === $('prq').value.trim().toLowerCase())[0]; if (e) prOpen(e.id, e.processed); };
@@ -2471,6 +2476,11 @@ const LADDER = [
   ['Campus Music Director', 'the Global Admin or the Assistant Global Admin'],
   ['Admin Team Member', 'the Assistant Global Admin']
 ];
+/** One tile in the shared style: icon, title, optional status pill, optional "How" label, body (html) and actions (html). tone: ok, warn, ask, no. */
+function tile(o) {
+  return '<div class="ugt ' + (o.tone || 'ask') + (o.cls ? ' ' + o.cls : '') + '"' + (o.attr ? ' ' + o.attr : '') + '><div class="ugtop"><span class="ugi">' + (o.icon || '') + '</span><b>' + esc(o.title) + '</b>' + (o.pill ? '<span class="pill ' + (o.pillCls || 'p-pend') + '">' + esc(o.pill) + '</span>' : '') + '</div>' +
+    (o.label ? '<div class="ugk">' + esc(o.label) + '</div>' : '') + (o.body ? '<div class="ugh"' + (o.label ? '' : ' style="margin-top:10px"') + '>' + o.body + '</div>' : '') + (o.actions ? '<div class="actions" style="margin:10px 0 0">' + o.actions + '</div>' : '') + '</div>';
+}
 function contactFor() {
   const hit = LADDER.filter(x => myRoles.indexOf(x[0]) !== -1)[0];
   return hit ? hit[1] : 'the Assistant Global Admin';
@@ -2498,24 +2508,34 @@ function renderHelp() {
   $('helpbody').innerHTML =
     '<div class="card pad rise"><div class="sub" style="margin:0">You are signed in as</div><div style="font-size:20px;font-weight:900">' + esc(myName || 'a staff member') + '</div>' +
       '<div>' + myRoles.filter(r => r !== 'Choir Member').map(r => '<span class="pillr">' + esc(r) + '</span>').join('') + '</div></div>' +
+    '<div class="fpchips hnav">' + ['Your menus', 'How do I\u2026?', 'Who does what', 'Rules that always apply', 'Words you will see', 'What you can undo'].map((t, i) => '<button type="button" class="fpchip' + (i === 0 ? ' on' : '') + '" data-hjump="' + t + '">' + t + '</button>').join('') + '</div>' +
     '<div id="hb1"></div><div id="hb2"></div><div id="hb3"></div>' +
-    '<div class="card pad rise"><div class="ct">Rules that always apply</div><ul class="hp"><li>Everything you do is recorded with your name and the time.</li><li>Nobody checks, approves or changes their own work or record.</li><li>Nothing is deleted. A member who leaves is made inactive.</li><li>When an admin does a desk\'s step, they give a reason and that desk is told.</li><li>Sign out when you finish on a shared phone.</li></ul></div>' +
+    '<div id="hrules"></div>' +
     undoGuideHtml() +
     '<div id="hb4"></div>' +
     '<div class="card pad rise"><div class="ct">Need more help?</div><p style="margin:.2rem 0">Speak to ' + esc(contactFor()) + '. For a sign-in or system problem, speak to the System Administrator.</p></div>';
+  const mine = name => myRoles.some(r => name.indexOf(r) !== -1 && r !== 'Choir Member');
+  const RULES = ['Everything you do is recorded with your name and the time.', 'Nobody checks, approves or changes their own work or record.', 'Nothing is deleted. A member who leaves is made inactive.', 'When an admin does a desk\'s step, they give a reason and that desk is told.', 'Sign out when you finish on a shared phone.'];
   fpPanel('hmenu', 'hb1', {title: 'Your menus', sub: 'What each menu is for. Use Open to go there.', items: shown, empty: 'No menus yet.',
     fields: [{k: 'q', label: 'Search menus', ph: 'For example: report, member, rehearsal', type: 'text', get: k => txt(TABHELP[k][0], TABHELP[k][1])}],
-    card: k => '<div class="card pad" style="margin-top:0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><div style="flex:1 1 260px"><b>' + esc(TABHELP[k][0]) + '</b><div class="sub" style="margin:2px 0 0">' + esc(TABHELP[k][1]) + '</div></div>' + (TABDEF[k] ? '<button class="btn line sm" type="button" data-helpgo="' + TABDEF[k][0] + '">Open ' + esc(TABDEF[k][1]) + '</button>' : '') + '</div>'});
+    card: k => tile({tone: 'ask', icon: '→', title: TABHELP[k][0], body: esc(TABHELP[k][1]), actions: TABDEF[k] ? '<button class="btn line sm" type="button" data-helpgo="' + TABDEF[k][0] + '">Open ' + esc(TABDEF[k][1]) + '</button>' : ''})});
   fpPanel('hfaq', 'hb2', {title: 'How do I…?', sub: 'Short answers for the menus you have. Choose a question to open it.', items: faq, empty: 'No questions yet.',
     fields: [{k: 'q', label: 'Search questions', ph: 'For example: absence, add, report', type: 'text', get: f => txt(f.q, f.a)}, {k: 'topic', label: 'Topic', type: 'list', get: f => f.topic}],
-    card: f => '<div class="fprow" style="display:block"><details class="hq" style="border:0"><summary>' + esc(f.q) + '</summary><div class="ha">' + esc(f.a) + '</div></details></div>'});
+    card: f => '<div class="ugt ask"><details class="hq" style="border:0"><summary class="ugtop"><span class="ugi">?</span><b>' + esc(f.q) + '</b></summary><div class="ugh" style="margin-top:10px">' + esc(f.a) + '</div></details></div>'});
   fpPanel('hwho', 'hb3', {title: 'Who does what', items: who, empty: '',
     fields: [{k: 'q', label: 'Search', ph: 'A role or a job', type: 'text', get: r => txt(r[0], r[1])}],
-    card: r => '<div class="card pad" style="margin-top:0"><b>' + esc(r[0]) + '</b><div class="sub" style="margin:2px 0 0">' + esc(r[1]) + '</div></div>'});
+    card: r => tile({tone: mine(r[0]) ? 'ok' : 'ask', icon: esc(/^Desk /.test(r[0]) ? r[0].slice(-1) : r[0].charAt(0)), title: r[0], pill: mine(r[0]) ? 'Your role' : '', pillCls: 'p-ok', body: esc(r[1])})});
   fpPanel('hgl', 'hb4', {title: 'Words you will see', items: gl, empty: '',
     fields: [{k: 'q', label: 'Search words', ph: 'For example: eligible, petition', type: 'text', get: r => txt(r[0], r[1])}],
-    card: r => '<div class="card pad" style="margin-top:0"><b>' + esc(r[0]) + '</b><div class="sub" style="margin:2px 0 0">' + esc(r[1]) + '</div></div>'});
+    card: r => tile({tone: 'warn', icon: 'i', title: r[0], body: esc(r[1])})});
+  { const rb = $('hrules'); if (rb) rb.innerHTML = '<div class="card pad rise"><div class="ct">Rules that always apply</div><div class="tgrid">' + RULES.map(r => tile({tone: 'ok', icon: '✓', title: r})).join('') + '</div></div>'; }
 }
+document.addEventListener('click', ev => {
+  const j = ev.target.closest && ev.target.closest('[data-hjump]'); if (!j) return;
+  window.rbcFoldSet && window.rbcFoldSet(j.dataset.hjump, true);
+  j.parentNode.querySelectorAll('.fpchip').forEach(x => x.classList.toggle('on', x === j));
+  const c = Array.from(document.querySelectorAll('#helpbody .fold')).filter(x => x.dataset.title === j.dataset.hjump)[0]; if (c && c.scrollIntoView) c.scrollIntoView({behavior: 'smooth', block: 'start'});
+});
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-helpgo]'); if (b) go(b.dataset.helpgo); });
 function today() { try { return new Date().toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}); } catch (e) { return new Date().toISOString().slice(0, 10); } }
 function welcome() {
