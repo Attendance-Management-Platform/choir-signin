@@ -652,6 +652,11 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <div class="pv"><span>Proposed ID</span><b id="pvid">-</b></div><div class="pv"><span>Date</span><b id="pvdate">-</b></div><div class="pv"><span>Status</span><span id="pvstatus" class="pill p-pend">Planned</span></div><div class="pv"><span>Absence requests close</span><b id="pvclose">-</b></div><div class="pv"><span>Notice</span><span id="pvnotice" class="pill p-pend">-</span></div>
 <div class="note" style="margin-top:10px">Pressing Save is the only thing that writes. The preview changes nothing.</div></div>
 <div id="rhmenu" class="hide"><button id="rhmake" type="button" data-noenter="1" class="hide">Make a rehearsal</button></div>
+<div id="rhfin" class="card pad rise hide" style="animation-delay:.09s"><div class="ct">Finish time today</div><p id="rhfinsub" class="sub"></p>
+<p class="sub">The roll call, the excuse times and the Process button all follow the finish time. If the rehearsal ends early or runs late, say so here so they open at the right moment.</p>
+<label for="rhfintime" class="lb">New finish time (Lagos time, like 18:30)</label><input id="rhfintime" type="time" class="in">
+<label for="rhfinwhy" class="lb">Reason</label><input id="rhfinwhy" class="in" autocomplete="off" maxlength="200" placeholder="For example: ran late, more songs">
+<div class="actions" style="margin-top:8px"><button id="rhfinnow" type="button" data-noenter="1" class="btn red">It has ended now</button><button id="rhfinset" type="button" data-noenter="1" class="btn line">Change finish time</button></div><p id="m8b" class="s"></p></div>
 <div id="rhcheck" class="card pad rise hide" style="animation-delay:.08s"><div class="ct">Check-in</div><p id="rhcisub" class="sub"></p><div id="rhbtns" class="actions" style="margin-top:8px"></div></div>
 <div id="rhvbox" class="card pad rise hide" style="animation-delay:.1s"><div class="ct">Confirm the venue position on site</div><p id="rhvinfo" class="sub"></p>
 <p class="sub">Do this at the venue shortly before the rehearsal. Anyone from Desk B, Desk D or the admins can do it. If nobody does, the position found from the address is used.</p>
@@ -2100,6 +2105,7 @@ async function loadRehearsal() {
     const stuck = list.filter(r => r.checkInOpen && !r.cancelled && !rhLive(r))[0] || null;
     if (stuck) { $('rhbtns').innerHTML = '<button class="btn red" type="button" data-op="close">Close check-in (' + esc(stuck.id) + ')</button>'; }
     else $('rhbtns').innerHTML = cur && rhLive(cur) ? (cur.checkInOpen ? '<button class="btn line" type="button" data-op="close">Close check-in (' + esc(cur.id) + ')</button>' : '<button class="btn red" type="button" data-op="open">Open check-in (' + esc(cur.id) + ')</button>') : '';
+    rhFinDraw(list, j.canEdit);
     $('rhcheck').classList.toggle('hide', !(j.canEdit && ((cur && rhLive(cur)) || stuck)));
     if (stuck && !(cur && rhLive(cur))) $('rhcisub').textContent = stuck.id + ' has finished but check-in was left open. Close it so its attendance can be processed.';
     if (cur && rhLive(cur)) $('rhcisub').textContent = cur.id + ' is the current rehearsal. Check-in is ' + (cur.checkInOpen ? (cur.autoOpen ? 'open (it opened by itself at the start time).' : 'open.') : 'closed.') + ' You can open it by hand from one hour before the start. If nobody does, it opens by itself at the start time and closes by itself at the finish time.';
@@ -2115,6 +2121,26 @@ async function loadRehearsal() {
     });
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
 }
+function rhFinDraw(list, canEdit) {
+  const now = Date.now();
+  const r = (list || []).filter(x => !x.cancelled && !x.dayProcessed && x.startMs <= now && now < (x.finishMs || x.startMs + 8 * 3600000) + 12 * 3600000).slice(-1)[0] || null;
+  $('rhfin').classList.toggle('hide', !(canEdit && r)); rhFinFor = r;
+  if (!r) return;
+  $('rhfinsub').textContent = r.id + ' is set to finish at ' + lagos(r.finishMs) + (r.finished ? ' (that time has passed).' : '.');
+  $('rhfintime').value = new Date(r.finishMs + 3600000).toISOString().slice(11, 16);
+}
+let rhFinFor = null;
+async function rhFinSend(extra) {
+  if (!rhFinFor) return;
+  const reason = $('rhfinwhy').value.trim();
+  if (reason.length < 5) return say('m8b', 'Write a short reason first (at least 5 letters).', 'bad');
+  try { const k = await call(Object.assign({action: 'rehearsal.setFinish', token, id: rhFinFor.id, reason}, extra));
+    if (k.ok) { $('rhfinwhy').value = ''; await loadRehearsal(); say('m8b', 'Saved. The times now follow ' + lagos(k.rehearsal.finishMs) + '.', 'ok'); }
+    else say('m8b', k.error || 'Could not save.', 'bad');
+  } catch (e) { say('m8b', 'Network problem. Try again.', 'bad'); }
+}
+$('rhfinnow').onclick = () => rhFinSend({endNow: true});
+$('rhfinset').onclick = () => rhFinSend({finish: $('rhfintime').value});
 function rhOpenForm(mode, id) {
   const r = mode === 'edit' ? ((rhState.rehearsals || []).filter(x => x.id === id)[0] || null) : null;
   if (mode === 'edit' && !r) return say('m8', 'That rehearsal was not found. Reload.', 'bad');
