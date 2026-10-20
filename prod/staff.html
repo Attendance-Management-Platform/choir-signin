@@ -520,6 +520,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <select id="prst" class="in" style="flex:1 1 130px"><option value="">All days</option><option value="todo">To process</option><option value="done">Processed</option><option value="wait">Not ready</option></select>
 <select id="prsrc" class="in" style="flex:1 1 130px"><option value="">Any source</option><option value="Google Form">Google Form</option><option value="QR check-in">QR check-in</option><option value="Google check-in">Google check-in (no QR)</option><option value="Marked by hand">Marked by hand</option></select><button id="prx" class="btn line sm" type="button">Clear</button></div>
 <p class="sub" id="prcount" style="margin:8px 0 0"></p><div id="prlist"></div><div class="actions"><button id="prmore" class="btn line hide" type="button">Show 10 more</button></div></div>
+<div id="prundo"></div>
 <div id="prdetail"></div>
 <p id="m15" class="s"></p>
 </div>
@@ -567,6 +568,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <div id="s12" class="pg hide">
 <div class="card pad rise hide npc"><div class="ct">Members without a part</div>
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
+<div id="pundo"></div>
 <div id="paw"></div>
 <div id="pwait"></div>
 <div id="pready"></div>
@@ -1211,7 +1213,7 @@ async function loadProcess() {
     $('prnote').textContent = j.note || '';
     prShown = 10; $('prq').value = ''; $('prst').value = j.rehearsals.some(r => !r.processed && !r.blocked) ? 'todo' : ''; $('prsrc').value = '';
     $('prids').innerHTML = j.rehearsals.slice(0, 500).map(r => '<option value="' + esc(r.id) + '">' + esc(r.date) + '</option>').join('');
-    prDraw();
+    prDraw(); loadUndo('prundo', 'process');
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
 }
 async function prOpen(id, done) {
@@ -1706,10 +1708,52 @@ async function loadPeople(keepMsg) {
       '<input class="in" style="flex:1 1 200px;max-width:340px" placeholder="Reason, if you say no" data-why="' + esc(r.id) + '"><button class="btn warn sm" type="button" data-no="' + esc(r.id) + '">Say no</button></div>')});
     fpPanel('ready', 'pready', {title: 'Approved and ready to carry out', sub: 'Carrying out changes the real list. It is checked first and recorded.', items: j.ready, fields: pFields, empty: 'Nothing is ready to carry out.', card: r => pCard(r, '<p class="sub" style="margin:4px 0 0">You carry this out as: ' + esc(r.as || '') + '</p><div style="margin-top:12px">' + (r.download ? '<button class="btn red sm" type="button" data-dl="' + esc(r.id) + '">Download (once)</button>' : '<button class="btn red sm" type="button" data-carry="' + esc(r.id) + '">Carry out</button>') + '</div>')});
     if (!j.ready.length) $('pready').innerHTML = '';
-    loadAway();
+    loadAway(); loadUndo('pundo', 'people');
     fpPanel('mine', 'pmine', {title: 'Requests you asked for', items: j.mine, fields: pFields, empty: 'You have not asked for anything yet.', card: r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : '')});
   } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); }
 }
+
+// ---- Undo of a processed day (asked by the Global Admin or Assistant; approved by the Global Admin; carried out by the System Administrator) ----
+async function loadUndo(boxId, where) {
+  const box = $(boxId); if (!box) return;
+  try {
+    const j = await call({action: 'undo.state', token});
+    if (!j.ok) { box.innerHTML = ''; return; }
+    const open = j.open || [];
+    const mineToAct = open.filter(x => (x.status === 'needs-ga' && j.canApprove) || (x.status === 'with-sysadmin' && j.canRun));
+    const showAsk = where === 'process' && j.canRequest && j.saving && (j.eligible || []).length > 0;
+    const showOpen = where === 'process' ? (j.canRequest && open.length > 0) : mineToAct.length > 0;
+    if (!showAsk && !showOpen) { box.innerHTML = ''; return; }
+    const st = x => x.status === 'needs-ga' ? 'waiting for the Global Admin to approve' : 'waiting for the System Administrator';
+    const list = (where === 'process' ? open : mineToAct).map(x => {
+      const act = (x.status === 'needs-ga' && j.canApprove) ? '<button class="btn red sm" type="button" data-undo="approve" data-id="' + esc(x.id) + '">Approve</button> ' : (x.status === 'with-sysadmin' && j.canRun) ? '<button class="btn red sm" type="button" data-undo="run" data-id="' + esc(x.id) + '">Undo ' + esc(x.rehearsalId) + ' now</button> ' : '';
+      const no = act ? '<input class="in" style="flex:1 1 180px;max-width:300px" placeholder="Reason, if you say no" data-undowhy="' + esc(x.id) + '"><button class="btn warn sm" type="button" data-undo="decline" data-id="' + esc(x.id) + '">Say no</button>' : '';
+      return '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><p class="sub" style="margin:0"><b>' + esc(x.rehearsalId) + '</b> · ' + esc(st(x)) + '<br>Asked by ' + esc(x.by) + ': ' + esc(x.reason) + (x.note ? '<br>' + esc(x.note) : '') + '</p>' + (act || no ? '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">' + act + no + '</div>' : '') + '</div>';
+    }).join('');
+    const ask = showAsk ? '<div style="margin-top:10px"><label class="lb" for="undoreh" style="margin-top:0">Day to undo</label><select class="in" id="undoreh">' + j.eligible.map(r => '<option value="' + esc(r.id) + '">' + esc(r.id) + ' · ' + esc(r.date) + '</option>').join('') + '</select>' +
+      '<label class="lb" for="undowhy">Why</label><input class="in" id="undowhy" maxlength="300" placeholder="10 to 300 characters"><div class="actions" style="margin-top:10px"><button class="btn line" type="button" data-undo="request">Ask the System Administrator to undo</button></div></div>' : '';
+    box.innerHTML = '<div class="card pad rise"><div class="ct">Undo a processed day</div><p class="sub">A processed day cannot be corrected. If something is really wrong, the Global Admin can ask for the day to be undone. Only the System Administrator does it, and only within 24 hours of the end, before another rehearsal is held, and before the day is published. Afterwards hand marks and excuses open again until the day is processed again.</p>' + list + ask + '</div>';
+  } catch (e) { box.innerHTML = ''; }
+}
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('[data-undo]');
+  if (!b) return;
+  const kind = b.getAttribute('data-undo'), id = b.getAttribute('data-id') || '';
+  const msg = $('s15') && !$('s15').classList.contains('hide') ? 'm15' : 'm12';
+  const body = {action: 'undo.' + kind, token};
+  if (kind === 'request') { body.rehearsalId = pv('undoreh'); body.reason = pv('undowhy'); }
+  else { body.requestId = id; if (kind === 'decline') { const w = document.querySelector('[data-undowhy="' + id + '"]'); body.reason = w ? w.value.trim() : ''; } }
+  if (kind === 'run' && !confirm('Undo the processing of this day? Its rows leave PROCESSED ATTENDANCE and the day opens again.')) return;
+  b.disabled = true;
+  try {
+    const j = await call(body);
+    if (j.signedOut) { signedOutNow(); return; }
+    say(msg, j.ok ? 'Done: ' + (j.summary || '') : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad');
+    loadUndo('prundo', 'process'); loadUndo('pundo', 'people');
+    if (j.ok && typeof loadProcess === 'function' && kind === 'run') loadProcess();
+  } catch (e) { say(msg, 'Network problem. Try again.', 'bad'); }
+  b.disabled = false;
+});
 async function loadAway() {
   try {
     const j = await call({action: 'away.state', token});
