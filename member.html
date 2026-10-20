@@ -452,7 +452,7 @@ async function loadReqs() {
     if (j.signedOut) return signedOutNow('Please sign in again.');
     if (!j.ok) { $('rmine').innerHTML = ''; return say('m3', j.error || 'Not available.', 'bad'); }
     abs = j; const rh = j.rehearsal;
-    const live = j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
+    const live = j.live === true || j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
     $('rwhich').textContent = rh ? dlong(rh.startMs) + ', ' + tm(rh.startMs) : 'No rehearsal is open for requests yet';
     const box = $('rinfo');
     if (!rh) { box.className = 'note'; box.textContent = 'There is no rehearsal to ask about yet.'; }
@@ -463,7 +463,8 @@ async function loadReqs() {
     const reqCard = r => tile({tone: (r.status === 'Withdrawn' && r.note && /^Cancelled by/.test(r.note)) ? 'no' : ({Approved: 'ok', Rejected: 'no', Pending: 'warn', Appeal: 'ask', Withdrawn: 'gr'}[r.status] || 'warn'), icon: ({Approved: '\u2713', Rejected: '\u2715', Pending: '\u2026', Appeal: '!', Withdrawn: '\u2013'}[r.status] || '\u2026'), title: esc(dshort(r.rehearsalStartMs)) + ' rehearsal', pill: pill(r.status, r), sub: esc(subOf(r)) + (r.late ? ' \u00b7 late' : ''), body:
       (r.reason ? '<div class="s">' + esc(r.reason) + (r.note ? ' \u00b7 Note: ' + esc(r.note) : '') + '</div>' : '') +
       (r.canAppeal ? '<label for="ap' + esc(r.requestId) + '" style="font-size:14px;font-weight:900">Why are you appealing?</label><textarea id="ap' + esc(r.requestId) + '" class="in" rows="3" maxlength="300"></textarea><button class="btn btn-red" style="margin-top:0" data-ap="' + esc(r.requestId) + '">Send appeal</button><div class="s">Appeals go to the Global Music Director first, then the Pastor.</div>' : '') +
-      (r.canWithdraw ? '<button class="btn btn-line" style="margin-top:0" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '')});
+      (r.canWithdraw ? '<button class="btn btn-line" style="margin-top:0" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '') +
+      (r.canAck ? '<button class="btn btn-line" style="margin-top:0" data-seen="' + esc(r.requestId) + '">Got it</button>' : '')});
     mfPanel('req', 'rmine', {items: j.mine, empty: 'You have no requests yet.', card: reqCard, chips: 'status', chipsAll: 'All requests',
       fields: [
         {k: 'q', label: 'Search', ph: 'A date, or words from your reason', get: r => [dlong(r.rehearsalStartMs), r.reason, r.note].join(' ')},
@@ -472,7 +473,8 @@ async function loadReqs() {
   } catch (e) { say('m3', 'Network problem. Try again.', 'bad'); }
 }
 $('rmine').addEventListener('click', async ev => {
-  const b = ev.target.closest && ev.target.closest('button[data-ap],button[data-w]'); if (!b) return;
+  const b = ev.target.closest && ev.target.closest('button[data-ap],button[data-w],button[data-seen]'); if (!b) return;
+  if (b.dataset.seen) { b.disabled = true; await call({action: 'ack.seen', token, id: b.dataset.seen}); loadReqs(); return; }
   if (b.dataset.ap) { const why = ($('ap' + b.dataset.ap).value || '').trim(); if (why.length < 10) return say('m3', 'Please give a reason of at least 10 characters.', 'bad'); const a2 = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m3', a2.ok ? 'Appeal sent.' : (a2.error || 'Could not appeal.'), a2.ok ? 'ok' : 'bad'); loadReqs(); return; }
   const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m3', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadReqs();
 });

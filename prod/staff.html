@@ -1709,7 +1709,7 @@ async function loadPeople(keepMsg) {
     fpPanel('ready', 'pready', {title: 'Approved and ready to carry out', sub: 'Carrying out changes the real list. It is checked first and recorded.', items: j.ready, fields: pFields, empty: 'Nothing is ready to carry out.', card: r => pCard(r, '<p class="sub" style="margin:4px 0 0">You carry this out as: ' + esc(r.as || '') + '</p><div style="margin-top:12px">' + (r.download ? '<button class="btn red sm" type="button" data-dl="' + esc(r.id) + '">Download (once)</button>' : '<button class="btn red sm" type="button" data-carry="' + esc(r.id) + '">Carry out</button>') + '</div>')});
     if (!j.ready.length) $('pready').innerHTML = '';
     loadAway(); loadUndo('pundo', 'people');
-    fpPanel('mine', 'pmine', {title: 'Requests you asked for', items: j.mine, fields: pFields, empty: 'You have not asked for anything yet.', card: r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : '')});
+    fpPanel('mine', 'pmine', {title: 'Requests you asked for', items: j.mine, fields: pFields, empty: 'You have not asked for anything yet.', card: r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : r.canAck ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-pseen="' + esc(r.id) + '">Got it</button></div>' : '')});
   } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); }
 }
 
@@ -1724,9 +1724,10 @@ async function loadUndo(boxId, where) {
     const showAsk = where === 'process' && j.canRequest && j.saving && (j.eligible || []).length > 0;
     const showOpen = where === 'process' ? (j.canRequest && open.length > 0) : mineToAct.length > 0;
     if (!showAsk && !showOpen) { box.innerHTML = ''; return; }
-    const st = x => x.status === 'needs-ga' ? 'waiting for the Global Admin to approve' : 'waiting for the System Administrator';
+    const st = x => x.status === 'needs-ga' ? 'waiting for the Global Admin to approve' : x.status === 'declined' ? 'declined' : 'waiting for the System Administrator';
     const list = (where === 'process' ? open : mineToAct).map(x => {
-      const act = (x.status === 'needs-ga' && j.canApprove) ? '<button class="btn red sm" type="button" data-undo="approve" data-id="' + esc(x.id) + '">Approve</button> ' : (x.status === 'with-sysadmin' && j.canRun) ? '<button class="btn red sm" type="button" data-undo="run" data-id="' + esc(x.id) + '">Undo ' + esc(x.rehearsalId) + ' now</button> ' : '';
+      const gotit = x.canAck ? '<button class="btn line sm" type="button" data-undo="seen" data-id="' + esc(x.id) + '">Got it</button>' : '';
+      const act = gotit || (x.status === 'needs-ga' && j.canApprove) ? '<button class="btn red sm" type="button" data-undo="approve" data-id="' + esc(x.id) + '">Approve</button> ' : (x.status === 'with-sysadmin' && j.canRun) ? '<button class="btn red sm" type="button" data-undo="run" data-id="' + esc(x.id) + '">Undo ' + esc(x.rehearsalId) + ' now</button> ' : '';
       const no = act ? '<input class="in" style="flex:1 1 180px;max-width:300px" placeholder="Reason, if you say no" data-undowhy="' + esc(x.id) + '"><button class="btn warn sm" type="button" data-undo="decline" data-id="' + esc(x.id) + '">Say no</button>' : '';
       return '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><p class="sub" style="margin:0"><b>' + esc(x.rehearsalId) + '</b> · ' + esc(st(x)) + '<br>Asked by ' + esc(x.by) + ': ' + esc(x.reason) + (x.note ? '<br>' + esc(x.note) : '') + '</p>' + (act || no ? '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">' + act + no + '</div>' : '') + '</div>';
     }).join('');
@@ -1740,9 +1741,10 @@ document.addEventListener('click', async ev => {
   if (!b) return;
   const kind = b.getAttribute('data-undo'), id = b.getAttribute('data-id') || '';
   const msg = $('s15') && !$('s15').classList.contains('hide') ? 'm15' : 'm12';
-  const body = {action: 'undo.' + kind, token};
+  const body = {action: kind === 'seen' ? 'ack.seen' : 'undo.' + kind, token};
+  if (kind === 'seen') body.id = id;
   if (kind === 'request') { body.rehearsalId = pv('undoreh'); body.reason = pv('undowhy'); }
-  else { body.requestId = id; if (kind === 'decline') { const w = document.querySelector('[data-undowhy="' + id + '"]'); body.reason = w ? w.value.trim() : ''; } }
+  else if (kind !== 'seen') { body.requestId = id; if (kind === 'decline') { const w = document.querySelector('[data-undowhy="' + id + '"]'); body.reason = w ? w.value.trim() : ''; } }
   if (kind === 'run' && !confirm('Undo the processing of this day? Its rows leave PROCESSED ATTENDANCE and the day opens again.')) return;
   b.disabled = true;
   try {
@@ -1766,6 +1768,8 @@ async function loadAway() {
   } catch (e) { $('paw').innerHTML = ''; }
 }
 document.addEventListener('click', async ev => {
+  const ps = ev.target.closest && ev.target.closest('[data-pseen]');
+  if (ps) { ps.disabled = true; try { const j = await call({action: 'ack.seen', token, id: ps.dataset.pseen}); if (j.signedOut) { signedOutNow(); return; } if (!j.ok) say('m12', j.error || 'Could not save.', 'bad'); } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); } if (ps.closest('#chpet')) loadChanges(); else loadPeople(true); return; }
   const ae = ev.target.closest && ev.target.closest('#awgo,[data-awayend]');
   if (ae) {
     const b = ae.id === 'awgo' ? {action: 'away.set', token, start: pv('awstart'), end: pv('awend'), reason: pv('awwhy')} : {action: 'away.end', token};
@@ -2300,7 +2304,7 @@ async function loadAbsence() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('rmine').innerHTML = ''; return say('m6', j.error || 'Not available.', 'bad'); }
     const rh = j.rehearsal;
-    const live = j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
+    const live = j.live === true || j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
     $('rinfo').textContent = rh ? 'Next rehearsal: ' + new Date(rh.startMs).toLocaleString() + '. Requests ' + (rh.open ? 'are open until ' + new Date(rh.closeMs).toLocaleString() + '.' : 'are closed. Please contact the Global Admin or Assistant Global Admin.') : 'No rehearsal is open for requests yet.';
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
     $('rfor').classList.toggle('hide', !j.canSubmitFor); if (j.canSubmitFor) loadAbsAdmin();
@@ -2309,9 +2313,10 @@ async function loadAbsence() {
       const t = /approv|valid|accept/i.test(r.status) ? ['ok', '✓', 'p-ok'] : /reject|declin|cancel/i.test(r.status) ? ['no', '✕', 'p-no'] : /withdr/i.test(r.status) ? ['ask', '↩', 'p-info'] : ['warn', '!', 'p-pend'];
       return tile({tone: t[0], icon: t[1], title: new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : ''), pill: r.status, pillCls: t[2],
         body: '<span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>',
-        actions: (r.canWithdraw ? '<button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + (r.canAppeal ? '<button data-ap="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Appeal</button>' : '')});
+        actions: (r.canWithdraw ? '<button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + (r.canAppeal ? '<button data-ap="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Appeal</button>' : '') + (r.canAck ? '<button data-seen="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Got it</button>' : '')});
     }).join('') + '</div>' : '';
     $('rmine').querySelectorAll('button').forEach(b => b.onclick = async () => {
+      if (b.dataset.seen) { b.disabled = true; await call({action: 'ack.seen', token, id: b.dataset.seen}); loadAbsence(); return; }
       if (b.dataset.ap) { const why = prompt('Why should this be looked at again? (10 to 300 characters)'); if (!why) return; const a = await call({action: 'absence.act', token, requestId: b.dataset.ap, op: 'appeal', reason: why}); say('m6', a.ok ? 'Appeal sent.' : (a.error || 'Could not appeal.'), a.ok ? 'ok' : 'bad'); loadAbsence(); return; }
       const k = await call({action: 'absence.withdraw', token, requestId: b.dataset.w}); say('m6', k.ok ? 'Withdrawn.' : (k.error || 'Could not withdraw.'), k.ok ? 'ok' : 'bad'); loadAbsence(); });
   } catch (e) { say('m6', 'Network problem. Try again.', 'bad'); }
@@ -2888,7 +2893,7 @@ async function loadChanges() {
         (chWhere(c) ? '<button class="btn line sm" type="button" data-taskgo="' + chWhere(c) + '">Where to undo it</button>' : '') + '</div></div>'});
     $('chpet').innerHTML = j.petitions.length ? '<div class="card pad rise"><div class="ct">Petitions' + (j.counts.waiting ? ' (' + j.counts.waiting + ' waiting for you)' : '') + '</div>' + j.petitions.map(p => '<div style="border-top:1px solid var(--line);padding:8px 0">' + (p.to === 'System Administrator' ? '<span class="pill p-info">Undo request</span> ' + stPill(p.status === 'Upheld' ? 'Done' : p.status === 'Declined' ? 'Declined' : p.status) : stPill(p.status)) + ' <b>' + esc(p.from) + '</b> to the ' + esc(p.to) + ' · ' + esc(tm(p.atMs)) +
       '<br><span class="s">' + esc(p.text) + (p.about ? ' · about: ' + esc(p.about) : '') + '</span>' + (p.answer ? '<br><span class="s">' + esc(p.answeredBy) + ': ' + esc(p.answer) + '</span>' : '') +
-      (p.canAnswer ? '<div class="actions" style="margin:6px 0 0"><button class="btn red" type="button" data-pans="upheld" data-id="' + esc(p.id) + '">' + (p.to === 'System Administrator' ? 'Undone' : 'Uphold') + '</button><button class="btn line" type="button" data-pans="declined" data-id="' + esc(p.id) + '">' + (p.to === 'System Administrator' ? 'Not undone' : 'Decline') + '</button></div>' : '') + '</div>').join('') +
+      (p.canAck ? '<div class="actions" style="margin:6px 0 0"><button class="btn line sm" type="button" data-pseen="' + esc(p.id) + '">Got it</button></div>' : '') + (p.canAnswer ? '<div class="actions" style="margin:6px 0 0"><button class="btn red" type="button" data-pans="upheld" data-id="' + esc(p.id) + '">' + (p.to === 'System Administrator' ? 'Undone' : 'Uphold') + '</button><button class="btn line" type="button" data-pans="declined" data-id="' + esc(p.id) + '">' + (p.to === 'System Administrator' ? 'Not undone' : 'Decline') + '</button></div>' : '') + '</div>').join('') +
       '<p class="sub">Upholding a petition is the recorded decision. The change itself is put right with the normal tool (for example Members or People and access). For an undo request, carry the undo out first, then press Undone and say what you did.</p></div>' : '';
   } catch (e) { say('m16', 'Network problem. Try again.', 'bad'); }
 }
