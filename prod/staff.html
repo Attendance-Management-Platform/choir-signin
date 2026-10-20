@@ -2656,7 +2656,7 @@ function undoGuideHtml() {
   const has = r => myRoles.indexOf(r) !== -1;
   const ga = has('Global Admin'), sup = ga || has('Assistant Global Admin'), A = has('Desk A'), B = has('Desk B'), C = has('Desk C'), D = has('Desk D'), md = has('Campus Music Director');
   const top = has('Global Music Director') || has('Pastor in Charge'), sysa = has('System Administrator');
-  const TONE = {Yes: ['ok', '✓'], Once: ['warn', '1'], Partly: ['warn', '◐'], Ask: ['ask', '?'], 'Do it': ['ask', '→'], No: ['no', '✕']};
+  const TONE = {Yes: ['ok', '✓'], Once: ['warn', '1'], Partly: ['warn', '~'], Ask: ['ask', '?'], 'Do it': ['ask', '→'], No: ['no', '✕']};
   const row = (what, ans, how) => { const t = TONE[ans] || ['ask', '?']; return '<div class="ugt ' + t[0] + '"><div class="ugtop"><span class="ugi">' + t[1] + '</span><b>' + esc(what) + '</b><span class="pill ' + (ans === 'Yes' ? 'p-ok' : ans === 'No' ? 'p-no' : 'p-pend') + '">' + esc(ans) + '</span></div><div class="ugk">How</div><div class="ugh">' + how + '</div></div>'; };
   let can = '', ask = '';
   if (sup || C || D || md) {
