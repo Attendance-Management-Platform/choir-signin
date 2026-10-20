@@ -217,6 +217,16 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .anl .kpi .kv{font-size:32px}
 .anl .anr{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;margin-top:24px;align-items:center}
 .anl .anbox{border:1px solid #E7ECF6;border-radius:18px;background:#fff;padding:20px 22px}
+.anl .anhero{display:grid;grid-template-columns:minmax(210px,290px) minmax(0,1fr);gap:34px;align-items:center;background:#fff;border:1px solid #E7ECF6;border-radius:22px;padding:28px 32px;box-shadow:0 8px 22px rgba(30,45,90,.06)}
+.anl .anring{text-align:center}.anl .anring svg{width:210px;height:210px;max-width:100%}
+.anl .anrid{margin-top:8px;font-size:13px;font-weight:800;color:#172039;letter-spacing:.02em}.anl .anring .pill{margin-top:8px;display:inline-block}
+.anl .anst{display:grid;gap:22px}
+.anl .ans .ansh{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.anl .ans .ansl{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#5E6A7E}.anl .ans .ansl i{width:12px;height:12px;border-radius:4px;display:inline-block}
+.anl .ans .ansn{font-size:30px;font-weight:900;line-height:1;color:#151B2D}.anl .ans .ansn small{font-size:13px;font-weight:600;color:#5E6A7E;margin-left:8px}
+.anl .ans .ansbar{background:#EEF1F6;border-radius:99px;height:10px;margin-top:10px;overflow:hidden}.anl .ans .ansbar div{height:10px;border-radius:99px}
+.anl .anhint{margin:14px 4px 0;font-size:12.5px;color:#5E6A7E}
+@media(max-width:760px){.anl .anhero{grid-template-columns:1fr;gap:22px;padding:22px 18px}}
 .nt{border:1px solid #EFE3CC;border-radius:16px;padding:18px 20px;margin:0 0 14px;background:#fff}.nt:last-child{margin-bottom:0}.nt .ct{font-size:16px}
 @media(max-width:899px){.anl .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.anl .anr{grid-template-columns:1fr}}
 @media(max-width:480px){.anl,.ntc{padding:20px 16px}.anl .kpis{gap:12px}.anl .kpi .kv{font-size:26px}}
@@ -1041,6 +1051,14 @@ function drawNotes(items) {
 }
 let ANC = null, ANREH = '', ANCAMP = '', ANROWS = null, ANCACHE = {};
 function anDays(c) { const n = {}; (c.series || []).forEach(x => { if (x.date) n[x.date] = (n[x.date] || 0) + 1; }); return Object.keys(n).filter(d => n[d] > 1).sort().reverse(); }
+function anHero(L, delta) {
+  const tot = Math.max(1, Number(L.eligible) || (L.present + L.absent + L.excused) || 1);
+  const dl = delta === null || delta === undefined ? '' : '<span class="pill ' + (delta >= 0 ? 'p-ok' : 'p-no') + '">' + (delta >= 0 ? '+' : '') + delta + ' pts vs the rehearsal before</span>';
+  const row = (k, n, col) => '<div class="ans"><div class="ansh"><span class="ansl"><i style="background:' + col + '"></i>' + k + '</span><span class="ansn">' + n + '<small>' + Math.round(1000 * n / tot) / 10 + '% of ' + tot + '</small></span></div><div class="ansbar"><div style="width:' + Math.max(n ? 1.5 : 0, Math.min(100, 100 * n / tot)) + '%;background:' + col + '"></div></div></div>';
+  return '<div class="anhero"><div class="anring">' + ring(L.rate, rateColor(L.rate)) + '<div class="anrid">' + esc(L.id || '') + (L.date ? ' · ' + esc(L.date) : '') + '</div>' + dl + '</div>' +
+    '<div class="anst">' + row('Present', L.present, NAVY) + row('Absent', L.absent, ATTN) + row('Excused', L.excused, SOFT) + '</div></div>' +
+    '<p class="anhint">Absent means no approved reason. Excused means the absence was approved.</p>';
+}
 function homeCharts(c, drill, canSee, canPick) {
   ANC = c;
   if (!c) return '';
@@ -1065,7 +1083,7 @@ function homeCharts(c, drill, canSee, canPick) {
     : '<div class="anbox"><div class="ct" style="margin-bottom:8px">By campus · ' + esc(L.id || 'last rehearsal') + '</div>' + rankBars(camps, {unit: '%', drill: drill}) + '</div>';
   return '<div class="card anl rise"><div class="anh"><div><div class="ct">Analytics</div><p class="sub">Official attendance' + (idl ? ' · ' + esc(idl) : '') + '</p></div>' + pick + '</div>' +
     '<div class="fpchips antabs" style="margin-top:16px">' + TB.map(x => '<button type="button" class="fpchip' + (tab === x[0] ? ' on' : '') + '" data-antab="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
-    '<div class="anp" data-p="ov"' + hid('ov') + '>' + kpis + '<div class="anbox" style="margin-top:22px"><div class="ct" style="margin-bottom:6px">' + (ANCAMP ? esc(ANCAMP) + ' · ' : '') + esc(L.id || 'Last rehearsal') + '</div><div style="display:flex;justify-content:center">' + statusDonut({present: L.present, absent: L.absent, excused: L.excused}) + '</div></div></div>' +
+    '<div class="anp" data-p="ov"' + hid('ov') + '>' + anHero(L, delta) + '</div>' +
     '<div class="anp" data-p="tr"' + hid('tr') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">Last ' + c.series.length + ' rehearsals</div>' + colChart(c.series.map(p => ({name: p.id, value: p.rate})), {unit: '%', drill: drill, label: 'Attendance rate, last rehearsals'}) + '</div></div>' +
     '<div class="anp" data-p="cp"' + hid('cp') + '>' + cpBody + '</div>' +
     (parts ? '<div class="anp" data-p="pt"' + hid('pt') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">By part · ' + esc((ANCAMP ? ANCAMP + ' · ' : '') + (L.id || '')) + '</div>' + rankBars(parts, {unit: '%', drill: false}) + '</div></div>' : '') + '</div>';
@@ -2036,9 +2054,9 @@ async function loadRows() {
     $('ckrid').innerHTML = choices.map(x => '<option value="' + esc(x.id) + '"' + (x.id === j.rehearsalId ? ' selected' : '') + '>' + esc(x.id) + ' · ' + esc(new Date(x.startMs).toLocaleDateString('en-GB')) + (x.finished ? ' (finished)' : '') + '</option>').join('');
     $('ckrid').onchange = () => { ckRid = $('ckrid').value; loadRows(); };
     const c = j.counts || {waiting: 0, clean: 0, flagged: 0, validated: 0};
-    say('m4', j.rows.length ? '' : 'No check-ins yet.');
+    say('m4', j.processed ? esc(j.rehearsalId || 'This rehearsal') + ' has been processed. Nothing is waiting to be checked; this list is only a record.' : (j.rows.length ? '' : 'No check-ins yet.'));
     $('vsum').textContent = c.waiting + ' waiting (' + c.clean + ' clean, ' + c.flagged + ' flagged) · ' + c.validated + ' checked';
-    $('vbar').classList.toggle('hide', !j.rows.length);
+    $('vbar').classList.toggle('hide', !j.rows.length || j.processed === true);
     $('vall').textContent = 'Validate all clean (' + c.clean + ')';
     $('vall').disabled = c.clean === 0;
     const tm = r => new Date(r.time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
@@ -2052,7 +2070,7 @@ async function loadRows() {
     const head = cols => '<div class="g gv th"><div></div><div>Member</div><div>' + cols + '</div><div>Action</div></div>';
     const flagged = j.rows.filter(r => r.flagged && !r.validatedBy), clean = j.rows.filter(r => !r.flagged && !r.validatedBy), done = j.rows.filter(r => r.validatedBy);
     const sect = (title, hint, list, cols) => list.length ? '<div class="card rise tblc"><div class="tblh"><span>' + title + ' (' + list.length + ') <small>· ' + hint + '</small></span></div>' + head(cols) + list.map(rowHtml).join('') + '</div>' : '';
-    $('rows').innerHTML = sect('Flagged first', 'one by one, or tick several', flagged, 'What looked odd') + sect('Clear, waiting', 'place and QR all ok', clean, 'Checked') + sect('Checked', 'every checked row can be undone with a reason', done, 'Status');
+    $('rows').innerHTML = j.processed ? sect('Record of check-ins', 'the day is processed', j.rows, 'Status') : sect('Flagged first', 'one by one, or tick several', flagged, 'What looked odd') + sect('Clear, waiting', 'place and QR all ok', clean, 'Checked') + sect('Checked', 'every checked row can be undone with a reason', done, 'Status');
     const stat = (k, v, col, bg) => '<div class="card stat"' + (bg ? ' style="background:' + bg + ';border-color:#F0E2C9"' : '') + '><div class="k" style="color:' + col + '">' + k + '</div><div class="v" style="color:' + col + '">' + v + '</div></div>';
     $('vstats').innerHTML = stat('Checked in', j.rows.length, '#20775A') + stat('Clean (place and QR ok)', c.clean, '#20775A') + stat('Flagged', c.flagged, '#95621D', '#FFF4DF') + stat('Checked', c.validated, '#2F4F7E');
     const ticks = () => Array.from($('rows').querySelectorAll('.tick:checked')).map(x => x.dataset.id);
