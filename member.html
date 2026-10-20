@@ -619,7 +619,7 @@ async function loadDetails() {
         (r.note ? '<div class="s" style="font-size:14px">Your note: ' + esc(r.note) + '</div>' : '') +
         (r.answer ? '<div class="s" style="font-size:14px">' + esc(DGO.charAt(0).toUpperCase() + DGO.slice(1)) + ': ' + esc(r.answer) + '</div>' : '') +
         (r.status === 'Waiting' ? '<div><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dw="' + esc(r.id) + '">Withdraw this request</button></div>' : '') +
-        (r.status === 'Not changed' ? '<div><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dagain="' + esc(r.id) + '">Ask again</button></div>' : '')});
+        (r.status === 'Not changed' ? '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dagain="' + esc(r.id) + '">Ask again</button><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dseen="' + esc(r.id) + '">Got it</button></div>' : '')});
     };
     mfPanel('det', 'dlist', {items: dreq, empty: '', card: dCard, chips: 'status', chipsAll: 'All requests',
       fields: [
@@ -630,6 +630,8 @@ async function loadDetails() {
 }
 $('dlist').addEventListener('click', async ev => {
   const w = ev.target.closest && ev.target.closest('[data-dw]'), ag = ev.target.closest && ev.target.closest('[data-dagain]');
+  const sn = ev.target.closest && ev.target.closest('[data-dseen]');
+  if (sn) { sn.disabled = true; const j = await call({action: 'ack.seen', token, id: sn.dataset.dseen}); if (j && j.signedOut) { signedOutNow(); return; } if (!(j && j.ok)) say('m5', (j && j.error) || 'Could not save.', 'bad'); await loadDetails(); return; }
   if (w) { w.disabled = true; const j = await call({action: 'me.details.withdraw', token, id: w.dataset.dw}); if (j && j.signedOut) { signedOutNow(); return; } say('m5', j && j.ok ? 'Withdrawn.' : ((j && j.error) || 'Could not withdraw.'), j && j.ok ? 'ok' : 'bad'); await loadDetails(); return; }
   if (ag) { const r = dreq.filter(x => x.id === ag.dataset.dagain)[0]; if (!r) return; $('dform').classList.remove('hide'); $('dask').classList.add('hide'); $('dkind').value = r.kind; $('dtext').value = r.text; $('dnote').value = r.note || ''; say('m5', 'Check it, change anything that was wrong, then send it again.'); $('dform').scrollIntoView({behavior: 'smooth', block: 'center'}); }
 });
