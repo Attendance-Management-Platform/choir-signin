@@ -377,6 +377,9 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 .chf{display:flex;gap:6px 22px;flex-wrap:wrap;margin-top:8px;font-size:13px}.chf i,.chr i{display:block;font-style:normal;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:var(--mut);margin-bottom:1px}
 .chd{margin-top:8px;font-size:13px;line-height:1.45;color:var(--fg)}
 .chr{margin-top:8px;padding:8px 10px;background:rgba(217,164,65,.12);border-radius:10px;font-size:13px;line-height:1.45}
+.ug summary{cursor:pointer;list-style:none;font-size:15px}.ug summary::-webkit-details-marker{display:none}.ug summary::before{content:"\25B8";display:inline-block;margin-right:8px;color:var(--acc)}.ug[open] summary::before{content:"\25BE"}
+.ugs{margin:14px 0 6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:var(--mut)}
+.ugr{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 8px}.ugw{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ugw .pill{margin-left:auto}.ugh{margin-top:6px;font-size:13px;line-height:1.5;color:var(--fg)}
 </style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -449,6 +452,7 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 </div>
 
 <div id="s16" class="pg hide">
+<div id="chundo"></div>
 <div id="chpet"></div>
 <div id="chbox"></div>
 <p id="m16" class="s"></p>
@@ -2482,6 +2486,7 @@ function renderHelp() {
       '<div>' + myRoles.filter(r => r !== 'Choir Member').map(r => '<span class="pillr">' + esc(r) + '</span>').join('') + '</div></div>' +
     '<div id="hb1"></div><div id="hb2"></div><div id="hb3"></div>' +
     '<div class="card pad rise"><div class="ct">Rules that always apply</div><ul class="hp"><li>Everything you do is recorded with your name and the time.</li><li>Nobody checks, approves or changes their own work or record.</li><li>Nothing is deleted. A member who leaves is made inactive.</li><li>When an admin does a desk\'s step, they give a reason and that desk is told.</li><li>Sign out when you finish on a shared phone.</li></ul></div>' +
+    undoGuideHtml() +
     '<div id="hb4"></div>' +
     '<div class="card pad rise"><div class="ct">Need more help?</div><p style="margin:.2rem 0">Speak to ' + esc(contactFor()) + '. For a sign-in or system problem, speak to the System Administrator.</p></div>';
   fpPanel('hmenu', 'hb1', {title: 'Your menus', sub: 'What each menu is for. Use Open to go there.', items: shown, empty: 'No menus yet.',
@@ -2631,6 +2636,37 @@ document.addEventListener('click', async ev => {
   const j = await call({action: 'petition.send', kind: 'undo', token, text, about: u.dataset.undo});
   say('m16', j.ok ? 'Sent: ' + j.summary + '.' : (j.error || 'Could not send.'), j.ok ? 'ok' : 'bad'); if (j.ok) loadChanges();
 });
+
+/** "What you can undo": a folded card that tells each role, in plain words, what it can reverse, how, and what is final. */
+function undoGuideHtml() {
+  const has = r => myRoles.indexOf(r) !== -1;
+  const ga = has('Global Admin'), sup = ga || has('Assistant Global Admin'), A = has('Desk A'), B = has('Desk B'), C = has('Desk C'), D = has('Desk D'), md = has('Campus Music Director');
+  const top = has('Global Music Director') || has('Pastor in Charge'), sysa = has('System Administrator');
+  const row = (what, ans, how) => '<div class="ugr"><div class="ugw"><b>' + esc(what) + '</b><span class="pill ' + (ans === 'Yes' ? 'p-ok' : ans === 'No' ? 'p-no' : 'p-pend') + '">' + esc(ans) + '</span></div><div class="ugh">' + how + '</div></div>';
+  let can = '', ask = '';
+  if (sup || C || D || md) {
+    const scope = sup ? 'You can undo any check-in.' : [D ? 'ordinary check-ins, and hand-marks made by a Campus Music Director (never Desk D\'s own marks)' : '', C ? 'any hand-marked entry' : '', md ? 'hand-marks Desk D made for members of your own campus' : ''].filter(Boolean).join('; ');
+    can += row('A validated check-in', 'Yes', 'Open <b>Check-ins</b>. Find the person under <b>Checked</b> and press <b>Undo</b>. Give a reason of 5 to 200 characters. ' + (sup ? scope : 'You can undo ' + scope + '.'));
+  }
+  if (sup) can += row('A late or on-time mark', 'Yes', 'Open <b>Check-ins</b> and press <b>Mark late</b> (or <b>Was on time</b>) with a reason. You can change a correction again, with a reason of at least 10 characters. A desk can correct an entry only once.');
+  else if (C || D) can += row('A late or on-time mark', 'Once', 'Open <b>Check-ins</b> and press <b>Mark late</b> (or on time) with a reason. Each entry can be corrected only once by a desk. If it was wrong, ask the Global Admin or the Assistant to change it again. Check before you press.');
+  if (sup || A) can += row('A member change', 'Yes', 'Open <b>Members</b>, find the member and edit again, or deactivate or reactivate with a reason. Each change is recorded and the Campus Music Director is told.');
+  if (sup || B) can += row('Rehearsal details you saved', 'Yes', 'Open <b>Rehearsals</b>, choose the rehearsal and save the right date, times or venue. Each save is recorded.');
+  if (ga) can += row('An absence the Assistant entered', 'Yes', 'Open the Change log, find the card, press <b>Where to undo it</b>, then <b>Cancel this absence</b> with a reason of 10 to 300 characters. It only works while the day is not yet published as official or cancelled.');
+  if (sup) can += row('Work a desk or Campus Music Director did', 'Partly', 'Open the Change log, find the card and press <b>Where to undo it</b>. It takes you to the page where that work is done, and you undo it there with the normal button. The items marked No below cannot be undone.');
+  if (top) ask += row('Any change you think was wrong', 'Ask', 'You do not undo it yourself. In the Change log press <b>Ask the System Administrator to undo this</b> on that card and type why. You can also send a <b>petition</b> to the Global Admin. You see the answer on the same page.');
+  if (sysa) ask += row('An undo request from the Global Music Director or the Pastor in Charge', 'Do it', 'Open the Change log and read the request under <b>Petitions</b>. Carry the undo out with the normal tool (for example Check-ins or Members), then press <b>Undone</b> and write what you did. Or press <b>Not undone</b> and say why.');
+  if ((A || B || C || D || md) && !sup) ask += row('Anything else you think was wrong', 'Ask', 'Tell the Global Admin or the Assistant. They can reverse most things, and everything they do is recorded with a reason.');
+  if (!can && !ask) ask += row('A change you think was wrong', 'Ask', 'Tell the person who made it, or your Campus Music Director. They can reverse it or pass it on.');
+  const fin = row('A cancelled rehearsal', 'No', 'A rehearsal is only cancelled when two people agree, so one person cannot reverse it.') +
+    row('A processed day', 'No', 'It cannot be reopened, because the absence lists have already gone to the Campus Music Directors. You can correct one person at a time in <b>Process attendance</b> with a reason.') +
+    row('A day published to the official attendance', 'No', 'In practice mode the System Administrator clears it from the script editor. After go-live it is final, and mistakes are corrected one person at a time.') +
+    row('An email already sent', 'No', 'A sent email cannot be taken back. Send a short correction instead.');
+  return '<details class="card pad ug"><summary><span class="ct" style="margin:0;display:inline">What you can undo</span><span class="s"> · for ' + esc(myRoles.filter(r => r !== 'Choir Member').join(', ') || 'your role') + '</span></summary>' +
+    '<p class="sub" style="margin:10px 0 4px">Every undo is recorded with your name, the time and your reason. Nothing is ever deleted.</p>' +
+    (can ? '<div class="ugs">You can undo</div>' + can : '') + (ask ? '<div class="ugs">' + (sysa && !top ? 'Your part' : 'Ask for an undo') + '</div>' + ask : '') +
+    '<div class="ugs">Final, and cannot be undone</div>' + fin + '</details>';
+}
 async function loadChanges() {
   say('m16', 'Loading…');
   try {
@@ -2638,6 +2674,7 @@ async function loadChanges() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('chbox').innerHTML = ''; $('chpet').innerHTML = ''; return say('m16', j.error || 'Not available.', 'bad'); }
     say('m16', '');
+    { const g = $('chundo'), was = g.querySelector('details') && g.querySelector('details').open; g.innerHTML = undoGuideHtml(); if (was) g.querySelector('details').open = true; }
     const rid = c => (String(c.recordId || '') + ' ' + String(c.detail || '')).match(/\bR\d{3,}\b/);
     fpPanel('chg', 'chbox', {title: 'What changed', sub: 'The last ' + j.days + ' days: ' + j.counts.admin + ' admin, ' + j.counts.operations + ' operations, ' + j.counts.bypasses + ' done by an admin instead of the usual desk or role.' + (j.petitionTo ? ' If you disagree with a change, send a petition to the ' + j.petitionTo + '.' : ''),
       items: j.changes, empty: 'Nothing has changed in this time.',
