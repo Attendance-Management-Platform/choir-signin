@@ -398,6 +398,36 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 #rhlist .rhrow:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:var(--ac)}
 #rhlist .rhrow[data-st=current]{--ac:#20775A;--tint:#EAF6F0}#rhlist .rhrow[data-st=finished]{--ac:#8a93a6;--tint:#F1F3F7}#rhlist .rhrow[data-st=cancelled]{--ac:#AE2D37;--tint:#FCECEE}
 #rhlist .datebox{background:var(--tint);border-radius:12px;padding:8px 0;width:56px}
+
+/* Home: even, tidy tiles */
+body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+#hgrid.stats>.stat{flex:none!important;position:relative;display:flex;flex-direction:column;gap:6px;min-height:128px;padding:16px 18px 16px 24px;border:1px solid var(--line);border-left:1px solid var(--line);border-radius:18px;background:linear-gradient(160deg,#fff 55%,var(--tint,#F7F9FC));box-shadow:0 4px 18px rgba(20,35,61,.05)}
+#hgrid.stats>.stat:before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:5px;border-radius:0 5px 5px 0;background:var(--sc,#B6000A)}
+#hgrid.stats>.stat .k{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:900}
+#hgrid.stats>.stat .v{font-size:34px;line-height:1}
+#hgrid.stats>.stat .pill{align-self:flex-start;margin:0}
+#hgrid.stats>.stat>.s{font-size:12.5px;line-height:1.4}
+.hqh{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:var(--mut);margin:14px 4px 8px}
+.hquick{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin:0 0 4px}
+.hquick a{min-height:64px;background:linear-gradient(160deg,#fff 55%,#FFF6F7);box-shadow:0 4px 18px rgba(20,35,61,.05)}
+#hquick.shut .hqg{display:none}
+
+.hqg{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;align-items:stretch}
+.hqc{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 14px 14px;box-shadow:0 4px 18px rgba(20,35,61,.05);display:flex;flex-direction:column}
+.hqc .hqh{margin:4px 4px 10px}
+.hqc .hquick{grid-template-columns:1fr;gap:8px;margin:0}
+.hqc .hquick a{min-height:52px;padding:8px 12px;box-shadow:none;border-radius:14px}
+@media (min-width:1000px){body #hgrid.stats{grid-template-columns:repeat(var(--cols,4),minmax(0,1fr))}}
+
+/* Reports tiles and Attendance records */
+.rtg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.rtl{position:relative;padding:14px 16px 14px 22px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(160deg,#fff 55%,#EAF0FA);box-shadow:0 4px 18px rgba(20,35,61,.05)}
+.rtl:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:#2F4F7E}
+.rtl .rk{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:#2F4F7E}.rtl .rv{font-size:28px;font-weight:900;line-height:1.1;margin-top:4px;color:#172039}
+#rcout .fplist{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;max-height:min(60vh,560px)}
+#rcout .fprow{cursor:pointer;align-items:center;padding:10px 14px;margin:0;border:1px solid var(--line);border-left-width:4px;border-radius:14px;background:#fff;gap:8px;transition:transform .15s,box-shadow .15s}
+#rcout .fprow:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(20,35,61,.10)}
+#rcout .fprow .nm{font-weight:800;font-size:14px}
 </style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -461,6 +491,7 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 <div id="s15" class="pg hide">
 <div class="card pad rise"><div class="ct">Process attendance</div>
 <p class="sub" id="prnote"></p>
+<div id="prchips" class="fpchips"></div>
 <div id="prfind" class="hide" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><input id="prq" class="in" list="prids" placeholder="Search: R104, 2026-09 or a date" style="flex:2 1 200px" autocomplete="off"><datalist id="prids"></datalist>
 <select id="prst" class="in" style="flex:1 1 130px"><option value="">All days</option><option value="todo">To process</option><option value="done">Processed</option><option value="wait">Not ready</option></select>
 <select id="prsrc" class="in" style="flex:1 1 130px"><option value="">Any source</option><option value="Google Form">Google Form</option><option value="QR check-in">QR check-in</option><option value="Google check-in">Google check-in (no QR)</option><option value="Marked by hand">Marked by hand</option></select><button id="prx" class="btn line sm" type="button">Clear</button></div>
@@ -504,12 +535,8 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 <div style="flex:2 1 220px"><label for="rcrid" class="lb" style="margin-top:0">Rehearsal</label><select id="rcrid" class="in"></select></div>
 </div>
 <div id="rcout"></div></div>
-<div class="card pad rise"><div class="ct">Find a member</div>
-<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
-<div style="flex:2 1 220px"><label for="rcq" class="lb" style="margin-top:0">Name</label><input id="rcq" class="in" autocomplete="off" placeholder="Type at least 2 letters, or tap a name above"></div>
-<div style="flex:1 1 160px"><label for="rcmc" class="lb" style="margin-top:0">Campus</label><select id="rcmc" class="in"></select></div>
-<div style="flex:1 1 140px"><label for="rcmp" class="lb" style="margin-top:0">Part</label><select id="rcmp" class="in"></select></div></div>
-<div class="actions"><button id="rcx" class="btn line sm" type="button">Clear</button></div><div id="rcmatch"></div><div id="rcmem"></div></div>
+<div id="rcmem"></div>
+<div hidden><input id="rcq"><select id="rcmc"></select><select id="rcmp"></select><button id="rcx" type="button"></button><div id="rcmatch"></div></div>
 <p id="m13" class="s"></p>
 </div>
 
@@ -1068,10 +1095,10 @@ async function showRecords() {
     if (!j.ok) { $('rcout').innerHTML = ''; return say('m13', j.error || 'Not available.', 'bad'); }
     say('m13', '');
     const col = st => st === 'Present' ? NAVY : st === 'Absent' ? ATTN : SOFT;
-    fpPanel('rec', 'rcout', {bare: true, items: j.rows, empty: 'Nobody is listed for this rehearsal.',
+    fpPanel('rec', 'rcout', {bare: true, chips: 'status', chipsAll: 'Everyone', items: j.rows, empty: 'Nobody is listed for this rehearsal.',
       before: '<p class="sub" style="margin:10px 0 0">' + esc(j.id + (j.date ? ' · ' + j.date : '')) + ' · ' + j.count + ' people' + (j.count > j.shown ? ' (first ' + j.shown + ')' : '') + '. Tap a name to open that member\'s record below.</p>',
-      fields: [{k: 'q', label: 'Search name', ph: 'Type a name, or choose', type: 'text', get: r => r.name, sug: r => [r.name]}, {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus}, {k: 'part', label: 'Part', type: 'list', get: r => r.part || '(no part)'}, {k: 'status', label: 'Status', type: 'list', get: r => r.status}],
-      card: r => '<div class="fprow" style="border-left-color:' + col(r.status) + '"><div><button class="btn line sm nmb" type="button" data-rcpick="' + esc(r.memberId) + '" data-rcname="' + esc(r.name) + '">' + esc(r.name) + '</button><div class="mt">' + esc(r.campus) + ' · ' + esc(r.part || '(no part)') + '</div></div>' + stPill(r.status) + '</div>'});
+      fields: [{k: 'q', label: 'Search name', ph: 'Type a name, or choose', type: 'text', get: r => r.name, sug: r => [r.name]}, {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus}, {k: 'part', label: 'Part', type: 'list', get: r => r.part || '(no part)'}, {k: 'status', label: 'Status', type: 'list', get: r => r.status, all: ['Present', 'Excused', 'Absent']}],
+      card: r => '<div class="fprow" style="border-left-color:' + col(r.status) + '" role="button" tabindex="0" data-rcpick="' + esc(r.memberId) + '" data-rcname="' + esc(r.name) + '"><div><div class="nm">' + esc(r.name) + '</div><div class="mt">' + esc(r.campus) + ' · ' + esc(r.part || '(no part)') + '</div></div>' + stPill(r.status) + '</div>'});
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
 let rcT = null;
@@ -1089,7 +1116,7 @@ async function showMember(id) {
     const j = await call({action: 'records.member', token, memberId: id});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) return say('m13', j.error || 'Not available.', 'bad');
-    $('rcmem').innerHTML = '<div class="card pad" style="margin-top:12px"><b>' + esc(j.member.name) + '</b><p class="sub" style="margin:4px 0 8px">' + esc(j.member.campus) + (j.member.part ? ' · ' + esc(j.member.part) : '') + ' · present at ' + j.attended + ' of ' + j.of + ' published rehearsals</p>' +
+    $('rcmem').innerHTML = '<div class="card pad rise" style="margin-top:12px"><div class="ct">Member record</div><b>' + esc(j.member.name) + '</b><p class="sub" style="margin:4px 0 8px">' + esc(j.member.campus) + (j.member.part ? ' · ' + esc(j.member.part) : '') + ' · present at ' + j.attended + ' of ' + j.of + ' published rehearsals</p>' +
       table(['Rehearsal', 'Date', 'Status'], j.rehearsals.map(r => [r.id, r.date || '', r.status])) + '</div>';
   } catch (e) { say('m13', 'Network problem. Try again.', 'bad'); }
 }
@@ -1101,7 +1128,7 @@ $('rcq').addEventListener('input', () => { clearTimeout(rcT); rcT = setTimeout(f
 document.addEventListener('click', ev => {
   const b = ev.target.closest && ev.target.closest('[data-rcm]'); if (b) showMember(b.dataset.rcm);
   const k = ev.target.closest && ev.target.closest('[data-rcpick]');
-  if (k) { if (window.rbcFoldSet) rbcFoldSet('Find a member', true); $('rcq').value = k.dataset.rcname; $('rcmc').value = ''; $('rcmp').value = ''; $('rcmatch').innerHTML = ''; showMember(k.dataset.rcpick); $('rcq').scrollIntoView({behavior: 'smooth', block: 'center'}); }
+  if (k) { if (window.rbcFoldSet) rbcFoldSet('Find a member', true); $('rcq').value = k.dataset.rcname; $('rcmc').value = ''; $('rcmp').value = ''; $('rcmatch').innerHTML = ''; showMember(k.dataset.rcpick); $('rcmem').scrollIntoView({behavior: 'smooth', block: 'nearest'}); }
 });
 
 // ---- Process attendance ----
@@ -1117,6 +1144,8 @@ function prDraw() {
   const hit = j.rehearsals.filter(r => (!q || (r.id + ' ' + r.date).toLowerCase().indexOf(q) !== -1) &&
     (!src || (r.sources && r.sources.length ? r.sources.map(prSrc).indexOf(src) !== -1 : prSrc(r.source) === src)) && (!st || (st === 'done' ? r.processed : st === 'wait' ? (!r.processed && r.blocked) : (!r.processed && !r.blocked))));
   $('prfind').classList.remove('hide');
+  { const all = j.rehearsals, cn = {'': all.length, todo: all.filter(r => !r.processed && !r.blocked).length, wait: all.filter(r => !r.processed && r.blocked).length, done: all.filter(r => r.processed).length};
+    $('prchips').innerHTML = [['', 'All days'], ['todo', 'To process'], ['wait', 'Not ready'], ['done', 'Processed']].map(c => '<button type="button" class="fpchip' + (st === c[0] ? ' on' : '') + '" data-prchip="' + c[0] + '">' + c[1] + '<b>' + cn[c[0]] + '</b></button>').join(''); }
   $('prfind').style.display = 'flex';
   $('prcount').textContent = j.rehearsals.length ? 'Showing ' + Math.min(prShown, hit.length) + ' of ' + hit.length + (hit.length !== j.rehearsals.length ? ' (' + j.rehearsals.length + ' held in all)' : '') + ', newest first.' : '';
   $('prmore').classList.toggle('hide', hit.length <= prShown);
@@ -1133,6 +1162,7 @@ $('prq').oninput = () => { prShown = 10; prDraw(); };
 $('prq').onchange = () => { prShown = 10; prDraw(); const e = prState && prState.rehearsals.filter(r => r.id.toLowerCase() === $('prq').value.trim().toLowerCase())[0]; if (e) prOpen(e.id, e.processed); };
 $('prst').onchange = $('prsrc').onchange = () => { prShown = 10; prDraw(); };
 $('prmore').onclick = () => { prShown += 10; prDraw(); };
+$('prchips').addEventListener('click', ev => { const b = ev.target.closest('[data-prchip]'); if (!b) return; $('prst').value = b.dataset.prchip; prShown = 10; prDraw(); });
 $('prx').onclick = () => { $('prq').value = ''; $('prst').value = ''; $('prsrc').value = ''; prShown = 10; prDraw(); $('prdetail').innerHTML = ''; $('prdetail').dataset.id = ''; };
 async function loadProcess() {
   say('m15', 'Loading…'); $('prdetail').innerHTML = '';
@@ -1142,7 +1172,7 @@ async function loadProcess() {
     if (!j.ok) return say('m15', j.error || 'Not available.', 'bad');
     prState = j; say('m15', j.saving ? '' : 'Saving is switched off, so nothing can be processed now.', j.saving ? '' : 'bad');
     $('prnote').textContent = j.note || '';
-    prShown = 10; $('prq').value = ''; $('prst').value = ''; $('prsrc').value = '';
+    prShown = 10; $('prq').value = ''; $('prst').value = j.rehearsals.some(r => !r.processed && !r.blocked) ? 'todo' : ''; $('prsrc').value = '';
     $('prids').innerHTML = j.rehearsals.slice(0, 500).map(r => '<option value="' + esc(r.id) + '">' + esc(r.date) + '</option>').join('');
     prDraw();
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
@@ -1767,7 +1797,7 @@ function drawBuild(j) {
     h = '<div class="card pad rise"><div class="ct">Summary</div><p class="sub" style="margin:0">' + esc(what) + '. ' + v.rehearsals + ' rehearsal(s). ' + v.members.length + ' member(s) missed ' + v.minStreak + ' or more in a row' + (v.perfect ? '; ' + v.perfect + ' were never absent' : '') + '. An excused absence does not break a run.</p>' + clr + '</div>' +
       '<div class="card pad rise"><div class="ct">Members to follow up</div>' + (v.members.length ? table(['Name', 'Campus', 'Part', 'In a row', 'Present', 'Absent', 'Rate'], v.members.map(x => [x.name, x.campus, x.part, x.streak, x.present, x.absent, x.rate + '%'])) : '<p class="sub">No one matches.</p>') + '<div class="actions">' + csv + '<button class="btn line sm" type="button" data-anclear="1">Clear this result</button></div></div>';
   } else {
-    const tiles = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">' + v.tiles.map(t => '<div style="background:#F5F7FA;border-radius:12px;padding:10px 14px;border-top:3px solid ' + NAVY + '"><div class="sub" style="margin:0;font-weight:800">' + esc(t[0]) + '</div><div style="font-size:21px;font-weight:900">' + esc(t[1]) + '</div></div>').join('') + '</div>';
+    const tiles = '<div class="rtg">' + v.tiles.map(t => '<div class="rtl"><div class="rk">' + esc(t[0]) + '</div><div class="rv">' + esc(t[1]) + '</div></div>').join('') + '</div>';
     let chart;
     const rate = v.measure === 'rate', valueOf = g => g.value;
     if (v.kind === 'time') chart = colChart(v.groups.map(g => ({name: g.name, value: valueOf(g)})), {unit: unit, single: true, label: what});
@@ -1887,7 +1917,7 @@ function drawQuick(has) {
   const ks = (myTabs || []).filter(k => k !== 'home' && k !== 'help' && TABDEF[k]);
   const box = $('hquick'); if (!box) return;
   box.classList.toggle('shut', homeShut('work'));
-  box.innerHTML = ks.length ? '<button type="button" class="hsec fold" data-hfold="work" aria-expanded="' + (homeShut('work') ? 'false' : 'true') + '">Your work</button><div class="hquick">' + ks.map(k => '<a href="#" data-go="' + TABDEF[k][0] + '"><span class="hi"><svg viewBox="0 0 24 24">' + (ICON[k] || ICON.records) + '</svg></span>' + esc(TABDEF[k][1]) + '</a>').join('') + '</div>' : '';
+  box.innerHTML = ks.length ? '<button type="button" class="hsec fold" data-hfold="work" aria-expanded="' + (homeShut('work') ? 'false' : 'true') + '">Your work</button><div class="hqg">' + NAVGROUPS.filter(g => g.name && g.tabs.some(k => ks.indexOf(k) !== -1)).map(g => '<div class="hqc"><div class="hqh">' + esc(g.name) + '</div><div class="hquick">' + g.tabs.filter(k => ks.indexOf(k) !== -1).map(k => '<a href="#" data-go="' + TABDEF[k][0] + '"><span class="hi"><svg viewBox="0 0 24 24">' + (ICON[k] || ICON.records) + '</svg></span>' + esc(TABDEF[k][1]) + '</a>').join('') + '</div></div>').join('') + '</div>' : '';
   box.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
 }
 async function loadHome() {
@@ -1910,6 +1940,8 @@ async function loadHome() {
     drawHero(j, t, has); drawQuick(has);
     $('hgrid').innerHTML = h ? '<button type="button" class="hsec fold" data-hfold="glance" aria-expanded="' + (homeShut('glance') ? 'false' : 'true') + '">At a glance</button>' + h : '';
     $('hgrid').classList.toggle('shut', homeShut('glance'));
+    { const n = document.querySelectorAll('#hgrid .stat').length; $('hgrid').style.setProperty('--cols', n <= 5 ? Math.max(n, 1) : Math.ceil(n / 2)); }
+    document.querySelectorAll('#hgrid .stat').forEach(e => { const k = e.querySelector('.k'); if (k && k.style.color) { e.style.setProperty('--sc', k.style.color); e.style.setProperty('--tint', 'color-mix(in srgb,' + k.style.color + ' 9%,#fff)'); } });
     document.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     const cr = t.cancelReminder;
     const crh = cr ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + esc(cr.id) + (cr.kind === 'last' ? '' : ' held as planned?') + '</div><p class="sub">' +
@@ -2226,7 +2258,7 @@ async function loadQueue() {
     const batchable = r => (r.ops.indexOf('validate') !== -1 || r.ops.indexOf('approve') !== -1);
     const n = k => items.filter(r => kind(r) === k).length;
     const tile = (k, v, col) => '<div class="card stat" style="box-shadow:none"><div class="k" style="color:var(--mut)">' + k + '</div><div class="v"' + (col ? ' style="color:' + col + '"' : '') + '>' + v + '</div></div>';
-    $('qsum').innerHTML = items.length ? '<div class="stats" style="margin:0 0 14px">' + tile('Waiting for you', items.length) + tile('Absent, no request', n('flag'), '#AE2D37') + tile('Late route', n('late'), '#95621D') + tile('Appeals', n('appeal'), '#2F4F7E') + '</div>' : '';
+    $('qsum').innerHTML = items.length ? '<div class="stats" style="margin:0 0 14px">' + tile('Waiting for you', items.length) + (n('flag') ? tile('Absent, no request', n('flag'), '#AE2D37') : '') + (n('late') ? tile('Late route', n('late'), '#95621D') : '') + (n('appeal') ? tile('Appeals', n('appeal'), '#2F4F7E') : '') + '</div>' + (items.some(r => r.bypass) ? '<p class="s" style="margin:0 0 12px">Items marked "With the Campus MD" are in their 48 hours. You can wait for them, or decide now yourself. Your reason is recorded and they are told.</p>' : '') : '';
     $('qfind').classList.toggle('hide', !items.length);
     const camps = Array.from(new Set(items.map(r => r.campus).filter(Boolean))).sort();
     $('qc').innerHTML = '<option value="">Any campus</option>' + camps.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
@@ -2243,7 +2275,7 @@ async function loadQueue() {
       return '<div class="qrow" data-k="' + esc((r.name || '').toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-r="' + esc(r.rehearsalId || '') + '" data-t="' + k + '">' +
         '<div class="qck">' + (batchable(r) ? '<input type="checkbox" class="qtick" data-id="' + esc(r.requestId) + '" data-v="' + (r.ops.indexOf('validate') !== -1 ? '1' : '') + '" data-a="' + (r.ops.indexOf('approve') !== -1 ? '1' : '') + '" data-f="' + (r.flagged ? '1' : '') + '" aria-label="Tick ' + esc(r.name || 'member') + '">' : '') + '</div>' +
         '<div class="qmain"><div class="qname">' + esc(r.name || 'Member') + ' <span class="s">' + esc(r.campus) + (when ? ' · ' + esc(r.rehearsalId || '') + ' · ' + when : '') + '</span></div><div class="qpills">' + pills + '</div>' +
-        (r.bypass ? '<div class="s qwhy" style="color:#2F4F7E">This is with the Campus MD, who has the 48 hours. You can wait for them, or decide now yourself (your reason is recorded and they are told).</div>' : '') + '<div class="s qwhy">' + esc(r.reason || (r.flagged ? 'Marked Absent at the rehearsal. Nobody sent a request.' : 'No reason recorded.')) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div></div>' +
+        (r.reason || r.note || !r.flagged ? '<div class="s qwhy">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div>' : '') + '</div>' +
         '<div class="qact">' + btns + '</div></div>';
     }).join('');
     const rowsEl = () => Array.from($('qrows').querySelectorAll('.qrow'));
@@ -2391,6 +2423,7 @@ async function loadRoll() {
     if (j && j.signedOut) { signedOutNow(); return; }
     if (!j || !j.ok) { box.innerHTML = '<div class="card pad rise"><div class="ct">Roll call</div><p class="sub">' + esc((j && j.error) || 'Not available.') + '</p></div>'; return; }
     const c = j.counts || {};
+    if (j.window && !j.window.open && !(j.rows || []).some(r => r.canPresent || r.canAbsent || r.canExcused || r.canTakeBack || r.canConfirm)) { box.innerHTML = '<div class="card pad rise"><div class="ct">Roll call</div><p class="sub" style="margin:0">The roll call for ' + esc(j.rehearsalId || 'this rehearsal') + ' has ended, so there is nothing left to mark. Its record is under Attendance records.</p></div>'; return; }
     fpPanel('roll', 'rollbox', {title: 'Roll call', sub: c.present + ' present · ' + c.absent + ' absent · ' + c.excused + ' excused · ' + c.none + ' not marked.' + (j.campus ? ' You see your own campus.' : '') + (j.window ? (j.campus ? (j.window.mdOpen ? ' It is your turn to mark.' : ' It is not your turn to mark now.') : (j.window.deskOpen ? ' It is Desk D\'s turn to mark.' : j.window.open ? ' You can check the Campus MDs\' marks. Desk D marks from 45 minutes before the end.' : ' The roll call is closed.')) : ''),
       items: j.rows, empty: 'No members to show.',
       fields: [{k: 'q', label: 'Search', ph: 'Type a name or ID, or choose', type: 'text', get: r => r.name + ' ' + r.memberId, sug: r => [r.name, r.memberId]},
