@@ -439,6 +439,19 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 #rcout .fprow{cursor:pointer;align-items:center;padding:10px 14px;margin:0;border:1px solid var(--line);border-left-width:4px;border-radius:14px;background:#fff;gap:8px;transition:transform .15s,box-shadow .15s}
 #rcout .fprow:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(20,35,61,.10)}
 #rcout .fprow .nm{font-weight:800;font-size:14px}
+/* Breathing room (owner, 20 Oct): tiles and rows keep a little space inside and between them, on every page that uses them. */
+.ugt{padding:20px 24px 20px 26px}.ugt:before{top:20px;bottom:20px}
+.ugtop{gap:14px}.ugtop b{line-height:1.4}
+.ugk{margin:18px 0 8px}.ugh{line-height:1.7}.ugh .pill,.ugh .tkn{margin:3px 8px 3px 0}
+.ugt .actions{margin:18px 0 0!important;gap:12px}
+#htasks .fplist,#mbdet .fplist,#pwait .fplist,#pready .fplist,#pmine .fplist,.tgrid,#helpbody #hb1 .fplist,#helpbody #hb2 .fplist,#helpbody #hb3 .fplist,#helpbody #hb4 .fplist{gap:22px;padding:10px 12px 14px 6px}
+.fplist{gap:20px;padding:8px 12px 12px 6px}
+.fprow{padding:18px 22px;gap:16px}
+#qrows{gap:22px;padding:18px 8px 10px}#qrows .qrow{padding:20px 24px 20px 26px;gap:10px 16px}
+#rcout .fplist{gap:16px}#rcout .fprow{padding:14px 18px}
+.stats{gap:18px}#hgrid.stats{gap:18px}.stat{padding:18px 22px}
+#htasks .fplist{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+@media(max-width:480px){.ugt{padding:16px 18px 16px 20px}.ugt:before{top:16px;bottom:16px}#htasks .fplist,#mbdet .fplist,#pwait .fplist,#pready .fplist,#pmine .fplist,.tgrid{gap:16px;padding:6px 6px 10px 2px}#qrows{gap:16px}#qrows .qrow{padding:16px 18px 16px 20px}.fprow{padding:14px 16px}}
 </style></head><body class="out">
 <div style="background:#172039;color:#fff;text-align:center;font-size:12px;padding:5px 8px">TEST copy: fake data only. The real choir uses the production page.</div><div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
