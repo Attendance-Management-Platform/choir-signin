@@ -158,6 +158,17 @@ input.in{height:48px;padding:0 14px}
   .sb.min .sbrand,.sb.min .sbfoot{display:none}.sb.min #sbtog span{display:none}.sb.min #sbtog{justify-content:center;padding:6px 0 14px}
   .sb.min .nv{font-size:0;justify-content:center;gap:0;padding:12px 0}.sb.min .nv:hover{transform:none}
 }
+.ugt{position:relative;border:1px solid var(--line);border-radius:16px;padding:14px 16px;background:linear-gradient(160deg,#fff 55%,var(--tint,#fff));box-shadow:0 4px 18px rgba(20,35,61,.05);transition:transform .15s ease,box-shadow .15s ease}
+.ugt:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,35,61,.10)}.ugt:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:var(--ac,#B6000A)}
+.ugt.ok{--ac:#20775A;--tint:#EAF6F0}.ugt.warn{--ac:#C98A1B;--tint:#FFF5E2}.ugt.ask{--ac:#2F4F7E;--tint:#EAF0FA}.ugt.no{--ac:#AE2D37;--tint:#FCECEE}.ugt.gr{--ac:#8A93A5;--tint:#F2F4F8}
+.ugtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ugtop b{font-size:14.5px;line-height:1.3;flex:1}.ugi{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;background:var(--ac)}
+.ugk{margin:12px 0 4px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:var(--muted)}.ugh{font-size:13px;line-height:1.55;color:var(--fg)}
+.ugt .ugs{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+#mfl_req,#mfl_det,#rmine .col{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px!important}
+#mfl_att{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px!important}
+#mfl_req>.mfpg,#mfl_det>.mfpg,#mfl_att>.mfpg,#mfl_req>:not(.ugt),#mfl_det>:not(.ugt),#mfl_att>:not(.ugt){grid-column:1/-1}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.tgrid .ugt .ugtop b{font-size:13px}.tgrid .ugt .s{margin-left:40px;word-break:break-word}
+#attlist>*{grid-column:1/-1}
 </style></head><body>
 <div id="outv">
  <div class="lp"><div class="lbrand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
@@ -236,7 +247,7 @@ input.in{height:48px;padding:0 14px}
 
    <div id="v4" class="hide">
     <div class="grid">
-     <div class="card rise" id="prof" style="line-height:2;font-size:15px"></div>
+     <div class="card rise" id="prof" style="font-size:15px"></div>
      <div class="card rise col" id="wrong"><div class="cth">Something wrong?</div><div class="s" style="font-size:14px">You cannot edit these yourself. Ask <span class="dgo">Desk A</span> to correct your name, email, campus or section.</div>
       <button id="dask" class="btn btn-red" type="button">Ask <span class="dgo">Desk A</span> to correct my details</button>
       <div id="dform" class="hide" style="margin-top:6px">
@@ -304,6 +315,7 @@ function tab(n) {
 $('req').onclick = () => tab(2); $('seeall').onclick = e => { e.preventDefault(); tab(2); }; $('attlink').onclick = e => { e.preventDefault(); tab(3); };
 $('out').onclick = $('out2').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
 const pill = (s, r) => s === 'Withdrawn' && r && /^Cancelled by/.test(r.note || '') ? '<span class="pill p-no">Cancelled</span>' : '<span class="pill ' + ({Approved: 'p-ok', Rejected: 'p-no', Pending: 'p-pend', Appeal: 'p-app', Withdrawn: 'p-pend'}[s] || 'p-pend') + '">' + esc(s) + '</span>';
+const tile = o => '<div class="ugt ' + (o.tone || 'ask') + '"><div class="ugtop"><span class="ugi">' + (o.icon || '') + '</span><b>' + o.title + '</b>' + (o.pill || '') + '</div>' + (o.sub ? '<div class="s" style="margin:6px 0 0 40px;font-size:13px">' + o.sub + '</div>' : '') + (o.body ? '<div class="ugs">' + o.body + '</div>' : '') + '</div>';
 const short = n => { const p = String(n || '').trim().split(/\s+/); return p.length > 1 ? p[0] + ' ' + p[p.length - 1].charAt(0) + '.' : (p[0] || ''); };
 
 // ---- sign in ----
@@ -448,10 +460,10 @@ async function loadReqs() {
     else { box.className = 'note'; box.textContent = 'Requests for this rehearsal are closed. Please contact the Global Admin or Assistant Global Admin.'; }
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
     say('m3', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
-    const reqCard = r => '<div class="card lift col" style="gap:8px"><div class="rowl"><div><div style="font-size:16px;font-weight:900">' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</div><div class="s">' + esc(subOf(r)) + (r.late ? ' · late' : '') + '</div></div>' + pill(r.status, r) + '</div>' +
-      (r.reason ? '<div class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div>' : '') +
+    const reqCard = r => tile({tone: (r.status === 'Withdrawn' && r.note && /^Cancelled by/.test(r.note)) ? 'no' : ({Approved: 'ok', Rejected: 'no', Pending: 'warn', Appeal: 'ask', Withdrawn: 'gr'}[r.status] || 'warn'), icon: ({Approved: '\u2713', Rejected: '\u2715', Pending: '\u2026', Appeal: '!', Withdrawn: '\u2013'}[r.status] || '\u2026'), title: esc(dshort(r.rehearsalStartMs)) + ' rehearsal', pill: pill(r.status, r), sub: esc(subOf(r)) + (r.late ? ' \u00b7 late' : ''), body:
+      (r.reason ? '<div class="s">' + esc(r.reason) + (r.note ? ' \u00b7 Note: ' + esc(r.note) : '') + '</div>' : '') +
       (r.canAppeal ? '<label for="ap' + esc(r.requestId) + '" style="font-size:14px;font-weight:900">Why are you appealing?</label><textarea id="ap' + esc(r.requestId) + '" class="in" rows="3" maxlength="300"></textarea><button class="btn btn-red" style="margin-top:0" data-ap="' + esc(r.requestId) + '">Send appeal</button><div class="s">Appeals go to the Global Music Director first, then the Pastor.</div>' : '') +
-      (r.canWithdraw ? '<button class="btn btn-line" style="margin-top:0" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '') + '</div>';
+      (r.canWithdraw ? '<button class="btn btn-line" style="margin-top:0" data-w="' + esc(r.requestId) + '">Withdraw request</button>' : '')});
     mfPanel('req', 'rmine', {items: j.mine, empty: 'You have no requests yet.', card: reqCard, chips: 'status', chipsAll: 'All requests',
       fields: [
         {k: 'q', label: 'Search', ph: 'A date, or words from your reason', get: r => [dlong(r.rehearsalStartMs), r.reason, r.note].join(' ')},
@@ -574,7 +586,7 @@ async function loadAtt() {
     $('attpct').textContent = Math.round(100 * j.attended / j.of) + '%';
     $('attsub').innerHTML = '<b style="color:var(--ink)">' + j.attended + ' of ' + j.of + '</b> rehearsals<br>' + j.excused + ' excused · ' + j.absent + ' absent';
     const fd = s => { const d = new Date(String(s) + 'T12:00:00'); return isNaN(d) ? String(s || '') : d.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'}); };
-    const attCard = r => '<div class="card lift rowl" style="padding:12px 16px"><div><b>' + esc(fd(r.date) || r.id) + '</b><div class="s" style="font-size:13px">' + esc(r.id) + '</div></div><span class="pill ' + ({Present: 'p-ok', Excused: 'p-app', Absent: 'p-no'}[r.status] || 'p-pend') + '">' + esc(r.status || '') + '</span></div>';
+    const attCard = r => tile({tone: ({Present: 'ok', Excused: 'ask', Absent: 'no'}[r.status] || 'warn'), icon: ({Present: '\u2713', Excused: 'E', Absent: '\u2715'}[r.status] || '\u2026'), title: esc(fd(r.date) || r.id), pill: '<span class="pill ' + ({Present: 'p-ok', Excused: 'p-app', Absent: 'p-no'}[r.status] || 'p-pend') + '">' + esc(r.status || '') + '</span>', sub: esc(r.id)});
     const mo = r => { const d = new Date(String(r.date) + 'T12:00:00'); return isNaN(d) ? '' : d.toLocaleDateString('en-GB', {month: 'long', year: 'numeric'}); };
     mfPanel('att', 'attlist', {items: j.rehearsals, per: 8, empty: 'Your attendance will show here once rehearsals are published.', card: attCard, chips: 'status', chipsAll: 'All rehearsals',
       fields: [
@@ -587,7 +599,8 @@ async function loadAtt() {
 function drawProfile() {
   const h = home;
   if (!h) { loadHome().then(drawProfile); return; }
-  $('prof').innerHTML = '<b style="font-size:18px">' + esc(h.name) + '</b><br><span class="s">Member ID</span> ' + esc(h.memberId) + '<br><span class="s">Campus</span> ' + esc(h.campus || '-') + '<br><span class="s">Section</span> ' + esc(h.part || '-') + '<br><span class="s">Email</span> ' + esc(h.email || '-') + '<br><span class="s">Status</span> <span class="pill p-ok">Active</span>';
+  const pr = (ic, k, v) => tile({tone: 'ask', icon: ic, title: esc(k), sub: v});
+  $('prof').innerHTML = '<b style="font-size:18px;display:block;margin-bottom:10px">' + esc(h.name) + '</b><div class="tgrid">' + pr('#', 'Member ID', esc(h.memberId)) + pr('C', 'Campus', esc(h.campus || '-')) + pr('S', 'Section', esc(h.part || '-')) + pr('@', 'Email', esc(h.email || '-')) + tile({tone: 'ok', icon: '\u2713', title: 'Status', pill: '<span class="pill p-ok">Active</span>'}) + '</div>';
 }
 let dreq = [];
 let DGO = 'Desk A';
@@ -601,11 +614,12 @@ async function loadDetails() {
     $('dask').classList.toggle('hide', j.canAsk === false || !$('dform').classList.contains('hide'));
     const dCard = r => {
       const st = r.status === 'Waiting' ? '<span class="pill p-pend">Waiting for ' + esc(DGO) + '</span>' : r.status === 'Done' ? '<span class="pill p-ok">Done</span>' : r.status === 'Withdrawn' ? '<span class="pill p-pend" style="background:#EEF1F6;color:#4A5568">Withdrawn</span>' : '<span class="pill p-no">Not changed</span>';
-      return '<div class="dh ' + (r.status === 'Done' ? 'done' : r.status === 'Waiting' ? '' : r.status === 'Withdrawn' ? 'wd' : 'no') + '"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><b>' + esc(r.kind) + '</b>' + st + '</div><div class="s" style="font-size:14px">Should be: ' + esc(r.text) + '</div>' +
+      return tile({tone: r.status === 'Done' ? 'ok' : r.status === 'Waiting' ? 'warn' : r.status === 'Withdrawn' ? 'gr' : 'no', icon: r.status === 'Done' ? '\u2713' : r.status === 'Waiting' ? '\u2026' : r.status === 'Withdrawn' ? '\u2013' : '\u2715', title: esc(r.kind), pill: st, sub: 'Sent ' + esc(dtm(r.atMs)), body:
+        '<div class="s" style="font-size:14px">Should be: ' + esc(r.text) + '</div>' +
         (r.note ? '<div class="s" style="font-size:14px">Your note: ' + esc(r.note) + '</div>' : '') +
-        (r.answer ? '<div class="s" style="font-size:14px">' + esc(DGO.charAt(0).toUpperCase() + DGO.slice(1)) + ': ' + esc(r.answer) + '</div>' : '') + '<div class="s" style="font-size:12px">Sent ' + esc(dtm(r.atMs)) + '</div>' +
+        (r.answer ? '<div class="s" style="font-size:14px">' + esc(DGO.charAt(0).toUpperCase() + DGO.slice(1)) + ': ' + esc(r.answer) + '</div>' : '') +
         (r.status === 'Waiting' ? '<div><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dw="' + esc(r.id) + '">Withdraw this request</button></div>' : '') +
-        (r.status === 'Not changed' ? '<div><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dagain="' + esc(r.id) + '">Ask again</button></div>' : '') + '</div>';
+        (r.status === 'Not changed' ? '<div><button class="btn btn-line" type="button" style="min-height:42px;font-size:14px" data-dagain="' + esc(r.id) + '">Ask again</button></div>' : '')});
     };
     mfPanel('det', 'dlist', {items: dreq, empty: '', card: dCard, chips: 'status', chipsAll: 'All requests',
       fields: [
