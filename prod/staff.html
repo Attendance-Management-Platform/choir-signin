@@ -371,6 +371,12 @@ button.hsec.fold[hidden]{display:none}#hqr .card>.ct:first-child{display:none}#h
 body .anh .ct,body #htasks .ct,body .pg>.card>.ct,body .pg>.card>.fh>.ct,body .dash .card>.ct,body .card.pad>.ct,body .ntc .ct,body .card>.fh .ct,body .fh>.ct,body .card>.tblh .ct{font-size:13px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8E0008}
 body .pg .ct,body .pg .tblh>span:first-child{font-size:13px!important;font-weight:900!important;letter-spacing:.07em!important;text-transform:uppercase!important;color:#8E0008!important}
 body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!important;text-transform:none!important;color:#172039!important}
+.chc{background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 8px}
+.chc.chb{border-left:4px solid #d9a441}
+.chh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.cht{font-size:15px;font-weight:900}.chw{margin-left:auto;font-size:12px;color:var(--mut);white-space:nowrap}
+.chf{display:flex;gap:6px 22px;flex-wrap:wrap;margin-top:8px;font-size:13px}.chf i,.chr i{display:block;font-style:normal;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:var(--mut);margin-bottom:1px}
+.chd{margin-top:8px;font-size:13px;line-height:1.45;color:var(--fg)}
+.chr{margin-top:8px;padding:8px 10px;background:rgba(217,164,65,.12);border-radius:10px;font-size:13px;line-height:1.45}
 </style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -2643,9 +2649,10 @@ async function loadChanges() {
         {k: 'by', label: 'Done by', type: 'list', get: c => c.by},
         {k: 'from', label: 'From', type: 'date', get: c => c.atMs},
         {k: 'to', label: 'To', type: 'date', get: c => c.atMs}],
-      card: c => '<div class="card pad" style="margin-top:0"><span class="pill ' + (c.bypass ? 'p-pend' : c.area === 'Admin' ? 'p-val' : 'p-info') + '">' + (c.bypass ? 'Done instead' : esc(c.area)) + '</span> <b>' + esc(c.label) + '</b> · ' + esc(c.recordId) + ' · ' + esc(c.by) + ' · ' + esc(tm(c.atMs)) +
-        (c.detail ? '<br><span class="s">' + esc(c.detail) + '</span>' : '') + (c.reason ? '<br><span class="s">Reason: ' + esc(c.reason) + '</span>' : '') +
-        '<div class="actions" style="margin:6px 0 0">' + (j.petitionTo ? '<button class="btn line sm" type="button" data-pet="' + esc(c.label + ' ' + c.recordId) + '">Petition about this</button>' : '') +
+      card: c => '<div class="chc' + (c.bypass ? ' chb' : '') + '"><div class="chh"><span class="pill ' + (c.bypass ? 'p-pend' : c.area === 'Admin' ? 'p-val' : 'p-info') + '">' + (c.bypass ? 'Done instead' : esc(c.area)) + '</span><b class="cht">' + esc(c.label) + '</b><span class="chw">' + esc(tm(c.atMs)) + '</span></div>' +
+        '<div class="chf">' + (c.by ? '<span><i>Done by</i>' + esc(c.by) + '</span>' : '') + (c.recordId ? '<span><i>Record</i>' + esc(c.recordId) + '</span>' : '') + '</div>' +
+        (c.detail ? '<div class="chd">' + esc(c.detail) + '</div>' : '') + (c.reason ? '<div class="chr"><i>Reason</i>' + esc(c.reason) + '</div>' : '') +
+        '<div class="actions" style="margin:8px 0 0">' + (j.petitionTo ? '<button class="btn line sm" type="button" data-pet="' + esc(c.label + ' ' + c.recordId) + '">Petition about this</button>' : '') +
         (j.undoTo ? '<button class="btn red sm" type="button" data-undo="' + esc(c.label + ' ' + c.recordId + (c.by ? ' by ' + c.by : '')) + '">Ask the ' + esc(j.undoTo) + ' to undo this</button>' : '') +
         (chWhere(c) ? '<button class="btn line sm" type="button" data-taskgo="' + chWhere(c) + '">Where to undo it</button>' : '') + '</div></div>'});
     $('chpet').innerHTML = j.petitions.length ? '<div class="card pad rise"><div class="ct">Petitions' + (j.counts.waiting ? ' (' + j.counts.waiting + ' waiting for you)' : '') + '</div>' + j.petitions.map(p => '<div style="border-top:1px solid var(--line);padding:8px 0">' + (p.to === 'System Administrator' ? '<span class="pill p-info">Undo request</span> ' + stPill(p.status === 'Upheld' ? 'Done' : p.status === 'Declined' ? 'Declined' : p.status) : stPill(p.status)) + ' <b>' + esc(p.from) + '</b> to the ' + esc(p.to) + ' · ' + esc(tm(p.atMs)) +
