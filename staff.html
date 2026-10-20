@@ -2259,7 +2259,7 @@ async function loadQueue() {
     const batchable = r => (r.ops.indexOf('validate') !== -1 || r.ops.indexOf('approve') !== -1);
     const n = k => items.filter(r => kind(r) === k).length;
     const tile = (k, v, col) => '<div class="card stat" style="box-shadow:none"><div class="k" style="color:var(--mut)">' + k + '</div><div class="v"' + (col ? ' style="color:' + col + '"' : '') + '>' + v + '</div></div>';
-    $('qsum').innerHTML = items.length ? '<div class="stats" style="margin:0 0 14px">' + tile('Waiting for you', items.length) + (n('flag') ? tile('Absent, no request', n('flag'), '#AE2D37') : '') + (n('late') ? tile('Late route', n('late'), '#95621D') : '') + (n('appeal') ? tile('Appeals', n('appeal'), '#2F4F7E') : '') + '</div>' + (items.some(r => r.bypass) ? '<p class="s" style="margin:0 0 12px">Items marked "With the Campus MD" are in their 48 hours. You can wait for them, or decide now yourself. Your reason is recorded and they are told.</p>' : '') : '';
+    $('qsum').innerHTML = items.length ? '<div class="stats" style="margin:0 0 14px">' + tile('Waiting for you', items.filter(r => !(r.flagged && r.lapsed)).length) + (n('flag') ? tile('Absent, no request', n('flag'), '#AE2D37') : '') + (n('late') ? tile('Late route', n('late'), '#95621D') : '') + (n('appeal') ? tile('Appeals', n('appeal'), '#2F4F7E') : '') + '</div>' + (items.some(r => r.bypass) ? '<p class="s" style="margin:0 0 12px">Items marked "With the Campus MD" are in their 48 hours. You can wait for them, or decide now yourself. Your reason is recorded and they are told.</p>' : '') + (items.some(r => r.flagged && r.lapsed) ? '<div class="fpchips" id="qviews"><button type="button" class="fpchip on" data-qv="open">Needs a decision<b>' + items.filter(r => !(r.flagged && r.lapsed)).length + '</b></button><button type="button" class="fpchip" data-qv="lapsed">Time is up, stays Absent<b>' + items.filter(r => r.flagged && r.lapsed).length + '</b></button></div><p class="s" id="qvnote" style="margin:0 0 10px;display:none">The Campus Music Director did not answer in 48 hours, so these stay Absent. The Global Admin or Assistant can still decide one, with a reason.</p>' : '') : '';
     $('qfind').classList.toggle('hide', !items.length);
     const camps = Array.from(new Set(items.map(r => r.campus).filter(Boolean))).sort();
     $('qc').innerHTML = '<option value="">Any campus</option>' + camps.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
@@ -2273,14 +2273,14 @@ async function loadQueue() {
         (r.bypass ? '<span class="pill p-info">With the Campus MD</span>' : '') + (r.handedToCampusMd ? '<span class="pill p-info">Handed to a Campus MD</span>' : '');
       const btns = r.ops.map(o => '<button type="button" class="btn ' + (/reject/.test(o) ? 'warn' : 'red') + ' sm" data-id="' + esc(r.requestId) + '" data-op="' + o + '" data-f="' + (r.flagged ? '1' : '') + '" data-w="' + (r.bypass ? '1' : '') + '">' + esc(r.flagged && FLABEL[o] ? FLABEL[o] : OPLABEL[o]) + '</button>').join('') +
         (r.flagged && r.memberId && r.ops.indexOf('validate') !== -1 ? '<button class="btn line sm" type="button" data-deact="1" data-mid="' + esc(r.memberId) + '" data-name="' + esc(r.name) + '" data-campus="' + esc(r.campus) + '">No longer in the choir…</button>' : '');
-      return '<div class="qrow" data-k="' + esc((r.name || '').toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-r="' + esc(r.rehearsalId || '') + '" data-t="' + k + '">' +
+      return '<div class="qrow" data-l="' + (r.flagged && r.lapsed ? '1' : '') + '" data-k="' + esc((r.name || '').toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-r="' + esc(r.rehearsalId || '') + '" data-t="' + k + '">' +
         '<div class="qck">' + (batchable(r) ? '<input type="checkbox" class="qtick" data-id="' + esc(r.requestId) + '" data-v="' + (r.ops.indexOf('validate') !== -1 ? '1' : '') + '" data-a="' + (r.ops.indexOf('approve') !== -1 ? '1' : '') + '" data-f="' + (r.flagged ? '1' : '') + '" aria-label="Tick ' + esc(r.name || 'member') + '">' : '') + '</div>' +
         '<div class="qmain"><div class="qname">' + esc(r.name || 'Member') + ' <span class="s">' + esc(r.campus) + (when ? ' · ' + esc(r.rehearsalId || '') + ' · ' + when : '') + '</span></div><div class="qpills">' + pills + '</div>' +
         (r.reason || r.note || !r.flagged ? '<div class="s qwhy">' + esc(r.reason || 'No reason recorded.') + (r.note ? ' · Note: ' + esc(r.note) : '') + '</div>' : '') + '</div>' +
         '<div class="qact">' + btns + '</div></div>';
     }).join('');
     const rowsEl = () => Array.from($('qrows').querySelectorAll('.qrow'));
-    let qpage = 0; const QPS = 8;
+    let qpage = 0, qview = 'open'; const QPS = 8;
     const shown = () => rowsEl().filter(e => e.dataset.m === '1');
     const ticked = () => Array.from($('qrows').querySelectorAll('.qtick:checked')).filter(x => x.closest('.qrow').dataset.m === '1');
     const upd = () => {
@@ -2291,8 +2291,9 @@ async function loadQueue() {
     };
     const filt = () => {
       const q = $('qq').value.trim().toLowerCase(), c = $('qc').value, t = $('qt').value, rr = $('qr').value;
-      rowsEl().forEach(e => { e.dataset.m = (!q || e.dataset.k.indexOf(q) !== -1) && (!c || e.dataset.c === c) && (!rr || e.dataset.r === rr) && (!t || e.dataset.t === t) ? '1' : ''; });
-      $('qcount').textContent = items.length ? 'Showing ' + shown().length + ' of ' + items.length + '.' : '';
+      rowsEl().forEach(e => { e.dataset.m = (!q || e.dataset.k.indexOf(q) !== -1) && (!c || e.dataset.c === c) && (!rr || e.dataset.r === rr) && (!t || e.dataset.t === t) && ((e.dataset.l === '1') === (qview === 'lapsed')) ? '1' : ''; });
+      const inView = rowsEl().filter(e => (e.dataset.l === '1') === (qview === 'lapsed')).length;
+      $('qcount').textContent = items.length ? 'Showing ' + shown().length + ' of ' + inView + '.' : '';
       qpage = 0; draw();
     };
     const draw = () => {
@@ -2305,6 +2306,7 @@ async function loadQueue() {
       $('qprev').disabled = qpage === 0; $('qnext').disabled = qpage >= pages - 1;
       $('qrows').scrollTop = 0; upd();
     };
+    document.querySelectorAll('#qviews [data-qv]').forEach(b => b.onclick = () => { qview = b.dataset.qv; document.querySelectorAll('#qviews [data-qv]').forEach(x => x.classList.toggle('on', x === b)); $('qvnote').style.display = qview === 'lapsed' ? '' : 'none'; filt(); });
     $('qprev').onclick = () => { qpage--; draw(); }; $('qnext').onclick = () => { qpage++; draw(); };
     $('qq').oninput = filt; $('qc').onchange = $('qr').onchange = $('qt').onchange = filt;
     $('qx').onclick = () => { $('qq').value = ''; $('qc').value = ''; $('qr').value = ''; $('qt').value = ''; rowsEl().forEach(e => { const b = e.querySelector('.qtick'); if (b) b.checked = false; }); filt(); };
