@@ -311,10 +311,10 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
   .rtu{padding-bottom:6px}
   body.rail-open #tabs{width:248px;padding:22px 14px!important}
   .rt{display:flex}
-  .rtg{align-items:center;gap:10px;height:44px;padding:0 12px;border-radius:10px;cursor:pointer;font-weight:900;font-size:14px;color:var(--fg);margin-bottom:6px;width:100%!important;background:none;border:0;box-shadow:none;min-height:0}
-  .rtg:hover{background:var(--rose);color:var(--acc);transform:none;box-shadow:none}
-  .rtg svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
-  .rtg span{display:none}body.rail-open .rtg span{display:inline}
+  .rtmenu{align-items:center;gap:10px;height:44px;padding:0 12px;border-radius:10px;cursor:pointer;font-weight:900;font-size:14px;color:var(--fg);margin-bottom:6px;width:100%!important;background:none;border:0;box-shadow:none;min-height:0}
+  .rtmenu:hover{background:var(--rose);color:var(--acc);transform:none;box-shadow:none}
+  .rtmenu svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .rtmenu span{display:none}body.rail-open .rtmenu span{display:inline}
   .rtb{display:none;flex-direction:column;gap:4px;padding:2px 6px 16px}
   body.rail-open .rtb{display:flex}
   .rtb img{height:58px;width:auto;align-self:flex-start}.rtb .n1{font-weight:900;font-size:15px;line-height:1.15;margin-top:4px}.rtb .n2{font-size:11px;letter-spacing:.12em;color:var(--mut);font-weight:700}
@@ -841,7 +841,7 @@ function navHtml() {
   return html + myTabs.filter(k => !used[k]).map(tabBtn).join('');
 }
 function drawTabs() {
-  $('tabs').innerHTML = '<button type="button" class="rt rtg" id="railtg" title="Show or hide the menu" aria-label="Show or hide the menu">' + MENU + '<span>Hide menu</span></button>' +
+  $('tabs').innerHTML = '<button type="button" class="rt rtmenu" id="railtg" title="Show or hide the menu" aria-label="Show or hide the menu">' + MENU + '<span>Hide menu</span></button>' +
     '<div class="rt rtb"><img src="logo.png" alt="CCW logo"><div class="n1">CELEBRATION<br>CHURCH WORSHIP</div><div class="n2">LAGOS REGION CHOIR</div></div>' +
     navHtml() + (myTabs.indexOf('absence') !== -1 ? '<button class="tab" type="button" data-mp="1" title="Your own attendance, absences and details" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg><span>My member page</span></button>' : '') +
     '<div class="rt rtu"><b>' + esc(myName || 'Signed in') + '</b>' + esc(myRoles.join(', ')) + '</div>';
