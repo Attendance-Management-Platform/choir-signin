@@ -592,7 +592,6 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <button type="button" class="hsec fold" data-hfold="health" id="hfh" hidden>System health</button><div id="hhealth"></div>
 <div id="hquick"></div>
 <button type="button" class="hsec fold" data-hfold="notes" id="hfn" hidden>Updates</button><div id="hnotes"></div>
-<button type="button" class="hsec fold" data-hfold="away" id="hfw" hidden>Being away</button><div id="hway"></div>
 <button type="button" class="hsec fold" data-hfold="qr" id="hfq" hidden>Campus Music Director away?</button><div id="hqr"></div>
 <p id="m10" class="s"></p>
 </div>
@@ -634,6 +633,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <div id="rform" class="hide"><label for="rreason" class="lb">Reason for the absence</label><textarea id="rreason" class="in" rows="3" maxlength="300" placeholder="Your reason (10 to 300 characters). Only you and the people who decide can see it." style="width:100%;font:inherit"></textarea>
 <div class="actions"><button id="rsend" class="btn red" type="button">Request absence</button></div></div>
 <p id="m6" class="s"></p></div>
+<div id="aaw"></div>
 <div id="rmine" class="card pad rise" style="animation-delay:.06s"></div>
 </div>
 <div class="c2">
@@ -1519,7 +1519,7 @@ async function loadCalendar(m) {
 document.addEventListener('click', ev => {
   const t = ev.target.closest && ev.target.closest('[data-calmake],[data-calgo],[data-calaway]'); if (!t) return;
   if (t.dataset.calmake) { window.__rhPref = t.dataset.calmake; go('s8'); }
-  else if (t.dataset.calaway) { window.__awPref = t.dataset.calaway; go('s12'); }
+  else if (t.dataset.calaway) { window.__awPref = t.dataset.calaway; go(awayBox() === 'aaw' ? 's6' : 's12'); }
   else go(t.dataset.calgo);
 });
 function calShift(n) { const [y, m] = (calMonth || new Date().toISOString().slice(0, 7)).split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); loadCalendar(d.toISOString().slice(0, 7)); }
@@ -1780,7 +1780,7 @@ async function loadPeople(keepMsg) {
       '<input class="in" style="flex:1 1 200px;max-width:340px" placeholder="Reason, if you say no" data-why="' + esc(r.id) + '"><button class="btn warn sm" type="button" data-no="' + esc(r.id) + '">Say no</button></div>')});
     fpPanel('ready', 'pready', {title: 'Approved and ready to carry out', sub: 'Carrying out changes the real list. It is checked first and recorded.', items: j.ready, fields: pFields, empty: 'Nothing is ready to carry out.', card: r => pCard(r, '<p class="sub" style="margin:4px 0 0">You carry this out as: ' + esc(r.as || '') + '</p><div style="margin-top:12px">' + (r.download ? '<button class="btn red sm" type="button" data-dl="' + esc(r.id) + '">Download (once)</button>' : '<button class="btn red sm" type="button" data-carry="' + esc(r.id) + '">Carry out</button>') + '</div>')});
     if (!j.ready.length) $('pready').innerHTML = '';
-    loadAway(); loadUndo('pundo', 'people');
+    if (awayBox() === 'paw') loadAway(); else $('paw').innerHTML = ''; loadUndo('pundo', 'people');
     fpPanel('mine', 'pmine', {title: 'Requests you asked for', items: j.mine, fields: pFields, empty: 'You have not asked for anything yet.', card: r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : r.canAck ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-pseen="' + esc(r.id) + '">Got it</button></div>' : '')});
   } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); }
 }
@@ -1838,6 +1838,12 @@ function awayCardHtml(j, p) {
   return '<div class="card pad rise"><div class="ct">Being away</div><p class="sub">One notice covers every role you hold. It ends by itself.' + (who.length ? ' <b>Away now: ' + esc(who.join(', ')) + '.</b>' : '') + '</p>' + list + mine +
     (j.saving && !(j.mine || []).length ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px"><div><label class="lb" for="' + p + 'awstart" style="margin-top:0">First day</label><input id="' + p + 'awstart" class="in" type="date"></div><div><label class="lb" for="' + p + 'awend" style="margin-top:0">Last day</label><input id="' + p + 'awend" class="in" type="date"></div><div style="grid-column:1/-1"><label class="lb" for="' + p + 'awwhy" style="margin-top:0">Reason</label><input id="' + p + 'awwhy" class="in" maxlength="200" placeholder="Why you will be away"></div></div>' + (j.canExcuse ? '<label style="display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;font-weight:600;line-height:1.4"><input type="checkbox" id="' + p + 'awex" style="margin-top:3px"><span>Also ask to be excused from the rehearsal in these days. Your reason is used for the request, so it needs 10 or more characters.</span></label>' : '') + '<div class="actions" style="margin-top:12px"><button class="btn red sm" type="button" data-awgo="' + p + '">Put in notice</button></div>' : '') + '</div>';
 }
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest && ev.target.closest('[data-tidy]'); if (!b) return;
+  b.disabled = true;
+  try { const j = await call({action: 'audit.tidy', token}); if (j.signedOut) { signedOutNow(); return; } say('m10', j.ok ? (j.moved ? j.moved + ' line(s) moved to the archive.' : 'Nothing old enough to move yet.') : (j.error || 'Could not tidy.'), j.ok ? 'ok' : 'bad'); if (j.ok) loadHome(); }
+  catch (e) { say('m10', 'Network problem. Try again.', 'bad'); b.disabled = false; }
+});
 /** The System Administrator's system health card (Home). */
 function drawHealth(h) {
   const box = $('hhealth'); if (!box) return;
@@ -1852,7 +1858,10 @@ function drawHealth(h) {
     row(h.fullPct >= 70 ? 'warn' : 'ok', h.fullPct >= 70 ? '!' : '\u2713', 'The workbook is ' + h.fullPct + '% full', h.fullPct >= 70 ? 'Plan ahead' : 'Fine', h.fullPct >= 70 ? 'p-pend' : 'p-ok',
       'Google allows ' + Number(h.cellLimit).toLocaleString() + ' cells. Biggest tabs: ' + esc((h.biggest || []).map(s => s.name + ' (' + s.rows + ' rows)').join(', ') || 'none') + '.'),
     h.quiet.length ? row('ask', 'i', h.quiet.length + ' staff member(s) with no sign-in in ' + h.quietDays + ' days', 'Check', 'p-val', esc(h.quiet.slice(0, 12).map(p => p.name + ' (' + p.roles + ')').join(', ')) + (h.quiet.length > 12 ? ' and more' : '') + '. Sign-ins are recorded from 21 Oct 2026, so this list starts full and shrinks as people sign in.')
-      : row('ok', '\u2713', 'All staff signed in within ' + h.quietDays + ' days', 'Fine', 'p-ok', '')].filter(Boolean);
+      : row('ok', '\u2713', 'All staff signed in within ' + h.quietDays + ' days', 'Fine', 'p-ok', ''),
+    h.tidy ? tile({tone: 'ok', icon: '\u2713', title: h.tidy.atMs ? 'Change log tidied ' + tm(h.tidy.atMs) : 'Change log not tidied yet', pill: 'Every 2 weeks', pillCls: 'p-ok',
+      body: 'Lines older than ' + h.tidy.keepDays + ' days move to the AUDIT LOG ARCHIVE tab. Nothing is deleted, and the Change log still finds them (choose "2 years" or "All time").' + (h.tidy.atMs ? ' Last time ' + h.tidy.moved + ' line(s) moved; the archive holds ' + h.tidy.archiveRows + '.' : ''),
+      actions: '<button class="btn line sm" type="button" data-tidy="1">Tidy now</button>'}) : ''].filter(Boolean);
   box.innerHTML = '<div class="card pad rise"><div class="ct">System health</div><p class="sub">What needs a look across the system. Only the System Administrator sees this.</p><div class="fplist">' + items.join('') + '</div></div>';
 }
 async function loadHomeAway() {
@@ -1863,13 +1872,17 @@ async function loadHomeAway() {
     homeFoldInit();
   } catch (e) { box.innerHTML = ''; }
 }
+/** Being away lives on My absence, next to asking to be excused. Staff with no My absence page (staff only, not choir members) find it on People. */
+function awayBox() { return myTabs.indexOf('absence') !== -1 ? 'aaw' : 'paw'; }
 async function loadAway() {
+  const id = awayBox(), other = id === 'aaw' ? 'paw' : 'aaw';
+  if ($(other)) $(other).innerHTML = '';
   try {
     const j = await call({action: 'away.state', token});
-    if (!j.ok || !j.canSet) { $('paw').innerHTML = ''; return; }
-    $('paw').innerHTML = awayCardHtml(j, '');
+    if (!j.ok || !j.canSet) { $(id).innerHTML = ''; return; }
+    $(id).innerHTML = awayCardHtml(j, '');
     if (window.__awPref && $('awstart')) { $('awstart').value = window.__awPref; window.__awPref = ''; if ($('awend')) $('awend').focus(); }
-  } catch (e) { $('paw').innerHTML = ''; }
+  } catch (e) { $(id).innerHTML = ''; }
 }
 document.addEventListener('click', async ev => {
   const ps = ev.target.closest && ev.target.closest('[data-pseen]');
@@ -1878,7 +1891,7 @@ document.addEventListener('click', async ev => {
   if (ae) {
     const ap = ae.dataset.awgo || ''; const b = ae.dataset.awgo !== undefined ? {action: 'away.set', token, start: pv(ap + 'awstart'), end: pv(ap + 'awend'), reason: pv(ap + 'awwhy'), excuse: !!($(ap + 'awex') && $(ap + 'awex').checked)} : {action: 'away.end', token};
     ae.disabled = true;
-    try { const j = await call(b); if (j.signedOut) { signedOutNow(); return; } say('m12', j.ok ? (j.excused ? (j.excused.ok ? 'Saved. Your request to be excused has gone to the people who decide.' : 'Saved. ' + (j.excused.note || '')) : 'Saved.') : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if ($('hway') && $('hway').contains(ae)) { loadHomeAway(); loadHome(); } else loadPeople(true); } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); ae.disabled = false; }
+    try { const j = await call(b); if (j.signedOut) { signedOutNow(); return; } say('m12', j.ok ? (j.excused ? (j.excused.ok ? 'Saved. Your request to be excused has gone to the people who decide.' : 'Saved. ' + (j.excused.note || '')) : 'Saved.') : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if ($('aaw') && $('aaw').contains(ae)) loadAway(); else loadPeople(true); } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); ae.disabled = false; }
     return;
   }
   const dl = ev.target.closest && ev.target.closest('[data-dl]');
@@ -2123,7 +2136,6 @@ async function loadHome() {
       body: '<div class="s" style="font-size:13px">' + esc(tm(x.atMs)) + '</div>', actions: gotBtn(x.key)}))) + gotAll(dln.slice(0, 8));
     drawHealth(j.health);
     $('hsum').innerHTML = homeSummary(t.charts, has('reports'));
-    loadHomeAway();
     drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['mq', 'Member requests', mqh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch], ['dl', 'Downloads', dlh]]);
     hfoldApply();
     drawTasks(j.tasks || []);
@@ -2375,7 +2387,7 @@ $('rhsave').onclick = async () => {
   $('rhsave').disabled = false;
 };
 async function loadAbsence() {
-  say('m6', 'Loading…'); $('rform').classList.add('hide');
+  say('m6', 'Loading…'); $('rform').classList.add('hide'); loadAway();
   try {
     const j = await call({action: 'absence.state', token});
     if (j.signedOut) { signedOutNow(); return; }
@@ -2700,7 +2712,7 @@ const FAQ = [
   {t: ['members'], q: 'How do I add a new campus?', a: 'Only the System Administrator can. In Add a new member, choose "Add a new campus" at the end of the Campus list, type the name, and add the first member there.'},
   {t: ['people'], q: 'How do I ask for a change to a role or access?', a: 'Open People, choose what the change is about under Ask for a change, give the details and a reason, and send it. A different, higher person says yes, then the right role carries it out.'},
   {t: ['people'], q: 'How do I say yes or no to a request?', a: 'Open People and find the request under Waiting for your answer. Use the filters to narrow the list, then choose Yes, or give a reason and choose Say no. Nobody answers their own request.'},
-  {t: ['people', 'calendar'], q: 'How do I say I will be away?', a: 'On People, open Being away, give the first and last day and a reason (14 days at most). It ends by itself. You can also start from a date in the Calendar.'},
+  {t: ['people', 'calendar'], q: 'How do I say I will be away?', a: 'On My absence, open Being away (staff who are not choir members find it on People), give the first and last day and a reason (14 days at most). It ends by itself. You can also start from a date in the Calendar.'},
   {t: ['changes'], q: 'How do I see what changed, and disagree with it?', a: 'Open Changes and use the filters (rehearsal, date, who did it, kind). Choose Petition about this and give your reason. The right person answers.'},
   {t: [], q: 'How do I clear a line from Updates?', a: 'Press Got it on the card, or Got it for all. The line leaves your Updates box and stays in the Change log. It only leaves for you; other people still see theirs until they press Got it. Cards that need an answer from you (requests, petitions) stay until they are answered.'},
   {t: ['process'], q: 'How do I process attendance after a rehearsal?', a: 'Open Process once the day has ended and processing has opened (90 minutes after the finish time). Check the counts, then press Process. The day is written once and locked. After that nobody can change one person; the only way back is an undo (see "A processed day is wrong"). Publishing to the official attendance is switched off until it is approved.'},
@@ -2974,7 +2986,7 @@ async function loadChanges() {
     if (!j.ok) { $('chbox').innerHTML = ''; $('chpet').innerHTML = ''; return say('m16', j.error || 'Not available.', 'bad'); }
     say('m16', '');
     $('chundo').innerHTML = undoGuideHtml();
-    $('chrange').innerHTML = '<div class="fpchips" style="margin:0 0 10px">' + [[1, 'Today'], [7, '7 days'], [30, '30 days'], [90, '90 days'], [365, 'A year']].map(r => '<button type="button" class="fpchip' + (j.days === r[0] ? ' on' : '') + '" data-chrange="' + r[0] + '">' + r[1] + '</button>').join('') + '</div>';
+    $('chrange').innerHTML = '<div class="fpchips" style="margin:0 0 10px">' + [[1, 'Today'], [7, '7 days'], [30, '30 days'], [90, '90 days'], [365, 'A year'], [730, '2 years'], [3650, 'All time']].map(r => '<button type="button" class="fpchip' + (j.days === r[0] ? ' on' : '') + '" data-chrange="' + r[0] + '">' + r[1] + '</button>').join('') + '</div>';
     const rid = c => (String(c.recordId || '') + ' ' + String(c.detail || '')).match(/\bR\d{3,}\b/);
     fpPanel('chg', 'chbox', {title: 'What changed', sub: (j.days === 1 ? 'Today: ' : 'The last ' + j.days + ' days: ') + j.counts.admin + ' admin, ' + j.counts.operations + ' operations, ' + j.counts.bypasses + ' done by an admin instead of the usual desk or role.' + (j.petitionTo ? ' If you disagree with a change, send a petition to the ' + j.petitionTo + '.' : ''),
       items: j.changes, chips: 'kind', chipsAll: 'Everything', page: 25, empty: 'Nothing has changed in this time. Choose a longer range above.', after: j.more ? '<p class="sub" style="margin:8px 0 0">Only the newest ' + j.changes.length + ' of ' + j.total + ' are shown. Choose a shorter range to see the rest.</p>' : '',
