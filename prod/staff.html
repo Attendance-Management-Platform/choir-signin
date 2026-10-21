@@ -536,6 +536,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <div id="s17" class="pg hide">
 <div class="card pad rise hide npc"><div class="ct">Members without a part</div>
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
+<div id="mbtidy"></div>
 <div id="mbaddcard" class="card pad rise"><div class="ct">Add a new member</div>
 <p class="sub" style="margin:0 0 4px">Added straight away, with no request. The Member ID is made for you. A reason is needed, it is written to the audit log, and Desk A and the Campus Music Director can see it.</p>
 <div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 160px"><label for="mbfn" class="lb">First name</label><input id="mbfn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbmn" class="lb">Middle name (optional)</label><input id="mbmn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbln" class="lb">Last name</label><input id="mbln" class="in" autocomplete="off" maxlength="50"></div></div>
@@ -2626,6 +2627,8 @@ const FAQ = [
   {t: ['absence'], q: 'How do I ask to be absent?', a: 'Open Absence and give your reason (10 to 300 characters). You can ask until 36 hours before the rehearsal. Only you and the people who decide can see the reason.'},
   {t: ['requests'], q: 'How do I answer an absence request?', a: 'A Campus Music Director validates requests from their own campus. The Global Admin or Assistant decides. Open Requests, read the reason, and approve or reject.'},
   {t: ['members'], q: 'How do I add a new member?', a: 'Open Members and fill in Add a new member: first name, last name (middle name is optional), email, campus, part, and a reason. The Member ID is made for you. It is done straight away and recorded.'},
+  {t: ['members'], q: 'Who can correct a member\'s name, phone, campus or part?', a: 'The Global Admin and Assistant can edit any member. Desk A can edit a member only while that member has a waiting Details to correct request. Desk A cannot change an email address; that goes to the System Administrator. The edit form has separate First name, Middle name and Last name boxes, and the full name is filled in for you.'},
+  {t: ['members'], q: 'Some members have no first or last name saved. How do I fix that?', a: 'When there are such members, a card called Tidy member names appears on Members for the Global Admin and Assistant. It shows how each full name would be split into first, middle and last name. Names of one word are left for you to edit by hand, and names of more than three words are marked to check. Press Fill in the names and give a reason. The full name is never changed.'},
   {t: ['members'], q: 'How do I edit, deactivate or reactivate a member?', a: 'On Members, use the filters (search, campus, part, status) to find the person, then choose Edit details, Deactivate or Reactivate. Each needs a reason. Nobody is deleted, and nobody changes their own record.'},
   {t: ['members', 'requests', 'people'], q: 'A member has no part. What do I do?', a: 'Open the Members without a part list (on Members, Requests or People). Choose the part and save. If the member once typed a part on the attendance form, it is already chosen for you; check it first.'},
   {t: ['members'], q: 'How do I add a new campus?', a: 'Only the System Administrator can. In Add a new member, choose "Add a new campus" at the end of the Campus list, type the name, and add the first member there.'},
@@ -2933,7 +2936,7 @@ async function loadMembers() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) {
       // Desk A and the System Administrator open this menu only for the requests to correct details; the member list and adding are for the admins.
-      $('mbbox').innerHTML = ''; $('mbaddcard').classList.add('hide'); loadDetailReqs();
+      $('mbbox').innerHTML = ''; $('mbtidy').innerHTML = ''; $('mbaddcard').classList.add('hide'); loadDetailReqs();
       return say('m17', /do not have this page/i.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad');
     }
     $('mbaddcard').classList.remove('hide');
@@ -2941,14 +2944,37 @@ async function loadMembers() {
     const cur = $('mbc').value;
     $('mbc').innerHTML = mbOpts(MB.campuses, cur, 'Choose a campus') + '<option value="__new__"' + (MB.canAdd ? '' : ' disabled') + '>+ Add a new campus' + (MB.canAdd ? '…' : ' (System Administrator only)') + '</option>';
     $('mbp').innerHTML = mbOpts(MB.parts, $('mbp').value, 'Choose a part');
-    loadDetailReqs();
+    loadDetailReqs(); loadTidy();
     const c = j.counts;
     fpPanel('mem', 'mbbox', {title: 'Members', sub: c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet. Use the filters to find someone, then edit their details, deactivate, reactivate or set their membership dates. Each change needs a reason and is recorded; the Campus Music Director and Desk A are told.',
       items: j.members, fields: mbFields, empty: 'There are no members yet.', card: mbCard});
   } catch (e) { say('m17', 'Network problem. Try again.', 'bad'); }
 }
+/** Members saved with only a full name: preview the split, then fill the three name columns. */
+async function loadTidy() {
+  const box = $('mbtidy'); if (!box) return;
+  try {
+    const j = await call({action: 'member.tidy', token});
+    if (!j || !j.ok || !(j.items || []).length) { box.innerHTML = ''; return; }
+    const ok = j.items.filter(x => x.ok);
+    box.innerHTML = '<div class="card pad rise"><div class="ct">Tidy member names (' + j.items.length + ')</div><p class="sub" style="margin:0 0 8px">These members were saved with only a full name. This is how each would be split into first, middle and last name. The full name is not changed. Names of one word cannot be split and are left for you to edit by hand. Names marked Check have more than three words.</p>' +
+      '<div style="max-height:260px;overflow:auto">' + j.items.map(x => '<div style="border-top:1px solid var(--line);padding:6px 0;font-size:14px"><b>' + esc(x.name) + '</b> <span class="s">' + esc(x.memberId) + (x.status && x.status !== 'Active' ? ' · ' + esc(x.status) : '') + '</span><br>' +
+        (x.ok ? 'First: ' + esc(x.first) + ' · Middle: ' + esc(x.middle || '-') + ' · Last: ' + esc(x.last) + (x.check ? ' <span class="pill p-pend">Check</span>' : '') : '<span class="s">One word. Edit by hand.</span>') + '</div>').join('') + '</div>' +
+      (ok.length && j.canApply ? '<label class="lb">Reason</label><input id="tdr" class="in" maxlength="300" placeholder="Why? (10 to 300 characters)" value="Fill the first, middle and last name columns from the full name"><div class="actions"><button class="btn red sm" type="button" id="tdgo">Fill in ' + ok.length + ' name' + (ok.length === 1 ? '' : 's') + '</button></div>' : '') + '</div>';
+  } catch (e) { box.innerHTML = ''; }
+}
+document.addEventListener('click', async ev => {
+  if (!(ev.target && ev.target.id === 'tdgo')) return;
+  const b = ev.target, reason = $('tdr').value.trim();
+  if (reason.length < 10) return say('m17', 'Give a reason of at least 10 characters.', 'bad');
+  b.disabled = true; say('m17', 'Saving…');
+  const j = await call({action: 'member.tidyApply', token, reason, bypassReason: reason});
+  if (j && j.signedOut) { signedOutNow(); return; }
+  say('m17', j && j.ok ? 'Done: ' + j.summary + (j.skipped ? '. ' + j.skipped + ' left for you to edit by hand' : '') + '.' : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
+  await loadMembers();
+});
 /** Members who asked Desk A to correct their own details (Desk A, Global Admin, Assistant). */
-let DETSYS = false;
+let DETSYS = false, DESKA = false;
 document.addEventListener('click', async ev => {
   const b = ev.target.closest && ev.target.closest('[data-dsedit]'); if (!b) return;
   const slot = b.closest('div[style]').parentNode.querySelector('.mbslot'); if (!slot) return;
@@ -2963,7 +2989,7 @@ async function loadDetailReqs() {
   try {
     const j = await call({action: 'details.list', token});
     if (!j || !j.ok) { $('mbdet').innerHTML = ''; return; }
-    const reqs = j.requests || []; DETSYS = j.sysEdit === true;
+    const reqs = j.requests || []; DESKA = j.deskEdit === true; DETSYS = j.sysEdit === true || DESKA;
     if (!reqs.length) { $('mbdet').innerHTML = ''; return; }
     const cardOf = r => {
       const stx = r.status === 'Not changed' ? 'Declined' : r.status, tn = stx === 'Waiting' ? ['warn', '!', 'p-pend'] : stx === 'Done' ? ['ok', '✓', 'p-ok'] : ['no', '✕', 'p-no'];
@@ -3003,8 +3029,10 @@ document.addEventListener('click', async ev => {
 });
 const mbMeta = loadMembers;
 function mbEditForm(m) {
+  const sp = String(m.name || '').trim().split(/\s+/).filter(Boolean);
+  const nm = (m.first || m.last) ? {first: m.first || '', middle: m.middle || '', last: m.last || ''} : {first: sp[0] || '', middle: sp.length > 2 ? sp.slice(1, -1).join(' ') : '', last: sp.length > 1 ? sp[sp.length - 1] : ''};
   return '<div class="mbed" data-id="' + esc(m.memberId) + '" style="margin-top:8px;padding:12px;background:#F5F7FA;border-radius:12px">' +
-    '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:2 1 200px"><label class="lb" style="margin-top:0">Full name</label><input class="in" data-f="name" value="' + esc(m.name) + '" maxlength="100"></div><div style="flex:2 1 200px"><label class="lb" style="margin-top:0">Email address</label><input class="in" data-f="email" type="email" value="' + esc(m.email) + '" maxlength="120"></div></div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1 1 130px"><label class="lb" style="margin-top:0">First name</label><input class="in" data-f="first" value="' + esc(nm.first) + '" maxlength="60"></div><div style="flex:1 1 130px"><label class="lb" style="margin-top:0">Middle name (if any)</label><input class="in" data-f="middle" value="' + esc(nm.middle) + '" maxlength="60"></div><div style="flex:1 1 130px"><label class="lb" style="margin-top:0">Last name</label><input class="in" data-f="last" value="' + esc(nm.last) + '" maxlength="60"></div><div style="flex:2 1 200px"><label class="lb" style="margin-top:0">Email address</label><input class="in" data-f="email" type="email" value="' + esc(m.email) + '" maxlength="120"' + (DESKA ? ' readonly' : '') + '>' + (DESKA ? '<div class="s" style="font-size:12px;margin-top:4px">An email change goes to the System Administrator.</div>' : '') + '</div></div>' +
     '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1 1 150px"><label class="lb">Campus</label><select class="in" data-f="campus">' + mbOpts(MB.campuses, m.campus) + '</select></div><div style="flex:1 1 150px"><label class="lb">Part</label><select class="in" data-f="part">' + mbOpts(MB.parts, m.part, '(no part)') + '</select></div><div style="flex:1 1 150px"><label class="lb">Phone</label><input class="in" data-f="phone" value="' + esc(m.phone) + '" maxlength="40"></div></div>' +
     '<label class="lb">Reason</label><input class="in" data-f="reason" maxlength="300" placeholder="Why is this being changed? (10 to 300 characters)">' +
     '<div class="actions"><button class="btn red sm" type="button" data-mbsave="' + esc(m.memberId) + '">Save changes</button><button class="btn line sm" type="button" data-mbcancel="1">Cancel</button></div></div>';
@@ -3018,9 +3046,10 @@ document.addEventListener('click', async ev => {
   const sv = ev.target.closest && ev.target.closest('[data-mbsave]');
   if (sv) {
     const f = k => sv.closest('.mbed').querySelector('[data-f="' + k + '"]').value.trim(), reason = f('reason');
+    if (!f('first') || !f('last')) return say('m17', 'A member needs a first name and a last name.', 'bad');
     if (reason.length < 10) return say('m17', 'Give a reason of at least 10 characters.', 'bad');
     sv.disabled = true; say('m17', 'Saving…');
-    const j = await call({action: 'member.edit', token, memberId: sv.dataset.mbsave, name: f('name'), email: f('email'), campus: f('campus'), part: f('part'), phone: f('phone'), reason, bypassReason: reason});
+    const j = await call({action: 'member.edit', token, memberId: sv.dataset.mbsave, firstName: f('first'), middleName: f('middle'), lastName: f('last'), email: f('email'), campus: f('campus'), part: f('part'), phone: f('phone'), reason, bypassReason: reason});
     const msg = j.ok ? 'Done: ' + j.summary + (j.note ? ' (' + j.note + ')' : '') + '.' : (j.error || 'Could not save.');
     if (j.ok) { await loadMembers(); loadNoPart(); } else sv.disabled = false;
     say('m17', msg, j.ok ? 'ok' : 'bad'); return;
