@@ -593,6 +593,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <div id="hgrid" class="stats rise"></div>
 <div id="hquick"></div>
 <div id="hnotes"></div>
+<div id="hway"></div>
 <button type="button" class="hsec fold" data-hfold="qr" id="hfq" hidden>Campus Music Director away?</button><div id="hqr"></div>
 <p id="m10" class="s"></p>
 </div>
@@ -908,7 +909,7 @@ function drawTasks(list) {
     if (g === 'reports:streak') return has('reports') ? '<button class="btn line sm" type="button" data-anpreset="streak">See who</button>' : '';
     return g && has(g) ? '<button class="btn ' + (t.mine ? 'red' : 'line') + ' sm" type="button" data-taskgo="' + esc(g) + '">' + label + '</button>' : '';
   };
-  fpPanel('tasks', 'htasks', {title: 'Needs attention', sub: 'What is waiting today, and who it is waiting for.' + (others ? ' Work that is not yours is shown so you can follow it up; "Do it instead" opens it with a reason and tells the owner.' : ''),
+  fpPanel('tasks', 'htasks', {title: 'Waiting today', sub: 'What is waiting, and who it is waiting for.' + (others ? ' Work that is not yours is shown so you can follow it up; "Do it instead" opens it with a reason and tells the owner.' : ''),
     items: list || [], chips: 'role', empty: 'Nothing is waiting today.',
     fields: [{k: 'q', label: 'Search', ph: 'A task, a desk, a campus', type: 'text', get: t => [t.title, t.detail, t.owner, t.campus].join(' ')},
       {k: 'role', label: 'Role', type: 'list', get: roleOf, optsAll: OVER ? ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge', 'System Administrator', 'Desk A', 'Desk B', 'Desk C', 'Desk D', 'Campus MD'] : null},
@@ -1794,25 +1795,39 @@ document.addEventListener('click', async ev => {
   } catch (e) { say(msg, 'Network problem. Try again.', 'bad'); }
   b.disabled = false;
 });
+
+function awayCardHtml(j, p) {
+  const who = Object.keys(j.away || {}).filter(r => j.away[r]);
+  const duties = j.duties || [];
+  const recv = x => x.kind === 'senior' ? 'passes on by the usual order, nothing for you to arrange' : x.kind === 'desk' ? 'the Assistant Global Admin arranges a cover (the Global Admin if the Assistant is away)' : 'the Assistant Global Admin arranges a stand-in (the Global Admin if the Assistant is away)';
+  const list = duties.length ? '<ul class="sub" style="margin:8px 0 0;padding-left:18px">' + duties.map(x => '<li><b>' + esc(x.duty) + '</b>: ' + esc(recv(x)) + '.</li>').join('') + '</ul>' : '';
+  const mine = (j.mine || []).map(n => '<p class="sub" style="margin:6px 0 0">You are away ' + esc(n.start) + ' to ' + esc(n.end) + ' (' + esc(n.reason) + ')' + ((n.duties || []).length ? ' for ' + esc(n.duties.join(', ')) : '') + ' <button class="btn line sm" type="button" data-awayend="1">I am back</button></p>').join('');
+  return '<div class="card pad rise"><div class="ct">Being away</div><p class="sub">If you will be away for days, put in one short notice. It covers every role you hold, and each one is handed on like this. It ends by itself.' + (who.length ? ' <b>Away now: ' + esc(who.join(', ')) + '.</b>' : '') + '</p>' + list + mine +
+    (j.saving && !(j.mine || []).length ? '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:10px"><div style="flex:1 1 140px"><label class="lb" for="' + p + 'awstart" style="margin-top:0">First day</label><input id="' + p + 'awstart" class="in" type="date"></div><div style="flex:1 1 140px"><label class="lb" for="' + p + 'awend" style="margin-top:0">Last day</label><input id="' + p + 'awend" class="in" type="date"></div><div style="flex:2 1 200px"><label class="lb" for="' + p + 'awwhy" style="margin-top:0">Reason</label><input id="' + p + 'awwhy" class="in" maxlength="200"></div><button class="btn red sm" type="button" data-awgo="' + p + '">Put in notice</button></div>' : '') + '</div>';
+}
+async function loadHomeAway() {
+  const box = $('hway'); if (!box) return;
+  try {
+    const j = await call({action: 'away.state', token});
+    box.innerHTML = j && j.ok && j.canSet ? awayCardHtml(j, 'h') : '';
+  } catch (e) { box.innerHTML = ''; }
+}
 async function loadAway() {
   try {
     const j = await call({action: 'away.state', token});
     if (!j.ok || !j.canSet) { $('paw').innerHTML = ''; return; }
-    const who = Object.keys(j.away || {}).filter(r => j.away[r]);
-    const mine = (j.mine || []).map(n => '<p class="sub" style="margin:6px 0 0">You are away ' + esc(n.start) + ' to ' + esc(n.end) + ' (' + esc(n.reason) + ') <button class="btn line sm" type="button" data-awayend="1">I am back</button></p>').join('');
-    $('paw').innerHTML = '<div class="card pad rise"><div class="ct">Being away</div><p class="sub">If you will be away for days, put in a short notice so others can act in the right order. A day or two with nothing due needs no notice. It ends by itself.' + (who.length ? ' <b>Away now: ' + esc(who.join(', ')) + '.</b>' : '') + '</p>' + mine +
-      (j.saving ? '<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px"><div style="flex:1 1 140px"><label class="lb" for="awstart" style="margin-top:0">First day</label><input id="awstart" class="in" type="date"></div><div style="flex:1 1 140px"><label class="lb" for="awend" style="margin-top:0">Last day</label><input id="awend" class="in" type="date"></div><div style="flex:2 1 200px"><label class="lb" for="awwhy" style="margin-top:0">Reason</label><input id="awwhy" class="in" maxlength="200"></div><button class="btn red sm" type="button" id="awgo">Put in notice</button></div>' : '') + '</div>';
+    $('paw').innerHTML = awayCardHtml(j, '');
     if (window.__awPref && $('awstart')) { $('awstart').value = window.__awPref; window.__awPref = ''; if ($('awend')) $('awend').focus(); }
   } catch (e) { $('paw').innerHTML = ''; }
 }
 document.addEventListener('click', async ev => {
   const ps = ev.target.closest && ev.target.closest('[data-pseen]');
   if (ps) { ps.disabled = true; try { const j = await call({action: 'ack.seen', token, id: ps.dataset.pseen}); if (j.signedOut) { signedOutNow(); return; } if (!j.ok) say('m12', j.error || 'Could not save.', 'bad'); } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); } if (ps.closest('#chpet')) loadChanges(); else loadPeople(true); return; }
-  const ae = ev.target.closest && ev.target.closest('#awgo,[data-awayend]');
+  const ae = ev.target.closest && ev.target.closest('[data-awgo],[data-awayend]');
   if (ae) {
-    const b = ae.id === 'awgo' ? {action: 'away.set', token, start: pv('awstart'), end: pv('awend'), reason: pv('awwhy')} : {action: 'away.end', token};
+    const ap = ae.dataset.awgo || ''; const b = ae.dataset.awgo !== undefined ? {action: 'away.set', token, start: pv(ap + 'awstart'), end: pv(ap + 'awend'), reason: pv(ap + 'awwhy')} : {action: 'away.end', token};
     ae.disabled = true;
-    try { const j = await call(b); if (j.signedOut) { signedOutNow(); return; } say('m12', j.ok ? 'Saved.' : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); loadPeople(true); } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); ae.disabled = false; }
+    try { const j = await call(b); if (j.signedOut) { signedOutNow(); return; } say('m12', j.ok ? 'Saved.' : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if ($('hway') && $('hway').contains(ae)) { loadHomeAway(); loadHome(); } else loadPeople(true); } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); ae.disabled = false; }
     return;
   }
   const dl = ev.target.closest && ev.target.closest('[data-dl]');
@@ -2075,7 +2090,10 @@ async function loadHome() {
       actions: has('people') ? gob('Open People and access', 's12') : ''})]) : '';
     const awl = t.away ? Object.keys(t.away.away || {}).filter(r => t.away.away[r]) : [];
     const FN = {rehearsal: 'Set up rehearsals', qr: 'Show the QR', records: 'See attendance records'};
-    const awh = lst((awl.length ? [mkTile({tone: 'warn', icon: '!', title: 'Away now: ' + awl.join(', '), pill: 'Away', pillCls: 'p-pend', body: esc('If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.')})] : []).concat(
+    const awn = (j.awayNeeds || []).map(x => mkTile({tone: 'warn', icon: '!', title: x.name + ' is away ' + x.start + ' to ' + x.end + ': ' + x.duty, pill: x.kind === 'desk' ? 'Cover needed' : 'Stand-in', pillCls: 'p-pend',
+      body: '<div class="s" style="font-size:13px">' + (x.kind === 'desk' ? 'Arrange a cover for this desk in People and access (a desk cover request).' : 'Arrange a stand-in for the QR and look after the campus for these days.') + '</div>' + (x.reason ? '<div style="margin-top:6px"><b>Reason:</b> ' + esc(x.reason) + '</div>' : ''),
+      actions: (x.kind === 'desk' ? gob('Arrange cover', 's12', true) : '') + (x.key ? gotBtn(x.key) : '')}));
+    const awh = lst(awn.concat(awl.length ? [mkTile({tone: 'warn', icon: '!', title: 'Away now: ' + awl.join(', '), pill: 'Away', pillCls: 'p-pend', body: esc('If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.')})] : []).concat(
       (j.openFunctions || []).length ? [mkTile({tone: 'ok', icon: '✓', title: 'Opened to you for a short time', pill: 'Open', pillCls: 'p-ok', body: esc(j.openFunctions.map(f => FN[f] || f).join(', ') + '. It ends by itself.')})] : []));
     const bph = lst((j.bypasses || []).map(x => mkTile({tone: 'ok', icon: '✓', title: bpDo(x), pill: 'Done by an admin', pillCls: 'p-val',
       body: '<div class="s" style="font-size:13px">' + (x.recordId && x.recordId !== 'several' ? esc(x.recordId) + ' · ' : '') + esc(tm(x.atMs)) + '</div><div style="margin-top:6px"><b>Reason:</b> ' + esc(x.reason) + '</div><div class="s" style="font-size:13px;margin-top:6px">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</div>', actions: gotBtn(x.key)}))) + gotAll(j.bypasses);
@@ -2093,6 +2111,7 @@ async function loadHome() {
     ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
     $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'), has('records'));
     if (has('records')) anLoad();
+    loadHomeAway();
     drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['mq', 'Member requests', mqh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
     hfoldApply();
     drawTasks(j.tasks || []);
