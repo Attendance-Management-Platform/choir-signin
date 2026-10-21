@@ -376,6 +376,12 @@ body #hgrid.stats{margin-bottom:18px;grid-template-columns:repeat(auto-fit,minma
 #hgrid.stats .stat{border-left:5px solid var(--sc,#B6000A);padding:16px 20px}#hgrid.stats .stat .v{font-size:32px}
 .hsec.fold{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;cursor:pointer;font-family:inherit;text-align:left}.hsec.fold:after{content:"";width:9px;height:9px;border-right:2.5px solid #8E0008;border-bottom:2.5px solid #8E0008;transform:rotate(45deg);margin:-4px 6px 0;transition:transform .25s}
 .shut>.hsec.fold:after,.hsec.fold.shut:after{transform:rotate(-45deg);margin-top:0}#hquick.shut .hquick{display:none}#hgrid.shut>.stat{display:none}
+button.hsec.fold{background:#fff;border:1px solid var(--line);border-left:4px solid #B6000A;border-radius:14px;padding:14px 18px;margin:20px 0 10px;box-shadow:0 4px 16px rgba(20,35,61,.05);min-height:0;color:#8E0008;transition:box-shadow .2s,background .2s}
+button.hsec.fold:hover{background:#FFF7F7;box-shadow:0 6px 20px rgba(142,0,8,.08);transform:none}
+button.hsec.fold.shut{background:#FBFBFD;border-left-color:#D9DDE5}
+.hsec .hsum{margin-left:auto;font-size:12px;font-weight:800;letter-spacing:0;text-transform:none;color:#5E6A7E;background:#F1F3F7;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.hsec .hsum.hot{color:#8E0008;background:#FDECEC}.hsec .hsum.ok{color:#20775A;background:#E8F5EF}
+#hgrid.stats>.hsec.fold{margin:6px 0 0}
 button.hsec.fold[hidden]{display:none}#hqr .card>.ct:first-child{display:none}#hsum.shut,#htasks.shut,#hqr.shut,#hhealth.shut,#hnotes.shut,#hway.shut{display:none}#hnotes .ntc .anh .ct,#htasks>.card>.ct,#hhealth .card>.ct,#hway .card>.ct{display:none}.hsecs{margin-top:6px}
 /* one heading style for every section and card title */
 body .anh .ct,body #htasks .ct,body .pg>.card>.ct,body .pg>.card>.fh>.ct,body .dash .card>.ct,body .card.pad>.ct,body .ntc .ct,body .card>.fh .ct,body .fh>.ct,body .card>.tblh .ct{font-size:13px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8E0008}
@@ -843,7 +849,7 @@ function drawTabs() {
   $('tabs').innerHTML = '<button type="button" class="rt rtmenu" id="railtg" title="Show or hide the menu" aria-label="Show or hide the menu">' + MENU + '<span>Hide menu</span></button>' +
     '<div class="rt rtb"><img src="../logo.png" alt="CCW logo"><div class="n1">CELEBRATION<br>CHURCH WORSHIP</div><div class="n2">LAGOS REGION CHOIR</div></div>' +
     navHtml() + (myTabs.indexOf('absence') !== -1 && !myStaffOnly ? '<button class="tab" type="button" data-mp="1" title="Your own attendance, absences and details" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg><span>My member page</span></button>' : '') +
-    '<div class="rt rtu"><b>' + esc(myName || 'Signed in') + '</b>' + esc(myRoles.join(', ')) + '</div>';
+    '<div class="rt rtu"><b>' + esc(myName || 'Signed in') + '</b>' + myRoles.map(r => '<span style="display:block;white-space:normal">' + esc(r) + '</span>').join('') + '</div>';
   document.querySelectorAll('.tab').forEach(b => b.onclick = () => b.dataset.mp ? (location.href = 'member.html') : go(b.dataset.v));
   document.querySelectorAll('.gh').forEach(h => h.onclick = () => { const g = h.dataset.ng, shut = !NAVSHUT[g]; NAVSHUT[g] = shut; try { localStorage.setItem('rbcNavShut', JSON.stringify(NAVSHUT)); } catch (e) {} h.parentNode.classList.toggle('shut', shut); h.setAttribute('aria-expanded', shut ? 'false' : 'true'); });
   $('railtg').onclick = () => { const open = document.body.classList.toggle('rail-open'); try { localStorage.setItem('rbcRail', open ? '1' : '0'); } catch (e) {} };
@@ -1100,6 +1106,7 @@ function homeSummary(c, canOpen) {
     if (cs.length > 1) lines.push('Lowest campus: <b>' + esc(cs[0].campus) + '</b> (' + cs[0].rate + '%). Highest: <b>' + esc(cs[cs.length - 1].campus) + '</b> (' + cs[cs.length - 1].rate + '%).');
   }
   const when = esc(L.id) + (L.date ? ' · ' + esc(L.date) : '') + (c.campusOnly ? ' · ' + esc(c.campusOnly) + ' only' : ' · all campuses');
+  window.__hsumLast = L.id + ' · ' + L.rate + '%';
   return '<div class="card pad rise"><p class="sub" style="margin:0 0 12px">' + when + '</p><div class="kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0">' +
     kp('Attendance', L.rate + '%', 'were present', rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'absence approved', SOFT) + '</div>' +
     (lines.length ? '<p class="sub" style="margin:14px 0 0;color:var(--fg)">' + lines.join(' ') + '</p>' : '') + open + '</div>';
@@ -1889,7 +1896,7 @@ async function loadHomeAway() {
   try {
     const j = await call({action: 'away.state', token});
     box.innerHTML = j && j.ok && j.canSet ? awayCardHtml(j, 'h') : '';
-    homeFoldInit();
+    homeFoldInit(); homeBarSums();
   } catch (e) { box.innerHTML = ''; }
 }
 /** Being away lives on My absence, next to asking to be excused. Staff with no My absence page (staff only, not choir members) find it on People. */
@@ -2076,6 +2083,24 @@ document.addEventListener('click', ev => { if (ev.target.closest && ev.target.cl
 
 
 const HFBOX = {work: 'hquick', glance: 'hgrid', charts: 'hsum', tasks: 'htasks', qr: 'hqr', health: 'hhealth', notes: 'hnotes', away: 'hway'};
+/** A short summary on each Home section bar, so a closed section still says what is inside. */
+function homeBarSums() {
+  const n = sel => document.querySelectorAll(sel).length;
+  const sum = {
+    charts: () => { const c = window.__hsumLast; return c ? [c, ''] : null; },
+    tasks: () => { const k = n('#htasks .ugt, #htasks .fprow'); return k ? [k + ' waiting', 'hot'] : ['Nothing waiting', 'ok']; },
+    glance: () => { const k = n('#hgrid .stat'); return k ? [k + ' figure' + (k === 1 ? '' : 's'), ''] : null; },
+    work: () => { const k = n('#hquick .hqg a, #hquick .hqg button'); return k ? [k + ' page' + (k === 1 ? '' : 's'), ''] : null; },
+    health: () => { const k = n('#hhealth .ugt.warn, #hhealth .ugt.no'); return k ? [k + ' to check', 'hot'] : ['All fine', 'ok']; },
+    notes: () => { const k = n('#hnotes .ugt'); return k ? [k + ' new', 'hot'] : ['Nothing new', 'ok']; }
+  };
+  document.querySelectorAll('#s10 button.hsec.fold[data-hfold]').forEach(b => {
+    const f = sum[b.dataset.hfold]; if (!f) return;
+    if (!b.dataset.label) b.dataset.label = b.textContent.trim();
+    const v = f();
+    b.innerHTML = esc(b.dataset.label) + (v ? '<span class="hsum ' + v[1] + '">' + esc(v[0]) + '</span>' : '');
+  });
+}
 function homeFoldInit() {
   [['charts', 'hfc'], ['tasks', 'hft'], ['qr', 'hfq'], ['health', 'hfh'], ['notes', 'hfn'], ['away', 'hfw']].forEach(x => {
     const box = $(HFBOX[x[0]]), b = $(x[1]); if (!box || !b) return;
@@ -2186,7 +2211,7 @@ async function loadHome() {
     else if (q.canToggle) qh = '<div class="card pad rise"><div class="ct">Campus Music Director away?</div><p class="sub">If the Campus Music Director cannot show the QR, switch this on. Then Desk D, the Assistant Global Admin and the Global Admin can show it for this rehearsal only. It is recorded with your name and the reason, and it ends by itself one hour after the rehearsal.</p>' +
       '<label for="sdwhy" class="lb">Reason (5 to 200 characters)</label><input id="sdwhy" class="in" autocomplete="off" maxlength="200" placeholder="For example: the Campus Music Director is ill"><div class="actions"><button id="sdon" class="btn red" type="button">Let the admins show the QR</button></div></div>';
     $('hqr').innerHTML = qh;
-    homeFoldInit();
+    homeFoldInit(); homeBarSums();
     const flip = async on => {
       const why = on ? ($('sdwhy').value || '').trim() : '';
       if (on && why.length < 5) return say('m10', 'Give a reason of 5 to 200 characters.', 'bad');
