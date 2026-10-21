@@ -376,7 +376,7 @@ body #hgrid.stats{margin-bottom:18px;grid-template-columns:repeat(auto-fit,minma
 #hgrid.stats .stat{border-left:5px solid var(--sc,#B6000A);padding:16px 20px}#hgrid.stats .stat .v{font-size:32px}
 .hsec.fold{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;cursor:pointer;font-family:inherit;text-align:left}.hsec.fold:after{content:"";width:9px;height:9px;border-right:2.5px solid #8E0008;border-bottom:2.5px solid #8E0008;transform:rotate(45deg);margin:-4px 6px 0;transition:transform .25s}
 .shut>.hsec.fold:after,.hsec.fold.shut:after{transform:rotate(-45deg);margin-top:0}#hquick.shut .hquick{display:none}#hgrid.shut>.stat{display:none}
-button.hsec.fold[hidden]{display:none}#hqr .card>.ct:first-child{display:none}#hcharts.shut,#htasks.shut,#hqr.shut{display:none}.hsecs{margin-top:6px}
+button.hsec.fold[hidden]{display:none}#hqr .card>.ct:first-child{display:none}#hcharts.shut,#htasks.shut,#hqr.shut,#hhealth.shut,#hnotes.shut,#hway.shut{display:none}#hcharts .anl .anh .ct,#hnotes .ntc .anh .ct,#htasks>.card>.ct,#hhealth .card>.ct,#hway .card>.ct{display:none}.hsecs{margin-top:6px}
 /* one heading style for every section and card title */
 body .anh .ct,body #htasks .ct,body .pg>.card>.ct,body .pg>.card>.fh>.ct,body .dash .card>.ct,body .card.pad>.ct,body .ntc .ct,body .card>.fh .ct,body .fh>.ct,body .card>.tblh .ct{font-size:13px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8E0008}
 body .pg .ct,body .pg .tblh>span:first-child{font-size:13px!important;font-weight:900!important;letter-spacing:.07em!important;text-transform:uppercase!important;color:#8E0008!important}
@@ -591,10 +591,10 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <button type="button" class="hsec fold" data-hfold="charts" id="hfc" hidden>Analytics</button><div id="hcharts"></div>
 <button type="button" class="hsec fold" data-hfold="tasks" id="hft" hidden>Needs attention</button><div id="htasks"></div>
 <div id="hgrid" class="stats rise"></div>
-<div id="hhealth"></div>
+<button type="button" class="hsec fold" data-hfold="health" id="hfh" hidden>System health</button><div id="hhealth"></div>
 <div id="hquick"></div>
-<div id="hnotes"></div>
-<div id="hway"></div>
+<button type="button" class="hsec fold" data-hfold="notes" id="hfn" hidden>Updates</button><div id="hnotes"></div>
+<button type="button" class="hsec fold" data-hfold="away" id="hfw" hidden>Being away</button><div id="hway"></div>
 <button type="button" class="hsec fold" data-hfold="qr" id="hfq" hidden>Campus Music Director away?</button><div id="hqr"></div>
 <p id="m10" class="s"></p>
 </div>
@@ -1009,7 +1009,7 @@ function heat(cols, rows, cells, label, rate) {
 let ANTAB = 'ov';
 const HF = (() => { try { return JSON.parse(localStorage.getItem('rbcHomeFold') || '{}') || {}; } catch (e) { return {}; } })();
 function hfoldApply() {
-  [['an', '#hcharts .anl'], ['tk', '#htasks > .card'], ['nt', '#hnotes .ntc']].forEach(x => { const c = document.querySelector(x[1]); if (!c) return; c.classList.add('hfd'); c.dataset.hk = x[0]; c.classList.toggle('hshut', HF[x[0]] === true); });
+  /* the section bars above each card now fold them; the cards themselves no longer fold */ [].forEach(x => { const c = document.querySelector(x[1]); if (!c) return; c.classList.add('hfd'); c.dataset.hk = x[0]; c.classList.toggle('hshut', HF[x[0]] === true); });
 }
 document.addEventListener('click', ev => {
   const t = ev.target, h = t.closest && t.closest('#hcharts .anl .anh, #hnotes .ntc .anh, #htasks > .card > .ct'); if (!h) return;
@@ -1073,9 +1073,11 @@ function drawNotes(items) {
 }
 let ANC = null, ANREH = '', ANCAMP = '', ANROWS = null, ANCACHE = {};
 function anDays(c) { const n = {}; (c.series || []).forEach(x => { if (x.date) n[x.date] = (n[x.date] || 0) + 1; }); return Object.keys(n).filter(d => n[d] > 1).sort().reverse(); }
+/** Plain words for a change: "Down from 92% at the rehearsal before". */
+function anVs(rate, delta) { const prev = Math.round((Number(rate) - Number(delta)) * 10) / 10; return delta === 0 ? 'Same as the rehearsal before' : (delta > 0 ? 'Up' : 'Down') + ' from ' + prev + '% at the rehearsal before'; }
 function anHero(L, delta) {
   const tot = Math.max(1, Number(L.eligible) || (L.present + L.absent + L.excused) || 1);
-  const dl = delta === null || delta === undefined ? '' : '<span class="pill ' + (delta >= 0 ? 'p-ok' : 'p-no') + '">' + (delta >= 0 ? '+' : '') + delta + ' pts vs the rehearsal before</span>';
+  const dl = delta === null || delta === undefined ? '' : '<span class="pill ' + (delta >= 0 ? 'p-ok' : 'p-no') + '">' + anVs(L.rate, delta) + '</span>';
   const row = (k, n, col) => '<div class="ans"><div class="ansh"><span class="ansl"><i style="background:' + col + '"></i>' + k + '</span><span class="ansn">' + n + '<small>' + Math.round(1000 * n / tot) / 10 + '% of ' + tot + '</small></span></div><div class="ansbar"><div style="width:' + Math.max(n ? 1.5 : 0, Math.min(100, 100 * n / tot)) + '%;background:' + col + '"></div></div></div>';
   return '<div class="anhero"><div class="anring">' + ring(L.rate, rateColor(L.rate)) + '<div class="anrid">' + esc(L.id || '') + (L.date ? ' · ' + esc(L.date) : '') + '</div>' + dl + '</div>' +
     '<div class="anst">' + row('Present', L.present, NAVY) + row('Absent', L.absent, ATTN) + row('Excused', L.excused, SOFT) + '</div></div>' +
@@ -1100,7 +1102,7 @@ function homeCharts(c, drill, canSee, canPick) {
   const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="Type or choose" onfocus="this.select()" value="' + esc(rid) + '"><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + anDays(c).map(d => '<option value="All on ' + esc(d) + '">Whole day, ' + c.series.filter(x => x.date === d).length + ' rehearsals</option>').join('') + '</datalist></div>' +
     (ANROWS ? '<div class="anpick"><label class="lb" for="ancamp">Campus</label><input id="ancamp" class="in" list="ancampl" autocomplete="off" placeholder="All campuses" onfocus="this.select()" value="' + esc(ANCAMP) + '"><datalist id="ancampl">' + Array.from(new Set(ANROWS.rows.map(r => r.campus).filter(Boolean))).sort().map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' : '') + '<button class="btn line sm anclear" type="button" data-anclear="1"' + (ANREH || ANCAMP ? '' : ' disabled') + '>Clear</button>' + '</div>' : '';
   const kp = (k, v, s, col) => '<div class="kpi" style="--kc:' + col + '"><div class="kk">' + k + '</div><div class="kv">' + v + '</div><div class="ks">' + s + '</div></div>';
-  const kpis = '<div class="kpis">' + kp('Attendance rate', L.rate + '%', esc(L.id || '') + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + ' pts'), rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'approved absences', SOFT) + '</div>';
+  const kpis = '<div class="kpis">' + kp('Attendance rate', L.rate + '%', esc(L.id || '') + (delta === null ? '' : ' · ' + anVs(L.rate, delta).toLowerCase()), rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'approved absences', SOFT) + '</div>';
   const idl = (L.id || '') + (L.date ? ' · ' + L.date : '') + (ANCAMP ? ' · ' + ANCAMP : '');
   const cpBody = ANCAMP ? kpis + '<div class="anbox" style="margin-top:22px"><div class="ct" style="margin-bottom:8px">' + esc(ANCAMP) + ' · by part</div>' + rankBars(parts, {unit: '%', drill: false}) + '</div>'
     : '<div class="anbox"><div class="ct" style="margin-bottom:8px">' + (c.campusOnly ? esc(c.campusOnly) + ' · by part · ' : 'By campus · ') + esc(L.id || 'last rehearsal') + '</div>' + rankBars(camps, {unit: '%', drill: c.campusOnly ? false : drill}) + '</div>';
@@ -1829,6 +1831,7 @@ async function loadHomeAway() {
   try {
     const j = await call({action: 'away.state', token});
     box.innerHTML = j && j.ok && j.canSet ? awayCardHtml(j, 'h') : '';
+    homeFoldInit();
   } catch (e) { box.innerHTML = ''; }
 }
 async function loadAway() {
@@ -2043,9 +2046,9 @@ $('rpcsv').onclick = async () => {
 };
 
 
-const HFBOX = {work: 'hquick', glance: 'hgrid', charts: 'hcharts', tasks: 'htasks', qr: 'hqr'};
+const HFBOX = {work: 'hquick', glance: 'hgrid', charts: 'hcharts', tasks: 'htasks', qr: 'hqr', health: 'hhealth', notes: 'hnotes', away: 'hway'};
 function homeFoldInit() {
-  [['charts', 'hfc'], ['tasks', 'hft'], ['qr', 'hfq']].forEach(x => {
+  [['charts', 'hfc'], ['tasks', 'hft'], ['qr', 'hfq'], ['health', 'hfh'], ['notes', 'hfn'], ['away', 'hfw']].forEach(x => {
     const box = $(HFBOX[x[0]]), b = $(x[1]); if (!box || !b) return;
     b.hidden = !String(box.innerHTML).trim();
     box.classList.toggle('shut', homeShut(x[0])); b.classList.toggle('shut', homeShut(x[0])); b.setAttribute('aria-expanded', homeShut(x[0]) ? 'false' : 'true');
@@ -2894,7 +2897,7 @@ if (token) { const first = n => call({action: 'me', token}).then(j => { if (j.ok
     var isTbl = card.classList.contains('tblc') && head.classList.contains('tblh');
     var isAnh = !isTbl && head.classList.contains('anh') && !!head.querySelector('.ct');
     if (!isTbl && !isAnh && !head.classList.contains('ct')) return;
-    if (card.closest('#s10,#s14') && !(card.parentNode && (card.parentNode.id === 'hway' || card.parentNode.id === 'hhealth'))) return;
+    if (card.closest('#s10,#s14')) return;
     var title = (isAnh ? head.querySelector('.ct') : isTbl ? (head.querySelector('span') || head) : head).textContent.trim();
     if (NOFOLD.indexOf(title) >= 0) { card.dataset.fold = 'x'; return; }
     card.dataset.fold = '1';
