@@ -2048,24 +2048,24 @@ async function loadHome() {
     const cr = t.cancelReminder;
     const lst = a => a.length ? '<div class="fplist">' + a.join('') + '</div>' : '';
     const gob = (label, to, red) => '<button class="btn ' + (red ? 'red' : 'line') + '" type="button" data-go="' + to + '">' + label + '</button>';
-    const crh = cr ? lst([tile({tone: 'warn', icon: '!', title: (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + cr.id + (cr.kind === 'last' ? '' : ' held as planned?'), pill: cr.kind === 'last' ? 'Last chance' : 'Check', pillCls: 'p-pend',
+    const crh = cr ? lst([mkTile({tone: 'warn', icon: '!', title: (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + cr.id + (cr.kind === 'last' ? '' : ' held as planned?'), pill: cr.kind === 'last' ? 'Last chance' : 'Check', pillCls: 'p-pend',
       body: esc(cr.kind === 'last' ? 'A held rehearsal can be cancelled only within 36 hours of its end. About ' + cr.hoursLeft + ' hour(s) are left. After that it cannot be cancelled.' : 'If ' + cr.id + ' must be cancelled, do it now. A held rehearsal can be cancelled only within 36 hours of its end, and the Global Music Director and the Pastor in Charge must both say yes.'),
       actions: has('people') ? gob('Open People and access', 's12') : ''})]) : '';
     const awl = t.away ? Object.keys(t.away.away || {}).filter(r => t.away.away[r]) : [];
     const FN = {rehearsal: 'Set up rehearsals', qr: 'Show the QR', records: 'See attendance records'};
-    const awh = lst((awl.length ? [tile({tone: 'warn', icon: '!', title: 'Away now: ' + awl.join(', '), pill: 'Away', pillCls: 'p-pend', body: esc('If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.')})] : []).concat(
-      (j.openFunctions || []).length ? [tile({tone: 'ok', icon: '✓', title: 'Opened to you for a short time', pill: 'Open', pillCls: 'p-ok', body: esc(j.openFunctions.map(f => FN[f] || f).join(', ') + '. It ends by itself.')})] : []));
-    const bph = lst((j.bypasses || []).map(x => tile({tone: 'ok', icon: '✓', title: x.what, pill: 'Done by an admin', pillCls: 'p-val',
+    const awh = lst((awl.length ? [mkTile({tone: 'warn', icon: '!', title: 'Away now: ' + awl.join(', '), pill: 'Away', pillCls: 'p-pend', body: esc('If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.')})] : []).concat(
+      (j.openFunctions || []).length ? [mkTile({tone: 'ok', icon: '✓', title: 'Opened to you for a short time', pill: 'Open', pillCls: 'p-ok', body: esc(j.openFunctions.map(f => FN[f] || f).join(', ') + '. It ends by itself.')})] : []));
+    const bph = lst((j.bypasses || []).map(x => mkTile({tone: 'ok', icon: '✓', title: x.what, pill: 'Done by an admin', pillCls: 'p-val',
       body: '<div class="s" style="font-size:13px">' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '</div><div style="margin-top:6px">Reason: ' + esc(x.reason) + '</div><div class="s" style="font-size:13px;margin-top:6px">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</div>'})));
-    const mch = lst((j.memberChanges || []).map(x => tile({tone: 'ask', icon: 'i', title: x.what, pill: 'Membership', pillCls: 'p-val',
+    const mch = lst((j.memberChanges || []).map(x => mkTile({tone: 'ask', icon: 'i', title: x.what, pill: 'Membership', pillCls: 'p-val',
       body: '<div class="s" style="font-size:13px">' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '</div><div style="margin-top:6px">Reason: ' + esc(x.reason) + '</div>'})).concat(has('changes') ? [] : []));
-    const pth = t.petitions && t.petitions.waiting ? lst([tile({tone: 'warn', icon: '!', title: t.petitions.waiting + ' petition(s) waiting for your answer', pill: 'Waiting', pillCls: 'p-pend', actions: gob('Open Changes and updates', 's16', true)})]) : '';
-    const dth = t.details && t.details.waiting ? lst([tile({tone: 'warn', icon: '!', title: t.details.waiting + ' member(s) asked for their details to be corrected', pill: 'Waiting', pillCls: 'p-pend', actions: gob('Open Members', 's17', true)})]) : '';
+    const pth = t.petitions && t.petitions.waiting ? lst([mkTile({tone: 'warn', icon: '!', title: t.petitions.waiting + ' petition(s) waiting for your answer', pill: 'Waiting', pillCls: 'p-pend', actions: gob('Open Changes and updates', 's16', true)})]) : '';
+    const dth = t.details && t.details.waiting ? lst([mkTile({tone: 'warn', icon: '!', title: t.details.waiting + ' member(s) asked for their details to be corrected', pill: 'Waiting', pillCls: 'p-pend', actions: gob('Open Members', 's17', true)})]) : '';
     const mq = t.mreq || {};
-    const mqh = (mq.waiting || mq.news) ? lst([tile({tone: mq.waiting ? 'warn' : 'ask', icon: mq.waiting ? '!' : 'i', title: mq.waiting ? mq.waiting + ' member request(s) waiting for you' : mq.news + ' member request(s) have an answer', pill: mq.waiting ? 'Waiting' : 'News', pillCls: mq.waiting ? 'p-pend' : 'p-val',
+    const mqh = (mq.waiting || mq.news) ? lst([mkTile({tone: mq.waiting ? 'warn' : 'ask', icon: mq.waiting ? '!' : 'i', title: mq.waiting ? mq.waiting + ' member request(s) waiting for you' : mq.news + ' member request(s) have an answer', pill: mq.waiting ? 'Waiting' : 'News', pillCls: mq.waiting ? 'p-pend' : 'p-val',
       body: mq.waiting && mq.news ? esc(mq.news + ' more have an answer you have not seen.') : '', actions: gob('Open Members', 's17', true)})]) : '';
     const abn = j.absenceNotices || [];
-    const abh = lst(abn.slice(0, 8).map(n => tile({tone: n.kind === 'cancelled' ? 'no' : 'ok', icon: n.kind === 'cancelled' ? '✕' : '✓', title: n.member + ' · ' + n.rehearsalId, pill: n.kind === 'cancelled' ? 'Cancelled' : 'Entered', pillCls: n.kind === 'cancelled' ? 'p-no' : 'p-ok',
+    const abh = lst(abn.slice(0, 8).map(n => mkTile({tone: n.kind === 'cancelled' ? 'no' : 'ok', icon: n.kind === 'cancelled' ? '✕' : '✓', title: n.member + ' · ' + n.rehearsalId, pill: n.kind === 'cancelled' ? 'Cancelled' : 'Entered', pillCls: n.kind === 'cancelled' ? 'p-no' : 'p-ok',
       body: '<div class="s" style="font-size:13px">' + esc(n.by) + (n.byAssistant ? ' (Assistant)' : '') + ' · ' + esc(tm(n.atMs)) + '</div>' + (n.reason ? '<div style="margin-top:6px">Reason: ' + esc(n.reason) + '</div>' : ''),
       actions: has('absence') ? gob('Open Absence', 's6') : ''})));
     ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
@@ -2671,6 +2671,8 @@ const LADDER = [
   ['Admin Team Member', 'the Assistant Global Admin']
 ];
 /** One tile in the shared style: icon, title, optional status pill, optional "How" label, body (html) and actions (html). tone: ok, warn, ask, no. */
+/** The shared card tile, reachable from functions that have their own local 'tile'. */
+function mkTile(o) { return tile(o); }
 function tile(o) {
   return '<div class="ugt ' + (o.tone || 'ask') + (o.cls ? ' ' + o.cls : '') + '"' + (o.attr ? ' ' + o.attr : '') + '><div class="ugtop"><span class="ugi">' + (o.icon || '') + '</span><b>' + esc(o.title) + '</b>' + (o.pill ? '<span class="pill ' + (o.pillCls || 'p-pend') + '">' + esc(o.pill) + '</span>' : '') + '</div>' +
     (o.label ? '<div class="ugk">' + esc(o.label) + '</div>' : '') + (o.body ? '<div class="ugh"' + (o.label ? '' : ' style="margin-top:10px"') + '>' + o.body + '</div>' : '') + (o.actions ? '<div class="actions" style="margin:10px 0 0">' + o.actions + '</div>' : '') + '</div>';
