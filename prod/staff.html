@@ -629,7 +629,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <div id="s6" class="pg hide">
 <div class="two">
 <div class="c1">
-<div class="card pad rise"><div class="ct">Request an absence</div><p id="rinfo" class="sub"></p>
+<div id="rreq" class="card pad rise"><div class="ct">Request an absence</div><p id="rinfo" class="sub"></p>
 <div id="rform" class="hide"><label for="rreason" class="lb">Reason for the absence</label><textarea id="rreason" class="in" rows="3" maxlength="300" placeholder="Your reason (10 to 300 characters). Only you and the people who decide can see it." style="width:100%;font:inherit"></textarea>
 <div class="actions"><button id="rsend" class="btn red" type="button">Request absence</button></div></div>
 <p id="m6" class="s"></p></div>
@@ -649,7 +649,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <div class="actions"><button id="rfsend" class="btn red" type="button">Enter and approve</button></div><p id="m6b" class="s"></p></div>
 <div id="rfrev" class="card pad rise hide"></div>
 <div id="rfnote" class="card pad rise hide"></div>
-<div class="card pad rise" style="animation-delay:.1s"><div class="ct">What happens next</div>
+<div id="rnext" class="card pad rise" style="animation-delay:.1s"><div class="ct">What happens next</div>
 <div class="step" style="margin-top:8px"><span>1. Campus Music Director</span><span class="pill p-pend">Validates</span></div>
 <div class="step"><span>2. Global Admin or Assistant</span><span class="pill p-val">Decides</span></div>
 <div class="step"><span>3. The member is told</span><span class="pill p-ok">Approved or rejected</span></div></div>
@@ -775,7 +775,8 @@ const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s1
 const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 let myBypass = {};
-function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
+var myStaffOnly = false;
+function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myStaffOnly = j.staffOnly === true; myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
 const ICON = {
   reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
   process: '<path d="M9 11l3 3 8-8"/><path d="M4 6h9M4 12h3M4 18h9"/>',
@@ -805,7 +806,7 @@ const PAGEHEAD = {
   s3: ['Show QR code', 'Show this to members so they can check in. It renews every few minutes.'],
   s4: ['Check-ins', 'See who has checked in, validate them, and fix flags.'],
   s5: ['Mark by hand', 'For someone with no phone, camera or location.'],
-  s6: ['My absence', 'Ask to be excused before the cut-off, and follow your requests.'],
+  s6: ['My absence', 'Ask to be excused from a rehearsal, or ask for time away from your staff role.'],
   s7: ['Absence requests', 'Requests waiting for you to validate or decide.'],
   s8: ['Rehearsals', 'Make a rehearsal. Members check in with the QR code.'],
   s9: ['Help', 'Find answers, see what each menu does, and who to ask.']
@@ -841,7 +842,7 @@ function navHtml() {
 function drawTabs() {
   $('tabs').innerHTML = '<button type="button" class="rt rtmenu" id="railtg" title="Show or hide the menu" aria-label="Show or hide the menu">' + MENU + '<span>Hide menu</span></button>' +
     '<div class="rt rtb"><img src="../logo.png" alt="CCW logo"><div class="n1">CELEBRATION<br>CHURCH WORSHIP</div><div class="n2">LAGOS REGION CHOIR</div></div>' +
-    navHtml() + (myTabs.indexOf('absence') !== -1 ? '<button class="tab" type="button" data-mp="1" title="Your own attendance, absences and details" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg><span>My member page</span></button>' : '') +
+    navHtml() + (myTabs.indexOf('absence') !== -1 && !myStaffOnly ? '<button class="tab" type="button" data-mp="1" title="Your own attendance, absences and details" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg><span>My member page</span></button>' : '') +
     '<div class="rt rtu"><b>' + esc(myName || 'Signed in') + '</b>' + esc(myRoles.join(', ')) + '</div>';
   document.querySelectorAll('.tab').forEach(b => b.onclick = () => b.dataset.mp ? (location.href = 'member.html') : go(b.dataset.v));
   document.querySelectorAll('.gh').forEach(h => h.onclick = () => { const g = h.dataset.ng, shut = !NAVSHUT[g]; NAVSHUT[g] = shut; try { localStorage.setItem('rbcNavShut', JSON.stringify(NAVSHUT)); } catch (e) {} h.parentNode.classList.toggle('shut', shut); h.setAttribute('aria-expanded', shut ? 'false' : 'true'); });
@@ -1830,13 +1831,32 @@ document.addEventListener('click', async ev => {
 });
 
 function awayCardHtml(j, p) {
-  const who = Object.keys(j.away || {}).filter(r => j.away[r]);
   const duties = j.duties || [];
-  const recv = x => x.kind === 'senior' ? 'passes on by the usual order, nothing for you to arrange' : x.kind === 'desk' ? 'the Assistant Global Admin arranges a cover (the Global Admin if the Assistant is away)' : 'the Assistant Global Admin arranges a stand-in (the Global Admin if the Assistant is away)';
+  const recv = x => x.kind === 'senior' ? 'passes on by the usual order' : x.kind === 'desk' ? 'the Assistant Global Admin arranges a cover (the Global Admin if the Assistant is away)' : 'the Assistant Global Admin arranges a stand-in (the Global Admin if the Assistant is away)';
   const list = duties.length ? '<ul class="sub" style="margin:8px 0 0;padding-left:18px">' + duties.map(x => '<li><b>' + esc(x.duty) + '</b>: ' + esc(recv(x)) + '.</li>').join('') + '</ul>' : '';
-  const mine = (j.mine || []).map(n => '<p class="sub" style="margin:6px 0 0">You are away ' + esc(n.start) + ' to ' + esc(n.end) + ' (' + esc(n.reason) + ')' + ((n.duties || []).length ? ' for ' + esc(n.duties.join(', ')) : '') + ' <button class="btn line sm" type="button" data-awayend="1">I am back</button></p>').join('');
-  return '<div class="card pad rise"><div class="ct">Being away</div><p class="sub">One notice covers every role you hold. It ends by itself.' + (who.length ? ' <b>Away now: ' + esc(who.join(', ')) + '.</b>' : '') + '</p>' + list + mine +
-    (j.saving && !(j.mine || []).length ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px"><div><label class="lb" for="' + p + 'awstart" style="margin-top:0">First day</label><input id="' + p + 'awstart" class="in" type="date"></div><div><label class="lb" for="' + p + 'awend" style="margin-top:0">Last day</label><input id="' + p + 'awend" class="in" type="date"></div><div style="grid-column:1/-1"><label class="lb" for="' + p + 'awwhy" style="margin-top:0">Reason</label><input id="' + p + 'awwhy" class="in" maxlength="200" placeholder="Why you will be away"></div></div>' + (j.canExcuse ? '<label style="display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;font-weight:600;line-height:1.4"><input type="checkbox" id="' + p + 'awex" style="margin-top:3px"><span>Also ask to be excused from the rehearsal in these days. Your reason is used for the request, so it needs 10 or more characters.</span></label>' : '') + '<div class="actions" style="margin-top:12px"><button class="btn red sm" type="button" data-awgo="' + p + '">Put in notice</button></div>' : '') + '</div>';
+  const PILL = {Pending: ['Waiting', 'p-pend', 'warn', '…'], Approved: ['Approved', 'p-ok', 'ok', '✓'], Declined: ['Not approved', 'p-no', 'no', '✕'], Withdrawn: ['Withdrawn', 'p-val', 'gr', '↩']};
+  const when = n => esc(n.start) + (n.end !== n.start ? ' to ' + esc(n.end) : '');
+  const mine = (j.mine || []).map(n => { const k = PILL[n.status] || PILL.Pending; return tile({tone: k[2], icon: k[3], title: 'Away ' + when(n), pill: k[0], pillCls: k[1],
+    body: '<div class="s">' + esc(n.reason) + (n.miss ? ' · will miss rehearsals' : '') + '</div>' +
+      (n.status === 'Pending' ? '<div class="s" style="margin-top:4px">Waiting for the ' + esc(n.decider) + ' (the ' + esc(n.standIn) + ' if they are away or have not answered in 48 hours).</div>' : '') +
+      (n.status === 'Approved' ? '<div class="s" style="margin-top:4px">Approved by ' + esc(n.decidedBy) + '. Your duties are handed on for these days' + (n.miss ? ', and every rehearsal in them counts as Excused' : '') + '.</div>' : '') +
+      (n.status === 'Declined' ? '<div class="s" style="margin-top:4px">Not approved by ' + esc(n.decidedBy) + (n.note ? ': ' + esc(n.note) : '') + '. Nothing changes.</div>' : ''),
+    actions: (n.status === 'Pending' || n.status === 'Approved') && !n.ended && n.current ? '<button class="btn line sm" type="button" data-awayend="' + esc(n.id) + '">' + (n.status === 'Pending' ? 'Withdraw' : 'I am back') + '</button>' : ''}); }).join('');
+  const busy = (j.mine || []).some(n => (n.status === 'Pending' || n.status === 'Approved') && !n.ended && n.current);
+  const form = j.saving && !busy ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px"><div><label class="lb" for="' + p + 'awstart" style="margin-top:0">First day</label><input id="' + p + 'awstart" class="in" type="date"></div><div><label class="lb" for="' + p + 'awend" style="margin-top:0">Last day</label><input id="' + p + 'awend" class="in" type="date"></div><div style="grid-column:1/-1"><label class="lb" for="' + p + 'awwhy" style="margin-top:0">Reason</label><input id="' + p + 'awwhy" class="in" maxlength="200" placeholder="Why you will be away"></div></div>' +
+    (j.canMiss ? '<label style="display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;font-weight:600;line-height:1.4"><input type="checkbox" id="' + p + 'awmiss" style="margin-top:3px"><span>I will also miss choir rehearsals in these days. Once approved, they count as Excused.</span></label>' : '') +
+    '<div class="actions" style="margin-top:12px"><button class="btn red sm" type="button" data-awgo="' + p + '">Ask for this time away</button></div>' : '';
+  const dec = (j.toDecide || []).map(n => tile({tone: 'warn', icon: '!', title: n.name + ' asks to be away ' + when(n), pill: n.standInAnswer ? 'As stand-in' : 'Your answer', pillCls: 'p-pend',
+    body: '<div class="s">' + esc(n.reason) + (n.miss ? ' · will miss rehearsals' : '') + '</div><div class="s" style="margin-top:4px">Duties: ' + esc((n.duties || []).join(', ') || 'none') + '.</div>' +
+      '<div class="s" style="margin-top:4px"><b>Also away then:</b> ' + ((n.othersAway || []).length ? esc(n.othersAway.map(o => o.name + ' (' + o.start + (o.end !== o.start ? ' to ' + o.end : '') + (o.status === 'Pending' ? ', waiting' : '') + ')').join(', ')) : 'nobody') + '.</div>' +
+      '<input id="awn' + esc(n.id) + '" class="in" maxlength="200" placeholder="Reason if you say no" style="margin-top:8px">',
+    actions: '<button class="btn red sm" type="button" data-awdec="' + esc(n.id) + '" data-yes="1">Yes</button><button class="btn line sm" type="button" data-awdec="' + esc(n.id) + '">No</button>'})).join('');
+  const ov = (j.overview || []).map(n => tile({tone: n.status === 'Approved' ? 'ok' : 'warn', icon: n.status === 'Approved' ? '✓' : '…', title: n.name + ' · ' + when(n), pill: n.status === 'Approved' ? 'Away' : 'Waiting', pillCls: n.status === 'Approved' ? 'p-ok' : 'p-pend',
+    body: '<div class="s">' + esc((n.duties || []).join(', ')) + (n.miss ? ' · misses rehearsals' : '') + (n.status === 'Pending' ? ' · waiting for the ' + esc(n.decider) : ' · approved by ' + esc(n.decidedBy)) + '</div>'})).join('');
+  return '<div class="card pad rise"><div class="ct">Being away</div><p class="sub">Time away from your staff role. One notice covers every role you hold, and it needs one yes. After the yes, each role is handed on like this:</p>' + list +
+    (mine ? '<div class="fplist" style="margin-top:12px">' + mine + '</div>' : '') + form +
+    (dec ? '<div class="ct" style="margin-top:18px">Waiting for your answer</div><div class="fplist">' + dec + '</div>' : '') +
+    (ov ? '<div class="ct" style="margin-top:18px">Everyone away now or soon</div><div class="fplist">' + ov + '</div>' : '') + '</div>';
 }
 document.addEventListener('click', async ev => {
   const b = ev.target.closest && ev.target.closest('[data-tidy]'); if (!b) return;
@@ -1873,7 +1893,7 @@ async function loadHomeAway() {
   } catch (e) { box.innerHTML = ''; }
 }
 /** Being away lives on My absence, next to asking to be excused. Staff with no My absence page (staff only, not choir members) find it on People. */
-function awayBox() { return myTabs.indexOf('absence') !== -1 ? 'aaw' : 'paw'; }
+function awayBox() { return 'aaw'; }
 async function loadAway() {
   const id = awayBox(), other = id === 'aaw' ? 'paw' : 'aaw';
   if ($(other)) $(other).innerHTML = '';
@@ -1887,11 +1907,20 @@ async function loadAway() {
 document.addEventListener('click', async ev => {
   const ps = ev.target.closest && ev.target.closest('[data-pseen]');
   if (ps) { ps.disabled = true; try { const j = await call({action: 'ack.seen', token, id: ps.dataset.pseen}); if (j.signedOut) { signedOutNow(); return; } if (!j.ok) say('m12', j.error || 'Could not save.', 'bad'); } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); } if (ps.closest('#chpet')) loadChanges(); else loadPeople(true); return; }
-  const ae = ev.target.closest && ev.target.closest('[data-awgo],[data-awayend]');
+  const ae = ev.target.closest && ev.target.closest('[data-awgo],[data-awayend],[data-awdec]');
   if (ae) {
-    const ap = ae.dataset.awgo || ''; const b = ae.dataset.awgo !== undefined ? {action: 'away.set', token, start: pv(ap + 'awstart'), end: pv(ap + 'awend'), reason: pv(ap + 'awwhy'), excuse: !!($(ap + 'awex') && $(ap + 'awex').checked)} : {action: 'away.end', token};
+    const ap = ae.dataset.awgo || '', msg = $('aaw') && $('aaw').contains(ae) ? 'm6' : 'm12';
+    let b;
+    if (ae.dataset.awgo !== undefined) b = {action: 'away.set', token, start: pv(ap + 'awstart'), end: pv(ap + 'awend'), reason: pv(ap + 'awwhy'), miss: !!($(ap + 'awmiss') && $(ap + 'awmiss').checked)};
+    else if (ae.dataset.awdec) b = {action: 'away.decide', token, id: ae.dataset.awdec, yes: ae.dataset.yes === '1', note: pv('awn' + ae.dataset.awdec)};
+    else b = {action: 'away.end', token, id: ae.dataset.awayend};
     ae.disabled = true;
-    try { const j = await call(b); if (j.signedOut) { signedOutNow(); return; } say('m12', j.ok ? (j.excused ? (j.excused.ok ? 'Saved. Your request to be excused has gone to the people who decide.' : 'Saved. ' + (j.excused.note || '')) : 'Saved.') : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if ($('aaw') && $('aaw').contains(ae)) loadAway(); else loadPeople(true); } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); ae.disabled = false; }
+    try {
+      const j = await call(b); if (j.signedOut) { signedOutNow(); return; }
+      const ok = b.action === 'away.set' ? 'Sent. It is waiting for the ' + (j.decider || 'person who decides') + '.' : b.action === 'away.decide' ? (b.yes ? 'Approved. The person is told.' : 'Answered no. The person is told.') : 'Done.';
+      say(msg, j.ok ? ok : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad');
+      if (j.ok) loadAway(); else ae.disabled = false;
+    } catch (e) { say(msg, 'Network problem. Try again.', 'bad'); ae.disabled = false; }
     return;
   }
   const dl = ev.target.closest && ev.target.closest('[data-dl]');
@@ -2116,7 +2145,14 @@ async function loadHome() {
     const awn = (j.awayNeeds || []).map(x => mkTile({tone: 'warn', icon: '!', title: x.name + ' is away ' + x.start + ' to ' + x.end + ': ' + x.duty, pill: x.kind === 'desk' ? 'Cover needed' : 'Stand-in', pillCls: 'p-pend',
       body: '<div class="s" style="font-size:13px">' + (x.kind === 'desk' ? 'Arrange a cover for this desk in People and access (a desk cover request).' : 'Arrange a stand-in for the QR and look after the campus for these days.') + '</div>' + (x.reason ? '<div style="margin-top:6px"><b>Reason:</b> ' + esc(x.reason) + '</div>' : ''),
       actions: (x.kind === 'desk' ? gob('Arrange cover', 's12', true) : '') + (x.key ? gotBtn(x.key) : '')}));
-    const awh = lst(awn.concat(awl.length ? [mkTile({tone: 'warn', icon: '!', title: 'Away now: ' + awl.join(', '), pill: 'Away', pillCls: 'p-pend', body: esc('If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.')})] : []).concat(
+    const PIL = {Approved: ['ok', '\u2713', 'Approved', 'p-ok'], Declined: ['no', '\u2715', 'Not approved', 'p-no']};
+    const awt = (j.awayNotes || []).map(x => { const k = x.kind === 'answer' ? PIL[x.status] || PIL.Approved : ['ask', 'i', x.kind === 'excused' ? 'Excused' : 'Away', 'p-val'];
+      const span = x.start + (x.end !== x.start ? ' to ' + x.end : '');
+      const title = x.kind === 'answer' ? 'Your time away ' + span + (x.status === 'Approved' ? ' is approved' : ' is not approved') : x.kind === 'excused' ? x.name + ' is excused from rehearsals ' + span : x.name + ' is away ' + span;
+      const body = x.kind === 'answer' ? (x.status === 'Approved' ? 'Approved by ' + esc(x.by) + '.' + (x.miss ? ' Rehearsals in these days count as Excused.' : '') : 'Answered by ' + esc(x.by) + (x.note ? ': ' + esc(x.note) : '') + '.') : 'Approved by ' + esc(x.by) + '.' + (x.duties && x.duties.length ? ' Duties: ' + esc(x.duties.join(', ')) + '.' : '');
+      return mkTile({tone: k[0], icon: k[1], title: title, pill: k[2], pillCls: k[3], body: '<div class="s" style="font-size:13px">' + body + '</div>', actions: gotBtn(x.key)}); });
+    const aww = t.awayWaiting ? [mkTile({tone: 'warn', icon: '!', title: t.awayWaiting.waiting + ' away notice(s) waiting for your answer', pill: 'Waiting', pillCls: 'p-pend', actions: gob('Open My absence', 's6', true)})] : [];
+    const awh = lst(aww.concat(awt).concat(awn).concat(awl.length ? [mkTile({tone: 'warn', icon: '!', title: 'Away now: ' + awl.join(', '), pill: 'Away', pillCls: 'p-pend', body: esc('If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.')})] : []).concat(
       (j.openFunctions || []).length ? [mkTile({tone: 'ok', icon: '✓', title: 'Opened to you for a short time', pill: 'Open', pillCls: 'p-ok', body: esc(j.openFunctions.map(f => FN[f] || f).join(', ') + '. It ends by itself.')})] : []));
     const bph = lst((j.bypasses || []).map(x => mkTile({tone: 'ok', icon: '✓', title: bpDo(x), pill: 'Done by an admin', pillCls: 'p-val',
       body: '<div class="s" style="font-size:13px">' + (x.recordId && x.recordId !== 'several' ? esc(x.recordId) + ' · ' : '') + esc(tm(x.atMs)) + '</div><div style="margin-top:6px"><b>Reason:</b> ' + esc(x.reason) + '</div><div class="s" style="font-size:13px;margin-top:6px">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</div>', actions: gotBtn(x.key)}))) + gotAll(j.bypasses);
@@ -2387,6 +2423,9 @@ $('rhsave').onclick = async () => {
   $('rhsave').disabled = false;
 };
 async function loadAbsence() {
+  // Staff who are not choir members only put in away notices here.
+  ['rreq', 'rmine', 'rnext'].forEach(i => { if ($(i)) $(i).classList.toggle('hide', myStaffOnly); });
+  if (myStaffOnly) { say('m6', ''); loadAway(); return; }
   say('m6', 'Loading…'); $('rform').classList.add('hide'); loadAway();
   try {
     const j = await call({action: 'absence.state', token});
@@ -2712,7 +2751,7 @@ const FAQ = [
   {t: ['members'], q: 'How do I add a new campus?', a: 'Only the System Administrator can. In Add a new member, choose "Add a new campus" at the end of the Campus list, type the name, and add the first member there.'},
   {t: ['people'], q: 'How do I ask for a change to a role or access?', a: 'Open People, choose what the change is about under Ask for a change, give the details and a reason, and send it. A different, higher person says yes, then the right role carries it out.'},
   {t: ['people'], q: 'How do I say yes or no to a request?', a: 'Open People and find the request under Waiting for your answer. Use the filters to narrow the list, then choose Yes, or give a reason and choose Say no. Nobody answers their own request.'},
-  {t: ['people', 'calendar'], q: 'How do I say I will be away?', a: 'On My absence, open Being away (staff who are not choir members find it on People), give the first and last day and a reason (14 days at most). It ends by itself. You can also start from a date in the Calendar.'},
+  {t: ['people', 'calendar'], q: 'How do I say I will be away?', a: 'On My absence, open Being away and ask for the time away. It needs one yes (usually the Global Admin); choir members also say whether they will miss rehearsals, give the first and last day and a reason (14 days at most). It ends by itself. You can also start from a date in the Calendar.'},
   {t: ['changes'], q: 'How do I see what changed, and disagree with it?', a: 'Open Changes and use the filters (rehearsal, date, who did it, kind). Choose Petition about this and give your reason. The right person answers.'},
   {t: [], q: 'How do I clear a line from Updates?', a: 'Press Got it on the card, or Got it for all. The line leaves your Updates box and stays in the Change log. It only leaves for you; other people still see theirs until they press Got it. Cards that need an answer from you (requests, petitions) stay until they are answered.'},
   {t: ['process'], q: 'How do I process attendance after a rehearsal?', a: 'Open Process once the day has ended and processing has opened (90 minutes after the finish time). Check the counts, then press Process. The day is written once and locked. After that nobody can change one person; the only way back is an undo (see "A processed day is wrong"). Publishing to the official attendance is switched off until it is approved.'},
@@ -2885,7 +2924,7 @@ if (token) { const first = n => call({action: 'me', token}).then(j => { if (j.ok
     head.setAttribute('aria-expanded', open ? 'true' : 'false');
     var s = head.querySelector('.fs'); if (!s) return;
     if (LIST.indexOf(title) >= 0) { var n = count(card); s.textContent = n ? String(n) : 'None'; }
-    else if (title === 'Being away') { var t = card.textContent; s.textContent = open || t.indexOf('Away now') < 0 ? '' : 'Someone is away'; }
+    else if (title === 'Being away') { var t = card.textContent; s.textContent = open ? '' : t.indexOf('Waiting for your answer') >= 0 ? 'Waiting for your answer' : t.indexOf('Waiting for the ') >= 0 ? 'Yours is waiting' : ''; }
     else s.textContent = '';
   }
   function build(card) {
@@ -2913,7 +2952,7 @@ if (token) { const first = n => call({action: 'me', token}).then(j => { if (j.ok
     var saved = st[title], open;
     if (saved) open = !!saved.o || n > (saved.n || 0);
     else if (LIST.indexOf(title) >= 0) open = n > 0;
-    else if (title === 'Being away') open = card.textContent.indexOf('Away now') >= 0;
+    else if (title === 'Being away') open = card.textContent.indexOf('Waiting for your answer') >= 0;
     else open = SHUT.indexOf(title) < 0;
     paint(card, bar, title, open);
     function flip() {
