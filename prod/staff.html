@@ -545,6 +545,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <label for="mbr" class="lb">Reason</label><input id="mbr" class="in" autocomplete="off" maxlength="300" placeholder="For example: joined the Ago campus on Sunday (10 to 300 characters)">
 <div class="actions"><button id="mbadd" class="btn red" type="button">Add member</button><button id="mbaddx" class="btn line" type="button">Clear</button></div></div>
 <div id="mbdet"></div>
+<div id="mbupd"></div>
 <div id="mbbox"></div>
 <p id="m17" class="s"></p>
 </div>
@@ -2936,10 +2937,10 @@ async function loadMembers() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) {
       // Desk A and the System Administrator open this menu only for the requests to correct details; the member list and adding are for the admins.
-      $('mbbox').innerHTML = ''; $('mbtidy').innerHTML = ''; $('mbaddcard').classList.add('hide'); loadDetailReqs();
+      $('mbbox').innerHTML = ''; $('mbtidy').innerHTML = ''; $('mbaddcard').classList.add('hide'); MBLIST = false; { const d = document.querySelector('#ph .d'); if (d) d.textContent = 'Members ask here when something in their own details is wrong. Open a request, correct it, then mark it done.'; } loadDetailReqs(); loadMbUpdates();
       return say('m17', /do not have this page/i.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad');
     }
-    $('mbaddcard').classList.remove('hide');
+    $('mbaddcard').classList.remove('hide'); MBLIST = true; $('mbupd').innerHTML = '';
     MB.campuses = j.campuses || []; MB.parts = j.parts || []; MB.canAdd = !!j.canAddCampus; MB.history = !!j.historyReady; window.__mbm = {}; j.members.forEach(m => { window.__mbm[m.memberId] = m; });
     const cur = $('mbc').value;
     $('mbc').innerHTML = mbOpts(MB.campuses, cur, 'Choose a campus') + '<option value="__new__"' + (MB.canAdd ? '' : ' disabled') + '>+ Add a new campus' + (MB.canAdd ? '…' : ' (System Administrator only)') + '</option>';
@@ -2973,8 +2974,22 @@ document.addEventListener('click', async ev => {
   say('m17', j && j.ok ? 'Done: ' + j.summary + (j.skipped ? '. ' + j.skipped + ' left for you to edit by hand' : '') + '.' : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
   await loadMembers();
 });
+/** Desk A (and the System Administrator) have no member list; show the same yellow Updates style as Home. */
+async function loadMbUpdates() {
+  const box = $('mbupd'); if (!box) return;
+  try {
+    const j = await call({action: 'home.state', token});
+    if (!j || !j.ok) { box.innerHTML = ''; return; }
+    const by = (j.bypasses || []).map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '<br><span class="s">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</span></p>').join('');
+    const mc = (j.memberChanges || []).map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('');
+    box.innerHTML = '<div class="card pad rise" style="margin-top:16px"><div class="ct">Updates</div><p class="sub" style="margin:0 0 8px">Notices and recent changes.</p>' +
+      (by ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Done by an admin instead of the usual desk or role</div><p class="sub">The Global Admin or Assistant did these themselves, each with a reason. The desk or role it belongs to does not need to do them again.</p>' + by + '</div>' : '') +
+      (mc ? '<div class="nt"><div class="ct">Membership changes</div>' + mc + '</div>' : '') +
+      (by || mc ? '' : '<p class="sub" style="margin:0">No updates right now.</p>') + '</div>';
+  } catch (e) { box.innerHTML = ''; }
+}
 /** Members who asked Desk A to correct their own details (Desk A, Global Admin, Assistant). */
-let DETSYS = false, DESKA = false;
+let DETSYS = false, DESKA = false, MBLIST = true;
 document.addEventListener('click', async ev => {
   const b = ev.target.closest && ev.target.closest('[data-dsedit]'); if (!b) return;
   const slot = b.closest('div[style]').parentNode.querySelector('.mbslot'); if (!slot) return;
@@ -2990,7 +3005,7 @@ async function loadDetailReqs() {
     const j = await call({action: 'details.list', token});
     if (!j || !j.ok) { $('mbdet').innerHTML = ''; return; }
     const reqs = j.requests || []; DESKA = j.deskEdit === true; DETSYS = j.sysEdit === true || DESKA;
-    if (!reqs.length) { $('mbdet').innerHTML = ''; return; }
+    if (!reqs.length) { $('mbdet').innerHTML = MBLIST ? '' : '<div class="card pad rise"><div class="ct">Details to correct</div><p class="sub" style="margin:0">Nothing waiting. When a member asks for their details to be corrected, it appears here.</p></div>'; return; }
     const cardOf = r => {
       const stx = r.status === 'Not changed' ? 'Declined' : r.status, tn = stx === 'Waiting' ? ['warn', '!', 'p-pend'] : stx === 'Done' ? ['ok', '✓', 'p-ok'] : ['no', '✕', 'p-no'];
       const body = '<div class="s" style="font-size:13px">' + esc(r.memberId) + ' · ' + esc(r.campus || '-') + ' · ' + esc(r.part || '-') + ' · ' + esc(tm(r.atMs)) + (r.goesTo && r.goesTo !== 'Desk A' ? ' · <span class="pill p-info">Goes to ' + esc(r.goesTo) + '</span>' : '') + '</div>' +
