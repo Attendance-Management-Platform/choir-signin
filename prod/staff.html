@@ -376,7 +376,7 @@ body #hgrid.stats{margin-bottom:18px;grid-template-columns:repeat(auto-fit,minma
 #hgrid.stats .stat{border-left:5px solid var(--sc,#B6000A);padding:16px 20px}#hgrid.stats .stat .v{font-size:32px}
 .hsec.fold{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;cursor:pointer;font-family:inherit;text-align:left}.hsec.fold:after{content:"";width:9px;height:9px;border-right:2.5px solid #8E0008;border-bottom:2.5px solid #8E0008;transform:rotate(45deg);margin:-4px 6px 0;transition:transform .25s}
 .shut>.hsec.fold:after,.hsec.fold.shut:after{transform:rotate(-45deg);margin-top:0}#hquick.shut .hquick{display:none}#hgrid.shut>.stat{display:none}
-button.hsec.fold[hidden]{display:none}#hqr .card>.ct:first-child{display:none}#hcharts.shut,#htasks.shut,#hqr.shut,#hhealth.shut,#hnotes.shut,#hway.shut{display:none}#hcharts .anl .anh .ct,#hnotes .ntc .anh .ct,#htasks>.card>.ct,#hhealth .card>.ct,#hway .card>.ct{display:none}.hsecs{margin-top:6px}
+button.hsec.fold[hidden]{display:none}#hqr .card>.ct:first-child{display:none}#hsum.shut,#htasks.shut,#hqr.shut,#hhealth.shut,#hnotes.shut,#hway.shut{display:none}#hnotes .ntc .anh .ct,#htasks>.card>.ct,#hhealth .card>.ct,#hway .card>.ct{display:none}.hsecs{margin-top:6px}
 /* one heading style for every section and card title */
 body .anh .ct,body #htasks .ct,body .pg>.card>.ct,body .pg>.card>.fh>.ct,body .dash .card>.ct,body .card.pad>.ct,body .ntc .ct,body .card>.fh .ct,body .fh>.ct,body .card>.tblh .ct{font-size:13px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8E0008}
 body .pg .ct,body .pg .tblh>span:first-child{font-size:13px!important;font-weight:900!important;letter-spacing:.07em!important;text-transform:uppercase!important;color:#8E0008!important}
@@ -481,10 +481,13 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
 <div id="s11" class="pg hide">
+<div id="hcharts"></div>
 <div id="rpoutlook"></div>
 <div class="card pad rise"><div class="ct">Build a report</div>
 <p class="sub" style="margin:4px 0 8px">Choose what you want to know, how to break it down and for which period. Nothing is drawn until you press Show.</p>
 <div id="anpre" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+<button class="btn line sm" type="button" data-anpreset="one">One rehearsal</button>
+<button class="btn line sm" type="button" data-anpreset="onemonth">One month</button>
 <button class="btn line sm" type="button" data-anpreset="campus6">Last 6 rehearsals by campus</button>
 <button class="btn line sm" type="button" data-anpreset="month">This year by month</button>
 <button class="btn line sm" type="button" data-anpreset="combo">Campus and part, last 3 months</button>
@@ -494,21 +497,16 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <div style="flex:1 1 190px"><label for="anm" class="lb" style="margin-top:0">Show</label><select id="anm" class="in"><option value="rate">Attendance rate</option><option value="present">Number present</option><option value="absent">Number absent</option><option value="excused">Number excused</option><option value="streak">Who keeps missing</option></select></div>
 <div id="anbw" style="flex:1 1 190px"><label for="anb" class="lb" style="margin-top:0">Broken down by</label><select id="anb" class="in"><option value="rehearsal">Rehearsal</option><option value="month">Month</option><option value="year">Year</option><option value="campus">Campus</option><option value="part">Part</option><option value="campuspart">Campus and part</option></select></div>
 <div id="anmw" class="hide" style="flex:1 1 190px"><label for="anms" class="lb" style="margin-top:0">Missed at least</label><select id="anms" class="in"><option value="2">2 in a row</option><option value="3">3 in a row</option><option value="4">4 in a row</option><option value="5">5 in a row</option></select></div>
-<div style="flex:1 1 190px"><label for="anpd" class="lb" style="margin-top:0">Period</label><select id="anpd" class="in"><option value="last6">Last 6 rehearsals</option><option value="last12">Last 12 rehearsals</option><option value="thismonth">This month</option><option value="last3months">Last 3 months</option><option value="thisyear">This year</option><option value="all">All time</option><option value="custom">Choose dates</option></select></div></div>
+<div style="flex:1 1 190px"><label for="anpd" class="lb" style="margin-top:0">Period</label><select id="anpd" class="in"><option value="last6">Last 6 rehearsals</option><option value="last12">Last 12 rehearsals</option><option value="thismonth">This month</option><option value="last3months">Last 3 months</option><option value="thisyear">This year</option><option value="all">All time</option><option value="rehearsal">One rehearsal</option><option value="month">One month</option><option value="custom">Choose dates</option></select></div></div>
+<div id="anow" class="hide" style="display:none;gap:12px;flex-wrap:wrap;margin-top:8px"><div id="anridw" style="flex:1 1 220px"><label for="anrid" class="lb" style="margin-top:0">Which rehearsal</label><select id="anrid" class="in"></select></div><div id="anmonw" style="flex:1 1 220px"><label for="anmon" class="lb" style="margin-top:0">Which month</label><select id="anmon" class="in"></select></div></div>
 <div id="andw" class="hide" style="display:none;gap:12px;flex-wrap:wrap;margin-top:8px"><div style="flex:1 1 170px"><label for="anfd" class="lb" style="margin-top:0">From</label><input id="anfd" class="in" type="date"></div><div style="flex:1 1 170px"><label for="antd" class="lb" style="margin-top:0">To</label><input id="antd" class="in" type="date"></div></div>
 <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
-<div style="flex:1 1 190px"><label for="anc" class="lb" style="margin-top:0">Only this campus</label><select id="anc" class="in"></select></div>
+<div id="ancwrap" style="flex:1 1 190px"><label for="anc" class="lb" style="margin-top:0">Only this campus</label><select id="anc" class="in"></select></div>
 <div style="flex:1 1 190px"><label for="anp" class="lb" style="margin-top:0">Only this part</label><select id="anp" class="in"></select></div>
 <label id="ancw" style="flex:1 1 190px;display:flex;gap:8px;align-items:center;font-size:14px;min-height:44px"><input id="ancmp" type="checkbox"> Compare with the period before</label></div>
 <div class="actions"><button id="anrun" class="btn red" type="button">Show</button><button id="anx" class="btn line" type="button">Clear</button></div></div>
 <div id="anout"></div>
-<h3 style="margin:22px 0 6px;font-size:16px">Quick reports</h3><p class="sub" style="margin:0 0 8px">One rehearsal, one month or one campus at a time.</p>
-<div class="card pad rise"><div class="ct">Choose a report</div>
-<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
-<div style="flex:1 1 160px"><label for="rpscope" class="lb" style="margin-top:0">Report</label><select id="rpscope" class="in"><option value="rehearsal">Rehearsal (daily)</option><option value="month">Month</option><option value="campus">Campus</option></select></div>
-<div style="flex:2 1 220px"><label for="rpkey" class="lb" style="margin-top:0">Which one</label><select id="rpkey" class="in"></select></div>
-<div id="rpdl" class="hide"><button id="rpcsv" class="btn red" type="button">Download CSV</button></div><div><button id="rpx" class="btn line" type="button">Clear</button></div></div></div>
-<div id="rpout"></div>
+
 <p id="m11" class="s"></p>
 </div>
 
@@ -588,7 +586,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 
 <div id="s10" class="pg hide">
 <div id="hhero"></div>
-<button type="button" class="hsec fold" data-hfold="charts" id="hfc" hidden>Analytics</button><div id="hcharts"></div>
+<button type="button" class="hsec fold" data-hfold="charts" id="hfc" hidden>Last rehearsal</button><div id="hsum"></div>
 <button type="button" class="hsec fold" data-hfold="tasks" id="hft" hidden>Needs attention</button><div id="htasks"></div>
 <div id="hgrid" class="stats rise"></div>
 <button type="button" class="hsec fold" data-hfold="health" id="hfh" hidden>System health</button><div id="hhealth"></div>
@@ -1083,6 +1081,28 @@ function anHero(L, delta) {
     '<div class="anst">' + row('Present', L.present, NAVY) + row('Absent', L.absent, ATTN) + row('Excused', L.excused, SOFT) + '</div></div>' +
     '<p class="anhint">Absent means no approved reason. Excused means the absence was approved.</p>';
 }
+/** Home: the last rehearsal in a few words. The charts and the digging are on Reports. */
+function homeSummary(c, canOpen) {
+  if (!c) return '';
+  const open = canOpen ? '<div class="actions" style="margin-top:14px"><button class="btn line sm" type="button" data-go="s11">Open Reports</button></div>'
+    : '<p class="sub" style="margin:12px 0 0">Need the names behind these numbers? Ask for a report download in People and access.</p>';
+  if (!c.series || !c.series.length || !c.last) return '<div class="card pad rise"><p class="sub" style="margin:0">No official attendance yet. It appears here once a rehearsal has been processed and published.</p>' + open + '</div>';
+  const L = c.last, prev = c.series.length > 1 ? c.series[c.series.length - 2] : null, delta = prev ? Math.round((L.rate - prev.rate) * 10) / 10 : null;
+  const kp = (k, v, sub, col) => '<div class="kpi" style="--kc:' + col + '"><div class="kk">' + k + '</div><div class="kv">' + v + '</div><div class="ks">' + sub + '</div></div>';
+  const lines = [];
+  if (delta !== null) lines.push(anVs(L.rate, delta) + ' (' + esc(prev.id) + ').');
+  if (c.campusOnly) {
+    const ps = (c.parts || []).filter(p => p.eligible > 0).slice().sort((a, b) => a.rate - b.rate);
+    if (ps.length > 1) lines.push('Lowest part: <b>' + esc(ps[0].part) + '</b> (' + ps[0].rate + '%). Highest: <b>' + esc(ps[ps.length - 1].part) + '</b> (' + ps[ps.length - 1].rate + '%).');
+  } else {
+    const cs = (c.campuses || []).filter(x => x.active > 0).slice().sort((a, b) => a.rate - b.rate);
+    if (cs.length > 1) lines.push('Lowest campus: <b>' + esc(cs[0].campus) + '</b> (' + cs[0].rate + '%). Highest: <b>' + esc(cs[cs.length - 1].campus) + '</b> (' + cs[cs.length - 1].rate + '%).');
+  }
+  const when = esc(L.id) + (L.date ? ' · ' + esc(L.date) : '') + (c.campusOnly ? ' · ' + esc(c.campusOnly) + ' only' : ' · all campuses');
+  return '<div class="card pad rise"><p class="sub" style="margin:0 0 12px">' + when + '</p><div class="kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0">' +
+    kp('Attendance', L.rate + '%', 'were present', rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'absence approved', SOFT) + '</div>' +
+    (lines.length ? '<p class="sub" style="margin:14px 0 0;color:var(--fg)">' + lines.join(' ') + '</p>' : '') + open + '</div>';
+}
 function homeCharts(c, drill, canSee, canPick) {
   ANC = c;
   if (!c) return '';
@@ -1106,7 +1126,7 @@ function homeCharts(c, drill, canSee, canPick) {
   const idl = (L.id || '') + (L.date ? ' · ' + L.date : '') + (ANCAMP ? ' · ' + ANCAMP : '');
   const cpBody = ANCAMP ? kpis + '<div class="anbox" style="margin-top:22px"><div class="ct" style="margin-bottom:8px">' + esc(ANCAMP) + ' · by part</div>' + rankBars(parts, {unit: '%', drill: false}) + '</div>'
     : '<div class="anbox"><div class="ct" style="margin-bottom:8px">' + (c.campusOnly ? esc(c.campusOnly) + ' · by part · ' : 'By campus · ') + esc(L.id || 'last rehearsal') + '</div>' + rankBars(camps, {unit: '%', drill: c.campusOnly ? false : drill}) + '</div>';
-  return '<div class="card anl rise"><div class="anh"><div><div class="ct">Analytics</div><p class="sub">Official attendance' + (idl ? ' · ' + esc(idl) : '') + '</p></div>' + pick + '</div>' +
+  return '<div class="card anl rise"><div class="anh"><div><div class="ct">Latest rehearsal</div><p class="sub">Official attendance' + (idl ? ' · ' + esc(idl) : '') + '</p></div>' + pick + '</div>' +
     '<div class="fpchips antabs" style="margin-top:16px">' + TB.map(x => '<button type="button" class="fpchip' + (tab === x[0] ? ' on' : '') + '" data-antab="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
     '<div class="anp" data-p="ov"' + hid('ov') + '>' + anHero(L, delta) + '</div>' +
     '<div class="anp" data-p="tr"' + hid('tr') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">Last ' + c.series.length + ' rehearsals</div>' + colChart(c.series.map(p => ({name: p.id, value: p.rate})), {unit: '%', drill: drill, label: 'Attendance rate, last rehearsals'}) + '</div></div>' +
@@ -1114,7 +1134,16 @@ function homeCharts(c, drill, canSee, canPick) {
     (parts ? '<div class="anp" data-p="pt"' + hid('pt') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">By part · ' + esc((ANCAMP ? ANCAMP + ' · ' : '') + (L.id || '')) + '</div>' + rankBars(parts, {unit: '%', drill: false}) + '</div></div>' : '') + '</div>';
 }
 let rpState = null, rpPick = null;
-function drillTo(scope, key) { rpPick = {scope, key}; go('s11'); }
+function drillTo(scope, key) { if ($('s11').classList.contains('hide')) { rpPick = {scope, key}; go('s11'); } else anDrill({scope, key}); }
+/** From a bar in the latest rehearsal card to a built report: a campus over the last 6 rehearsals, or one rehearsal by campus. */
+function anDrill(pk) {
+  if (!pk) return;
+  $('anm').value = 'rate'; $('ancmp').checked = false; $('anp').value = '';
+  if (pk.scope === 'campus') { $('anb').value = 'rehearsal'; $('anpd').value = 'last6'; if (!(rpState && rpState.campusOnly)) $('anc').value = pk.key; }
+  else { $('anb').value = rpState && rpState.campusOnly ? 'part' : 'campus'; $('anpd').value = 'rehearsal'; $('anrid').value = pk.key; }
+  anShape(); showBuild();
+  try { $('anout').scrollIntoView({behavior: 'smooth', block: 'start'}); } catch (e) {}
+}
 
 // ---- Attendance records ----
 async function loadRecords() {
@@ -1903,17 +1932,13 @@ async function loadReports() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) return say('m11', j.error || 'Not available.', 'bad');
     loadOutlook();
-    rpState = j; $('rpdl').classList.toggle('hide', !j.canDownload); say('m11', j.empty || '');
-    if (rpPick) { $('rpscope').value = rpPick.scope; }
-    fillKeys(); if (rpPick) { $('rpkey').value = rpPick.key; rpPick = null; }
+    rpState = j; say('m11', j.empty || '');
+    ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
+    $('hcharts').innerHTML = j.latest ? homeCharts(j.latest, true, true, myTabs.indexOf('records') !== -1) : '';
+    wireHome(); if (myTabs.indexOf('records') !== -1) anLoad();
     anFill(); if (rpPreset) { const pr = rpPreset; rpPreset = ''; anApply(pr); }
-    showReport();
+    if (rpPick) { const pk = rpPick; rpPick = null; anDrill(pk); }
   } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
-}
-function fillKeys() {
-  const sc = $('rpscope').value, o = rpState || {rehearsals: [], months: [], campuses: []};
-  const list = sc === 'rehearsal' ? o.rehearsals.map(r => [r.id, r.id + (r.date ? ' · ' + r.date : '') + ' · ' + r.present + ' present']) : sc === 'month' ? o.months.map(m => [m, m]) : o.campuses.map(c => [c, c]);
-  $('rpkey').innerHTML = list.map(x => '<option value="' + esc(x[0]) + '">' + esc(x[1]) + '</option>').join('') || '<option value="">Nothing yet</option>';
 }
 function table(cols, rows, raw) {
   return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr>' + cols.map(c => '<th style="text-align:left;padding:8px 10px;font-size:12px;color:#5E6A7E;border-bottom:1px solid #E6E9EF">' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
@@ -1922,11 +1947,17 @@ function table(cols, rows, raw) {
 
 // ---- Build a report (Reports) ----
 let rpPreset = '', anLast = null;
-const AN_PRE = {campus6: {m: 'rate', b: 'campus', p: 'last6'}, month: {m: 'rate', b: 'month', p: 'thisyear'}, combo: {m: 'rate', b: 'campuspart', p: 'last3months'}, absentpart: {m: 'absent', b: 'part', p: 'thisyear'}, streak: {m: 'streak', b: 'rehearsal', p: 'last6'}};
+const AN_PRE = {one: {m: 'rate', b: 'campus', p: 'rehearsal'}, onemonth: {m: 'rate', b: 'rehearsal', p: 'month'}, campus6: {m: 'rate', b: 'campus', p: 'last6'}, month: {m: 'rate', b: 'month', p: 'thisyear'}, combo: {m: 'rate', b: 'campuspart', p: 'last3months'}, absentpart: {m: 'absent', b: 'part', p: 'thisyear'}, streak: {m: 'streak', b: 'rehearsal', p: 'last6'}};
 function anFill() {
   const o = rpState || {campuses: [], parts: []}, c = $('anc').value, p = $('anp').value;
   $('anc').innerHTML = (o.campusOnly ? '' : '<option value="">All campuses</option>') + (o.campuses || []).map(x => '<option>' + esc(x) + '</option>').join('');
   ['campus6', 'combo'].forEach(k => { const b = document.querySelector('[data-anpreset="' + k + '"]'); if (b) b.classList.toggle('hide', !!o.campusOnly); });
+  // A Campus Music Director's reports are already only their campus: no campus box, and no break-down by campus.
+  $('ancwrap').style.display = o.campusOnly ? 'none' : '';
+  Array.from($('anb').options).forEach(op => { if (op.value === 'campus' || op.value === 'campuspart') { op.hidden = !!o.campusOnly; op.disabled = !!o.campusOnly; } });
+  if (o.campusOnly && ($('anb').value === 'campus' || $('anb').value === 'campuspart')) $('anb').value = 'part';
+  $('anrid').innerHTML = (o.rehearsals || []).map(r => '<option value="' + esc(r.id) + '">' + esc(r.id + (r.date ? ' · ' + r.date : '')) + '</option>').join('') || '<option value="">None yet</option>';
+  $('anmon').innerHTML = (o.months || []).map(m => '<option>' + esc(m) + '</option>').join('') || '<option value="">None yet</option>';
   $('anp').innerHTML = '<option value="">All parts</option>' + (o.parts || []).map(x => '<option>' + esc(x) + '</option>').join('');
   if (c) $('anc').value = c; if (p) $('anp').value = p;
   anShape();
@@ -1935,12 +1966,14 @@ function anShape() {
   const st = $('anm').value === 'streak';
   $('anbw').classList.toggle('hide', st); $('anmw').classList.toggle('hide', !st); $('ancw').classList.toggle('hide', st);
   const cu = $('anpd').value === 'custom'; $('andw').classList.toggle('hide', !cu); $('andw').style.display = cu ? 'flex' : 'none';
+  const pr = $('anpd').value === 'rehearsal', pm = $('anpd').value === 'month', ow = $('anow');
+  ow.classList.toggle('hide', !pr && !pm); ow.style.display = pr || pm ? 'flex' : 'none'; $('anridw').style.display = pr ? '' : 'none'; $('anmonw').style.display = pm ? '' : 'none';
 }
 function anClear() {
   $('anm').value = 'rate'; $('anb').value = 'rehearsal'; $('anpd').value = 'last6'; $('anc').value = ''; $('anp').value = ''; $('ancmp').checked = false; $('anms').value = '2'; $('anfd').value = ''; $('antd').value = '';
   $('anout').innerHTML = ''; anLast = null; anShape(); say('m11', '');
 }
-function anParams() { return {measure: $('anm').value, by: $('anb').value, period: $('anpd').value, from: $('anfd').value, to: $('antd').value, campus: $('anc').value, part: $('anp').value, compare: $('ancmp').checked, minStreak: Number($('anms').value)}; }
+function anParams() { return {measure: $('anm').value, by: $('anb').value, period: $('anpd').value, from: $('anfd').value, to: $('antd').value, rid: $('anrid').value, month: $('anmon').value, campus: $('anc').value, part: $('anp').value, compare: $('ancmp').checked, minStreak: Number($('anms').value)}; }
 async function showBuild() {
   say('m11', 'Working it out…');
   try {
@@ -1978,7 +2011,7 @@ function drawBuild(j) {
 }
 function anApply(name) {
   const x = AN_PRE[name]; if (!x) return;
-  $('anm').value = x.m; $('anb').value = x.b; $('anpd').value = x.p; $('anc').value = ''; $('anp').value = ''; $('ancmp').checked = false; $('anms').value = name === 'streak' ? '3' : '2'; anShape(); showBuild();
+  $('anm').value = x.m; $('anb').value = (rpState && rpState.campusOnly && x.b === 'campus') ? 'part' : x.b; $('anpd').value = x.p; $('anc').value = ''; $('anp').value = ''; $('ancmp').checked = false; $('anms').value = name === 'streak' ? '3' : '2'; anShape(); showBuild();
 }
 ['anm', 'anpd'].forEach(i => $(i).addEventListener('change', anShape));
 $('anrun').onclick = showBuild; $('anx').onclick = anClear;
@@ -1997,56 +2030,10 @@ document.addEventListener('click', async ev => {
     } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
   }
 });
-async function showReport() {
-  const key = $('rpkey').value; if (!key) { $('rpout').innerHTML = '<div class="card pad"><p class="sub">There is nothing to report yet.</p></div>'; return; }
-  say('m11', 'Loading…');
-  try {
-    const j = await call({action: 'reports.summary', token, scope: $('rpscope').value, key});
-    if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('rpout').innerHTML = ''; return say('m11', j.error || 'Not available.', 'bad'); }
-    const s = j.summary, sc = $('rpscope').value;
-    const T = {}; s.tiles.forEach(t => { T[t[0]] = t[1]; });
-    const pc = v => parseFloat(String(v)) || 0, kp = (k, v, sub, col) => '<div class="c3 card kpi" style="--kc:' + col + '"><div class="kk">' + esc(k) + '</div><div class="kv">' + esc(v) + '</div>' + (sub ? '<div class="ks">' + esc(sub) + '</div>' : '') + '</div>';
-    let tiles = '', body = '';
-    if (sc === 'rehearsal') {
-      const rate = pc(T['Rate']), present = Number(T['Present']) || 0, absent = Number(T['Absent']) || 0, exc = Number(T['Excused']) || 0;
-      tiles = kp('Attendance rate', T['Rate'], 'of ' + T['Eligible members'] + ' eligible members', rateColor(rate)) + kp('Present', present, '', NAVY) + kp('Absent', absent, 'no approved reason', ATTN) + kp('Excused', exc, 'approved absences', SOFT);
-      const camps = s.rows.map(r => ({name: r[0], value: Number(r[3]) || 0, a: r[2], b: r[1]})).sort((a, b) => b.value - a.value);
-      const parts = s.rows2 || [], pmax = Math.max(1, ...parts.map(p => Number(p[1]) || 0));
-      body = '<div class="c5 card pad"><div class="ct">Who was there</div><div style="display:flex;justify-content:center">' + statusDonut({present: present, absent: absent, excused: exc}) + '</div></div>' +
-        '<div class="c7 card pad"><div class="ct">By campus</div>' + rankBars(camps, {unit: '%', drill: true}) + '</div>' +
-        (parts.length ? '<div class="c12 card pad"><div class="ct">Present by part</div>' + rankBars(parts.map(p => ({name: p[0], value: Number(p[1]) || 0})), {unit: ' '}) + '</div>' : '');
-    } else {
-      const rate = pc(T['Average rate']);
-      tiles = s.tiles.map((t, i) => kp(t[0], t[1], '', i === s.tiles.length - 1 ? rateColor(rate) : NAVY)).join('');
-      const ri = s.columns.indexOf('Rate %');
-      body = '<div class="c12 card pad"><div class="ct">Attendance rate by rehearsal</div>' + colChart(s.rows.map(r => ({name: r[0], value: Number(r[ri]) || 0})), {unit: '%', single: true, drill: true, label: s.title}) + '</div>';
-    }
-    const fig = '<details class="c12 card pad" style="cursor:default"><summary style="cursor:pointer;font-weight:800;font-size:15px">Figures behind the charts</summary><div style="margin-top:10px">' + table(s.columns, s.rows) + (s.rows2 ? '<div style="margin-top:14px"></div>' + table(s.columns2, s.rows2) : '') + '</div></details>';
-    $('rpout').innerHTML = '<div class="card pad rise" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px"><div class="ct" style="margin:0">' + esc(s.title) + '</div><button class="btn line sm" type="button" data-rpclear="1">Clear this result</button></div>' +
-      '<div class="dash rise"><div class="c12 card pad"><div class="ct">Key figures</div><div class="dash" style="margin-top:6px">' + tiles + '</div></div>' + body + fig + '</div><p class="sub" style="margin:8px 4px 0">' + esc(s.note) + '</p>';
-    document.querySelectorAll('#rpout .drill').forEach(e => { const f = () => { const to = e.dataset.sc; $('rpscope').value = to; fillKeys(); $('rpkey').value = e.dataset.key; showReport(); }; e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
-    say('m11', '');
-  } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
-}
-$('rpscope').onchange = () => { fillKeys(); showReport(); };
-$('rpkey').onchange = showReport;
-function rpClear() { $('rpout').innerHTML = ''; say('m11', ''); }
-$('rpx').onclick = rpClear;
-document.addEventListener('click', ev => { if (ev.target.closest && ev.target.closest('[data-rpclear]')) rpClear(); });
-$('rpcsv').onclick = async () => {
-  say('m11', 'Preparing…');
-  try {
-    const j = await call({action: 'reports.csv', token, scope: $('rpscope').value, key: $('rpkey').value});
-    if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) return say('m11', j.error || 'Not allowed.', 'bad');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([j.csv], {type: 'text/csv'})); a.download = j.filename; document.body.appendChild(a); a.click(); a.remove();
-    say('m11', 'Downloaded. This download is recorded in the audit log.', 'ok');
-  } catch (e) { say('m11', 'Network problem. Try again.', 'bad'); }
-};
+document.addEventListener('click', ev => { if (ev.target.closest && ev.target.closest('[data-rpclear]')) { $('anout').innerHTML = ''; say('m11', ''); } });
 
 
-const HFBOX = {work: 'hquick', glance: 'hgrid', charts: 'hcharts', tasks: 'htasks', qr: 'hqr', health: 'hhealth', notes: 'hnotes', away: 'hway'};
+const HFBOX = {work: 'hquick', glance: 'hgrid', charts: 'hsum', tasks: 'htasks', qr: 'hqr', health: 'hhealth', notes: 'hnotes', away: 'hway'};
 function homeFoldInit() {
   [['charts', 'hfc'], ['tasks', 'hft'], ['qr', 'hfq'], ['health', 'hfh'], ['notes', 'hfn'], ['away', 'hfw']].forEach(x => {
     const box = $(HFBOX[x[0]]), b = $(x[1]); if (!box || !b) return;
@@ -2135,9 +2122,7 @@ async function loadHome() {
     const dlh = lst(dln.slice(0, 8).map(x => mkTile({tone: 'ask', icon: '\u2193', title: x.name + ' downloaded ' + x.what, pill: 'Download', pillCls: 'p-val',
       body: '<div class="s" style="font-size:13px">' + esc(tm(x.atMs)) + '</div>', actions: gotBtn(x.key)}))) + gotAll(dln.slice(0, 8));
     drawHealth(j.health);
-    ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
-    $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'), has('records'));
-    if (has('records')) anLoad();
+    $('hsum').innerHTML = homeSummary(t.charts, has('reports'));
     loadHomeAway();
     drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['mq', 'Member requests', mqh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch], ['dl', 'Downloads', dlh]]);
     hfoldApply();
