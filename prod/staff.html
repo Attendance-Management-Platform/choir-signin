@@ -1724,9 +1724,9 @@ function pDetail(r) {
   return bits.filter(Boolean).join(' · ');
 }
 function pCard(r, extra) {
-  const t = /approv|valid|accept|done|carried/i.test(r.status) ? ['ok', '✓', 'p-ok'] : /reject|declin|cancel/i.test(r.status) ? ['no', '✕', 'p-no'] : /withdr/i.test(r.status) ? ['ask', '↩', 'p-info'] : ['warn', '!', 'p-pend'];
+  const t = /approv|valid|accept|done|carried/i.test(r.status) ? ['ok', '✓', 'p-ok'] : /reject|declin|cancel/i.test(r.status) ? ['no', '✕', 'p-no'] : /withdr/i.test(r.status) ? ['ask', '↩', 'p-val'] : ['warn', '!', 'p-pend'];
   return tile({tone: t[0], icon: t[1], title: r.id + ' · ' + r.kindName, pill: r.status, pillCls: t[2],
-    body: '<p class="sub" style="margin:0">' + esc(pDetail(r)) + '</p><p class="sub" style="margin:6px 0 0">Asked by ' + esc(r.askedBy) + ' (' + esc(r.askedByRole) + ') · ' + esc(pWhen(r.raisedAt)) + '</p><p class="sub" style="margin:6px 0 0">Reason: ' + esc(r.reason) + '</p>' + (extra || '')});
+    body: '<p class="sub" style="margin:0">' + esc(pDetail(r)) + '</p><p class="sub" style="margin:6px 0 0">Asked by ' + esc(r.askedBy) + ' (' + esc(r.askedByRole) + ') · ' + esc(pWhen(r.raisedAt)) + '</p><p class="sub" style="margin:6px 0 0">Reason: ' + esc(r.reason) + '</p>' + ((r.details && r.details.validatedBy && /^Pending$/i.test(r.status)) ? '<p class="sub" style="margin:6px 0 0"><b>Validated</b> by ' + esc(r.details.validatedBy) + '. Now waiting for the Global Music Director to approve.</p>' : '') + (extra || '')});
 }
 async function loadPeople(keepMsg) {
   loadNoPart();
@@ -1742,7 +1742,7 @@ async function loadPeople(keepMsg) {
     if (cur && j.kinds.some(k => k.kind === cur)) $('pkind').value = cur;
     if (!$('pform').innerHTML) drawPForm();
     fpPanel('wait', 'pwait', {title: 'Waiting for your answer', items: j.waiting, fields: pFields, empty: 'Nothing is waiting for you.', card: r => pCard(r,
-      (r.standIn ? '<p class="sub" style="margin:4px 0 0"><b>You are the stand-in for this one request</b> (the ' + esc(r.standInFor || 'usual approver') + ' is away or has not answered in 48 hours). Your answer is recorded as a stand-in answer.</p>' : '') + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center"><button class="btn red sm" type="button" data-yes="' + esc(r.id) + '">Yes</button>' +
+      (r.stage === 'validate' ? '<p class="sub" style="margin:4px 0 0">The Assistant Global Admin asked. Validate it, and it then goes to the Global Music Director to approve. Say no here to stop it.</p>' : '') + (r.standIn ? '<p class="sub" style="margin:4px 0 0"><b>You are the stand-in for this one request</b> (the ' + esc(r.standInFor || 'usual approver') + ' is away or has not answered in 48 hours). Your answer is recorded as a stand-in answer.</p>' : '') + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center"><button class="btn red sm" type="button" data-yes="' + esc(r.id) + '">' + (r.stage === 'validate' ? 'Validate' : 'Yes') + '</button>' +
       '<input class="in" style="flex:1 1 200px;max-width:340px" placeholder="Reason, if you say no" data-why="' + esc(r.id) + '"><button class="btn warn sm" type="button" data-no="' + esc(r.id) + '">Say no</button></div>')});
     fpPanel('ready', 'pready', {title: 'Approved and ready to carry out', sub: 'Carrying out changes the real list. It is checked first and recorded.', items: j.ready, fields: pFields, empty: 'Nothing is ready to carry out.', card: r => pCard(r, '<p class="sub" style="margin:4px 0 0">You carry this out as: ' + esc(r.as || '') + '</p><div style="margin-top:12px">' + (r.download ? '<button class="btn red sm" type="button" data-dl="' + esc(r.id) + '">Download (once)</button>' : '<button class="btn red sm" type="button" data-carry="' + esc(r.id) + '">Carry out</button>') + '</div>')});
     if (!j.ready.length) $('pready').innerHTML = '';
@@ -2356,7 +2356,7 @@ async function loadAbsence() {
     $('rfor').classList.toggle('hide', !j.canSubmitFor); if (j.canSubmitFor) loadAbsAdmin();
     say('m6', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
     $('rmine').innerHTML = j.mine.length ? '<div class="ct">Your requests</div><div class="tgrid">' + j.mine.map(r => {
-      const t = /approv|valid|accept/i.test(r.status) ? ['ok', '✓', 'p-ok'] : /reject|declin|cancel/i.test(r.status) ? ['no', '✕', 'p-no'] : /withdr/i.test(r.status) ? ['ask', '↩', 'p-info'] : ['warn', '!', 'p-pend'];
+      const t = /approv|valid|accept/i.test(r.status) ? ['ok', '✓', 'p-ok'] : /reject|declin|cancel/i.test(r.status) ? ['no', '✕', 'p-no'] : /withdr/i.test(r.status) ? ['ask', '↩', 'p-val'] : ['warn', '!', 'p-pend'];
       return tile({tone: t[0], icon: t[1], title: new Date(r.rehearsalStartMs).toLocaleString() + (r.late ? ' · late' : ''), pill: r.status, pillCls: t[2],
         body: '<span class="s">' + esc(r.reason) + (r.note ? ' · Note: ' + esc(r.note) : '') + '</span>',
         actions: (r.canWithdraw ? '<button data-w="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Withdraw</button>' : '') + (r.canAppeal ? '<button data-ap="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Appeal</button>' : '') + (r.canAck ? '<button data-seen="' + esc(r.requestId) + '" style="width:auto;padding:.4rem .8rem;background:none;color:var(--acc);border:1px solid var(--acc)">Got it</button>' : '')});
