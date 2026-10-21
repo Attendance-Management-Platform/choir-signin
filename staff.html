@@ -2986,7 +2986,7 @@ async function loadMembers() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) {
       // Desk A and the System Administrator open this menu only for the requests to correct details; the member list and adding are for the admins.
-      $('mbbox').innerHTML = ''; $('mbtidy').innerHTML = ''; $('mbaddcard').classList.add('hide'); MBLIST = false; { const d = document.querySelector('#ph .d'); if (d) d.textContent = 'Members ask here when something in their own details is wrong. Open a request, correct it, then mark it done.'; } loadDetailReqs(); loadMbUpdates(); loadMbReq();
+      $('mbbox').innerHTML = ''; $('mbtidy').innerHTML = ''; $('mbaddcard').classList.add('hide'); MBLIST = false; { const d = document.querySelector('#ph .d'); if (d) d.textContent = 'Ask for a member to be added, deactivated or reactivated, and correct a member\'s details when they ask. Every change has a reason and is recorded.'; } loadDetailReqs(); loadMbUpdates(); loadMbReq();
       return say('m17', /do not have this page/i.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad');
     }
     $('mbaddcard').classList.remove('hide'); MBLIST = true; $('mbupd').innerHTML = '';
