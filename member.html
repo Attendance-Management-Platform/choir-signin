@@ -655,7 +655,7 @@ $('dsend').onclick = async () => {
   $('dsend').disabled = false;
 };
 gisInit();
-if (token) { call({action: 'me.home', token}).then(j => { if (j && j.ok) { home = j; enter(j.name); } else signedOutNow(); }).catch(() => signedOutNow()); }
+if (token) { const first = (n) => call({action: 'me.home', token}).then(j => { if (j && j.ok) { home = j; enter(j.name); } else if (j && j.signedOut) signedOutNow(); else if (n < 2) setTimeout(() => first(n + 1), 2500); else signedOutNow(); }).catch(() => { if (n < 2) setTimeout(() => first(n + 1), 2500); else signedOutNow(); }); first(0); }
 
 (function () {
   var KEY = 'rbcMFold', st = {};

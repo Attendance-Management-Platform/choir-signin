@@ -2846,7 +2846,7 @@ async function start() {
   } catch (e) { if (me !== runId) return; say('m3', 'At ' + stamp() + ': network problem (' + (e && e.message ? e.message : 'unknown') + '). Trying again in 10 seconds.', 'bad'); timer = setTimeout(start, 10000); }
 }
 pgClearInstall();
-if (token) call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTabs(); land(); welcome(); } else signedOutNow(); }).catch(() => signedOutNow());
+if (token) { const first = n => call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTabs(); land(); welcome(); } else if (j.signedOut || n >= 2) signedOutNow(); else setTimeout(() => first(n + 1), 2500); }).catch(() => { if (n < 2) setTimeout(() => first(n + 1), 2500); else signedOutNow(); }); first(0); }
 </script><script>
 (function () {
   var NOFOLD = ['Mark a member by hand', 'Request an absence'];
