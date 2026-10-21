@@ -460,6 +460,7 @@ async function loadReqs() {
     else if (rh.open) { box.className = 'good'; box.textContent = 'You are in time. Requests close ' + dtm(rh.closeMs) + '.'; }
     else { box.className = 'note'; box.textContent = 'Requests for this rehearsal are closed. Please contact the Global Admin or Assistant Global Admin.'; }
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
+    if (j.awayHint && rh && rh.open && !live && !$('rreason').value) { $('rreason').value = j.awayHint.reason; box.textContent += ' You are on an away notice, so your reason is filled in. Press the button to ask to be excused.'; }
     say('m3', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
     const reqCard = r => tile({tone: (r.status === 'Withdrawn' && r.note && /^Cancelled by/.test(r.note)) ? 'no' : ({Approved: 'ok', Rejected: 'no', Pending: 'warn', Appeal: 'ask', Withdrawn: 'gr'}[r.status] || 'warn'), icon: ({Approved: '\u2713', Rejected: '\u2715', Pending: '\u2026', Appeal: '!', Withdrawn: '\u2013'}[r.status] || '\u2026'), title: esc(dshort(r.rehearsalStartMs)) + ' rehearsal', pill: pill(r.status, r), sub: esc(subOf(r)) + (r.late ? ' \u00b7 late' : ''), body:
       (r.reason ? '<div class="s">' + esc(r.reason) + (r.note ? ' \u00b7 Note: ' + esc(r.note) : '') + '</div>' : '') +
