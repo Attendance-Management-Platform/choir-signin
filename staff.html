@@ -1832,7 +1832,7 @@ document.addEventListener('click', async ev => {
 
 function awayCardHtml(j, p) {
   const duties = j.duties || [];
-  const recv = x => x.kind === 'senior' ? 'passes on by the usual order' : x.kind === 'desk' ? 'the Assistant Global Admin arranges a cover (the Global Admin if the Assistant is away)' : 'the Assistant Global Admin arranges a stand-in (the Global Admin if the Assistant is away)';
+  const recv = x => x.kind === 'admin' ? 'approved changes wait for you to carry them out when you are back' : x.kind === 'senior' ? 'passes on by the usual order' : x.kind === 'desk' ? 'the Assistant Global Admin arranges a cover (the Global Admin if the Assistant is away)' : 'the Assistant Global Admin arranges a stand-in (the Global Admin if the Assistant is away)';
   const list = duties.length ? '<ul class="sub" style="margin:8px 0 0;padding-left:18px">' + duties.map(x => '<li><b>' + esc(x.duty) + '</b>: ' + esc(recv(x)) + '.</li>').join('') + '</ul>' : '';
   const PILL = {Pending: ['Waiting', 'p-pend', 'warn', '…'], Approved: ['Approved', 'p-ok', 'ok', '✓'], Declined: ['Not approved', 'p-no', 'no', '✕'], Withdrawn: ['Withdrawn', 'p-val', 'gr', '↩']};
   const when = n => esc(n.start) + (n.end !== n.start ? ' to ' + esc(n.end) : '');
