@@ -1483,6 +1483,7 @@ document.addEventListener('click', async ev => {
 // ---- Calendar ----
 let calMonth = '';
 const CALSTAT = {Planned: 'p-pend', Open: 'p-ok', Held: 'p-val', Cancelled: 'p-no'};
+function rbDeskB() { return myRoles.indexOf('Global Admin') === -1 && myRoles.indexOf('Assistant Global Admin') === -1; }
 async function loadCalendar(m) {
   say('m14', 'Loading…');
   try {
@@ -1514,12 +1515,12 @@ async function loadCalendar(m) {
         const acts = [];
         if (!isPast && !rehs.length && has('rehearsal')) acts.push('<button class="btn red sm" type="button" data-calmake="' + esc(day) + '">Set up a rehearsal on this day</button>');
         if (live.length && has('rehearsal')) acts.push('<button class="btn line sm" type="button" data-calgo="s8">Open ' + esc(live[0].id) + ' to edit it</button>');
-        if (!isPast && live.length && has('absence')) acts.push('<button class="btn line sm" type="button" data-calgo="s6">Ask to be absent for ' + esc(live[0].id) + '</button>');
-        if (!isPast && has('people') && ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge'].some(r => myRoles.indexOf(r) !== -1)) acts.push('<button class="btn line sm" type="button" data-calaway="' + esc(day) + '">Put in an away notice from this day</button>');
+        if (!isPast && live.length && has('absence') && !myStaffOnly) acts.push('<button class="btn line sm" type="button" data-calgo="s6">Ask to be absent for ' + esc(live[0].id) + '</button>');
+        if (!isPast && has('absence')) acts.push('<button class="btn line sm" type="button" data-calaway="' + esc(day) + '">Ask for time away from this day</button>');
         $('calday').innerHTML = '<div class="ct" style="margin-top:14px">' + esc(day) + '</div>' + (es.length ? es.map(e => e.type === 'rehearsal'
           ? '<p class="sub" style="margin:6px 0 0"><b>' + esc(e.id) + '</b> · ' + esc(e.status) + (e.startMs ? ' · ' + esc(lt(e.startMs)) : '') + (e.venue ? ' · ' + esc(e.venue) : '') + (e.description ? ' · ' + esc(e.description) : '') + '</p>'
           : '<p class="sub" style="margin:6px 0 0">' + esc(e.label) + '</p>').join('') : '<p class="sub">' + (isPast ? 'Nothing was on this day.' : 'Nothing is planned on this day.') + '</p>') +
-          (acts.length ? '<div class="calact">' + acts.join('') + '</div>' : '') + (isPast ? '' : '<p class="sub" style="margin:8px 0 0">Setting up a rehearsal in place of Desk B needs a reason, and Desk B is told.</p>');
+          (acts.length ? '<div class="calact">' + acts.join('') + '</div>' : '') + (isPast || !has('rehearsal') || rbDeskB() ? '' : '<p class="sub" style="margin:8px 0 0">Setting up a rehearsal in place of Desk B needs a reason, and Desk B is told.</p>');
       };
     });
   } catch (e) { say('m14', 'Network problem. Try again.', 'bad'); }

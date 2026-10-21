@@ -199,6 +199,7 @@ input.in{height:48px;padding:0 14px}
    <button id="t1" class="nv on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Home</button>
    <button id="t2" class="nv"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"/></svg>Requests</button>
    <button id="t3" class="nv"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Attendance</button>
+   <button id="t5" class="nv"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Calendar</button>
    <button id="t4" class="nv"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profile</button>
   </nav>
   <div class="sbfoot"><b style="color:var(--ink)">Need help?</b><br>No phone, camera or location? Tell your Campus Music Director or Desk D and they will mark you by hand.</div>
@@ -246,6 +247,11 @@ input.in{height:48px;padding:0 14px}
     <div class="s" style="margin-top:12px">Only you can see this page.</div>
    </div>
 
+   <div id="v5" class="hide">
+    <div class="card rise col"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><button class="btn btn-line" type="button" id="calprev" style="margin:0;width:auto;padding:0 14px">&#8249;</button><div class="cth" id="calm" style="margin:0"></div><button class="btn btn-line" type="button" id="calnext" style="margin:0;width:auto;padding:0 14px">&#8250;</button></div>
+     <div class="s" style="font-size:14px;margin-top:6px">Every rehearsal in the month: planned, held or cancelled.</div>
+     <div id="callist" style="margin-top:12px"></div><p id="m5" class="s"></p></div>
+   </div>
    <div id="v4" class="hide">
     <div class="grid">
      <div class="card rise" id="prof" style="font-size:15px"></div>
@@ -306,13 +312,38 @@ function signedOutNow(msg) {
   token = ''; try { sessionStorage.removeItem('rbcMTok'); sessionStorage.removeItem('rbcTok'); } catch (e) {}
   $('inv').classList.add('hide'); $('outv').classList.remove('hide'); say('m1', msg || '', msg ? 'bad' : '');
 }
-const TITLES = ['', 'Home', 'My requests', 'My attendance', 'My profile'];
+const TITLES = ['', 'Home', 'My requests', 'My attendance', 'My profile', 'Rehearsal calendar'];
 function tab(n) {
-  [1, 2, 3, 4].forEach(i => { $('v' + i).classList.toggle('hide', n !== i); $('t' + i).classList.toggle('on', n === i); });
+  [1, 2, 3, 4, 5].forEach(i => { $('v' + i).classList.toggle('hide', n !== i); $('t' + i).classList.toggle('on', n === i); });
   $('ptitle').textContent = TITLES[n]; window.scrollTo(0, 0);
-  if (n === 1) loadHome(); else if (n === 2) loadReqs(); else if (n === 3) loadAtt(); else { drawProfile(); loadDetails(); }
+  if (n === 1) loadHome(); else if (n === 2) loadReqs(); else if (n === 3) loadAtt(); else if (n === 5) loadCal(); else { drawProfile(); loadDetails(); }
 }
-[1, 2, 3, 4].forEach(i => $('t' + i).onclick = () => tab(i));
+[1, 2, 3, 4, 5].forEach(i => $('t' + i).onclick = () => tab(i));
+// ---- rehearsal calendar (rehearsals only; nothing about staff) ----
+let calM = '';
+const calShift = (m, k) => { const y = Number(m.slice(0, 4)), mo = Number(m.slice(5, 7)) - 1 + k; const d = new Date(Date.UTC(y, mo, 1)); return d.toISOString().slice(0, 7); };
+async function loadCal(m) {
+  say('m5', 'Loading…');
+  try {
+    const [j, a] = await Promise.all([call({action: 'calendar.state', token, month: m || calM || ''}), abs ? Promise.resolve(abs) : call({action: 'absence.state', token})]);
+    if (j.signedOut) return signedOutNow('Please sign in again.');
+    if (!j.ok) return say('m5', j.error || 'Not available.', 'bad');
+    calM = j.month; say('m5', '');
+    $('calm').textContent = new Date(Date.UTC(Number(j.month.slice(0, 4)), Number(j.month.slice(5, 7)) - 1, 1)).toLocaleDateString('en-GB', {month: 'long', year: 'numeric', timeZone: 'UTC'});
+    const open = a && a.ok && a.rehearsal && a.rehearsal.open && !a.live ? a.rehearsal.id : '';
+    const list = Object.keys(j.entries || {}).sort().reduce((o, day) => o.concat((j.entries[day] || []).filter(e => e.type === 'rehearsal').map(e => Object.assign({day: day}, e))), []);
+    const K = {Planned: ['ask', '\u2026', 'Planned', 'p-val'], Open: ['ok', '\u2713', 'Check-in open', 'p-ok'], Held: ['gr', '\u2713', 'Held', 'p-val'], Cancelled: ['no', '\u2715', 'Cancelled', 'p-no']};
+    $('callist').innerHTML = list.length ? '<div class="fplist">' + list.map(e => { const k = K[e.status] || K.Planned;
+      const when = new Date(e.day + 'T12:00:00Z').toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC'}) + (e.startMs ? ', ' + tm(e.startMs) : '');
+      const body = (e.venue ? '<div>' + esc(e.venue) + '</div>' : '') + (e.description ? '<div>' + esc(e.description) + '</div>' : '') +
+        (open && e.id === open ? '<button class="btn btn-line" style="margin:10px 0 0;width:auto" type="button" data-calask="1">Ask to be excused</button>' : '');
+      return tile({tone: k[0], icon: k[1], title: esc(e.id + ' \u00b7 ' + when), pill: '<span class="pill ' + k[3] + '">' + esc(k[2]) + '</span>', body: body || ''}); }).join('') + '</div>'
+      : '<div class="s" style="font-size:14px">No rehearsals in this month.</div>';
+  } catch (e) { say('m5', 'Network problem. Try again.', 'bad'); }
+}
+$('calprev').onclick = () => loadCal(calShift(calM, -1));
+$('calnext').onclick = () => loadCal(calShift(calM, 1));
+document.addEventListener('click', ev => { if (ev.target.closest && ev.target.closest('[data-calask]')) tab(2); });
 $('req').onclick = () => tab(2); $('seeall').onclick = e => { e.preventDefault(); tab(2); }; $('attlink').onclick = e => { e.preventDefault(); tab(3); };
 $('out').onclick = $('out2').onclick = () => { const t = token; signedOutNow(); call({action: 'signout', token: t}).catch(() => {}); };
 const pill = (s, r) => s === 'Withdrawn' && r && /^Cancelled by/.test(r.note || '') ? '<span class="pill p-no">Cancelled</span>' : '<span class="pill ' + ({Approved: 'p-ok', Rejected: 'p-no', Pending: 'p-pend', Appeal: 'p-app', Withdrawn: 'p-pend'}[s] || 'p-pend') + '">' + esc(s) + '</span>';
