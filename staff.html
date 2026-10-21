@@ -1225,7 +1225,7 @@ document.addEventListener('click', async ev => {
       body: '<div class="s" style="font-size:13px">Tab: ' + esc(x.sheet) + '</div>' + x.problems.map(p => '<div style="margin-top:6px;color:#AE2D37">' + esc(p) + '</div>').join('') + x.notes.map(p => '<div class="s" style="font-size:13px;margin-top:6px">' + esc(p) + '</div>').join('')}));
     const orph = (j.orphans || []).map(n => mkTile({tone: 'warn', icon: '!', title: n, pill: 'Not used', pillCls: 'p-pend', body: 'No row in the REHEARSALS tab uses this tab yet. Add a row (Rehearsal ID, Date, Status and this tab name under Attendance Sheet) so the day appears on Process.'}));
     const all = orph.concat(tiles);
-    $('prfcres').innerHTML = all.length ? '<div class="fplist" style="margin-top:12px">' + all.join('') + '</div>' : '<p class="sub" style="margin:10px 0 0">No Google Form days are set up in the REHEARSALS tab.</p>';
+    $('prfcres').innerHTML = all.length ? '<div class="fplist" style="margin-top:12px">' + all.join('') + '</div>' : '<p class="sub" style="margin:10px 0 0">Nothing needs checking. Every Google Form day is already processed and published, or none is set up yet.</p>';
   } catch (e) { $('prfcres').innerHTML = '<p class="sub">Network problem. Try again.</p>'; }
   b.disabled = false;
 });
