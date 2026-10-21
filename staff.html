@@ -1241,7 +1241,8 @@ async function prOpen(id, done) {
     const list = '<div id="prtablecard" class="card rise tblc" style="margin-top:16px"><div class="tblh"><span>Everyone on the list</span><span class="s" id="prtcount"></span></div>' +
       prBar('pt', 'Search a name or ID', rows.map(r => r.campus), rows.map(r => r.part), '<select id="pttst" class="in" style="flex:1 1 110px;max-width:150px"><option value="">Any status</option><option value="Present">Present</option><option value="Absent">Absent</option><option value="Excused">Excused</option></select>') + prTable(rows, done && j.canCorrect) + '</div>';
     window.prCtx = {rows: rows, review: j.review || []};
-    $('prdetail').innerHTML = earlyNote + head + names + list;
+    const todo = done && !j.published && j.canCorrect ? '<div class="note" style="margin-top:16px"><b>Before this day is published</b><br>' + ((j.review || []).length ? 'Answer the ' + j.review.length + ' form name' + (j.review.length === 1 ? '' : 's') + ' below. The day cannot be published until they are answered.<br>' : 'No form names are waiting.<br>') + 'Someone was there but is not on the form, or was counted by mistake? Find them in the list below and press <b>Correct</b>. Excuses go through Enter an absence for a member. Members are fixed on the Members page.</div>' : '';
+    $('prdetail').innerHTML = earlyNote + head + todo + names + list;
     $('prdetail').dataset.id = j.id;
     prWire('pt', '#prtablecard tbody tr', (tr, f) => (!f.s || tr.dataset.st === f.s), n => { $('prtcount').textContent = '· ' + n + ' of ' + rows.length; });
     if ($('pnq')) prWire('pn', '.prnm', () => true, n => { $('pncount').textContent = n === j.review.length ? '' : 'Showing ' + n + ' of ' + j.review.length + '.'; });
