@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Google Form day checklist</title>
+<style>
+:root{--ink:#14233D;--mut:#5B6678;--red:#B6000A;--line:#E3E7EE;--bg:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E8ECF4;--mut:#A5AEBF;--line:#2B3547;--bg:#121826}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:22px;margin:0 0 4px;color:var(--red)}p.sub{margin:0 0 18px;color:var(--mut)}
+h2{font-size:15px;letter-spacing:.06em;text-transform:uppercase;margin:24px 0 8px;color:var(--mut)}
+ol{list-style:none;margin:0;padding:0}li{display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+li:before{content:"";flex:0 0 18px;height:18px;margin-top:3px;border:2px solid var(--ink);border-radius:4px}
+li b{display:block}code{background:rgba(120,130,150,.15);padding:1px 5px;border-radius:4px}
+button{font:inherit;padding:8px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.note{margin-top:20px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;color:var(--mut);font-size:14px}
+@media print{button{display:none}body{font-size:13px}main{padding:0}}
+</style></head><body><main>
+<h1>Google Form day checklist</h1>
+<p class="sub">CCW Lagos Region RBC Choir. Use this when a rehearsal is taken on a Google Form instead of the QR code. Tick each box as you go.</p>
+<button type="button" onclick="window.print()">Print this page</button>
+<h2>Before the rehearsal</h2>
+<ol>
+<li><span><b>Copy the last form that worked.</b>Do not add, remove or rename a question. The responses sheet must have exactly the same 10 columns and headings as before.</span></li>
+<li><span><b>Link the form to the workbook.</b>In the form, open Responses, choose Link to Sheets, then Select existing spreadsheet, and pick "CCW Lagos Region RBC Choir - Check-in". Google adds a new tab of responses.</span></li>
+<li><span><b>Rename the new tab.</b>Call it <code>ATTENDANCE FOR dd/mm/yyyy</code> with the rehearsal date, for example <code>ATTENDANCE FOR 24/10/2026</code>.</span></li>
+<li><span><b>Add one row in the REHEARSALS tab.</b>Rehearsal ID: the next unused number, like <code>R006</code>. Date: the rehearsal date. Status: the same wording as the other rows, but not Cancelled. Attendance Sheet: the tab name, typed exactly as in the step above. Leave the other columns as they are.</span></li>
+<li><span><b>Check it.</b>Open Process on the staff page and press "Check my Google Form days". Fix anything it shows in red.</span></li>
+</ol>
+<h2>After the rehearsal</h2>
+<ol>
+<li><span><b>Wait for the day to appear on Process.</b>It appears after 11 pm Lagos time on the rehearsal date.</span></li>
+<li><span><b>Enter excuses first.</b>Use Enter an absence for a member for anyone who was excused.</span></li>
+<li><span><b>Process the day.</b>Desk C, the Global Admin or the Assistant can do this.</span></li>
+<li><span><b>Answer every name that did not match.</b>Choose existing member, new member or visitor, and give a short reason. Only the Global Admin or Assistant adds a new member.</span></li>
+<li><span><b>Correct one person if needed.</b>Someone who was there but is not on the form, or was counted by mistake: Global Admin or Assistant, with a reason, before the day is published.</span></li>
+<li><span><b>Publish.</b>Possible only when no names are waiting. After publishing, the day is final. A later mistake is recorded as a dated note on the day.</span></li>
+</ol>
+<div class="note">If the day does not appear: check the Rehearsal ID style, the date, that the Status is not Cancelled, and that the tab name matches the REHEARSALS row exactly.</div>
+</main></body></html>
