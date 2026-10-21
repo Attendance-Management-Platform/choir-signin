@@ -394,7 +394,7 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 .ugtop{display:flex;align-items:center;gap:10px}.ugtop b{font-size:14.5px;line-height:1.3;flex:1}.ugi{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;background:var(--ac)}
 .ugk{margin:12px 0 4px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:var(--mut)}.ugh{font-size:13px;line-height:1.55;color:var(--fg)}
 #helpbody #hb1 .fplist,#helpbody #hb2 .fplist,#helpbody #hb3 .fplist,#helpbody #hb4 .fplist,.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}.tgrid{margin-top:6px}
-#htasks .fplist,#mbdet .fplist,#pwait .fplist,#pready .fplist,#pmine .fplist{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px}#helpbody .fplist>.ugt,#mbdet .fplist>.ugt,#htasks .fplist>.ugt{margin:0}#helpbody .ugt summary{list-style:none;cursor:pointer}#helpbody .ugt summary::-webkit-details-marker{display:none}#helpbody .ugt .ugtop b{flex:1}
+#htasks .fplist,#hnotes .fplist,#mbupd .fplist,#mbreq .fplist,#mbdet .fplist,#pwait .fplist,#pready .fplist,#pmine .fplist{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:12px}#helpbody .fplist>.ugt,#mbdet .fplist>.ugt,#htasks .fplist>.ugt{margin:0}#helpbody .ugt summary{list-style:none;cursor:pointer}#helpbody .ugt summary::-webkit-details-marker{display:none}#helpbody .ugt .ugtop b{flex:1}
 .hnav{margin:0 0 14px}
 #qrows{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;padding:12px 4px 4px}
 #qrows .qrow{position:relative;border:1px solid var(--line);border-radius:16px;padding:14px 16px 14px 20px;background:linear-gradient(160deg,#fff 55%,var(--tint,#fff));box-shadow:0 4px 18px rgba(20,35,61,.05);transition:transform .15s ease,box-shadow .15s ease;--ac:#2F4F7E;--tint:#EAF0FA}
@@ -451,7 +451,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 #rcout .fplist{gap:16px}#rcout .fprow{padding:14px 18px}
 .stats{gap:18px}#hgrid.stats{gap:18px}.stat{padding:18px 22px}
 #htasks .fplist{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
-@media(max-width:480px){.ugt{padding:16px 18px 16px 20px}.ugt:before{top:16px;bottom:16px}#htasks .fplist,#mbdet .fplist,#pwait .fplist,#pready .fplist,#pmine .fplist,.tgrid{gap:16px;padding:6px 6px 10px 2px}#qrows{gap:16px}#qrows .qrow{padding:16px 18px 16px 20px}.fprow{padding:14px 16px}}
+@media(max-width:480px){.ugt{padding:16px 18px 16px 20px}.ugt:before{top:16px;bottom:16px}#htasks .fplist,#hnotes .fplist,#mbupd .fplist,#mbreq .fplist,#mbdet .fplist,#pwait .fplist,#pready .fplist,#pmine .fplist,.tgrid{gap:16px;padding:6px 6px 10px 2px}#qrows{gap:16px}#qrows .qrow{padding:16px 18px 16px 20px}.fprow{padding:14px 16px}}
 </style></head><body class="out">
 <div style="background:#172039;color:#fff;text-align:center;font-size:12px;padding:5px 8px">TEST copy: fake data only. The real choir uses the production page.</div><div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -544,6 +544,8 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 200px"><label for="mbc" class="lb">Campus</label><select id="mbc" class="in"></select></div><div id="mbncw" class="hide" style="flex:1 1 200px"><label for="mbnc" class="lb">New campus name</label><input id="mbnc" class="in" autocomplete="off" maxlength="40"></div><div style="flex:1 1 160px"><label for="mbp" class="lb">Part</label><select id="mbp" class="in"></select></div><div id="mbiw" class="hide" style="flex:1 1 160px"><label for="mbi" class="lb">Member ID</label><input id="mbi" class="in" autocomplete="off" maxlength="40"></div></div>
 <label for="mbr" class="lb">Reason</label><input id="mbr" class="in" autocomplete="off" maxlength="300" placeholder="For example: joined the Ago campus on Sunday (10 to 300 characters)">
 <div class="actions"><button id="mbadd" class="btn red" type="button">Add member</button><button id="mbaddx" class="btn line" type="button">Clear</button></div></div>
+<div id="mbreq"></div>
+<div id="mbask"></div>
 <div id="mbdet"></div>
 <div id="mbupd"></div>
 <div id="mbbox"></div>
@@ -2044,24 +2046,32 @@ async function loadHome() {
     document.querySelectorAll('#hgrid .stat').forEach(e => { const k = e.querySelector('.k'); if (k && k.style.color) { e.style.setProperty('--sc', k.style.color); e.style.setProperty('--tint', 'color-mix(in srgb,' + k.style.color + ' 9%,#fff)'); } });
     document.querySelectorAll('[data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     const cr = t.cancelReminder;
-    const crh = cr ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + esc(cr.id) + (cr.kind === 'last' ? '' : ' held as planned?') + '</div><p class="sub">' +
-      (cr.kind === 'last' ? 'A held rehearsal can be cancelled only within 36 hours of its end. About ' + cr.hoursLeft + ' hour(s) are left. After that it cannot be cancelled.' : 'If ' + esc(cr.id) + ' must be cancelled, do it now. A held rehearsal can be cancelled only within 36 hours of its end, and the Global Music Director and the Pastor in Charge must both say yes.') +
-      '</p>' + (has('people') ? '<div class="actions"><button class="btn line" type="button" data-go="s12">Open People and access</button></div>' : '') + '</div>' : '';
+    const lst = a => a.length ? '<div class="fplist">' + a.join('') + '</div>' : '';
+    const gob = (label, to, red) => '<button class="btn ' + (red ? 'red' : 'line') + '" type="button" data-go="' + to + '">' + label + '</button>';
+    const crh = cr ? lst([tile({tone: 'warn', icon: '!', title: (cr.kind === 'last' ? 'Last chance to cancel ' : 'Was ') + cr.id + (cr.kind === 'last' ? '' : ' held as planned?'), pill: cr.kind === 'last' ? 'Last chance' : 'Check', pillCls: 'p-pend',
+      body: esc(cr.kind === 'last' ? 'A held rehearsal can be cancelled only within 36 hours of its end. About ' + cr.hoursLeft + ' hour(s) are left. After that it cannot be cancelled.' : 'If ' + cr.id + ' must be cancelled, do it now. A held rehearsal can be cancelled only within 36 hours of its end, and the Global Music Director and the Pastor in Charge must both say yes.'),
+      actions: has('people') ? gob('Open People and access', 's12') : ''})]) : '';
     const awl = t.away ? Object.keys(t.away.away || {}).filter(r => t.away.away[r]) : [];
     const FN = {rehearsal: 'Set up rehearsals', qr: 'Show the QR', records: 'See attendance records'};
-    const awh = (awl.length ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Away now: ' + esc(awl.join(', ')) + '</div><p class="sub">If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.</p></div>' : '') +
-      ((j.openFunctions || []).length ? '<div class="nt" style="background:#E6F2EC;border-color:#CBE2D6"><div class="ct">Opened to you for a short time</div><p class="sub">' + esc(j.openFunctions.map(f => FN[f] || f).join(', ')) + '. It ends by itself.</p></div>' : '');
-    const bph = (j.bypasses || []).length ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Done by an admin instead of the usual desk or role</div><p class="sub">The Global Admin or Assistant did these themselves, each with a reason. The desk or role it belongs to does not need to do them again.</p>' +
-      j.bypasses.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '<br><span class="s">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</span></p>').join('') + '</div>' : '';
-    const mch = (j.memberChanges || []).length ? '<div class="nt"><div class="ct">Membership changes</div>' + j.memberChanges.map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('') + (has('changes') ? '<div class="actions"><button class="btn line" type="button" data-go="s16">Open Changes and updates</button></div>' : '') + '</div>' : '';
-    const pth = t.petitions && t.petitions.waiting ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.petitions.waiting + ' petition(s) waiting for your answer</div><div class="actions"><button class="btn red" type="button" data-go="s16">Open Changes and updates</button></div></div>' : '';
-    const dth = t.details && t.details.waiting ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">' + t.details.waiting + ' member(s) asked for their details to be corrected</div><div class="actions"><button class="btn red" type="button" data-go="s17">Open Members</button></div></div>' : '';
+    const awh = lst((awl.length ? [tile({tone: 'warn', icon: '!', title: 'Away now: ' + awl.join(', '), pill: 'Away', pillCls: 'p-pend', body: esc('If something is waiting for an answer and the usual person is away, the next person in line will see it under People and access.')})] : []).concat(
+      (j.openFunctions || []).length ? [tile({tone: 'ok', icon: '✓', title: 'Opened to you for a short time', pill: 'Open', pillCls: 'p-ok', body: esc(j.openFunctions.map(f => FN[f] || f).join(', ') + '. It ends by itself.')})] : []));
+    const bph = lst((j.bypasses || []).map(x => tile({tone: 'ok', icon: '✓', title: x.what, pill: 'Done by an admin', pillCls: 'p-val',
+      body: '<div class="s" style="font-size:13px">' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '</div><div style="margin-top:6px">Reason: ' + esc(x.reason) + '</div><div class="s" style="font-size:13px;margin-top:6px">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</div>'})));
+    const mch = lst((j.memberChanges || []).map(x => tile({tone: 'ask', icon: 'i', title: x.what, pill: 'Membership', pillCls: 'p-val',
+      body: '<div class="s" style="font-size:13px">' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '</div><div style="margin-top:6px">Reason: ' + esc(x.reason) + '</div>'})).concat(has('changes') ? [] : []));
+    const pth = t.petitions && t.petitions.waiting ? lst([tile({tone: 'warn', icon: '!', title: t.petitions.waiting + ' petition(s) waiting for your answer', pill: 'Waiting', pillCls: 'p-pend', actions: gob('Open Changes and updates', 's16', true)})]) : '';
+    const dth = t.details && t.details.waiting ? lst([tile({tone: 'warn', icon: '!', title: t.details.waiting + ' member(s) asked for their details to be corrected', pill: 'Waiting', pillCls: 'p-pend', actions: gob('Open Members', 's17', true)})]) : '';
+    const mq = t.mreq || {};
+    const mqh = (mq.waiting || mq.news) ? lst([tile({tone: mq.waiting ? 'warn' : 'ask', icon: mq.waiting ? '!' : 'i', title: mq.waiting ? mq.waiting + ' member request(s) waiting for you' : mq.news + ' member request(s) have an answer', pill: mq.waiting ? 'Waiting' : 'News', pillCls: mq.waiting ? 'p-pend' : 'p-val',
+      body: mq.waiting && mq.news ? esc(mq.news + ' more have an answer you have not seen.') : '', actions: gob('Open Members', 's17', true)})]) : '';
     const abn = j.absenceNotices || [];
-    const abh = abn.length ? '<div class="nt"><div class="ct">Absences entered by an admin</div>' + abn.slice(0, 8).map(n => '<p class="sub" style="margin:6px 0 0"><span class="pill ' + (n.kind === 'cancelled' ? 'p-no' : 'p-ok') + '">' + (n.kind === 'cancelled' ? 'Cancelled' : 'Entered') + '</span> <b>' + esc(n.member) + '</b> · ' + esc(n.rehearsalId) + ' · ' + esc(n.by) + (n.byAssistant ? ' (Assistant)' : '') + ' · ' + esc(tm(n.atMs)) + (n.reason ? '<br>Reason: ' + esc(n.reason) : '') + '</p>').join('') + (has('absence') ? '<div class="actions"><button class="btn line" type="button" data-go="s6">Open Absence</button></div>' : '') + '</div>' : '';
+    const abh = lst(abn.slice(0, 8).map(n => tile({tone: n.kind === 'cancelled' ? 'no' : 'ok', icon: n.kind === 'cancelled' ? '✕' : '✓', title: n.member + ' · ' + n.rehearsalId, pill: n.kind === 'cancelled' ? 'Cancelled' : 'Entered', pillCls: n.kind === 'cancelled' ? 'p-no' : 'p-ok',
+      body: '<div class="s" style="font-size:13px">' + esc(n.by) + (n.byAssistant ? ' (Assistant)' : '') + ' · ' + esc(tm(n.atMs)) + '</div>' + (n.reason ? '<div style="margin-top:6px">Reason: ' + esc(n.reason) + '</div>' : ''),
+      actions: has('absence') ? gob('Open Absence', 's6') : ''})));
     ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
     $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'), has('records'));
     if (has('records')) anLoad();
-    drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
+    drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['mq', 'Member requests', mqh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
     hfoldApply();
     drawTasks(j.tasks || []);
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
@@ -2630,6 +2640,7 @@ const FAQ = [
   {t: ['members'], q: 'How do I add a new member?', a: 'Open Members and fill in Add a new member: first name, last name (middle name is optional), email, campus, part, and a reason. The Member ID is made for you. It is done straight away and recorded.'},
   {t: ['members'], q: 'Who can correct a member\'s name, phone, campus or part?', a: 'The Global Admin and Assistant can edit any member. Desk A can edit a member only while that member has a waiting Details to correct request. Desk A cannot change an email address; that goes to the System Administrator. The edit form has separate First name, Middle name and Last name boxes, and the full name is filled in for you.'},
   {t: ['members'], q: 'Some members have no first or last name saved. How do I fix that?', a: 'When there are such members, a card called Tidy member names appears on Members for the Global Admin and Assistant. It shows how each full name would be split into first, middle and last name. Names of one word are left for you to edit by hand, and names of more than three words are marked to check. Press Fill in the names and give a reason. The full name is never changed.'},
+  {t: ['members'], q: 'How do I add, deactivate or reactivate a member without being the Global Admin?', a: 'Use Member requests on Members. A Campus Music Director chooses Ask Desk A to add a member; Desk A adds them and everyone involved sees the result. Desk A can also add a member for the Campus Music Director of that campus to validate; the member is added only after the Campus Music Director says yes. To deactivate or reactivate, Desk A or the Campus Music Director of that campus chooses Ask to deactivate or reactivate, finds the member, gives a date (optional) and a reason; the Global Admin or Assistant decides. Nobody answers their own request. The Global Admin and Assistant can still do all of it directly on the Members page. Press Got it on a card once you have seen the answer; it then stays only in the Change log. Nothing is emailed.'},
   {t: ['members'], q: 'How do I edit, deactivate or reactivate a member?', a: 'On Members, use the filters (search, campus, part, status) to find the person, then choose Edit details, Deactivate or Reactivate. Each needs a reason. Nobody is deleted, and nobody changes their own record.'},
   {t: ['members', 'requests', 'people'], q: 'A member has no part. What do I do?', a: 'Open the Members without a part list (on Members, Requests or People). Choose the part and save. If the member once typed a part on the attendance form, it is already chosen for you; check it first.'},
   {t: ['members'], q: 'How do I add a new campus?', a: 'Only the System Administrator can. In Add a new member, choose "Add a new campus" at the end of the Campus list, type the name, and add the first member there.'},
@@ -2938,7 +2949,7 @@ async function loadMembers() {
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) {
       // Desk A and the System Administrator open this menu only for the requests to correct details; the member list and adding are for the admins.
-      $('mbbox').innerHTML = ''; $('mbtidy').innerHTML = ''; $('mbaddcard').classList.add('hide'); MBLIST = false; { const d = document.querySelector('#ph .d'); if (d) d.textContent = 'Members ask here when something in their own details is wrong. Open a request, correct it, then mark it done.'; } loadDetailReqs(); loadMbUpdates();
+      $('mbbox').innerHTML = ''; $('mbtidy').innerHTML = ''; $('mbaddcard').classList.add('hide'); MBLIST = false; { const d = document.querySelector('#ph .d'); if (d) d.textContent = 'Members ask here when something in their own details is wrong. Open a request, correct it, then mark it done.'; } loadDetailReqs(); loadMbUpdates(); loadMbReq();
       return say('m17', /do not have this page/i.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad');
     }
     $('mbaddcard').classList.remove('hide'); MBLIST = true; $('mbupd').innerHTML = '';
@@ -2946,7 +2957,7 @@ async function loadMembers() {
     const cur = $('mbc').value;
     $('mbc').innerHTML = mbOpts(MB.campuses, cur, 'Choose a campus') + '<option value="__new__"' + (MB.canAdd ? '' : ' disabled') + '>+ Add a new campus' + (MB.canAdd ? '…' : ' (System Administrator only)') + '</option>';
     $('mbp').innerHTML = mbOpts(MB.parts, $('mbp').value, 'Choose a part');
-    loadDetailReqs(); loadTidy();
+    loadDetailReqs(); loadTidy(); loadMbReq();
     const c = j.counts;
     fpPanel('mem', 'mbbox', {title: 'Members', sub: c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet. Use the filters to find someone, then edit their details, deactivate, reactivate or set their membership dates. Each change needs a reason and is recorded; the Campus Music Director and Desk A are told.',
       items: j.members, fields: mbFields, empty: 'There are no members yet.', card: mbCard});
@@ -2981,14 +2992,105 @@ async function loadMbUpdates() {
   try {
     const j = await call({action: 'home.state', token});
     if (!j || !j.ok) { box.innerHTML = ''; return; }
-    const by = (j.bypasses || []).map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '<br><span class="s">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</span></p>').join('');
-    const mc = (j.memberChanges || []).map(x => '<p class="sub" style="margin:6px 0 0"><b>' + esc(x.what) + '</b> · ' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '<br>Reason: ' + esc(x.reason) + '</p>').join('');
-    box.innerHTML = '<div class="card pad rise" style="margin-top:16px"><div class="ct">Updates</div><p class="sub" style="margin:0 0 8px">Notices and recent changes.</p>' +
-      (by ? '<div class="nt" style="background:#FFF4DF;border-color:#F0E2C9"><div class="ct">Done by an admin instead of the usual desk or role</div><p class="sub">The Global Admin or Assistant did these themselves, each with a reason. The desk or role it belongs to does not need to do them again.</p>' + by + '</div>' : '') +
-      (mc ? '<div class="nt"><div class="ct">Membership changes</div>' + mc + '</div>' : '') +
-      (by || mc ? '' : '<p class="sub" style="margin:0">No updates right now.</p>') + '</div>';
+    const by = (j.bypasses || []).map(x => tile({tone: 'ok', icon: '✓', title: x.what, pill: 'Done by an admin', pillCls: 'p-val',
+      body: '<div class="s" style="font-size:13px">' + esc(x.recordId) + ' · ' + esc(String(x.by).replace(/^done by /, '')) + ' · ' + esc(tm(x.atMs)) + '</div><div style="margin-top:6px">Reason: ' + esc(x.reason) + '</div><div class="s" style="font-size:13px;margin-top:6px">Nothing left for ' + esc(ownerLabel(x.ownerKey)) + ' to do.</div>'}));
+    const mc = (j.memberChanges || []).map(x => tile({tone: 'ask', icon: 'i', title: x.what, pill: 'Membership', pillCls: 'p-val',
+      body: '<div class="s" style="font-size:13px">' + esc(String(x.by).replace(/\s*\(.*$/, '')) + ' · ' + esc(tm(x.atMs)) + '</div><div style="margin-top:6px">Reason: ' + esc(x.reason) + '</div>'}));
+    const all = by.concat(mc);
+    box.innerHTML = '<div class="card pad rise" style="margin-top:16px"><div class="ct">Updates</div><p class="sub" style="margin:0 0 12px">Notices and recent changes.</p>' + (all.length ? '<div class="fplist">' + all.join('') + '</div>' : '<p class="sub" style="margin:0">No updates right now.</p>') + '</div>';
   } catch (e) { box.innerHTML = ''; }
 }
+/** Member requests (add, deactivate, reactivate): cards, answers and the forms to ask. */
+const MQ = {list: null};
+function mqTitle(r) {
+  return r.kind === 'add-asked' ? 'Add ' + r.name + ' to ' + r.campus : r.kind === 'add-proposed' ? 'Add ' + r.name + ' to ' + r.campus : (r.kind === 'deactivate' ? 'Deactivate ' : 'Reactivate ') + r.name;
+}
+function mqCard(r) {
+  const tn = r.status === 'Waiting' ? ['warn', '!', 'p-pend'] : r.status === 'Done' ? ['ok', '✓', 'p-ok'] : ['no', '✕', 'p-no'];
+  const add = r.kind === 'add-asked' || r.kind === 'add-proposed';
+  const what = add ? [r.part, r.email, r.phone].filter(Boolean).map(esc).join(' · ') : esc(r.memberId) + ' · ' + esc(r.campus) + ' · from ' + esc(r.date);
+  const how = r.kind === 'add-asked' ? 'Asked by the Campus Music Director. Desk A adds the member.' : r.kind === 'add-proposed' ? 'Proposed by Desk A. The Campus Music Director validates it, then the member is added.' : 'Asked by Desk A or the Campus Music Director. The Global Admin or Assistant decides.';
+  const body = '<div class="s" style="font-size:13px">' + what + ' · ' + esc(r.from) + ' · ' + esc(tm(r.atMs)) + '</div>' +
+    '<div style="margin-top:8px">Reason: ' + esc(r.reason) + '</div><div class="s" style="font-size:13px;margin-top:6px">' + esc(how) + (r.status === 'Waiting' ? ' Goes to ' + esc(r.goesTo) + '.' : '') + '</div>' +
+    (r.answer ? '<div class="s" style="font-size:13px;margin-top:6px">' + esc(r.answeredBy) + ': ' + esc(r.answer) + '</div>' : r.status !== 'Waiting' ? '<div class="s" style="font-size:13px;margin-top:6px">' + esc(r.status === 'Done' ? 'Done by ' + r.answeredBy + '.' : 'Not done. ' + r.answeredBy) + '</div>' : '') +
+    (r.status === 'Waiting' && r.own ? '<div class="s" style="font-size:13px;margin-top:8px">This is your request. Someone else answers it.</div>' : '');
+  const yes = r.kind === 'add-asked' ? 'Add the member' : r.kind === 'add-proposed' ? 'Validate and add' : r.kind === 'deactivate' ? 'Deactivate' : 'Reactivate';
+  const acts = r.canAnswer ? '<button class="btn red" type="button" data-mqa="done" data-id="' + esc(r.id) + '">' + yes + '</button><button class="btn line" type="button" data-mqa="declined" data-id="' + esc(r.id) + '">Decline</button>' :
+    r.status !== 'Waiting' ? '<button class="btn line sm" type="button" data-mqseen="' + esc(r.id) + '">Got it</button>' : '';
+  return tile({tone: tn[0], icon: tn[1], title: mqTitle(r), pill: r.status, pillCls: tn[2], body: body, actions: acts});
+}
+async function loadMbReq() {
+  const box = $('mbreq'), ask = $('mbask'); if (!box) return;
+  try {
+    const j = await call({action: 'mreq.list', token});
+    if (!j || !j.ok) { box.innerHTML = ''; ask.innerHTML = ''; return; }
+    MQ.list = j;
+    const rq = j.requests || [];
+    box.innerHTML = '<div class="card pad rise" style="margin-top:16px"><div class="ct">Member requests' + (j.waiting ? ' (' + j.waiting + ' waiting for you)' : '') + '</div><p class="sub" style="margin:0 0 12px">Adding, deactivating and reactivating members. Each request shows who it goes to and what happens next. Press Got it when you have seen an answer.</p>' +
+      (rq.length ? '<div class="fplist">' + rq.map(mqCard).join('') + '</div>' : '<p class="sub" style="margin:0">Nothing waiting.</p>') + '</div>';
+    ask.innerHTML = j.canAddAsk || j.canChangeAsk ? '<div class="card pad rise" style="margin-top:16px"><div class="ct">Ask for a change</div><div class="actions" style="margin:0">' +
+      (j.canAddAsk ? '<button class="btn red" type="button" data-mqopen="add">' + (j.canAddKind === 'add-asked' ? 'Ask Desk A to add a member' : 'Add a member for the Campus Music Director to validate') + '</button>' : '') +
+      (j.canChangeAsk ? '<button class="btn line" type="button" data-mqopen="change">Ask to deactivate or reactivate a member</button>' : '') + '</div><div id="mqform"></div></div>' : '';
+  } catch (e) { box.innerHTML = ''; }
+}
+function mqAddForm() {
+  const j = MQ.list || {}, one = (j.campuses || []).length === 1 && j.campus;
+  return '<div style="margin-top:12px;padding:12px;background:#F5F7FA;border-radius:12px"><div style="display:flex;gap:10px;flex-wrap:wrap">' +
+    '<div style="flex:1 1 130px"><label class="lb" style="margin-top:0">First name</label><input class="in" id="mqf" maxlength="30"></div><div style="flex:1 1 130px"><label class="lb" style="margin-top:0">Middle name (if any)</label><input class="in" id="mqm" maxlength="30"></div><div style="flex:1 1 130px"><label class="lb" style="margin-top:0">Last name</label><input class="in" id="mql" maxlength="30"></div></div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1 1 150px"><label class="lb">Campus</label>' + (one ? '<input class="in" id="mqc" value="' + esc(j.campus) + '" readonly>' : '<select class="in" id="mqc">' + mbOpts(j.campuses || [], '', 'Choose a campus') + '</select>') + '</div>' +
+    '<div style="flex:1 1 150px"><label class="lb">Part</label><select class="in" id="mqp">' + mbOpts(j.parts || [], '', 'Choose a part') + '</select></div></div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:2 1 200px"><label class="lb">Email address (optional)</label><input class="in" id="mqe" type="email" maxlength="80"></div><div style="flex:1 1 150px"><label class="lb">Phone (optional)</label><input class="in" id="mqt" maxlength="20"></div></div>' +
+    '<label class="lb">Reason</label><input class="in" id="mqr" maxlength="300" placeholder="Why is this member being added? (10 to 300 characters)">' +
+    '<div class="actions"><button class="btn red sm" type="button" id="mqsend" data-kind="' + esc(j.canAddKind) + '">' + (j.canAddKind === 'add-asked' ? 'Send to Desk A' : 'Send to the Campus Music Director') + '</button><button class="btn line sm" type="button" data-mqclose="1">Cancel</button></div></div>';
+}
+function mqChangeForm() {
+  return '<div style="margin-top:12px;padding:12px;background:#F5F7FA;border-radius:12px"><label class="lb" style="margin-top:0">Find the member (at least 2 letters of the name)</label><div style="display:flex;gap:8px;flex-wrap:wrap"><input class="in" id="mqq" style="flex:1 1 220px" maxlength="60"><button class="btn line sm" type="button" id="mqfind">Find</button></div>' +
+    '<div id="mqres"></div><div id="mqpick" class="hide"><div class="s" id="mqwho" style="margin-top:10px"></div><label class="lb">From which date? (optional, today if empty)</label><input class="in" id="mqd" placeholder="2026-10-18" maxlength="10"><label class="lb">Reason</label><input class="in" id="mqr2" maxlength="300" placeholder="Why? (10 to 300 characters)">' +
+    '<div class="actions"><button class="btn red sm" type="button" id="mqsend2">Send to the Global Admin or Assistant</button></div></div><div class="actions"><button class="btn line sm" type="button" data-mqclose="1">Cancel</button></div></div>';
+}
+document.addEventListener('click', async ev => {
+  const t = ev.target; if (!t || !t.closest) return;
+  const op = t.closest('[data-mqopen]');
+  if (op) { $('mqform').innerHTML = op.dataset.mqopen === 'add' ? mqAddForm() : mqChangeForm(); return; }
+  if (t.closest('[data-mqclose]')) { $('mqform').innerHTML = ''; return; }
+  if (t.id === 'mqfind') {
+    const j = await call({action: 'mreq.find', token, q: $('mqq').value.trim()});
+    if (j && j.signedOut) { signedOutNow(); return; }
+    $('mqres').innerHTML = (j && j.matches || []).length ? '<div style="margin-top:8px">' + j.matches.map(m => '<button class="btn line sm" style="margin:0 6px 6px 0" type="button" data-mqpick="' + esc(m.memberId) + '" data-nm="' + esc(m.name) + '" data-st="' + esc(m.status) + '">' + esc(m.name) + ' · ' + esc(m.campus) + ' · ' + esc(m.status) + '</button>').join('') + '</div>' : '<p class="sub" style="margin:8px 0 0">Nobody found.</p>';
+    return;
+  }
+  const pk = t.closest('[data-mqpick]');
+  if (pk) { MQ.pick = {id: pk.dataset.mqpick, kind: pk.dataset.st === 'Active' ? 'deactivate' : 'reactivate'}; $('mqpick').classList.remove('hide'); $('mqwho').textContent = (MQ.pick.kind === 'deactivate' ? 'Deactivate ' : 'Reactivate ') + pk.dataset.nm + ' (' + pk.dataset.mqpick + ')'; return; }
+  if (t.id === 'mqsend') {
+    t.disabled = true;
+    const j = await call({action: 'mreq.ask', token, kind: t.dataset.kind, firstName: $('mqf').value, middleName: $('mqm').value, lastName: $('mql').value, campus: $('mqc').value, part: $('mqp').value, email: $('mqe').value, phone: $('mqt').value, reason: $('mqr').value});
+    if (j && j.signedOut) { signedOutNow(); return; }
+    say('m17', j && j.ok ? 'Sent. ' + (t.dataset.kind === 'add-asked' ? 'Desk A will add the member.' : 'The Campus Music Director will validate it.') : ((j && j.error) || 'Could not send.'), j && j.ok ? 'ok' : 'bad');
+    if (j && j.ok) { $('mqform').innerHTML = ''; loadMbReq(); } else t.disabled = false;
+    return;
+  }
+  if (t.id === 'mqsend2') {
+    if (!MQ.pick) return;
+    t.disabled = true;
+    const j = await call({action: 'mreq.ask', token, kind: MQ.pick.kind, memberId: MQ.pick.id, date: $('mqd').value.trim(), reason: $('mqr2').value});
+    if (j && j.signedOut) { signedOutNow(); return; }
+    say('m17', j && j.ok ? 'Sent to the Global Admin or Assistant.' : ((j && j.error) || 'Could not send.'), j && j.ok ? 'ok' : 'bad');
+    if (j && j.ok) { $('mqform').innerHTML = ''; loadMbReq(); } else t.disabled = false;
+    return;
+  }
+  const an = t.closest('[data-mqa]');
+  if (an) {
+    let reason = '';
+    if (an.dataset.mqa === 'declined') { reason = prompt('Why is this not being done? (10 to 300 characters)'); if (!reason) return; }
+    an.disabled = true;
+    const j = await call({action: 'mreq.answer', token, id: an.dataset.id, decision: an.dataset.mqa, reason: reason.trim()});
+    if (j && j.signedOut) { signedOutNow(); return; }
+    say('m17', j && j.ok ? (an.dataset.mqa === 'done' ? 'Done. ' + (j.summary || '') : 'Declined. The people involved can see why.') : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
+    await loadMbReq(); if (j && j.ok && MBLIST) loadMembers(); return;
+  }
+  const sn = t.closest('[data-mqseen]');
+  if (sn) { sn.disabled = true; const j = await call({action: 'ack.seen', token, id: sn.dataset.mqseen}); if (j && j.signedOut) { signedOutNow(); return; } loadMbReq(); }
+});
 /** Members who asked Desk A to correct their own details (Desk A, Global Admin, Assistant). */
 let DETSYS = false, DESKA = false, MBLIST = true;
 document.addEventListener('click', async ev => {
