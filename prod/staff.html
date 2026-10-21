@@ -2150,8 +2150,8 @@ async function loadRoom() {
   try {
     const j = await call({action: 'room.list', token, rehearsalId: (typeof ckRid !== 'undefined' && ckRid) ? ckRid : undefined});
     if (!j.ok) { box.innerHTML = ''; return; }
-    fpPanel('room', 'roombox', {title: 'Who is in the room?', sub: 'These members checked in with Google, without the QR. Say yes only if you can see them here.' + (j.campus ? ' You see your own campus.' : ''),
-      items: j.rows, empty: 'No one has checked in without the QR yet.',
+    fpPanel('room', 'roombox', {title: 'Who is in the room?', sub: (j.rehearsalId ? j.rehearsalId + (j.startMs ? ' · ' + new Date(j.startMs).toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'}) : '') + '. ' : '') + 'These members checked in with Google, without the QR. Say yes only if you can see them here.' + (j.campus ? ' You see your own campus.' : ''),
+      items: j.rows, empty: j.processed ? 'This rehearsal has been processed, so there is nothing left to answer.' : 'No one has checked in without the QR yet.',
       fields: [{k: 'q', label: 'Search', ph: 'Type a name or ID, or choose', type: 'text', get: r => r.name + ' ' + r.memberId, sug: r => [r.name, r.memberId]},
         {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus},
         {k: 'answer', label: 'Answer', type: 'list', get: r => ROOMLAB[r.answer || ''][0], all: ['Waiting for a yes', 'In the room', 'Not here']}],
