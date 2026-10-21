@@ -897,7 +897,7 @@ function drawTasks(list) {
   const box = $('htasks'); if (!box) return;
   list = list || [];
   const OVER = ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge'].some(r => (myRoles || []).indexOf(r) !== -1);
-  if ((!list || !list.length) && !OVER) { box.innerHTML = Object.keys(myBypass || {}).length || myRoles.length ? '<div class="card pad rise"><div class="ct">Needs attention</div><p class="sub" style="margin:0">Nothing is waiting today. Well done.</p></div>' : ''; return; }
+  if ((!list || !list.length) && !OVER) { box.innerHTML = Object.keys(myBypass || {}).length || myRoles.length ? '<div class="card pad rise"><p class="sub" style="margin:0">Nothing is waiting today. Well done.</p></div>' : ''; return; }
   const others = list.some(t => !t.mine);
   const has = k => myTabs.indexOf(k) !== -1;
   const OVR = ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge'].some(r => (myRoles || []).indexOf(r) !== -1);
