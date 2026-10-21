@@ -591,6 +591,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <button type="button" class="hsec fold" data-hfold="charts" id="hfc" hidden>Analytics</button><div id="hcharts"></div>
 <button type="button" class="hsec fold" data-hfold="tasks" id="hft" hidden>Needs attention</button><div id="htasks"></div>
 <div id="hgrid" class="stats rise"></div>
+<div id="hhealth"></div>
 <div id="hquick"></div>
 <div id="hnotes"></div>
 <div id="hway"></div>
@@ -1718,7 +1719,7 @@ const pFields = [
 function pWhen(t) { return t ? String(t).replace('T', ' ').replace('Z', ' UTC') : ''; }
 function pDetail(r) {
   const d = r.details || {}, bits = [];
-  if (r.kind === 'download') bits.push((d.scope === 'month' ? 'Month ' : 'Rehearsal ') + (d.key || '') + ' · ' + (d.campus || ''));
+  if (r.kind === 'download') bits.push((d.scope === 'month' ? 'Month ' : 'Rehearsal ') + (d.key || '') + ' · ' + (d.campus || 'All campuses'));
   else if (r.kind === 'desk_cover') bits.push('Desk ' + d.awayDesk + ' · covered by ' + (r.subjectName || r.subjectEmail) + ' · ' + d.start + ' to ' + d.end);
   else if (r.kind === 'emergency_open') bits.push((d.fnName || d.fn) + ' · for ' + (r.subjectName || r.subjectEmail) + ' · ' + d.start + ' to ' + d.until);
   else if (r.kind === 'cancel_held') bits.push('Rehearsal ' + r.target + (d.onBehalf ? ' · asked on behalf of the Global Admin' : '') + ' · yes so far: ' + ((d.yes || []).map(y => y.role).join(', ') || 'none'));
@@ -1805,6 +1806,23 @@ function awayCardHtml(j, p) {
   const mine = (j.mine || []).map(n => '<p class="sub" style="margin:6px 0 0">You are away ' + esc(n.start) + ' to ' + esc(n.end) + ' (' + esc(n.reason) + ')' + ((n.duties || []).length ? ' for ' + esc(n.duties.join(', ')) : '') + ' <button class="btn line sm" type="button" data-awayend="1">I am back</button></p>').join('');
   return '<div class="card pad rise"><div class="ct">Being away</div><p class="sub">One notice covers every role you hold. It ends by itself.' + (who.length ? ' <b>Away now: ' + esc(who.join(', ')) + '.</b>' : '') + '</p>' + list + mine +
     (j.saving && !(j.mine || []).length ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px"><div><label class="lb" for="' + p + 'awstart" style="margin-top:0">First day</label><input id="' + p + 'awstart" class="in" type="date"></div><div><label class="lb" for="' + p + 'awend" style="margin-top:0">Last day</label><input id="' + p + 'awend" class="in" type="date"></div><div style="grid-column:1/-1"><label class="lb" for="' + p + 'awwhy" style="margin-top:0">Reason</label><input id="' + p + 'awwhy" class="in" maxlength="200" placeholder="Why you will be away"></div></div>' + (j.canExcuse ? '<label style="display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;font-weight:600;line-height:1.4"><input type="checkbox" id="' + p + 'awex" style="margin-top:3px"><span>Also ask to be excused from the rehearsal in these days. Your reason is used for the request, so it needs 10 or more characters.</span></label>' : '') + '<div class="actions" style="margin-top:12px"><button class="btn red sm" type="button" data-awgo="' + p + '">Put in notice</button></div>' : '') + '</div>';
+}
+/** The System Administrator's system health card (Home). */
+function drawHealth(h) {
+  const box = $('hhealth'); if (!box) return;
+  if (!h) { box.innerHTML = ''; return; }
+  const row = (tone, icon, title, pill, pillCls, body) => tile({tone, icon, title, pill, pillCls, body});
+  const items = [
+    h.stuck.length ? row('warn', '!', h.stuck.length + ' request(s) waiting more than 48 hours', 'Stuck', 'p-pend', esc(h.stuck.map(r => r.id + ' (' + r.hours + ' h)').join(', ')) + '. Open People and access to see who should answer.')
+      : row('ok', '\u2713', 'No request is stuck', 'Fine', 'p-ok', 'Nothing has waited more than 48 hours.'),
+    h.breakers.length ? row('no', '\u2715', h.breakers.length + ' person(s) break the role rule', 'Fix', 'p-no', h.breakers.map(b => '<div><b>' + esc(b.name) + '</b>: ' + esc(b.problem) + '</div>').join(''))
+      : row('ok', '\u2713', 'Everyone keeps the role rule', 'Fine', 'p-ok', 'One top role, at most two desks, never C with D, at most three roles.'),
+    h.mailLeft === null ? '' : row(h.mailLeft < 30 ? 'warn' : 'ok', h.mailLeft < 30 ? '!' : '\u2713', h.mailLeft + ' email(s) left today', h.mailLeft < 30 ? 'Low' : 'Fine', h.mailLeft < 30 ? 'p-pend' : 'p-ok', '20 are kept for sign-in codes.'),
+    row(h.fullPct >= 70 ? 'warn' : 'ok', h.fullPct >= 70 ? '!' : '\u2713', 'The workbook is ' + h.fullPct + '% full', h.fullPct >= 70 ? 'Plan ahead' : 'Fine', h.fullPct >= 70 ? 'p-pend' : 'p-ok',
+      'Google allows ' + Number(h.cellLimit).toLocaleString() + ' cells. Biggest tabs: ' + esc((h.biggest || []).map(s => s.name + ' (' + s.rows + ' rows)').join(', ') || 'none') + '.'),
+    h.quiet.length ? row('ask', 'i', h.quiet.length + ' staff member(s) with no sign-in in ' + h.quietDays + ' days', 'Check', 'p-val', esc(h.quiet.slice(0, 12).map(p => p.name + ' (' + p.roles + ')').join(', ')) + (h.quiet.length > 12 ? ' and more' : '') + '. Sign-ins are recorded from 21 Oct 2026, so this list starts full and shrinks as people sign in.')
+      : row('ok', '\u2713', 'All staff signed in within ' + h.quietDays + ' days', 'Fine', 'p-ok', '')].filter(Boolean);
+  box.innerHTML = '<div class="card pad rise"><div class="ct">System health</div><p class="sub">What needs a look across the system. Only the System Administrator sees this.</p><div class="fplist">' + items.join('') + '</div></div>';
 }
 async function loadHomeAway() {
   const box = $('hway'); if (!box) return;
@@ -2110,11 +2128,15 @@ async function loadHome() {
     const abh = lst(abn.slice(0, 8).map(n => mkTile({tone: n.kind === 'cancelled' ? 'no' : 'ok', icon: n.kind === 'cancelled' ? '✕' : '✓', title: n.member + ' · ' + n.rehearsalId, pill: n.kind === 'cancelled' ? 'Cancelled' : 'Entered', pillCls: n.kind === 'cancelled' ? 'p-no' : 'p-ok',
       body: '<div class="s" style="font-size:13px">' + esc(n.by) + (n.byAssistant ? ' (Assistant)' : '') + ' · ' + esc(tm(n.atMs)) + '</div>' + (n.reason ? '<div style="margin-top:6px">Reason: ' + esc(n.reason) + '</div>' : ''),
       actions: gotBtn(n.key) + (has('absence') ? gob('Open Absence', 's6') : '')}))) + gotAll(abn.slice(0, 8));
+    const dln = j.downloads || [];
+    const dlh = lst(dln.slice(0, 8).map(x => mkTile({tone: 'ask', icon: '\u2193', title: x.name + ' downloaded ' + x.what, pill: 'Download', pillCls: 'p-val',
+      body: '<div class="s" style="font-size:13px">' + esc(tm(x.atMs)) + '</div>', actions: gotBtn(x.key)}))) + gotAll(dln.slice(0, 8));
+    drawHealth(j.health);
     ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
     $('hcharts').innerHTML = homeCharts(t.charts, has('reports'), has('reports'), has('records'));
     if (has('records')) anLoad();
     loadHomeAway();
-    drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['mq', 'Member requests', mqh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch]]);
+    drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['mq', 'Member requests', mqh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch], ['dl', 'Downloads', dlh]]);
     hfoldApply();
     drawTasks(j.tasks || []);
     document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
@@ -2872,7 +2894,7 @@ if (token) { const first = n => call({action: 'me', token}).then(j => { if (j.ok
     var isTbl = card.classList.contains('tblc') && head.classList.contains('tblh');
     var isAnh = !isTbl && head.classList.contains('anh') && !!head.querySelector('.ct');
     if (!isTbl && !isAnh && !head.classList.contains('ct')) return;
-    if (card.closest('#s10,#s14') && !(card.parentNode && card.parentNode.id === 'hway')) return;
+    if (card.closest('#s10,#s14') && !(card.parentNode && (card.parentNode.id === 'hway' || card.parentNode.id === 'hhealth'))) return;
     var title = (isAnh ? head.querySelector('.ct') : isTbl ? (head.querySelector('span') || head) : head).textContent.trim();
     if (NOFOLD.indexOf(title) >= 0) { card.dataset.fold = 'x'; return; }
     card.dataset.fold = '1';
