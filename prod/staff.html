@@ -2127,7 +2127,7 @@ async function loadHome() {
     drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['mq', 'Member requests', mqh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch], ['dl', 'Downloads', dlh]]);
     hfoldApply();
     drawTasks(j.tasks || []);
-    document.querySelectorAll('#hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
+    document.querySelectorAll('#hsum [data-go], #hcharts [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
     document.querySelectorAll('#hcharts .drill').forEach(e => { const f = () => drillTo(e.dataset.sc, e.dataset.key); e.onclick = f; e.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); f(); } }; });
     // the QR stand-in
     const q = t.qr || {}, sd = q.standin;
