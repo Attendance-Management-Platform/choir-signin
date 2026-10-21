@@ -1242,7 +1242,10 @@ async function prOpen(id, done) {
       prBar('pt', 'Search a name or ID', rows.map(r => r.campus), rows.map(r => r.part), '<select id="pttst" class="in" style="flex:1 1 110px;max-width:150px"><option value="">Any status</option><option value="Present">Present</option><option value="Absent">Absent</option><option value="Excused">Excused</option></select>') + prTable(rows, done && j.canCorrect) + '</div>';
     window.prCtx = {rows: rows, review: j.review || []};
     const todo = done && !j.published && j.canCorrect ? '<div class="note" style="margin-top:16px"><b>Before this day is published</b><br>' + ((j.review || []).length ? 'Answer the ' + j.review.length + ' form name' + (j.review.length === 1 ? '' : 's') + ' below. The day cannot be published until they are answered.<br>' : 'No form names are waiting.<br>') + 'Someone was there but is not on the form, or was counted by mistake? Find them in the list below and press <b>Correct</b>. Excuses go through Enter an absence for a member. Members are fixed on the Members page.</div>' : '';
-    $('prdetail').innerHTML = earlyNote + head + todo + names + list;
+    const rnote = j.rosterNote ? '<div class="note" style="margin-top:16px">' + esc(j.rosterNote) + '</div>' : '';
+    const notesCard = done ? '<div class="card pad rise" style="margin-top:16px"><div class="ct">Notes on this day</div>' + ((j.notes || []).length ? (j.notes || []).map(n => '<div style="border-top:1px solid var(--line);padding:8px 0"><span class="s">' + esc(tm(n.atMs)) + ' · ' + esc(n.by) + '</span><br>' + esc(n.text) + '</div>').join('') : '<p class="sub" style="margin:6px 0 0">No notes.</p>') +
+      (j.canNote ? '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><input id="prnotetxt" class="in" style="flex:1 1 260px" maxlength="300" placeholder="What was found later, and why (10 to 300 characters)"><button class="btn line sm" type="button" data-prnote="' + esc(j.id) + '">Add note</button></div>' : '') + '</div>' : '';
+    $('prdetail').innerHTML = earlyNote + head + rnote + todo + names + list + notesCard;
     $('prdetail').dataset.id = j.id;
     prWire('pt', '#prtablecard tbody tr', (tr, f) => (!f.s || tr.dataset.st === f.s), n => { $('prtcount').textContent = '· ' + n + ' of ' + rows.length; });
     if ($('pnq')) prWire('pn', '.prnm', () => true, n => { $('pncount').textContent = n === j.review.length ? '' : 'Showing ' + n + ' of ' + j.review.length + '.'; });
@@ -1390,6 +1393,14 @@ document.addEventListener('click', async ev => {
       if (!j.ok) { of.disabled = false; return say('m15', j.error || 'Could not publish.', 'bad'); }
       await loadProcess(); await prOpen(of.dataset.prof, true); say('m15', 'Done: ' + j.summary + '.', 'ok'); } catch (e) { of.disabled = false; say('m15', 'Network problem. Try again.', 'bad'); }
     return;
+  }
+  const pn = ev.target.closest && ev.target.closest('[data-prnote]');
+  if (pn) {
+    pn.disabled = true;
+    try { const j = await call({action: 'process.note', token, rehearsalId: pn.dataset.prnote, text: $('prnotetxt').value.trim()});
+      if (j.signedOut) { signedOutNow(); return; }
+      say('m15', j.ok ? 'Note added.' : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad'); if (j.ok) prOpen(pn.dataset.prnote, true); } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
+    pn.disabled = false; return;
   }
   const f = ev.target.closest && ev.target.closest('[data-prfix]');
   if (f) {
@@ -2622,7 +2633,11 @@ const FAQ = [
   {t: ['people'], q: 'How do I say yes or no to a request?', a: 'Open People and find the request under Waiting for your answer. Use the filters to narrow the list, then choose Yes, or give a reason and choose Say no. Nobody answers their own request.'},
   {t: ['people', 'calendar'], q: 'How do I say I will be away?', a: 'On People, open Being away, give the first and last day and a reason (14 days at most). It ends by itself. You can also start from a date in the Calendar.'},
   {t: ['changes'], q: 'How do I see what changed, and disagree with it?', a: 'Open Changes and use the filters (rehearsal, date, who did it, kind). Choose Petition about this and give your reason. The right person answers.'},
-  {t: ['process'], q: 'How do I process attendance after a rehearsal?', a: 'Open Process once check-in is closed and every check-in is checked. Process the rehearsal, then publish it to the official attendance. If one person is wrong, the Global Admin or Assistant can correct them with a reason.'},
+  {t: ['process'], q: 'How do I process attendance after a rehearsal?', a: 'Open Process once the day has ended and processing has opened (90 minutes after the finish time). Check the counts, then press Process. The day is written once and locked. After that nobody can change one person; the only way back is an undo (see "A processed day is wrong"). Publishing to the official attendance is switched off until it is approved.'},
+  {t: ['process'], q: 'A processed day is wrong. What do I do?', a: 'A QR or Google check-in day cannot be corrected once processed. The Global Admin asks the System Administrator to undo it, with a reason, using the Undo a processed day card on Process. It works only within 24 hours of the end, before another rehearsal is held, and before the day is published. After the undo, mark or excuse the people, then process again. The Assistant can ask too, but the Global Admin must approve unless the Global Admin is away.'},
+  {t: ['process'], q: 'How do I deal with an old Google Form day?', a: 'Do it in this order. 1) Members page first: add new members, deactivate people who left (with the date), and fix names. Check Active From dates, because each day counts only who was a member on that date. 2) Enter excuses with Enter an absence for a member. 3) Process the days oldest first; Desk C, the Global Admin or the Assistant can do this. 4) Answer every name that did not match under Names to answer: existing member, new member (Global Admin or Assistant only, with the date they became active), or visitor. 5) For someone who was there but is not on the form, or was counted by mistake, press Correct next to them (Global Admin or Assistant, with a reason). 6) When no names are waiting, the day can be published. After publishing it is final.'},
+  {t: ['process'], q: 'Someone joined or left during these days. How are they counted?', a: 'Each day counts the people who were members on that day, using Active From and Active Until on the Members page. Someone who joined at rehearsal 4 should have Active From set to that date, so they are not counted absent for earlier days. Someone who left should be deactivated with the date they left. If many dates look missing, the page says so and uses today\'s list instead, so fix the dates first.'},
+  {t: ['process'], q: 'A published day has a mistake. What now?', a: 'A published day is final and cannot be changed. The Global Admin or Assistant can add a dated note to the day on Process (Notes on this day) saying what was found and why. The record stays as published and the note sits beside it.'},
   {t: ['reports'], q: 'How do I build a report?', a: 'Open Reports. Use a ready-made button, or choose what to show, how to break it down and the period, then press Show. Nothing is drawn until you do. Use Clear to start again.'},
   {t: ['reports', 'records'], q: 'Can I download figures?', a: 'The Global Admin and Assistant can download as CSV. Every download is recorded in the audit log. A Campus Music Director asks for one through People and gets a single download.'},
   {t: ['records'], q: 'How do I look up who attended?', a: 'Open Records. Pick a rehearsal to see who was there, or look up one member. Filter by campus or part. Names are shown only to the Global Admin and Assistant.'},
