@@ -66,6 +66,7 @@ input.in{height:48px;padding:0 14px}
 .hello{font-size:24px;font-weight:900;line-height:1.15}.hsub{font-size:14px;color:#FFE9EA}
 .so{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;font-weight:700;font-size:13px;cursor:pointer}
 .mhdr .so{position:absolute;top:14px;right:16px}
+.mhdr .so.staffgo{top:14px;right:104px}
 .sb{display:contents}
 .sbrand,.dtop,.sbfoot,.tiles{display:none}
 .nav{position:fixed;left:0;right:0;bottom:0;display:flex;gap:4px;background:#fff;border-top:1px solid var(--line);padding:8px 12px calc(14px + env(safe-area-inset-bottom));z-index:5}
@@ -190,7 +191,7 @@ input.in{height:48px;padding:0 14px}
 </div>
 
 <div id="inv" class="hide">
-  <div class="mhdr"><button class="so" id="out2">Sign out</button><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b2" style="line-height:1.3">CELEBRATION CHURCH WORSHIP<br>LAGOS REGION CHOIR</div><div id="hello" class="hello"></div><div id="hsub" class="hsub"></div></div></div>
+  <div class="mhdr"><a class="so staffgo hide" href="staff.html" style="text-decoration:none;margin-right:6px">Staff page</a><button class="so" id="out2">Sign out</button><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b2" style="line-height:1.3">CELEBRATION CHURCH WORSHIP<br>LAGOS REGION CHOIR</div><div id="hello" class="hello"></div><div id="hsub" class="hsub"></div></div></div>
  <div class="sb" id="sb">
   <button id="sbtog" type="button" aria-label="Hide menu" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span>Hide menu</span></button>
   <div class="sbrand"><img src="logo.png" alt="CCW logo" style="height:58px;width:auto;display:block"><div style="font-weight:900;font-size:15px;margin-top:6px;line-height:1.15">CELEBRATION<br>CHURCH WORSHIP</div><div style="font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:700">LAGOS REGION CHOIR</div></div>
@@ -203,7 +204,7 @@ input.in{height:48px;padding:0 14px}
   <div class="sbfoot"><b style="color:var(--ink)">Need help?</b><br>No phone, camera or location? Tell your Campus Music Director or Desk D and they will mark you by hand.</div>
  </div>
  <div class="mainw">
-  <div class="dtop"><div class="tt"><div class="t1">LAGOS REGION CHOIR</div><div class="t2">Check in, ask to be excused and follow your own attendance.</div></div><div class="chip"><div id="av" class="av"></div><div style="line-height:1.25"><b id="dname" style="font-size:14px"></b><div id="dsub" style="font-size:12px;color:var(--muted)"></div></div><button class="so" id="out">Sign out</button></div></div>
+  <div class="dtop"><div class="tt"><div class="t1">LAGOS REGION CHOIR</div><div class="t2">Check in, ask to be excused and follow your own attendance.</div></div><div class="chip"><div id="av" class="av"></div><div style="line-height:1.25"><b id="dname" style="font-size:14px"></b><div id="dsub" style="font-size:12px;color:var(--muted)"></div></div><a class="so staffgo hide" href="staff.html" style="text-decoration:none;margin-right:6px">Staff page</a><button class="so" id="out">Sign out</button></div></div>
   <h2 id="ptitle" class="ptitle">Home</h2>
   <div id="app" style="margin-top:16px">
 
@@ -284,7 +285,7 @@ const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.go
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 let token = '', gTok = '', gAt = 0, home = null, abs = null, att = null, onFresh = null, reading = null;
-try { token = sessionStorage.getItem('rbcMTok') || ''; } catch (e) {}
+try { token = sessionStorage.getItem('rbcMTok') || sessionStorage.getItem('rbcTok') || ''; } catch (e) {}
 const say = (id, t, k) => { $(id).textContent = t || ''; $(id).className = 's' + (k ? ' ' + k : ''); };
 const D = ms => new Date(Number(ms));
 const dlong = ms => D(ms).toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'short', year: 'numeric'});
@@ -302,7 +303,7 @@ async function call(body) {
   }
 }
 function signedOutNow(msg) {
-  token = ''; try { sessionStorage.removeItem('rbcMTok'); } catch (e) {}
+  token = ''; try { sessionStorage.removeItem('rbcMTok'); sessionStorage.removeItem('rbcTok'); } catch (e) {}
   $('inv').classList.add('hide'); $('outv').classList.remove('hide'); say('m1', msg || '', msg ? 'bad' : '');
 }
 const TITLES = ['', 'Home', 'My requests', 'My attendance', 'My profile'];
@@ -324,7 +325,7 @@ async function googleDone(resp) {
   try {
     const j = await call({action: 'signin.google', idToken: resp.credential, memberId: $('mid').value.trim()});
     if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
-    token = j.token; gTok = resp.credential; gAt = Date.now(); try { sessionStorage.setItem('rbcMTok', token); } catch (e) {}
+    token = j.token; gTok = resp.credential; gAt = Date.now(); try { sessionStorage.setItem('rbcMTok', token); sessionStorage.setItem('rbcTok', token); } catch (e) {}
     enter(j.name);
   } catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
 }
@@ -338,7 +339,7 @@ function gisInit() {
   } catch (e) { say('m1', 'Google sign-in is not available right now.', 'bad'); } };
   document.head.appendChild(gs);
 }
-function enter(name) { $('outv').classList.add('hide'); $('inv').classList.remove('hide'); setWho({name: name}); tab(1); }
+function enter(name) { $('outv').classList.add('hide'); $('inv').classList.remove('hide'); setWho({name: name}); tab(1); call({action: 'me', token}).then(m => { if (m && m.ok && (m.tabs || []).indexOf('home') !== -1) document.querySelectorAll('.staffgo').forEach(a => a.classList.remove('hide')); }).catch(() => {}); }
 function setWho(h) {
   const sub = [h.campus ? h.campus + ' Campus' : '', h.part || ''].filter(Boolean).join(' · ') || 'Choir Member';
   $('hello').textContent = 'Hello, ' + short(h.name); $('hsub').textContent = sub;
@@ -356,7 +357,7 @@ $('codego').onclick = async () => {
   say('m1', 'Checking the code…');
   try { const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
     if (!j.ok) return say('m1', j.error || 'That code did not work.', 'bad');
-    token = j.token; try { sessionStorage.setItem('rbcMTok', token); } catch (e) {} enter(j.name); }
+    token = j.token; try { sessionStorage.setItem('rbcMTok', token); sessionStorage.setItem('rbcTok', token); } catch (e) {} enter(j.name); }
   catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
 };
 $('help').onclick = () => $('helpbox').classList.remove('hide');

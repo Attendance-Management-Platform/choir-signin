@@ -726,7 +726,7 @@ const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxdSQPQ28ALJAaDnTpA
 if (!BACKEND_URL) setTimeout(() => { const n = document.getElementById('notconn'); if (n) n.classList.remove('hide'); }, 0);
 const $ = id => document.getElementById(id);
 let token = '', timer = null;
-try { token = sessionStorage.getItem('rbcTok') || ''; } catch (e) {}
+try { token = sessionStorage.getItem('rbcTok') || sessionStorage.getItem('rbcMTok') || ''; } catch (e) {}
 let pending = 0, busyT = null;
 let ckRid = '';
 async function call(body) {
@@ -841,9 +841,9 @@ function navHtml() {
 function drawTabs() {
   $('tabs').innerHTML = '<button type="button" class="rt rtg" id="railtg" title="Show or hide the menu" aria-label="Show or hide the menu">' + MENU + '<span>Hide menu</span></button>' +
     '<div class="rt rtb"><img src="../logo.png" alt="CCW logo"><div class="n1">CELEBRATION<br>CHURCH WORSHIP</div><div class="n2">LAGOS REGION CHOIR</div></div>' +
-    navHtml() +
+    navHtml() + (myTabs.indexOf('absence') !== -1 ? '<button class="tab" type="button" data-mp="1" title="Your own attendance, absences and details" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg><span>My member page</span></button>' : '') +
     '<div class="rt rtu"><b>' + esc(myName || 'Signed in') + '</b>' + esc(myRoles.join(', ')) + '</div>';
-  document.querySelectorAll('.tab').forEach(b => b.onclick = () => go(b.dataset.v));
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => b.dataset.mp ? (location.href = 'member.html') : go(b.dataset.v));
   document.querySelectorAll('.gh').forEach(h => h.onclick = () => { const g = h.dataset.ng, shut = !NAVSHUT[g]; NAVSHUT[g] = shut; try { localStorage.setItem('rbcNavShut', JSON.stringify(NAVSHUT)); } catch (e) {} h.parentNode.classList.toggle('shut', shut); h.setAttribute('aria-expanded', shut ? 'false' : 'true'); });
   $('railtg').onclick = () => { const open = document.body.classList.toggle('rail-open'); try { localStorage.setItem('rbcRail', open ? '1' : '0'); } catch (e) {} };
   $('who').innerHTML = myName ? '<b>' + esc(myName) + '</b>' + (myRoles.length ? '<span class="s">' + esc(myRoles.join(', ')) + '</span>' : '') : '<b>Signed in</b>';
@@ -877,7 +877,7 @@ function pgClear(id) {
 }
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-pgx]'); if (b) pgClear(b.dataset.pgx); });
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
-function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
+function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); sessionStorage.removeItem('rbcMTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
 function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17']) $(x).classList.toggle('hide', x !== id);
   const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   const ph = PAGEHEAD[id]; $('ph').classList.toggle('hide', !ph);
@@ -2625,7 +2625,7 @@ $('verify').onclick = async () => {
   try {
     const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
     if (!j.ok) return say('m2', j.error || 'Could not sign in.', 'bad');
-    token = j.token; try { sessionStorage.setItem('rbcTok', token); } catch (e) {}
+    token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
     setMe(j); drawTabs(); land(); welcome();
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 };
@@ -2792,7 +2792,7 @@ async function googleDone(resp) {
   try {
     const j = await call({action: 'signin.google', idToken: resp.credential, memberId: $('mid').value.trim()});
     if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
-    token = j.token; try { sessionStorage.setItem('rbcTok', token); } catch (e) {}
+    token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
     setMe(j); drawTabs(); land(); welcome();
   } catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
 }
