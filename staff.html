@@ -1092,7 +1092,8 @@ function homeCharts(c, drill, canSee, canPick) {
     L = {id: ANROWS.id, date: sr.date || ANROWS.date || '', present: t.present, absent: t.absent, excused: t.excused, eligible: t.total, rate: t.rate};
     camps = anGroup(ANCAMP ? rows : ANROWS.rows, 'campus', 'No campus'); parts = anGroup(rows, 'part', 'No part');
   } else { const prev = c.series.length > 1 ? c.series[c.series.length - 2] : null; delta = prev ? (Math.round((L.rate - prev.rate) * 10) / 10) : null; }
-  const TB = [['ov', 'Overview'], ['tr', 'Trend'], ['cp', 'By campus']].concat(parts ? [['pt', 'By part']] : []);
+  if (c.campusOnly && !ANROWS) camps = (c.parts || []).map(x => ({name: x.part, value: x.rate, a: x.present, b: x.eligible})).sort((a, b) => b.value - a.value);
+  const TB = [['ov', 'Overview'], ['tr', 'Trend'], ['cp', c.campusOnly ? 'By part' : 'By campus']].concat(parts ? [['pt', 'By part']] : []);
   const tab = TB.some(x => x[0] === ANTAB) ? ANTAB : 'ov', hid = k => tab === k ? '' : ' hidden';
   const rid = ANROWS ? ANROWS.id : (last.id || '');
   const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="Type or choose" onfocus="this.select()" value="' + esc(rid) + '"><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + anDays(c).map(d => '<option value="All on ' + esc(d) + '">Whole day, ' + c.series.filter(x => x.date === d).length + ' rehearsals</option>').join('') + '</datalist></div>' +
@@ -1101,7 +1102,7 @@ function homeCharts(c, drill, canSee, canPick) {
   const kpis = '<div class="kpis">' + kp('Attendance rate', L.rate + '%', esc(L.id || '') + (delta === null ? '' : ' · ' + (delta >= 0 ? '+' : '') + delta + ' pts'), rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'approved absences', SOFT) + '</div>';
   const idl = (L.id || '') + (L.date ? ' · ' + L.date : '') + (ANCAMP ? ' · ' + ANCAMP : '');
   const cpBody = ANCAMP ? kpis + '<div class="anbox" style="margin-top:22px"><div class="ct" style="margin-bottom:8px">' + esc(ANCAMP) + ' · by part</div>' + rankBars(parts, {unit: '%', drill: false}) + '</div>'
-    : '<div class="anbox"><div class="ct" style="margin-bottom:8px">By campus · ' + esc(L.id || 'last rehearsal') + '</div>' + rankBars(camps, {unit: '%', drill: drill}) + '</div>';
+    : '<div class="anbox"><div class="ct" style="margin-bottom:8px">' + (c.campusOnly ? esc(c.campusOnly) + ' · by part · ' : 'By campus · ') + esc(L.id || 'last rehearsal') + '</div>' + rankBars(camps, {unit: '%', drill: c.campusOnly ? false : drill}) + '</div>';
   return '<div class="card anl rise"><div class="anh"><div><div class="ct">Analytics</div><p class="sub">Official attendance' + (idl ? ' · ' + esc(idl) : '') + '</p></div>' + pick + '</div>' +
     '<div class="fpchips antabs" style="margin-top:16px">' + TB.map(x => '<button type="button" class="fpchip' + (tab === x[0] ? ' on' : '') + '" data-antab="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
     '<div class="anp" data-p="ov"' + hid('ov') + '>' + anHero(L, delta) + '</div>' +
@@ -1903,7 +1904,8 @@ let rpPreset = '', anLast = null;
 const AN_PRE = {campus6: {m: 'rate', b: 'campus', p: 'last6'}, month: {m: 'rate', b: 'month', p: 'thisyear'}, combo: {m: 'rate', b: 'campuspart', p: 'last3months'}, absentpart: {m: 'absent', b: 'part', p: 'thisyear'}, streak: {m: 'streak', b: 'rehearsal', p: 'last6'}};
 function anFill() {
   const o = rpState || {campuses: [], parts: []}, c = $('anc').value, p = $('anp').value;
-  $('anc').innerHTML = '<option value="">All campuses</option>' + (o.campuses || []).map(x => '<option>' + esc(x) + '</option>').join('');
+  $('anc').innerHTML = (o.campusOnly ? '' : '<option value="">All campuses</option>') + (o.campuses || []).map(x => '<option>' + esc(x) + '</option>').join('');
+  ['campus6', 'combo'].forEach(k => { const b = document.querySelector('[data-anpreset="' + k + '"]'); if (b) b.classList.toggle('hide', !!o.campusOnly); });
   $('anp').innerHTML = '<option value="">All parts</option>' + (o.parts || []).map(x => '<option>' + esc(x) + '</option>').join('');
   if (c) $('anc').value = c; if (p) $('anp').value = p;
   anShape();
