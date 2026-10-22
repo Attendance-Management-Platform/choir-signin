@@ -2266,6 +2266,8 @@ function drawSettingsSystem(sys) {
     st('In real use', sys.live ? 'Yes' : 'Not yet', sys.live, sys.live ? 'The system is live.' : 'Still being set up. rbcProdGoLive switches it on.') +
     st('Practice mode', sys.practice ? 'On' : 'Off', !sys.practice, sys.practice ? 'Changes can be undone with rbcPracticeUndo.' : 'Changes are kept.') +
     st('Saving', sys.saving ? 'On' : 'Off', sys.saving, sys.saving ? 'New changes are saved.' : 'Nothing new is saved. Pages still show data.') +
+    (() => { const bk = sys.backup, old = !bk || Date.now() - bk.atMs > 8 * 86400000;
+      return '<div class="mrow"><span class="mtx"><b>Weekly safety copy</b><span>' + (bk ? 'Last copy: ' + esc(bk.name) + ', saved in the owner\'s Google Drive' + (bk.url ? ' · <a href="' + esc(bk.url) + '" target="_blank" rel="noopener">open it</a>' : '') : 'No copy yet. The owner sets up the weekly copy in Apps Script.') + '</span></span><span class="pill ' + (old ? 'p-pend' : 'p-ok') + '">' + (bk ? (old ? 'Overdue' : 'Fine') : 'Not set up') + '</span></div>'; })() +
     '</div><div id="ssyshealth"></div>';
   drawHealth(sys.health, 'ssyshealth');
 }
