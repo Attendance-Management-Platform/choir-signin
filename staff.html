@@ -237,13 +237,20 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .nt{border:1px solid #EFE3CC;border-radius:16px;padding:18px 20px;margin:0 0 14px;background:#fff}.nt:last-child{margin-bottom:0}.nt .ct{font-size:16px}
 @media(max-width:899px){.anl .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.anl .anr{grid-template-columns:1fr}}
 @media(max-width:480px){.anl,.ntc{padding:20px 16px}.anl .kpis{gap:12px}.anl .kpi .kv{font-size:26px}}
-/* Insight cards: change since last time, lowest and highest */
-.ainr{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:12px;margin:16px 0 0}
-.ain{border:1px solid #E7ECF6;border-left:4px solid var(--ic,#8A94A6);border-radius:14px;background:linear-gradient(160deg,#fff 55%,var(--it,#F5F7FB));padding:12px 14px;min-width:0}
-.ain.up{--ic:#20775A;--it:#EAF6F0}.ain.dn{--ic:#B4232A;--it:#FCEEEE}.ain.eq{--ic:#8A94A6;--it:#F3F5F8}.ain.lo{--ic:#D98A00;--it:#FFF6E3}.ain.hi{--ic:#2F4F86;--it:#EEF3FC}
-.aink{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#5E6A7E}
-.ainv{font-size:19px;font-weight:900;color:#172039;margin-top:4px;line-height:1.2}.ain.up .ainv{color:#20775A}.ain.dn .ainv{color:#B4232A}
-.ains{font-size:12.5px;color:#5E6A7E;margin-top:3px}
+/* Insight tiles: change since last time, lowest and highest. Same family as the Home number tiles: icon badge, big value, accent bar */
+.ainr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0 0}
+.ain{position:relative;overflow:hidden;min-width:0;display:flex;flex-direction:column;gap:6px;min-height:132px;padding:16px 16px 16px 22px;border:1px solid #E7ECF6;border-radius:18px;background:linear-gradient(155deg,#fff 45%,var(--it,#F5F7FB));box-shadow:0 6px 20px rgba(20,35,61,.06);transition:transform .2s ease,box-shadow .2s ease}
+.ain:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(30,45,90,.12)}
+.ain:before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:5px;border-radius:0 5px 5px 0;background:var(--ic,#8A94A6)}
+.ain:after{content:"";position:absolute;right:-30px;bottom:-30px;width:110px;height:110px;border-radius:50%;background:var(--ic,#8A94A6);opacity:.07}
+.ain.up{--ic:#20775A;--it:#E6F5EE}.ain.dn{--ic:#B4232A;--it:#FCEBEB}.ain.eq{--ic:#8A94A6;--it:#F1F3F7}.ain.lo{--ic:#D98A00;--it:#FFF3DC}.ain.hi{--ic:#2F4F86;--it:#E9F0FC}
+.ainh{display:flex;align-items:center;gap:10px}
+.aini{flex:none;width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--ic);box-shadow:inset 0 0 0 1px rgba(0,0,0,.05),0 3px 8px rgba(20,35,61,.08)}
+.aini svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.aink{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#5E6A7E;line-height:1.25}
+.ainv{font-size:26px;font-weight:900;color:#172039;line-height:1.1;margin-top:4px;overflow-wrap:anywhere}.ain.up .ainv,.ain.dn .ainv{color:var(--ic)}
+.ains{font-size:12.5px;color:#5E6A7E;margin-top:auto}
+@media(max-width:640px){.ainr{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ainr>.ain:first-child:nth-last-child(odd){grid-column:1/-1}.ain{min-height:112px;padding:14px 12px 14px 18px}.ainv{font-size:20px}}
 .anpicks{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}.anpick{min-width:170px;flex:0 1 200px}
 input[list].in::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:38px;height:100%;cursor:pointer}
 input[list].in{position:relative}
@@ -1184,10 +1191,11 @@ function anDays(c) { const n = {}; (c.series || []).forEach(x => { if (x.date) n
 function anVs(rate, delta, pid) { const prev = Math.round((Number(rate) - Number(delta)) * 10) / 10, ref = (pid ? esc(pid) + ' (' + prev + '%)' : prev + '%'); return delta === 0 ? 'Same as ' + ref : (delta > 0 ? 'Up ' : 'Down ') + Math.abs(delta) + ' points from ' + ref; }
 /** Three small cards under the numbers: the change since the rehearsal before, the lowest and the highest campus (or part). Used on Home and Reports. */
 function anInsights(o) {
-  const t = [], card = (cls, k, v, sub) => '<div class="ain ' + cls + '"><div class="aink">' + k + '</div><div class="ainv">' + v + '</div><div class="ains">' + sub + '</div></div>';
+  const IC = {up: '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>', dn: '<path d="M3 7l6 6 4-4 8 8"/><path d="M14 17h7v-7"/>', eq: '<path d="M5 12h14"/>', lo: '<path d="M12 5v14M6 13l6 6 6-6"/>', hi: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0z"/><path d="M17 5h3v2a3 3 0 01-3 3M7 5H4v2a3 3 0 003 3"/>'};
+  const t = [], card = (cls, k, v, sub) => '<div class="ain ' + cls + '"><div class="ainh"><span class="aini"><svg viewBox="0 0 24 24" aria-hidden="true">' + IC[cls] + '</svg></span><span class="aink">' + k + '</span></div><div class="ainv">' + v + '</div><div class="ains">' + sub + '</div></div>';
   if (o.delta !== null && o.delta !== undefined) {
     const d = Number(o.delta), prev = Math.round((Number(o.rate) - d) * 10) / 10;
-    t.push(card(d > 0 ? 'up' : d < 0 ? 'dn' : 'eq', 'Since the rehearsal before', (d > 0 ? '\u25B2 ' : d < 0 ? '\u25BC ' : '') + (d === 0 ? 'No change' : Math.abs(d) + ' points ' + (d > 0 ? 'up' : 'down')), 'was ' + prev + '%' + (o.prevId ? ' at ' + esc(o.prevId) : '')));
+    t.push(card(d > 0 ? 'up' : d < 0 ? 'dn' : 'eq', 'Since the rehearsal before', (d === 0 ? 'No change' : (d > 0 ? '+' : '\u2212') + Math.abs(d) + ' pts'), (d > 0 ? 'Up' : d < 0 ? 'Down' : 'Same') + ' from ' + prev + '%' + (o.prevId ? ' at ' + esc(o.prevId) : '')));
   }
   const l = (o.list || []).filter(x => x && x.name).slice().sort((a, b) => a.value - b.value), kind = o.kind || 'campus';
   if (l.length > 1) {
