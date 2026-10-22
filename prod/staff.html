@@ -1851,11 +1851,13 @@ function calActs(day, es, j, dayView) {
   const today = (j && j.today) || '', isPast = day < today, has = k => myTabs.indexOf(k) !== -1;
   const rehs = es.filter(e => e.type === 'rehearsal' && e.status !== 'Cancelled'), live = rehs.filter(e => e.status === 'Planned' || e.status === 'Open');
   const acts = [];
-  if (!isPast && !rehs.length && has('rehearsal')) acts.push('<button class="btn red sm" type="button" data-calmake="' + esc(day) + '">Set up a rehearsal on this day</button>');
-  if (live.length && has('rehearsal')) acts.push('<button class="btn line sm" type="button" data-calgo="s8">Open ' + esc(live[0].id) + ' to edit it</button>');
+  // Only the people who set up rehearsals see "Set up" (Desk B, Global Admin, Assistant Global Admin). Desk D runs the room: it can only look at a rehearsal and confirm the venue.
+  const setUp = j && j.canSetUp !== undefined ? j.canSetUp === true : has('rehearsal');
+  if (!isPast && !rehs.length && setUp) acts.push('<button class="btn red sm" type="button" data-calmake="' + esc(day) + '">Set up a rehearsal on this day</button>');
+  if (live.length && has('rehearsal')) acts.push('<button class="btn line sm" type="button" data-calgo="s8">' + (setUp ? 'Open ' + esc(live[0].id) + ' to edit it' : 'See ' + esc(live[0].id) + ' on Rehearsals') + '</button>');
   if (!isPast && live.length && has('absence') && !myStaffOnly && myRoles.indexOf('Pastor in Charge') === -1 && !RC.you(live[0].id)) acts.push('<button class="btn line sm" type="button" data-calgo="s6">Ask to be excused from ' + esc(live[0].id) + '</button>');
   if (!isPast && has('absence')) acts.push('<button class="btn line sm" type="button" data-calaway="' + esc(day) + '">Ask for time away from this day</button>');
-  return acts.join('') + (acts.length && !isPast && has('rehearsal') && !rbDeskB() && !rehs.length ? '<div class="rc-sub" style="width:100%">Setting up a rehearsal in place of Desk B needs a reason, and Desk B is told.</div>' : '');
+  return acts.join('') + (acts.length && !isPast && setUp && !rbDeskB() && !rehs.length ? '<div class="rc-sub" style="width:100%">Setting up a rehearsal in place of Desk B needs a reason, and Desk B is told.</div>' : '');
 }
 document.addEventListener('click', ev => {
   const t = ev.target.closest && ev.target.closest('[data-calmake],[data-calgo],[data-calaway]'); if (!t) return;
