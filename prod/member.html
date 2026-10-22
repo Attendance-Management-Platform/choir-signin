@@ -108,7 +108,7 @@ input.in{height:48px;padding:0 14px}
   .chip .so{height:40px;padding:0 14px;background:#fff;border:1px solid #D5DAE3;color:var(--ink);font-size:14px}
   .chip .so:hover{border-color:var(--red);color:var(--red);background:var(--rose)}
   .ptitle{display:block;font-size:22px;font-weight:900;margin:0 0 14px;color:var(--ink)}
-  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:18px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:14px;margin-bottom:18px}
   .tl{background:#FFF6F6;border:1px solid #F3D3D5;border-radius:14px;padding:14px 16px}
   .tl.am{background:#FFF4DF;border-color:#F0E2C9}
   .tl .a{font-size:13px;color:var(--muted);font-weight:700}.tl .n{font-size:26px;font-weight:900;color:var(--deep);line-height:1.2}.tl .c{font-size:12px;color:var(--muted)}
@@ -117,7 +117,7 @@ input.in{height:48px;padding:0 14px}
   .grid .wide{grid-column:1 / -1}
   .card{padding:22px 24px;border-radius:18px}
   .big{font-size:26px}
-  #attlist{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px!important}
+  #attlist{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr));gap:14px!important}
 }
 
 /* search and filters (same rules as the staff pages) */
@@ -165,10 +165,10 @@ input.in{height:48px;padding:0 14px}
 .ugtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.ugtop b{font-size:14.5px;line-height:1.3;flex:1}.ugi{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;background:var(--ac)}
 .ugk{margin:12px 0 4px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:var(--muted)}.ugh{font-size:13px;line-height:1.55;color:var(--fg)}
 .ugt .ugs{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-#mfl_req,#mfl_det,#rmine .col{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px!important}
-#mfl_att{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px!important}
+#mfl_req,#mfl_det,#rmine .col{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:12px!important}
+#mfl_att{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),1fr));gap:12px!important}
 #mfl_req>.mfpg,#mfl_det>.mfpg,#mfl_att>.mfpg,#mfl_req>:not(.ugt),#mfl_det>:not(.ugt),#mfl_att>:not(.ugt){grid-column:1/-1}
-.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.tgrid .ugt .ugtop b{font-size:13px}.tgrid .ugt .s{margin-left:40px;word-break:break-word}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:10px}.tgrid .ugt .ugtop b{font-size:13px}.tgrid .ugt .s{margin-left:40px;word-break:break-word}
 #attlist>*{grid-column:1/-1}
 /* Calendar: Day, Week and Month */
 .rc-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
