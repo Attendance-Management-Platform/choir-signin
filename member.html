@@ -215,6 +215,7 @@ input.in{height:48px;padding:0 14px}
 .rc-pill{margin-left:auto;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}
 .rc-pill.rc-pl{background:#E7EEFB;color:#2F4F86}.rc-pill.rc-op{background:#E3F4EC;color:#20775A}.rc-pill.rc-hd{background:#EEF0F4;color:#5E6A7E}.rc-pill.rc-cx{background:#FDECEC;color:#B4232A}
 .rc-sub{font-size:13px;color:#5E6A7E;margin-top:4px}
+.rc-you{display:inline-block;margin-top:8px;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}.rc-you-ok{background:#E3F4EC;color:#20775A}.rc-you-wait{background:#FFF3DC;color:#9A5B00}.rc-you-no{background:#FDECEC;color:#B4232A}
 .rc-tag{font-size:13px;font-weight:700;border-radius:10px;padding:7px 10px}.rc-tag.rc-away{background:#FFF6E3;color:#8A5200}.rc-tag.rc-cover,.rc-tag.rc-open{background:#F4EEFC;color:#5D3790}
 .rc-acts{display:flex;gap:8px;flex-wrap:wrap}.rc-acts .btn{margin:0;width:auto;min-height:0;height:auto;font-size:14px;padding:9px 14px;line-height:1.3}
 .rc-oneday .rc-row{padding:18px}.rc-oneday .rc-date{width:84px;padding:12px 0}.rc-oneday .rc-date b{font-size:32px}
@@ -282,12 +283,12 @@ input.in{height:48px;padding:0 14px}
      <div class="card col"><div class="cth">Request an absence</div>
       <div><div style="font-size:14px;font-weight:900">Which rehearsal?</div><div id="rwhich" class="in" style="background:#F7F9FC;height:auto"></div></div>
       <div id="rinfo" class="good"></div>
-      <div id="rform" class="hide"><label for="rreason" style="font-size:14px;font-weight:900">Reason</label><textarea id="rreason" class="in" rows="3" maxlength="300" placeholder="At least 10 characters"></textarea><div class="s" style="margin-top:4px">Only the people who decide your request can read this.</div>
+      <div id="rform" class="hide"><div id="rduty"></div><label for="rreason" style="font-size:14px;font-weight:900">Reason</label><textarea id="rreason" class="in" rows="3" maxlength="300" placeholder="At least 10 characters"></textarea><div class="s" style="margin-top:4px">Only the people who decide your request can read this.</div>
        <div style="font-size:14px;font-weight:900;margin-top:12px">What happens next</div><ol class="steps s" style="margin:4px 0 0;padding-left:20px"><li>Your Campus Music Director checks it.</li><li>The Global Admin approves or rejects it.</li><li>You can withdraw it while it is still pending.</li></ol>
        <button id="rsend" class="btn btn-red">Send request</button></div>
       <div id="m3" class="s"></div>
       <div class="s">Late request? Ask the Global Admin or Assistant to send it for you.</div></div>
-     <div class="col"><div style="font-size:18px;font-weight:900">My requests</div><div id="rmine" class="col"></div></div>
+     <div class="col"><div style="font-size:18px;font-weight:900">My requests</div><div id="raway" class="col"></div><div id="rmine" class="col"></div></div>
     </div>
    </div>
 
@@ -403,9 +404,12 @@ const RC = (function () {
     const st = ST[r.status] || ST.Planned;
     const time = r.startMs ? tm(r.startMs) + (r.finishMs ? ' – ' + tm(r.finishMs) : '') : '';
     return '<div class="rc-ev ' + st[0] + '"><div class="rc-evt"><b>' + e(r.id) + '</b>' + (time ? '<span class="rc-time">' + e(time) + '</span>' : '') + '<span class="rc-pill ' + st[0] + '">' + e(st[1]) + '</span></div>' +
-      (r.venue ? '<div class="rc-sub">' + e(r.venue) + '</div>' : '') + (r.description ? '<div class="rc-sub">' + e(r.description) + '</div>' : '') + '</div>';
+      (r.venue ? '<div class="rc-sub">' + e(r.venue) + '</div>' : '') + (r.description ? '<div class="rc-sub">' + e(r.description) + '</div>' : '') + youLine(r) + '</div>';
   }
   const other = x => '<div class="rc-tag rc-' + e(x.type) + '">' + e(x.label) + '</div>';
+  // "You": the signed-in person's own standing for this rehearsal (choir members only).
+  const youOf = id => { for (const m in S.cache) { const y = (S.cache[m] && S.cache[m].you) || {}; if (y[id]) return y[id]; } return ''; };
+  const youLine = r => { const y = youOf(r.id); if (!y) return ''; const c = y === 'Excused' ? 'rc-you-ok' : y === 'Waiting' ? 'rc-you-wait' : 'rc-you-no'; return '<div class="rc-you ' + c + '">You: ' + e(y === 'Waiting' ? 'Request waiting' : y) + '</div>'; };
 
   function head() {
     const v = S.view, at = S.at;
@@ -485,13 +489,13 @@ const RC = (function () {
     }
     draw();
   }
-  return {mount: mount, refresh: () => { S.cache = {}; draw(); }};
+  return {mount: mount, refresh: () => { S.cache = {}; draw(); }, you: youOf};
 })();
 async function loadCal(m) {
   say('m5', '');
   let a = abs;
   try { if (!a) a = await call({action: 'absence.state', token}); } catch (x) { a = null; }
-  const open = a && a.ok && a.rehearsal && a.rehearsal.open && !a.live ? a.rehearsal.id : '';
+  const open = a && a.ok && a.rehearsal && a.rehearsal.open && !a.live && !a.awayExcused && !a.noAbsence ? a.rehearsal.id : '';
   RC.mount('rcal', {at: m ? m + '-01' : undefined, load: month => call({action: 'calendar.state', token, month: month}),
     onError: t => { if (t === 'signedOut') return signedOutNow('Please sign in again.'); say('m5', t, t ? 'bad' : ''); },
     actions: (day, es) => es.some(e => e.type === 'rehearsal' && e.id === open) ? '<button class="btn btn-line" type="button" data-calask="1" style="margin:0;width:auto">Ask to be excused from ' + esc(open) + '</button>' : ''});
@@ -644,7 +648,13 @@ async function loadReqs() {
     else if (rh.open) { box.className = 'good'; box.textContent = 'You are in time. Requests close ' + dtm(rh.closeMs) + '.'; }
     else { box.className = 'note'; box.textContent = 'Requests for this rehearsal are closed. Please contact the Global Admin or Assistant Global Admin.'; }
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
-    if (j.awayHint && rh && rh.open && !live && !$('rreason').value) { $('rreason').value = j.awayHint.reason; box.textContent += ' You are on an away notice, so your reason is filled in. Press the button to ask to be excused.'; }
+    if (j.noAbsence) { box.className = 'note'; box.textContent = 'The Pastor in Charge is not counted at rehearsals, so there is nothing to ask for here.'; $('rform').classList.add('hide'); }
+    else if (j.awayExcused && rh) { box.className = 'good'; box.textContent = 'You are already excused from this rehearsal by your approved time away.'; $('rform').classList.add('hide'); }
+    const duties = (home && home.rehearsalDuties) || [];
+    $('rduty').innerHTML = duties.length ? '<div class="note" style="margin:0 0 10px">You are also ' + esc(duties.join(' and ')) + ', which is needed on rehearsal day. If you will miss that work too, ask for time away on the staff page (My absence, Being away) so someone covers you.</div>' : '';
+    $('raway').innerHTML = (j.awayItems || []).map(n => tile({tone: n.status === 'Approved' ? 'ok' : 'warn', icon: n.status === 'Approved' ? '\u2713' : '\u2026', title: esc('Time away ' + n.start + (n.end !== n.start ? ' to ' + n.end : '')),
+      pill: '<span class="pill ' + (n.status === 'Approved' ? 'p-ok' : 'p-pend') + '">' + (n.status === 'Approved' ? 'Approved' : 'Waiting') + '</span>',
+      body: esc(n.status === 'Approved' ? 'From your approved time away: rehearsals in these days count as Excused.' : 'From your time away, still waiting for a yes. Once approved, rehearsals in these days count as Excused.')})).join('');
     say('m3', rh && rh.open && live ? 'You already have a request for this rehearsal.' : '');
     const reqCard = r => tile({tone: (r.status === 'Withdrawn' && r.note && /^Cancelled by/.test(r.note)) ? 'no' : ({Approved: 'ok', Rejected: 'no', Pending: 'warn', Appeal: 'ask', Withdrawn: 'gr'}[r.status] || 'warn'), icon: ({Approved: '\u2713', Rejected: '\u2715', Pending: '\u2026', Appeal: '!', Withdrawn: '\u2013'}[r.status] || '\u2026'), title: esc(dshort(r.rehearsalStartMs)) + ' rehearsal', pill: pill(r.status, r), sub: esc(subOf(r)) + (r.late ? ' \u00b7 late' : ''), body:
       (r.reason ? '<div class="s">' + esc(r.reason) + (r.note ? ' \u00b7 Note: ' + esc(r.note) : '') + '</div>' : '') +

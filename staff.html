@@ -458,6 +458,13 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 .stats{gap:18px}#hgrid.stats{gap:18px}.stat{padding:18px 22px}
 #htasks .fplist{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
 @media(max-width:480px){.ugt{padding:16px 18px 16px 20px}.ugt:before{top:16px;bottom:16px}#htasks .fplist,#hnotes .fplist,#mbupd .fplist,#mbreq .fplist,#mbdet .fplist,#pwait .fplist,#pready .fplist,#pmine .fplist,.tgrid{gap:16px;padding:6px 6px 10px 2px}#qrows{gap:16px}#qrows .qrow{padding:16px 18px 16px 20px}.fprow{padding:14px 16px}}
+/* Sign-in pop-up: what is waiting for your answer */
+.wpop{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000;animation:wpin .2s ease}
+.wpopc{background:#fff;border-radius:20px;max-width:440px;width:100%;padding:22px;box-shadow:0 24px 60px rgba(15,23,42,.3);border-top:5px solid #B6000A}
+.wpoph{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}.wpoph b{font-size:18px;color:#172039}
+.wpopi{flex:none;width:34px;height:34px;border-radius:50%;background:#FDECEC;color:#B6000A;font-weight:900;display:flex;align-items:center;justify-content:center}
+.wpopr{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #EEF0F4;font-size:15px}.wpopr .btn{margin:0;width:auto}
+@keyframes wpin{from{opacity:0}to{opacity:1}}
 /* Calendar: Day, Week and Month */
 .rc-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .rc-segs{display:inline-flex;background:#F1F3F7;border-radius:12px;padding:4px;gap:2px}
@@ -503,6 +510,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 .rc-pill{margin-left:auto;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}
 .rc-pill.rc-pl{background:#E7EEFB;color:#2F4F86}.rc-pill.rc-op{background:#E3F4EC;color:#20775A}.rc-pill.rc-hd{background:#EEF0F4;color:#5E6A7E}.rc-pill.rc-cx{background:#FDECEC;color:#B4232A}
 .rc-sub{font-size:13px;color:#5E6A7E;margin-top:4px}
+.rc-you{display:inline-block;margin-top:8px;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}.rc-you-ok{background:#E3F4EC;color:#20775A}.rc-you-wait{background:#FFF3DC;color:#9A5B00}.rc-you-no{background:#FDECEC;color:#B4232A}
 .rc-tag{font-size:13px;font-weight:700;border-radius:10px;padding:7px 10px}.rc-tag.rc-away{background:#FFF6E3;color:#8A5200}.rc-tag.rc-cover,.rc-tag.rc-open{background:#F4EEFC;color:#5D3790}
 .rc-acts{display:flex;gap:8px;flex-wrap:wrap}.rc-acts .btn{margin:0;width:auto;min-height:0;height:auto;font-size:14px;padding:9px 14px;line-height:1.3}
 .rc-oneday .rc-row{padding:18px}.rc-oneday .rc-date{width:84px;padding:12px 0}.rc-oneday .rc-date b{font-size:32px}
@@ -629,6 +637,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
 <div id="pundo"></div>
 <div id="paw"></div>
+<div id="prun"></div>
 <div id="pwait"></div>
 <div id="pready"></div>
 <div class="card pad rise"><div class="ct">Ask for a change</div>
@@ -1568,9 +1577,12 @@ const RC = (function () {
     const st = ST[r.status] || ST.Planned;
     const time = r.startMs ? tm(r.startMs) + (r.finishMs ? ' – ' + tm(r.finishMs) : '') : '';
     return '<div class="rc-ev ' + st[0] + '"><div class="rc-evt"><b>' + e(r.id) + '</b>' + (time ? '<span class="rc-time">' + e(time) + '</span>' : '') + '<span class="rc-pill ' + st[0] + '">' + e(st[1]) + '</span></div>' +
-      (r.venue ? '<div class="rc-sub">' + e(r.venue) + '</div>' : '') + (r.description ? '<div class="rc-sub">' + e(r.description) + '</div>' : '') + '</div>';
+      (r.venue ? '<div class="rc-sub">' + e(r.venue) + '</div>' : '') + (r.description ? '<div class="rc-sub">' + e(r.description) + '</div>' : '') + youLine(r) + '</div>';
   }
   const other = x => '<div class="rc-tag rc-' + e(x.type) + '">' + e(x.label) + '</div>';
+  // "You": the signed-in person's own standing for this rehearsal (choir members only).
+  const youOf = id => { for (const m in S.cache) { const y = (S.cache[m] && S.cache[m].you) || {}; if (y[id]) return y[id]; } return ''; };
+  const youLine = r => { const y = youOf(r.id); if (!y) return ''; const c = y === 'Excused' ? 'rc-you-ok' : y === 'Waiting' ? 'rc-you-wait' : 'rc-you-no'; return '<div class="rc-you ' + c + '">You: ' + e(y === 'Waiting' ? 'Request waiting' : y) + '</div>'; };
 
   function head() {
     const v = S.view, at = S.at;
@@ -1650,7 +1662,7 @@ const RC = (function () {
     }
     draw();
   }
-  return {mount: mount, refresh: () => { S.cache = {}; draw(); }};
+  return {mount: mount, refresh: () => { S.cache = {}; draw(); }, you: youOf};
 })();
 async function loadCalendar(m) {
   say('m14', '');
@@ -1665,7 +1677,7 @@ function calActs(day, es, j, dayView) {
   const acts = [];
   if (!isPast && !rehs.length && has('rehearsal')) acts.push('<button class="btn red sm" type="button" data-calmake="' + esc(day) + '">Set up a rehearsal on this day</button>');
   if (live.length && has('rehearsal')) acts.push('<button class="btn line sm" type="button" data-calgo="s8">Open ' + esc(live[0].id) + ' to edit it</button>');
-  if (!isPast && live.length && has('absence') && !myStaffOnly) acts.push('<button class="btn line sm" type="button" data-calgo="s6">Ask to be excused from ' + esc(live[0].id) + '</button>');
+  if (!isPast && live.length && has('absence') && !myStaffOnly && myRoles.indexOf('Pastor in Charge') === -1 && !RC.you(live[0].id)) acts.push('<button class="btn line sm" type="button" data-calgo="s6">Ask to be excused from ' + esc(live[0].id) + '</button>');
   if (!isPast && has('absence')) acts.push('<button class="btn line sm" type="button" data-calaway="' + esc(day) + '">Ask for time away from this day</button>');
   return acts.join('') + (acts.length && !isPast && has('rehearsal') && !rbDeskB() && !rehs.length ? '<div class="rc-sub" style="width:100%">Setting up a rehearsal in place of Desk B needs a reason, and Desk B is told.</div>' : '');
 }
@@ -1685,7 +1697,7 @@ const PKIND_HELP = {
   top_role: 'Give, change or end a senior role: Global Admin, Global Music Director, Pastor in Charge or System Administrator.',
   desk_cover: 'Another desk holder covers a desk that is away. Up to 14 days, no more than 2 desks away at once.',
   cancel_held: 'Cancel a rehearsal that has already been held (within 36 hours). The Global Music Director and the Pastor in Charge must both say yes.',
-  emergency_open: 'Only while the Global Admin and the Assistant Global Admin are both away. Opens one function to one named person for up to 7 days. The Global Music Director or the Pastor in Charge says yes. It ends by itself.',
+  emergency_open: 'For when the Global Admin and the Assistant are both suddenly unavailable. Opens what you tick to one named person for up to 7 days. The Global Music Director or the Pastor in Charge says yes. If neither answers in 12 hours (or there is neither), you can start a limited version yourself: 48 hours, no absence answers. It ends by itself, or when the Global Admin or Assistant ends it.',
   download: 'Ask for the names and counts of your own campus for one rehearsal or one month. The Assistant Global Admin or Global Admin says yes. You can download once, within 7 days of the yes.'
 };
 let pState = null;
@@ -1702,7 +1714,7 @@ function drawPForm() {
     g.push(pField('pdesk', 'Which desk is away?', pSelect('pdesk', [['A', 'Desk A'], ['B', 'Desk B'], ['C', 'Desk C'], ['D', 'Desk D']])), pField('pawayemail', 'Email of the person who is away', pInput('pawayemail', 'name@example.com', 'email')),
       pField('pcoveremail', 'Email of the person who will cover', pInput('pcoveremail', 'name@example.com', 'email')), pField('pstart', 'First day', pInput('pstart', '', 'date')), pField('pend', 'Last day', pInput('pend', '', 'date')));
   } else if (k === 'emergency_open') {
-    g.push(pField('pfn', 'Which function?', pSelect('pfn', [['rehearsal', 'Set up rehearsals'], ['qr', 'Show the QR'], ['records', 'See attendance records']])), pField('pemail', 'Email of the person it is for', pInput('pemail', 'name@example.com', 'email')), pField('puntil', 'Last day it stays open (7 days at most)', pInput('puntil', '', 'date')));
+    g.push(pField('pfn', 'What may they do?', '<div style="display:flex;flex-direction:column;gap:6px">' + [['rehearsal', 'Set up rehearsals'], ['qr', 'Show the QR'], ['records', 'See attendance records'], ['absence', 'Answer absence requests (only with a yes from the Global MD or Pastor)']].map(o => '<label class="s" style="display:flex;gap:8px"><input type="checkbox" data-pfn="' + o[0] + '"> ' + o[1] + '</label>').join('') + '</div>'), pField('pemail', 'Email of the person it is for', pInput('pemail', 'name@example.com', 'email')), pField('puntil', 'Last day it stays open (7 days at most)', pInput('puntil', '', 'date')));
   } else if (k === 'download') {
     g.push(pField('pscope', 'What do you need?', pSelect('pscope', [['rehearsal', 'One rehearsal'], ['month', 'One month']])), pField('pkey', 'Which one? (a rehearsal ID such as R004, or a month such as 2026-10)', pInput('pkey', 'R004')));
   } else if (k === 'cancel_held') {
@@ -1724,7 +1736,7 @@ async function sendRequest() {
   if (k === 'member') Object.assign(b, {change: pv('pchange'), subjectName: pv('pname'), subjectEmail: pv('pemail'), campus: pv('pcampus'), memberId: pv('pmid')});
   else if (k === 'desk_cover') Object.assign(b, {awayDesk: pv('pdesk'), awayEmail: pv('pawayemail'), coverEmail: pv('pcoveremail'), start: pv('pstart'), end: pv('pend')});
   else if (k === 'cancel_held') Object.assign(b, {rehearsalId: pv('prid')});
-  else if (k === 'emergency_open') Object.assign(b, {fn: pv('pfn'), forEmail: pv('pemail'), until: pv('puntil')});
+  else if (k === 'emergency_open') Object.assign(b, {fns: Array.from(document.querySelectorAll('[data-pfn]')).filter(x => x.checked).map(x => x.dataset.pfn), forEmail: pv('pemail'), until: pv('puntil')});
   else if (k === 'download') Object.assign(b, {scope: pv('pscope'), key: pv('pkey')});
   else { Object.assign(b, {subjectEmail: pv('pemail'), change: pv('pchange')}); if (k === 'desk_staff') { b.desk = pv('pdesk'); b.role = 'Admin Team Member'; } if (k === 'campus_md') { b.campus = pv('pcampus'); b.role = 'Campus Music Director'; } if (k === 'top_role') b.role = pv('prole'); if (k === 'assistant_ga') b.role = 'Assistant Global Admin'; }
   say('m12b', 'Sending…');
@@ -1903,7 +1915,7 @@ function pDetail(r) {
   const d = r.details || {}, bits = [];
   if (r.kind === 'download') bits.push((d.scope === 'month' ? 'Month ' : 'Rehearsal ') + (d.key || '') + ' · ' + (d.campus || 'All campuses'));
   else if (r.kind === 'desk_cover') bits.push('Desk ' + d.awayDesk + ' · covered by ' + (r.subjectName || r.subjectEmail) + ' · ' + d.start + ' to ' + d.end);
-  else if (r.kind === 'emergency_open') bits.push((d.fnName || d.fn) + ' · for ' + (r.subjectName || r.subjectEmail) + ' · ' + d.start + ' to ' + d.until);
+  else if (r.kind === 'emergency_open') bits.push((d.fnName || d.fn) + ' · for ' + (r.subjectName || r.subjectEmail) + ' · ' + d.start + ' to ' + d.until + (d.limited ? ' · started without a yes: ' + (d.limited.fns || []).join(', ') + ' until ' + d.limited.until : ''));
   else if (r.kind === 'cancel_held') bits.push('Rehearsal ' + r.target + (d.onBehalf ? ' · asked on behalf of the Global Admin' : '') + ' · yes so far: ' + ((d.yes || []).map(y => y.role).join(', ') || 'none'));
   else { bits.push((d.change || '') + (r.subjectName ? ' · ' + r.subjectName : '') + (r.subjectEmail ? ' (' + r.subjectEmail + ')' : '')); if (d.role) bits.push(d.role + (d.desk ? ' Desk ' + d.desk : '') + (d.campus ? ' · ' + d.campus : '')); }
   return bits.filter(Boolean).join(' · ');
@@ -1931,8 +1943,9 @@ async function loadPeople(keepMsg) {
       '<input class="in" style="flex:1 1 200px;max-width:340px" placeholder="Reason, if you say no" data-why="' + esc(r.id) + '"><button class="btn warn sm" type="button" data-no="' + esc(r.id) + '">Say no</button></div>')});
     fpPanel('ready', 'pready', {title: 'Approved and ready to carry out', sub: 'Carrying out changes the real list. It is checked first and recorded.', items: j.ready, fields: pFields, empty: 'Nothing is ready to carry out.', card: r => pCard(r, '<p class="sub" style="margin:4px 0 0">You carry this out as: ' + esc(r.as || '') + '</p><div style="margin-top:12px">' + (r.download ? '<button class="btn red sm" type="button" data-dl="' + esc(r.id) + '">Download (once)</button>' : '<button class="btn red sm" type="button" data-carry="' + esc(r.id) + '">Carry out</button>') + '</div>')});
     if (!j.ready.length) $('pready').innerHTML = '';
+    $('prun').innerHTML = (j.running || []).length ? '<div class="card pad rise"><div class="ct">Emergency opening running</div><div class="fplist">' + j.running.map(r => pCard(r, '<div style="margin-top:12px"><button class="btn red sm" type="button" data-emend="' + esc(r.id) + '">End it now</button></div>')).join('') + '</div></div>' : '';
     if (awayBox() === 'paw') loadAway(); else $('paw').innerHTML = ''; loadUndo('pundo', 'people');
-    fpPanel('mine', 'pmine', {title: 'Requests you asked for', items: j.mine, fields: pFields, empty: 'You have not asked for anything yet.', card: r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : r.canAck ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-pseen="' + esc(r.id) + '">Got it</button></div>' : '')});
+    fpPanel('mine', 'pmine', {title: 'Requests you asked for', items: j.mine, fields: pFields, empty: 'You have not asked for anything yet.', card: r => pCard(r, r.status === 'Pending' ? '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">' + (r.kind === 'emergency_open' && !(r.details || {}).limited ? '<button class="btn red sm" type="button" data-emnow="' + esc(r.id) + '">Start a limited version now</button>' : '') + '<button class="btn line sm" type="button" data-back="' + esc(r.id) + '">Take it back</button></div>' : r.canAck ? '<div style="margin-top:12px"><button class="btn line sm" type="button" data-pseen="' + esc(r.id) + '">Got it</button></div>' : '')});
   } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); }
 }
 
@@ -1984,7 +1997,7 @@ function awayCardHtml(j, p) {
   const duties = j.duties || [];
   const recv = x => x.kind === 'admin' ? 'approved changes wait for you to carry them out when you are back' : x.kind === 'senior' ? 'passes on by the usual order' : x.kind === 'desk' ? 'the Assistant Global Admin arranges a cover (the Global Admin if the Assistant is away)' : 'the Assistant Global Admin arranges a stand-in (the Global Admin if the Assistant is away)';
   const list = duties.length ? '<ul class="sub" style="margin:8px 0 0;padding-left:18px">' + duties.map(x => '<li><b>' + esc(x.duty) + '</b>: ' + esc(recv(x)) + '.</li>').join('') + '</ul>' : '';
-  const PILL = {Pending: ['Waiting', 'p-pend', 'warn', '…'], Approved: ['Approved', 'p-ok', 'ok', '✓'], Declined: ['Not approved', 'p-no', 'no', '✕'], Withdrawn: ['Withdrawn', 'p-val', 'gr', '↩']};
+  const PILL = {Lapsed: ['Not answered', 'p-val', 'gr', '\u2013'], Pending: ['Waiting', 'p-pend', 'warn', '…'], Approved: ['Approved', 'p-ok', 'ok', '✓'], Declined: ['Not approved', 'p-no', 'no', '✕'], Withdrawn: ['Withdrawn', 'p-val', 'gr', '↩']};
   const when = n => esc(n.start) + (n.end !== n.start ? ' to ' + esc(n.end) : '');
   const mine = (j.mine || []).map(n => { const k = PILL[n.status] || PILL.Pending; return tile({tone: k[2], icon: k[3], title: 'Away ' + when(n), pill: k[0], pillCls: k[1],
     body: '<div class="s">' + esc(n.reason) + (n.miss ? ' · will miss rehearsals' : '') + '</div>' +
@@ -1994,12 +2007,15 @@ function awayCardHtml(j, p) {
     actions: (n.status === 'Pending' || n.status === 'Approved') && !n.ended && n.current ? '<button class="btn line sm" type="button" data-awayend="' + esc(n.id) + '">' + (n.status === 'Pending' ? 'Withdraw' : 'I am back') + '</button>' : ''}); }).join('');
   const busy = (j.mine || []).some(n => (n.status === 'Pending' || n.status === 'Approved') && !n.ended && n.current);
   const form = j.saving && !busy ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:12px"><div><label class="lb" for="' + p + 'awstart" style="margin-top:0">First day</label><input id="' + p + 'awstart" class="in" type="date"></div><div><label class="lb" for="' + p + 'awend" style="margin-top:0">Last day</label><input id="' + p + 'awend" class="in" type="date"></div><div style="grid-column:1/-1"><label class="lb" for="' + p + 'awwhy" style="margin-top:0">Reason</label><input id="' + p + 'awwhy" class="in" maxlength="200" placeholder="Why you will be away"></div></div>' +
-    (j.canMiss ? '<label style="display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;font-weight:600;line-height:1.4"><input type="checkbox" id="' + p + 'awmiss" style="margin-top:3px"><span>I will also miss choir rehearsals in these days. Once approved, they count as Excused.</span></label>' : '') +
+    (j.canMiss ? '<p class="sub" style="margin:12px 0 0">Once approved, any rehearsals in these days count as <b>Excused</b> for you. Ask at least 36 hours before a rehearsal, or it may not be excused.</p>' : '') +
     '<div class="actions" style="margin-top:12px"><button class="btn red sm" type="button" data-awgo="' + p + '">Ask for this time away</button></div>' : '';
   const dec = (j.toDecide || []).map(n => tile({tone: 'warn', icon: '!', title: n.name + ' asks to be away ' + when(n), pill: n.standInAnswer ? 'As stand-in' : 'Your answer', pillCls: 'p-pend',
     body: '<div class="s">' + esc(n.reason) + (n.miss ? ' · will miss rehearsals' : '') + '</div><div class="s" style="margin-top:4px">Duties: ' + esc((n.duties || []).join(', ') || 'none') + '.</div>' +
       '<div class="s" style="margin-top:4px"><b>Also away then:</b> ' + ((n.othersAway || []).length ? esc(n.othersAway.map(o => o.name + ' (' + o.start + (o.end !== o.start ? ' to ' + o.end : '') + (o.status === 'Pending' ? ', waiting' : '') + ')').join(', ')) : 'nobody') + '.</div>' +
-      '<input id="awn' + esc(n.id) + '" class="in" maxlength="200" placeholder="Reason if you say no" style="margin-top:8px">',
+      (n.limit ? '<div class="s" style="margin-top:6px;color:#B4232A"><b>Over the limit:</b> ' + esc(n.limit) + '</div><label class="s" style="display:flex;gap:8px;margin-top:4px"><input type="checkbox" id="awol' + esc(n.id) + '"> Approve over the limit (give the reason below)</label>' : '') +
+      ((n.late || []).length ? '<label class="s" style="display:flex;gap:8px;margin-top:6px"><input type="checkbox" id="awlate' + esc(n.id) + '"> Also excuse ' + esc(n.late.join(', ')) + ' (asked less than 36 hours before)</label>' : '') +
+      ((n.processed || []).length ? '<div class="s" style="margin-top:6px">' + esc(n.processed.join(', ')) + ' has already been processed and stays as it is.</div>' : '') +
+      '<input id="awn' + esc(n.id) + '" class="in" maxlength="200" placeholder="Reason (needed to say no, or to approve over the limit)" style="margin-top:8px">',
     actions: '<button class="btn red sm" type="button" data-awdec="' + esc(n.id) + '" data-yes="1">Yes</button><button class="btn line sm" type="button" data-awdec="' + esc(n.id) + '">No</button>'})).join('');
   const ov = (j.overview || []).map(n => tile({tone: n.status === 'Approved' ? 'ok' : 'warn', icon: n.status === 'Approved' ? '✓' : '…', title: n.name + ' · ' + when(n), pill: n.status === 'Approved' ? 'Away' : 'Waiting', pillCls: n.status === 'Approved' ? 'p-ok' : 'p-pend',
     body: '<div class="s">' + esc((n.duties || []).join(', ')) + (n.miss ? ' · misses rehearsals' : '') + (n.status === 'Pending' ? ' · waiting for the ' + esc(n.decider) : ' · approved by ' + esc(n.decidedBy)) + '</div>'})).join('');
@@ -2014,6 +2030,25 @@ document.addEventListener('click', async ev => {
   try { const j = await call({action: 'audit.tidy', token}); if (j.signedOut) { signedOutNow(); return; } say('m10', j.ok ? (j.moved ? j.moved + ' line(s) moved to the archive.' : 'Nothing old enough to move yet.') : (j.error || 'Could not tidy.'), j.ok ? 'ok' : 'bad'); if (j.ok) loadHome(); }
   catch (e) { say('m10', 'Network problem. Try again.', 'bad'); b.disabled = false; }
 });
+/** Once per sign-in: a pop-up listing what is waiting for this person's answer. */
+function waitPopup(t) {
+  const k = 'rbcPop:' + String(token || '').slice(-12);
+  try { if (sessionStorage.getItem(k)) return; } catch (e) { /* show it */ }
+  const rows = [[t.awayWaiting && t.awayWaiting.waiting, 'time away request', 's6'], [t.access && t.access.waiting, 'role or access request', 's12'],
+    [t.requests && t.requests.waiting, 'absence request', 's7'], [t.mreq && t.mreq.waiting, 'member request', 's17'],
+    [t.petitions && t.petitions.waiting, 'petition', 's16'], [t.details && t.details.waiting, 'details correction', 's17']].filter(r => Number(r[0]) > 0);
+  try { sessionStorage.setItem(k, '1'); } catch (e) { /* fine */ }
+  if (!rows.length) return;
+  const box = document.createElement('div'); box.className = 'wpop'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'Waiting for your answer');
+  box.innerHTML = '<div class="wpopc"><div class="wpoph"><span class="wpopi">!</span><div><b>Waiting for your answer</b><div class="s">Please answer these when you can. Each one also went to you by email.</div></div></div>' +
+    rows.map(r => '<div class="wpopr"><span><b>' + r[0] + '</b> ' + r[1] + (Number(r[0]) === 1 ? '' : 's') + '</span><button class="btn red sm" type="button" data-wgo="' + r[2] + '">Open</button></div>').join('') +
+    '<div class="actions" style="margin-top:14px"><button class="btn line sm" type="button" data-wlater="1">Later</button></div></div>';
+  document.body.appendChild(box);
+  const close = () => box.remove();
+  box.addEventListener('click', ev => { const g = ev.target.closest('[data-wgo]'); if (g) { close(); go(g.dataset.wgo); return; } if (ev.target.closest('[data-wlater]') || ev.target === box) close(); });
+  document.addEventListener('keydown', function esc1(ev) { if (ev.key === 'Escape') { close(); document.removeEventListener('keydown', esc1); } });
+  const b = box.querySelector('[data-wgo]'); if (b) b.focus();
+}
 /** The System Administrator's system health card (Home). */
 function drawHealth(h) {
   const box = $('hhealth'); if (!box) return;
@@ -2061,8 +2096,8 @@ document.addEventListener('click', async ev => {
   if (ae) {
     const ap = ae.dataset.awgo || '', msg = $('aaw') && $('aaw').contains(ae) ? 'm6' : 'm12';
     let b;
-    if (ae.dataset.awgo !== undefined) b = {action: 'away.set', token, start: pv(ap + 'awstart'), end: pv(ap + 'awend'), reason: pv(ap + 'awwhy'), miss: !!($(ap + 'awmiss') && $(ap + 'awmiss').checked)};
-    else if (ae.dataset.awdec) b = {action: 'away.decide', token, id: ae.dataset.awdec, yes: ae.dataset.yes === '1', note: pv('awn' + ae.dataset.awdec)};
+    if (ae.dataset.awgo !== undefined) b = {action: 'away.set', token, start: pv(ap + 'awstart'), end: pv(ap + 'awend'), reason: pv(ap + 'awwhy')};
+    else if (ae.dataset.awdec) { const i = ae.dataset.awdec; b = {action: 'away.decide', token, id: i, yes: ae.dataset.yes === '1', note: pv('awn' + i), overLimit: !!($('awol' + i) && $('awol' + i).checked), lateOk: !!($('awlate' + i) && $('awlate' + i).checked)}; }
     else b = {action: 'away.end', token, id: ae.dataset.awayend};
     ae.disabled = true;
     try {
@@ -2085,9 +2120,10 @@ document.addEventListener('click', async ev => {
     } catch (e) { dl.disabled = false; say('m12', 'Network problem. Try again.', 'bad'); }
     return;
   }
-  const t = ev.target.closest && ev.target.closest('[data-yes],[data-no],[data-back],[data-carry]'); if (!t) return;
-  const id = t.dataset.yes || t.dataset.no || t.dataset.back || t.dataset.carry;
-  const b = {token, id, action: t.dataset.yes ? 'access.yes' : t.dataset.no ? 'access.decline' : t.dataset.carry ? 'access.carry' : 'access.withdraw'};
+  const t = ev.target.closest && ev.target.closest('[data-yes],[data-no],[data-back],[data-carry],[data-emnow],[data-emend]'); if (!t || t.closest('#aaw')) return;
+  const id = t.dataset.yes || t.dataset.no || t.dataset.back || t.dataset.carry || t.dataset.emnow || t.dataset.emend;
+  const b = {token, id, action: t.dataset.emnow ? 'access.emergencyNow' : t.dataset.emend ? 'access.endOpen' : t.dataset.yes ? 'access.yes' : t.dataset.no ? 'access.decline' : t.dataset.carry ? 'access.carry' : 'access.withdraw'};
+  if (t.dataset.emend && !confirm('End this emergency opening now?')) return;
   if (t.dataset.carry && !confirm('Carry out request ' + id + ' now? This changes the real list.')) return;
   if (t.dataset.no) { const w = document.querySelector('[data-why="' + id + '"]'); b.reason = w ? w.value.trim() : ''; if (!b.reason) return say('m12', 'Type a reason before you say no.', 'bad'); }
   t.disabled = true;
@@ -2314,7 +2350,8 @@ async function loadHome() {
       body: '<div class="s" style="font-size:13px">' + (x.kind === 'desk' ? 'Arrange a cover for this desk in People and access (a desk cover request).' : 'Arrange a stand-in for the QR and look after the campus for these days.') + '</div>' + (x.reason ? '<div style="margin-top:6px"><b>Reason:</b> ' + esc(x.reason) + '</div>' : ''),
       actions: (x.kind === 'desk' ? gob('Arrange cover', 's12', true) : '') + (x.key ? gotBtn(x.key) : '')}));
     const PIL = {Approved: ['ok', '\u2713', 'Approved', 'p-ok'], Declined: ['no', '\u2715', 'Not approved', 'p-no']};
-    const awt = (j.awayNotes || []).map(x => { const k = x.kind === 'answer' ? PIL[x.status] || PIL.Approved : ['ask', 'i', x.kind === 'excused' ? 'Excused' : 'Away', 'p-val'];
+    const awt = (j.awayNotes || []).map(x => { if (x.kind === 'startsWaiting') return mkTile({tone: 'warn', icon: '!', title: (x.mine ? 'Your time away' : x.name + '\u2019s time away') + ' starts ' + x.start + ' and is still waiting', pill: 'Starts today', pillCls: 'p-pend', body: '<div class="s" style="font-size:13px">' + (x.mine ? 'Nothing is handed on until someone says yes.' : 'Please answer it in My absence, Being away.') + '</div>', actions: (x.mine ? '' : gob('Open My absence', 's6', true)) + gotBtn(x.key)});
+      const k = x.kind === 'answer' ? PIL[x.status] || PIL.Approved : ['ask', 'i', x.kind === 'excused' ? 'Excused' : 'Away', 'p-val'];
       const span = x.start + (x.end !== x.start ? ' to ' + x.end : '');
       const title = x.kind === 'answer' ? 'Your time away ' + span + (x.status === 'Approved' ? ' is approved' : ' is not approved') : x.kind === 'excused' ? x.name + ' is excused from rehearsals ' + span : x.name + ' is away ' + span;
       const body = x.kind === 'answer' ? (x.status === 'Approved' ? 'Approved by ' + esc(x.by) + '.' + (x.miss ? ' Rehearsals in these days count as Excused.' : '') : 'Answered by ' + esc(x.by) + (x.note ? ': ' + esc(x.note) : '') + '.') : 'Approved by ' + esc(x.by) + '.' + (x.duties && x.duties.length ? ' Duties: ' + esc(x.duties.join(', ')) + '.' : '');
@@ -2339,6 +2376,7 @@ async function loadHome() {
     const dlh = lst(dln.slice(0, 8).map(x => mkTile({tone: 'ask', icon: '\u2193', title: x.name + ' downloaded ' + x.what, pill: 'Download', pillCls: 'p-val',
       body: '<div class="s" style="font-size:13px">' + esc(tm(x.atMs)) + '</div>', actions: gotBtn(x.key)}))) + gotAll(dln.slice(0, 8));
     drawHealth(j.health);
+    waitPopup(t);
     $('hsum').innerHTML = homeSummary(t.charts, has('reports'));
     drawNotes([['ab', 'Absences entered', abh], ['dt', 'Details to correct', dth], ['pt', 'Petitions', pth], ['cr', 'Cancel reminder', crh], ['aw', 'Away and opened', awh], ['mq', 'Member requests', mqh], ['bp', 'Done by an admin', bph], ['mc', 'Membership', mch], ['dl', 'Downloads', dlh]]);
     hfoldApply();
