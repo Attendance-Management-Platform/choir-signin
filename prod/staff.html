@@ -629,6 +629,14 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),
 .rc-pill{margin-left:auto;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}
 .rc-pill.rc-pl{background:#E7EEFB;color:#2F4F86}.rc-pill.rc-op{background:#E3F4EC;color:#20775A}.rc-pill.rc-hd{background:#EEF0F4;color:#5E6A7E}.rc-pill.rc-cx{background:#FDECEC;color:#B4232A}
 .rc-sub{font-size:13px;color:#5E6A7E;margin-top:4px}
+@media(max-width:640px){.rc-oneday .rc-row{flex-direction:column}.rc-oneday .rc-date{flex-direction:row;gap:8px;width:auto!important;padding:8px 14px!important}.rc-oneday .rc-date b{font-size:22px!important}.rc-oneday .rc-body{width:100%}}
+/* Calendar day: your tasks for each rehearsal */
+.rcd{width:100%;display:flex;flex-direction:column;gap:12px}
+.rcd-g{border:1px solid #E7ECF6;border-radius:14px;background:#fff;padding:12px 14px}
+.rcd-h{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#5E6A7E;margin-bottom:10px}.rcd-h b{color:#172039;letter-spacing:0}
+.rcd-bs{display:flex;flex-wrap:wrap;gap:8px}
+.rc-acts .rcd-b{display:inline-flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px}.rcd-b small{font-size:11.5px;font-weight:600;opacity:.85}
+@media(max-width:640px){.rcd-bs{flex-direction:column}.rc-acts .rcd-b{width:100%}}
 .rc-you{display:inline-block;margin-top:8px;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}.rc-you-ok{background:#E3F4EC;color:#20775A}.rc-you-wait{background:#FFF3DC;color:#9A5B00}.rc-you-no{background:#FDECEC;color:#B4232A}
 .rc-tag{font-size:13px;font-weight:700;border-radius:10px;padding:7px 10px}.rc-tag.rc-away{background:#FFF6E3;color:#8A5200}.rc-tag.rc-cover,.rc-tag.rc-open{background:#F4EEFC;color:#5D3790}
 .rc-acts{display:flex;gap:8px;flex-wrap:wrap}.rc-acts .btn{margin:0;width:auto;min-height:0;height:auto;font-size:14px;padding:9px 14px;line-height:1.3}
@@ -1854,16 +1862,45 @@ function calActs(day, es, j, dayView) {
   // Only the people who set up rehearsals see "Set up" (Desk B, Global Admin, Assistant Global Admin). Desk D runs the room: it can only look at a rehearsal and confirm the venue.
   const setUp = j && j.canSetUp !== undefined ? j.canSetUp === true : has('rehearsal');
   if (!isPast && !rehs.length && setUp) acts.push('<button class="btn red sm" type="button" data-calmake="' + esc(day) + '">Set up a rehearsal on this day</button>');
-  if (live.length && has('rehearsal')) acts.push('<button class="btn line sm" type="button" data-calgo="s8">' + (setUp ? 'Open ' + esc(live[0].id) + ' to edit it' : 'See ' + esc(live[0].id) + ' on Rehearsals') + '</button>');
-  if (!isPast && live.length && has('absence') && !myStaffOnly && myRoles.indexOf('Pastor in Charge') === -1 && !RC.you(live[0].id)) acts.push('<button class="btn line sm" type="button" data-calgo="s6">Ask to be excused from ' + esc(live[0].id) + '</button>');
+  // Each rehearsal on this day: "your tasks", worked out by the system for this person and this moment (calendar.day).
+  if (es.some(e => e.type === 'rehearsal')) { acts.push('<div class="rcd" data-rcd="' + esc(day) + '"><div class="rc-sub">Loading your tasks for this day…</div></div>'); setTimeout(() => rcdLoad(day), 0); }
   if (!isPast && has('absence')) acts.push('<button class="btn line sm" type="button" data-calaway="' + esc(day) + '">Ask for time away from this day</button>');
   return acts.join('') + (acts.length && !isPast && setUp && !rbDeskB() && !rehs.length ? '<div class="rc-sub" style="width:100%">Setting up a rehearsal in place of Desk B needs a reason, and Desk B is told.</div>' : '');
+}
+/** Times on the calendar are Lagos time, and say so (staff may be anywhere). */
+function lagosAt(ms, day) {
+  const d = new Date(Number(ms)), sameDay = day && d.toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}) === day;
+  const t = d.toLocaleTimeString('en-GB', {timeZone: 'Africa/Lagos', hour: '2-digit', minute: '2-digit'});
+  return (sameDay ? t : d.toLocaleDateString('en-GB', {timeZone: 'Africa/Lagos', weekday: 'short', day: 'numeric', month: 'short'}) + ', ' + t) + ' Lagos time';
+}
+const RCD = {};
+async function rcdLoad(day) {
+  const box = document.querySelector('[data-rcd="' + day + '"]'); if (!box) return;
+  const hit = RCD[day];
+  if (hit && Date.now() - hit.at < 30000) { box.innerHTML = rcdHtml(hit.j, day); return; }
+  try {
+    const j = await call({action: 'calendar.day', token, day});
+    if (j && j.ok) { RCD[day] = {j, at: Date.now()}; const b = document.querySelector('[data-rcd="' + day + '"]'); if (b) b.innerHTML = rcdHtml(j, day); }
+    else box.innerHTML = ['rehearsal', 'absence', 'checkins', 'process'].filter(k => myTabs.indexOf(k) !== -1).map(k => '<button class="btn line sm" type="button" data-calgo="' + TABDEF[k][0] + '">Open ' + esc(TABDEF[k][1]) + '</button>').join('');
+  } catch (e) { box.innerHTML = '<div class="rc-sub">Could not load your tasks. Try again.</div>'; }
+}
+function rcdHtml(j, day) {
+  const goOf = k => TABDEF[k] ? TABDEF[k][0] : '';
+  return (j.rehearsals || []).map(r => {
+    const btns = r.tasks.map(x => '<button class="btn ' + (x.key === 'process' || x.key === 'excuse' ? 'red' : 'line') + ' sm rcd-b" type="button" data-calgo="' + esc(goOf(x.go)) + '"><span>' + esc(x.label) + '</span>' +
+      (x.hint ? '<small>' + esc(x.hint + (x.atMs ? ' ' + lagosAt(x.atMs, day) : '')) + '</small>' : '') + '</button>').join('');
+    const notes = r.notes.slice();
+    if (r.closedAtMs) notes.push('Asking to be excused from ' + r.id + ' closed on ' + lagosAt(r.closedAtMs) + '. If you cannot come, speak to your Campus Music Director.');
+    if (!btns && !notes.length) return '';
+    return '<div class="rcd-g"><div class="rcd-h"><b>' + esc(r.id) + '</b> · ' + (r.preview ? 'your tasks on the day' : 'your tasks') + '</div>' + (btns ? '<div class="rcd-bs">' + btns + '</div>' : '') +
+      notes.map(n => '<div class="rc-sub">' + esc(n) + '</div>').join('') + '</div>';
+  }).join('') || '<div class="rc-sub">Nothing for you to do on this rehearsal.</div>';
 }
 document.addEventListener('click', ev => {
   const t = ev.target.closest && ev.target.closest('[data-calmake],[data-calgo],[data-calaway]'); if (!t) return;
   if (t.dataset.calmake) { window.__rhPref = t.dataset.calmake; go('s8'); }
   else if (t.dataset.calaway) { window.__awPref = t.dataset.calaway; go(awayBox() === 'aaw' ? 's6' : 's12'); }
-  else go(t.dataset.calgo);
+  else if (t.dataset.calgo) go(t.dataset.calgo);
 });
 
 // ---- People and access ----

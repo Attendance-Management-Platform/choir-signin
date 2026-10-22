@@ -215,6 +215,9 @@ input.in{height:48px;padding:0 14px}
 .rc-pill{margin-left:auto;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}
 .rc-pill.rc-pl{background:#E7EEFB;color:#2F4F86}.rc-pill.rc-op{background:#E3F4EC;color:#20775A}.rc-pill.rc-hd{background:#EEF0F4;color:#5E6A7E}.rc-pill.rc-cx{background:#FDECEC;color:#B4232A}
 .rc-sub{font-size:13px;color:#5E6A7E;margin-top:4px}
+@media(max-width:640px){.rc-oneday .rc-row{flex-direction:column}.rc-oneday .rc-date{flex-direction:row;gap:8px;width:auto!important;padding:8px 14px!important}.rc-oneday .rc-date b{font-size:22px!important}.rc-oneday .rc-body{width:100%}}
+.rcd{width:100%;display:flex;flex-direction:column;gap:12px}.rcd-g{border:1px solid #E7ECF6;border-radius:14px;background:#fff;padding:12px 14px}.rcd-h{font-size:12px;font-weight:800;color:#5E6A7E;margin-bottom:8px}.rcd-h b{color:#172039}
+.rcd-b{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left}.rcd-b small{font-size:11.5px;font-weight:600;opacity:.85}
 .rc-you{display:inline-block;margin-top:8px;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}.rc-you-ok{background:#E3F4EC;color:#20775A}.rc-you-wait{background:#FFF3DC;color:#9A5B00}.rc-you-no{background:#FDECEC;color:#B4232A}
 .rc-tag{font-size:13px;font-weight:700;border-radius:10px;padding:7px 10px}.rc-tag.rc-away{background:#FFF6E3;color:#8A5200}.rc-tag.rc-cover,.rc-tag.rc-open{background:#F4EEFC;color:#5D3790}
 .rc-acts{display:flex;gap:8px;flex-wrap:wrap}.rc-acts .btn{margin:0;width:auto;min-height:0;height:auto;font-size:14px;padding:9px 14px;line-height:1.3}
@@ -498,7 +501,28 @@ async function loadCal(m) {
   const open = a && a.ok && a.rehearsal && a.rehearsal.open && !a.live && !a.awayExcused && !a.noAbsence ? a.rehearsal.id : '';
   RC.mount('rcal', {at: m ? m + '-01' : undefined, load: month => call({action: 'calendar.state', token, month: month}),
     onError: t => { if (t === 'signedOut') return signedOutNow('Please sign in again.'); say('m5', t, t ? 'bad' : ''); },
-    actions: (day, es) => es.some(e => e.type === 'rehearsal' && e.id === open) ? '<button class="btn btn-line" type="button" data-calask="1" style="margin:0;width:auto">Ask to be excused from ' + esc(open) + '</button>' : ''});
+    // Day view: for each rehearsal, the system says whether you can still ask to be excused, and until when (Lagos time), or why not.
+    actions: (day, es, j, dayView) => dayView && es.some(e => e.type === 'rehearsal') ? (setTimeout(() => mcdLoad(day, open), 0), '<div class="rcd" data-rcd="' + esc(day) + '"><div class="rc-sub">Checking…</div></div>') : ''});
+}
+function lagosAt(ms, day) {
+  const d = new Date(Number(ms)), sameDay = day && d.toLocaleDateString('en-CA', {timeZone: 'Africa/Lagos'}) === day;
+  const t = d.toLocaleTimeString('en-GB', {timeZone: 'Africa/Lagos', hour: '2-digit', minute: '2-digit'});
+  return (sameDay ? t : d.toLocaleDateString('en-GB', {timeZone: 'Africa/Lagos', weekday: 'short', day: 'numeric', month: 'short'}) + ', ' + t) + ' Lagos time';
+}
+async function mcdLoad(day, open) {
+  const box = document.querySelector('[data-rcd="' + day + '"]'); if (!box) return;
+  try {
+    const j = await call({action: 'calendar.day', token, day});
+    const b = document.querySelector('[data-rcd="' + day + '"]'); if (!b) return;
+    if (!j || !j.ok) { b.innerHTML = open ? '<button class="btn btn-line" type="button" data-calask="1" style="margin:0;width:auto">Ask to be excused from ' + esc(open) + '</button>' : ''; return; }
+    b.innerHTML = (j.rehearsals || []).map(r => {
+      const ask = r.tasks.filter(x => x.key === 'excuse')[0];
+      const lines = r.notes.slice(); if (r.closedAtMs) lines.push('Asking to be excused closed on ' + lagosAt(r.closedAtMs) + '. If you cannot come, speak to your Campus Music Director.');
+      if (!ask && !lines.length) return '';
+      return '<div class="rcd-g"><div class="rcd-h"><b>' + esc(r.id) + '</b></div>' + (ask ? '<button class="btn btn-line rcd-b" type="button" data-calask="1" style="margin:0;width:auto"><span>' + esc(ask.label) + '</span><small>Open until ' + esc(lagosAt(ask.atMs, day)) + '</small></button>' : '') +
+        lines.map(n => '<div class="rc-sub">' + esc(n) + '</div>').join('') + '</div>';
+    }).join('');
+  } catch (e) { box.innerHTML = ''; }
 }
 document.addEventListener('click', ev => { if (ev.target.closest && ev.target.closest('[data-calask]')) tab(2); });
 $('req').onclick = () => tab(2); $('seeall').onclick = e => { e.preventDefault(); tab(2); }; $('attlink').onclick = e => { e.preventDefault(); tab(3); };
