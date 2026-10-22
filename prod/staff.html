@@ -230,8 +230,7 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .nt{border:1px solid #EFE3CC;border-radius:16px;padding:18px 20px;margin:0 0 14px;background:#fff}.nt:last-child{margin-bottom:0}.nt .ct{font-size:16px}
 @media(max-width:899px){.anl .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.anl .anr{grid-template-columns:1fr}}
 @media(max-width:480px){.anl,.ntc{padding:20px 16px}.anl .kpis{gap:12px}.anl .kpi .kv{font-size:26px}}
-.anpicks{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}.anpick{min-width:170px;flex:0 1 200px}.anpick .in{height:40px;border-radius:999px;padding:0 16px;font-weight:700}
-input[list].in,.anpick input.in{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235E6A7E' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px!important;cursor:pointer}
+.anpicks{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}.anpick{min-width:170px;flex:0 1 200px}
 input[list].in::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:38px;height:100%;cursor:pointer}
 input[list].in{position:relative}
 .anclear{align-self:flex-end}
@@ -342,7 +341,17 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .drill:hover{opacity:.85}.drill:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px;border-radius:8px}
 
-.cbw{position:relative}.cbw>input{padding-right:34px!important;display:block}.cbx{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;min-height:0;padding:0;border:0;border-radius:50%;background:#F1F3F8;color:#5E6A7E;font-size:17px;line-height:1;cursor:pointer;align-items:center;justify-content:center;box-shadow:none}.cbx:hover{background:#FFE4E6;color:#8E0008;transform:translateY(-50%)}.cbw>input:not(:placeholder-shown)~.cbx,.cbw.cbset>.cbx{display:flex}.cbw.cbpick>input::placeholder{color:#5E6A7E;opacity:1}.cbhost{display:block;position:relative}.cbhost .cbw{width:100%}
+.cbw{position:relative}.cbw>input{padding-right:34px!important;display:block}.cbx{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;min-height:0;padding:0;border:0;border-radius:50%;background:#F1F3F8;color:#5E6A7E;font-size:17px;line-height:1;cursor:pointer;align-items:center;justify-content:center;box-shadow:none}.cbx:hover{background:#FFE4E6;color:#8E0008;transform:translateY(-50%)}.cbw>input:not(:placeholder-shown)~.cbx,.cbw.cbset>.cbx{display:flex}.pg .cbw>.cbx{margin:0;right:12px}
+/* One look for every search and pick box (the style of the Latest rehearsal pickers): a round box, a down arrow for a list, a magnifier for a search */
+.pg .cbw>input.in,.pg .fpbar input[type=date].in{height:42px;border-radius:999px;padding:0 16px;font-weight:700;background-color:#fff;margin-top:6px}
+.pg .cbw>input.in::placeholder{color:#98A2B3;font-weight:600;opacity:1}.pg .cbw.cbpick>input.in::placeholder{color:#5E6A7E;font-weight:700}
+.pg .cbw>input.cbpk{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235E6A7E' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 15px center;padding-right:40px!important;cursor:pointer}
+.pg .cbw>input.cbpk:not(:placeholder-shown),.pg .cbw.cbset>input.cbpk{background-image:none}
+.pg .cbw>input.in:not(.cbpk){background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%235E6A7E' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 15px center;padding-left:40px!important}
+@media(max-width:640px){.pg .cbw>input.in,.pg .fpbar input[type=date].in{font-size:16px;height:46px}
+  .fpbar>div{flex:1 1 calc(50% - 6px)!important;min-width:0!important}.fpbar>div:first-child{flex-basis:100%!important}.fpbar>[data-fpx]{flex:1 1 100%}
+  .anpick{flex:1 1 calc(50% - 6px);min-width:0}.anpicks .anclear{flex:1 1 100%}.cbhost{max-width:none!important;min-width:0}
+  .cbl{max-height:min(340px,55vh)}.cbo{padding:12px 14px;font-size:15px;min-height:44px}}.cbhost{display:block;position:relative}.cbhost .cbw{width:100%}
 .cbl{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;background:#fff;border:1px solid #E4D3D6;border-radius:14px;box-shadow:0 18px 40px rgba(142,0,8,.14),0 2px 6px rgba(23,32,57,.06);max-height:260px;overflow-y:auto;padding:6px;display:none}
 .cbl.on{display:block}
 .cbo{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:14px;color:#172039}
@@ -1187,8 +1196,8 @@ function homeCharts(c, drill, canSee, canPick) {
   const TB = [['ov', 'Overview'], ['tr', 'Trend'], ['cp', c.campusOnly ? 'By part' : 'By campus']].concat(parts ? [['pt', 'By part']] : []);
   const tab = TB.some(x => x[0] === ANTAB) ? ANTAB : 'ov', hid = k => tab === k ? '' : ' hidden';
   const rid = ANROWS ? ANROWS.id : (last.id || '');
-  const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="' + esc(rid ? rid + ' \u00b7 tap to change' : 'Choose a rehearsal') + '" value=""><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + anDays(c).map(d => '<option value="All on ' + esc(d) + '">Whole day, ' + c.series.filter(x => x.date === d).length + ' rehearsals</option>').join('') + '</datalist></div>' +
-    (ANROWS ? '<div class="anpick"><label class="lb" for="ancamp">Campus</label><input id="ancamp" class="in" list="ancampl" autocomplete="off" placeholder="' + esc(ANCAMP ? ANCAMP + ' \u00b7 tap to change' : 'All campuses') + '" value=""><datalist id="ancampl">' + Array.from(new Set(ANROWS.rows.map(r => r.campus).filter(Boolean))).sort().map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' : '') + '<button class="btn line sm anclear" type="button" data-anclear="1"' + (ANREH || ANCAMP ? '' : ' disabled') + '>Clear</button>' + '</div>' : '';
+  const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="' + esc(rid ? rid + cbTap() : 'Choose a rehearsal') + '" value=""><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + anDays(c).map(d => '<option value="All on ' + esc(d) + '">Whole day, ' + c.series.filter(x => x.date === d).length + ' rehearsals</option>').join('') + '</datalist></div>' +
+    (ANROWS ? '<div class="anpick"><label class="lb" for="ancamp">Campus</label><input id="ancamp" class="in" list="ancampl" autocomplete="off" placeholder="' + esc(ANCAMP ? ANCAMP + cbTap() : 'All campuses') + '" value=""><datalist id="ancampl">' + Array.from(new Set(ANROWS.rows.map(r => r.campus).filter(Boolean))).sort().map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' : '') + '<button class="btn line sm anclear" type="button" data-anclear="1"' + (ANREH || ANCAMP ? '' : ' disabled') + '>Clear</button>' + '</div>' : '';
   const kp = (k, v, s, col) => '<div class="kpi" style="--kc:' + col + '"><div class="kk">' + k + '</div><div class="kv">' + v + '</div><div class="ks">' + s + '</div></div>';
   const kpis = '<div class="kpis">' + kp('Attendance rate', L.rate + '%', esc(L.id || '') + (delta === null ? '' : ' · ' + anVs(L.rate, delta).toLowerCase()), rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'approved absences', SOFT) + '</div>';
   const idl = (L.id || '') + (L.date ? ' · ' + L.date : '') + (ANCAMP ? ' · ' + ANCAMP : '');
@@ -1753,6 +1762,16 @@ async function sendRequest() {
 // attach(input, optsFn, onPick): optsFn(typedText) returns [{v, label, sub, n}] already narrowed by the other filters.
 let CBOPEN = null;
 
+// The box stays empty and shows the current choice in grey ("Ago · tap to change"). Tap it: the whole list opens. Pick one: the box empties again.
+function cbTap() { return window.matchMedia && matchMedia('(max-width:640px)').matches ? '' : ' \u00b7 tap to change'; }
+function cbShow(inp, chosen, keep) {
+  if (!inp) return;
+  if (inp.dataset.ph0 === undefined) inp.dataset.ph0 = inp.placeholder && inp.placeholder.trim() ? inp.placeholder : '';
+  const typing = document.activeElement === inp && inp.__cb && inp.__cb.typed;
+  if (!typing && !keep) inp.value = '';
+  inp.placeholder = chosen ? chosen + cbTap() : (inp.dataset.ph0 || 'Type or choose');
+  const w = inp.parentNode; if (w && w.classList && w.classList.contains('cbw')) { w.classList.toggle('cbpick', !!chosen); w.classList.toggle('cbset', !!chosen && inp.dataset.noclear !== '1'); }
+}
 // Every search or type-ahead box gets a small x inside it that empties just that box.
 function cbWrap(inp) {
   if (inp.parentNode && inp.parentNode.classList.contains('cbw')) return inp.parentNode;
@@ -1781,8 +1800,9 @@ function cbAttach(inp, optsFn, onPick) {
     box.classList.add('on');
   };
   const hl = (txt, t) => { const i = t ? txt.toLowerCase().indexOf(t) : -1; return i < 0 ? esc(txt) : esc(txt.slice(0, i)) + '<b>' + esc(txt.slice(i, i + t.length)) + '</b>' + esc(txt.slice(i + t.length)); };
-  const choose = i => { const o = st.items[i]; if (!o) return; box.classList.remove('on'); st.picking = true; try { st.pick(o, inp); } finally { st.picking = false; } box.classList.remove('on'); if (CBOPEN === box) CBOPEN = null; };
+  const choose = i => { const o = st.items[i]; if (!o) return; box.classList.remove('on'); st.picking = true; if (inp.classList.contains('cbpk')) st.typed = false; try { st.pick(o, inp); } finally { st.picking = false; } box.classList.remove('on'); if (CBOPEN === box) CBOPEN = null; };
   st.open = () => { st.typed = false; draw(); };
+  inp.addEventListener('blur', () => setTimeout(() => { if (document.activeElement === inp || !inp.classList.contains('cbpk')) return; st.typed = false; inp.value = ''; box.classList.remove('on'); }, 150));
   inp.addEventListener('focus', () => { st.typed = false; draw(); }); inp.addEventListener('input', () => { if (st.picking) return; st.typed = true; draw(); });
   inp.addEventListener('keydown', ev => {
     if (!box.classList.contains('on')) { if (ev.key === 'ArrowDown') draw(); return; }
@@ -1806,13 +1826,8 @@ function cbUpSelect(sel) {
   const ph = () => { const e = Array.from(sel.options).filter(o => o.value === '')[0]; return e ? e.text : 'Choose…'; };
   // The box stays empty and shows the current choice in grey. Tap it: the whole list opens. Pick one: it is used and the box empties again.
   const hasAny = () => Array.from(sel.options).some(o => o.value === '');
-  const sync = () => {
-    const l = label(), typing = document.activeElement === inp && inp.__cb && inp.__cb.typed;
-    if (!typing) inp.value = '';
-    inp.placeholder = l ? l + ' \u00b7 tap to change' : sel.options.length ? ph() : 'Nothing to choose yet';
-    inp.disabled = sel.disabled;
-    const w = inp.parentNode; if (w && w.classList) { w.classList.toggle('cbpick', !!l); w.classList.toggle('cbset', !!l && hasAny()); }
-  };
+  inp.classList.add('cbpk');
+  const sync = () => { inp.dataset.ph0 = sel.options.length ? ph() : 'Nothing to choose yet'; inp.dataset.noclear = hasAny() ? '' : '1'; inp.disabled = sel.disabled; cbShow(inp, label()); };
   inp.__cbClear = () => { if (sel.value !== '' && hasAny()) { sel.value = ''; sel.dispatchEvent(new Event('change', {bubbles: true})); } };
   const d = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
   Object.defineProperty(sel, 'value', {get() { return d.get.call(sel); }, set(v) { d.set.call(sel, v); sync(); }, configurable: true});
@@ -1825,12 +1840,11 @@ function cbUpSelect(sel) {
   // An "any" choice is always at the top, so you can go back to everything.
   const keep = inp.__cb.fn; inp.__cb.fn = t => { const any = Array.from(sel.options).filter(o => o.value === '')[0], l = keep(t) || []; return any ? [{v: '', label: any.text}].concat(l) : l; };
   // Leaving the box without picking keeps the current choice; the x (or the "any" line at the top) goes back to everything.
-  inp.addEventListener('blur', () => setTimeout(() => { if (document.activeElement === inp) return; if (inp.__cb) inp.__cb.typed = false; sync(); }, 150));
   sync();
 }
 function cbUpList(inp) {
   const id = inp.getAttribute('list'), dl = id && document.getElementById(id); if (!dl || inp.__cb) return;
-  inp.removeAttribute('list');
+  inp.removeAttribute('list'); if (inp.closest('.anpick')) inp.classList.add('cbpk');
   cbAttach(inp, () => Array.from(dl.options).map(o => ({v: o.value, label: o.value, sub: o.label && o.label !== o.value ? o.label : (o.textContent || '')})), o => { inp.value = o.v; inp.dispatchEvent(new Event('input', {bubbles: true})); inp.dispatchEvent(new Event('change', {bubbles: true})); });
 }
 function cbScan(root) {
@@ -1860,6 +1874,8 @@ function fpOk(f, it, v) {
 }
 function fpDraw(key) {
   const st = FP[key], o = st.o, box = document.getElementById('fpl_' + key); if (!box) return;
+  o.fields.forEach(f => { if (f.type !== 'list' && !f.sug) return; const el = document.getElementById('fp_' + key + '_' + f.k); if (!el) return;
+    if (f.type === 'list' || (st.pk && st.pk[f.k])) cbShow(el, st.v[f.k] || ''); else cbShow(el, '', true); });
   const left = o.items.filter(it => o.fields.every(f => fpOk(f, it, st.v[f.k])));
   const onlyChip = o.chips && st.v[o.chips] && o.fields.every(f => f.k === o.chips || !st.v[f.k]);
   const lim = o.page ? Math.max(st.lim || 0, o.page) : left.length, shown = left.slice(0, lim);
@@ -1880,8 +1896,8 @@ function fpPanel(key, boxId, o) {
     const keys = (cf.all || []).concat(Object.keys(cnt).filter(k => (cf.all || []).indexOf(k) === -1).sort()); keys.forEach(k => { cnt[k] = cnt[k] || 0; });
     if (keys.length > 1) chipsHtml = '<div class="fpchips"><button type="button" class="fpchip' + (st.v[o.chips] ? '' : ' on') + '" data-fpchip="' + key + '|' + o.chips + '|">' + esc(o.chipsAll || 'All roles') + '<b>' + o.items.length + '</b></button>' + keys.map(v => '<button type="button" class="fpchip' + (st.v[o.chips] === v ? ' on' : '') + '" data-fpchip="' + key + '|' + o.chips + '|' + esc(v) + '">' + esc(v) + '<b>' + cnt[v] + '</b></button>').join('') + '</div>';
   }
-  const bar = o.fields.map(f => { const id = 'fp_' + key + '_' + f.k; return '<div style="flex:' + (f.k === 'q' ? '2 1 200px' : '1 1 140px') + '"><label class="lb" for="' + id + '">' + esc(f.label) + '</label><input id="' + id + '" class="in" data-fp="' + key + '" data-k="' + f.k + '"' +
-    (f.type === 'date' ? ' type="date"' : ' autocomplete="off" placeholder="' + esc(f.ph || (f.type === 'list' || f.sug ? 'Start typing…' : '')) + '"') + ' value="' + esc(st.v[f.k] || '') + '"></div>'; }).join('');
+  const bar = o.fields.map(f => { const id = 'fp_' + key + '_' + f.k, isL = f.type === 'list', picked = isL || (st.pk && st.pk[f.k]); return '<div style="flex:' + (f.k === 'q' ? '2 1 200px' : '1 1 140px') + '"><label class="lb" for="' + id + '">' + esc(f.label) + '</label><input id="' + id + '" class="in' + (isL ? ' cbpk' : '') + '" data-fp="' + key + '" data-k="' + f.k + '"' + (isL ? ' data-fl="1"' : '') +
+    (f.type === 'date' ? ' type="date"' : ' autocomplete="off" data-ph0="' + esc(f.ph || (isL ? 'Any' : f.sug ? 'Start typing…' : '')) + '" placeholder="' + esc(picked && st.v[f.k] ? st.v[f.k] + cbTap() : (f.ph || (isL ? 'Any' : f.sug ? 'Start typing…' : ''))) + '"') + ' value="' + esc(picked ? '' : st.v[f.k] || '') + '"></div>'; }).join('');
   target.innerHTML = opn + hd + (o.before || '') + (o.sub && !o.bare ? '<p class="sub" style="margin:0 0 4px">' + esc(o.sub) + '</p>' : '') + dl +
     chipsHtml + '<div class="fpbar">' + bar + '<button class="btn line sm" type="button" data-fpx="' + key + '">Clear</button></div><div class="fplist" id="fpl_' + key + '"></div><div class="fpcount"><span id="fpc_' + key + '"></span><span>Scroll inside this box</span></div>' + (o.after || '') + '</div>';
   o.fields.filter(f => f.type === 'list' || f.sug).forEach(f => {
@@ -1893,14 +1909,14 @@ function fpPanel(key, boxId, o) {
       const cnt = {}; left.forEach(it => { const vals = f.sug ? f.sug(it) : [].concat(f.get(it)); Array.from(new Set(vals.filter(Boolean))).forEach(v => { cnt[v] = (cnt[v] || 0) + 1; }); });
       return Object.keys(cnt).sort().filter(v => have.indexOf(v.toLowerCase()) === -1).map(v => ({v: v, label: v, n: cnt[v]}));
     }, (opt, el) => {
-      const pre = f.type === 'list' ? String(el.value || '').split(',').slice(0, -1).map(x => x.trim()).filter(Boolean) : [];
-      st.v[f.k] = pre.concat(opt.v).join(', '); el.value = st.v[f.k]; fpDraw(key);
+      st.v[f.k] = opt.v; st.pk = st.pk || {}; st.pk[f.k] = true; st.lim = 0; if (el.__cb) el.__cb.typed = false; el.value = ''; fpDraw(key);
     });
+    inp.__cbClear = () => { st.v[f.k] = ''; if (st.pk) st.pk[f.k] = false; st.lim = 0; fpDraw(key); };
   });
   fpDraw(key);
   if (key === 'tasks' && typeof hfoldApply === 'function') hfoldApply();
 }
-document.addEventListener('input', ev => { const t = ev.target; if (t && t.dataset && t.dataset.fp) { FP[t.dataset.fp].v[t.dataset.k] = t.value; FP[t.dataset.fp].lim = 0; fpDraw(t.dataset.fp); } });
+document.addEventListener('input', ev => { const t = ev.target; if (t && t.dataset && t.dataset.fp) { if (t.dataset.fl) return; const p0 = FP[t.dataset.fp]; if (p0.pk) p0.pk[t.dataset.k] = false; FP[t.dataset.fp].v[t.dataset.k] = t.value; FP[t.dataset.fp].lim = 0; fpDraw(t.dataset.fp); } });
 document.addEventListener('click', ev => { const gt = ev.target.closest && ev.target.closest('[data-gotab]'); if (gt) go(gt.dataset.gotab); });
 document.addEventListener('click', ev => {
   const j = ev.target.closest && ev.target.closest('[data-ugjump]'); if (!j) return;
@@ -1912,7 +1928,7 @@ document.addEventListener('click', ev => {
 document.addEventListener('click', ev => { const mo = ev.target.closest && ev.target.closest('[data-fpmore]'); if (!mo) return; const st3 = FP[mo.dataset.fpmore]; st3.lim = (st3.lim || st3.o.page) + st3.o.page; fpDraw(mo.dataset.fpmore); });
 document.addEventListener('click', ev => { const cr = ev.target.closest && ev.target.closest('[data-chrange]'); if (!cr) return; chDays = Number(cr.dataset.chrange) || 7; delete FP.chg; loadChanges(); });
 document.addEventListener('click', ev => { const ch = ev.target.closest && ev.target.closest('[data-fpchip]'); if (ch) { const p = ch.dataset.fpchip.split('|'), st2 = FP[p[0]]; st2.v[p[1]] = p.slice(2).join('|'); st2.lim = 0; fpPanel(p[0], st2.box, st2.o); } });
-document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-fpx]'); if (!b) return; const st = FP[b.dataset.fpx]; st.v = {}; fpPanel(b.dataset.fpx, st.box, st.o); });
+document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-fpx]'); if (!b) return; const st = FP[b.dataset.fpx]; st.v = {}; st.pk = {}; fpPanel(b.dataset.fpx, st.box, st.o); });
 const pFields = [
   {k: 'q', label: 'Search', ph: 'Name, request number, words', type: 'text', get: r => [r.id, r.kindName, r.askedBy, r.askedByRole, r.subjectName, r.subjectEmail, r.target, r.reason, pDetail(r)].join(' ')},
   {k: 'kind', label: 'What it is about', type: 'list', get: r => r.kindName},
@@ -2819,7 +2835,7 @@ async function rfLoad() {
   rfCount();
 }
 function rfLeft(skip) {
-  const c = $('rfc').value.trim().toLowerCase(), p = $('rfp').value.trim().toLowerCase();
+  const c = String($('rfc').dataset.v || '').toLowerCase(), p = String($('rfp').dataset.v || '').toLowerCase();
   return RFM.filter(m => (skip === 'c' || !c || String(m.campus || '').toLowerCase() === c) && (skip === 'p' || !p || String(m.part || '').toLowerCase() === p));
 }
 function rfCount() {
@@ -2827,22 +2843,24 @@ function rfCount() {
 }
 function rfPick(m) {
   RF = {id: m.memberId, name: m.name};
-  $('rfq').value = m.name; $('rfc').value = m.campus || ''; $('rfp').value = m.part || ''; rfCount();
+  $('rfc').dataset.v = m.campus || ''; $('rfp').dataset.v = m.part || ''; rfCount(); rfShow();
   const pk = $('rfpick'); pk.classList.remove('hide');
   pk.innerHTML = '<div><div class="nm">' + esc(m.name) + '</div><div class="mt">' + esc(m.memberId) + ' · ' + esc(m.campus || '-') + ' · ' + esc(m.part || '-') + '</div></div><span class="pill p-ok">Chosen</span>';
 }
-function rfReset() { RF = {id: '', name: ''}; $('rfpick').classList.add('hide'); }
+function rfReset() { RF = {id: '', name: ''}; $('rfpick').classList.add('hide'); rfShow(); }
+function rfShow() { cbShow($('rfc'), $('rfc').dataset.v || ''); cbShow($('rfp'), $('rfp').dataset.v || ''); cbShow($('rfq'), RF.name || ''); }
 function rfFacet(key, skip) {
   const cnt = {}; rfLeft(skip).forEach(m => { const v = m[key]; if (v) cnt[v] = (cnt[v] || 0) + 1; });
   return Object.keys(cnt).sort().map(v => ({v: v, label: v, n: cnt[v]}));
 }
-cbAttach($('rfc'), () => rfFacet('campus', 'c'), (o, el) => { el.value = o.v; rfReset(); rfCount(); });
-cbAttach($('rfp'), () => rfFacet('part', 'p'), (o, el) => { el.value = o.v; rfReset(); rfCount(); });
+['rfc', 'rfp', 'rfq'].forEach(id => $(id).classList.add('cbpk'));
+cbAttach($('rfc'), () => rfFacet('campus', 'c'), (o, el) => { el.dataset.v = o.v; rfReset(); rfCount(); });
+cbAttach($('rfp'), () => rfFacet('part', 'p'), (o, el) => { el.dataset.v = o.v; rfReset(); rfCount(); });
+$('rfc').__cbClear = () => { $('rfc').dataset.v = ''; rfReset(); rfCount(); };
+$('rfp').__cbClear = () => { $('rfp').dataset.v = ''; rfReset(); rfCount(); };
+$('rfq').__cbClear = () => { rfReset(); };
 cbAttach($('rfq'), t => rfLeft().map(m => ({v: m, label: m.name, sub: m.memberId + ' · ' + (m.campus || '-') + ' · ' + (m.part || '-')})), o => rfPick(o.v));
-$('rfq').addEventListener('input', () => { if (RF.id && $('rfq').value !== RF.name) rfReset(); });
-$('rfc').addEventListener('input', () => { rfReset(); rfCount(); });
-$('rfp').addEventListener('input', () => { rfReset(); rfCount(); });
-$('rfclear').onclick = () => { $('rfc').value = ''; $('rfp').value = ''; $('rfq').value = ''; rfReset(); rfCount(); };
+$('rfclear').onclick = () => { $('rfc').dataset.v = ''; $('rfp').dataset.v = ''; rfReset(); rfCount(); };
 document.addEventListener('click', async ev => {
   const c = ev.target.closest && ev.target.closest('[data-rfcancel]');
   if (c) {
@@ -2859,7 +2877,7 @@ $('rfsend').onclick = async () => {
   try {
     const k = await call({action: 'absence.adminEnter', token, memberId: RF.id, rehearsalId: $('rfrh').value, reason: $('rfreason').value.trim()});
     say('m6b', k.ok ? 'Entered and approved for ' + RF.name + '. They and their Campus Music Director are told.' + (k.warning ? ' ' + k.warning : '') : (k.error || 'Could not enter it.'), k.ok ? 'ok' : 'bad');
-    if (k.ok) { $('rfreason').value = ''; $('rfq').value = ''; rfReset(); rfCount(); loadAbsAdmin(); }
+    if (k.ok) { $('rfreason').value = ''; rfReset(); rfCount(); loadAbsAdmin(); }
   } catch (e) { say('m6b', 'Network problem. Try again.', 'bad'); }
   $('rfsend').disabled = false;
 };
