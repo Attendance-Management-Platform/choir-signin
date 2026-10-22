@@ -2135,18 +2135,32 @@ function drawMail(j, msg, bad) {
     j.kinds.map(k => '<div class="mrow"><span class="mtx"><b>' + esc(k.label) + '</b><span>' + esc(k.to) + '</span></span><button type="button" class="mswt' + (k.on ? ' on' : '') + '" role="switch" aria-checked="' + (k.on ? 'true' : 'false') + '" aria-label="Replies for ' + esc(k.label) + '" data-mailset="' + esc(k.key) + '" data-on="' + (k.on ? 'false' : 'true') + '"><i></i><span>' + (k.on ? 'Replies on' : 'Replies off') + '</span></button></div>').join('') +
     '<p class="s' + (bad ? ' bad' : '') + '" id="mmail" style="margin:10px 0 0">' + esc(msg || '') + '</p></div>';
 }
-async function loadMail() {
+let mailSig = '';
+async function loadMail(quiet) {
   if (!MAILROLES.some(r => (myRoles || []).indexOf(r) !== -1)) { const b = $('pmail'); if (b) b.innerHTML = ''; return; }
-  try { const j = await call({action: 'mail.state', token}); drawMail(j); } catch (e) { /* the card stays as it was */ }
+  try {
+    const j = await call({action: 'mail.state', token}); if (!j || !j.ok) return;
+    const sig = j.kinds.map(k => k.key + (k.on ? 1 : 0)).join('');
+    // While the page stays open the card checks again by itself; it only redraws (and says so) when someone else changed something.
+    if (quiet && sig === mailSig) return;
+    const changed = quiet && mailSig && sig !== mailSig; mailSig = sig;
+    drawMail(j, changed ? 'Updated: someone else changed a switch just now.' : '');
+  } catch (e) { /* the card stays as it was */ }
 }
+// Keep the card current: every 60 seconds while People and access is on screen, and as soon as you come back to this tab.
+setInterval(() => { if (token && !document.hidden && $('s12') && !$('s12').classList.contains('hide') && $('pmail') && $('pmail').innerHTML) loadMail(true); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && token && $('s12') && !$('s12').classList.contains('hide') && $('pmail') && $('pmail').innerHTML) loadMail(true); });
 document.addEventListener('click', async ev => {
   const b = ev.target.closest && ev.target.closest('[data-mailset]'); if (!b) return;
   b.disabled = true;
   try {
-    const j = await call({action: 'mail.set', token, kind: b.dataset.mailset, on: b.dataset.on === 'true'});
+    const q = {action: 'mail.set', token, kind: b.dataset.mailset, on: b.dataset.on === 'true'};
+    if (b.dataset.mailset !== 'all') q.was = b.dataset.on !== 'true';
+    const j = await call(q);
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { b.disabled = false; const m = $('mmail'); if (m) { m.textContent = j.error || 'Not saved.'; m.className = 's bad'; } return; }
-    drawMail(j, 'Saved. New emails follow this straight away.');
+    mailSig = j.kinds.map(k => k.key + (k.on ? 1 : 0)).join('');
+    drawMail(j, j.stale ? 'Someone else changed this a moment ago. The card now shows what is saved; press again if you still want to change it.' : 'Saved. New emails follow this straight away, and everyone with this card sees it.', j.stale);
   } catch (e) { b.disabled = false; const m = $('mmail'); if (m) { m.textContent = 'Network problem. Try again.'; m.className = 's bad'; } }
 });
 async function loadPeople(keepMsg) {
