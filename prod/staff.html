@@ -69,7 +69,13 @@ button[style*="background:none"]{box-shadow:none}
 ul.hp{margin:0;padding-left:1.1rem}ul.hp li{margin:.25rem 0}
 @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
 #tabs{position:sticky;bottom:10px;z-index:10;box-shadow:0 10px 30px rgba(20,35,61,.16)}
-@media(max-width:899px){body.kbd #tabs{display:none!important}}
+@media(max-width:899px){body.kbd #tabs{display:none!important}
+  /* Phones: the menu is one slim row at the bottom that you swipe sideways, so it never covers the page */
+  #tabs{flex-wrap:nowrap!important;overflow-x:auto;overflow-y:hidden;gap:6px!important;padding:7px!important;border-radius:20px;bottom:calc(8px + env(safe-area-inset-bottom));scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  #tabs::-webkit-scrollbar{display:none}
+  #tabs .tab{flex:0 0 auto!important;width:auto!important;min-width:72px;max-width:96px;white-space:normal;line-height:1.15;text-align:center;font-size:11px;min-height:54px;padding:6px 7px;border-radius:14px}
+  #tabs .tab span{display:block}
+}
 button,.card{-webkit-tap-highlight-color:rgba(182,0,10,.14)}
 .tab{white-space:nowrap;background:#fff;color:var(--fg);border:1px solid #D5DAE3;box-shadow:none;margin-top:0}
 .tab.on{background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(182,0,10,.25)}
@@ -960,7 +966,7 @@ function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9
   const dk = Object.keys(TABDEF).filter(k => TABDEF[k][0] === id && myBypass[k])[0];
   if (ph) $('ph').innerHTML = '<div class="t">' + ph[0] + '</div><div class="d">' + ph[1] + '</div>' + (dk ? '<div class="dkb" role="note"><b>' + esc(myBypass[dk]) + '\'s task.</b> You can do it instead. You give a reason, and once it is done ' + esc(myBypass[dk]) + ' is told and does not need to do it again.</div>' : '');
   for (const e of ['tabs', 'bar']) { $(e).classList.toggle('hide', !signed); $(e).style.display = signed ? 'flex' : 'none'; }
-  document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); }); navOpenFor(id); }
+  document.querySelectorAll('.tab').forEach(b => { b.classList.toggle('on', b.dataset.v === id); if (b.dataset.v === id && window.matchMedia && matchMedia('(max-width:899px)').matches) { const t = $('tabs'); if (t) t.scrollTo({left: Math.max(0, b.offsetLeft - (t.clientWidth - b.offsetWidth) / 2), behavior: 'smooth'}); } }); navOpenFor(id); }
 function ownerLabel(k) { k = String(k || ''); if (/^desk /.test(k)) return 'Desk ' + k.slice(5).split('/').map(x => x.toUpperCase()).join(' or '); if (/^campus md /.test(k)) return 'the ' + k.slice(10).replace(/\b\w/g, c => c.toUpperCase()) + ' Campus Music Director'; if (k === 'campus md') return 'the Campus Music Directors'; return 'the usual role'; }
 const TKLEV = {now: ['Now', '#B4474D', 'p-no'], soon: ['Today', '#D9A441', 'p-pend'], info: ['For your attention', '#A9B4C6', 'p-info']};
 function roleOf(t) {
