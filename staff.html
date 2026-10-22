@@ -445,6 +445,16 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 .ugt:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,35,61,.10)}.ugt:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0;background:var(--ac,#B6000A)}
 .ugt.ok{--ac:#20775A;--tint:#EAF6F0}.ugt.warn{--ac:#C98A1B;--tint:#FFF5E2}.ugt.ask{--ac:#2F4F7E;--tint:#EAF0FA}.ugt.no{--ac:#AE2D37;--tint:#FCECEE}
 .ugtop{display:flex;align-items:center;gap:10px}.ugtop b{font-size:14.5px;line-height:1.3;flex:1}.ugi{flex:0 0 30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:14px;color:#fff;background:var(--ac)}
+.ugtt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:5px}.ugtt b{display:block}
+.ugtag{font-size:11px!important;font-weight:800;padding:2px 9px!important;margin:0!important;line-height:1.5;letter-spacing:.02em}
+.ugi.ugn{flex:0 0 auto;min-width:52px;height:34px;padding:0 9px;border-radius:12px;font-size:14px;letter-spacing:-.01em;box-shadow:0 4px 10px rgba(20,35,61,.15)}
+/* A grouped tile: one line per campus with its rate and its own buttons */
+.tkg{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.tkgr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 10px;border:1px solid #E7ECF6;border-radius:12px;background:#fff}
+.tkgr .ugi.ugn{min-width:60px;height:30px;font-size:13px}
+.tkgr .tkgn{flex:1 1 140px;min-width:0}.tkgr .tkgn b{display:block;font-size:14px}.tkgr .tkgn span{font-size:12px;color:var(--mut)}
+.tkgr .tkga{display:flex;gap:8px;flex-wrap:wrap}.tkgr .btn{margin:0}
+@media(max-width:640px){.ugt .actions .btn,.tkgr .btn{height:36px;min-height:0;padding:0 14px;font-size:13px}.ugt .actions{gap:8px!important;margin-top:12px!important}}
 .ugk{margin:12px 0 4px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:var(--mut)}.ugh{font-size:13px;line-height:1.55;color:var(--fg)}
 #helpbody #hb1 .fplist,#helpbody #hb2 .fplist,#helpbody #hb3 .fplist,#helpbody #hb4 .fplist,.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(290px,100%),1fr));gap:12px}.tgrid{margin-top:6px}
 #htasks .fplist,#hnotes .fplist,#mbupd .fplist,#mbreq .fplist,#prform .fplist,#mbtidy .fplist,#mbdet .fplist,#pwait .fplist,#pready .fplist,#pmine .fplist{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(310px,100%),1fr));gap:12px}#helpbody .fplist>.ugt,#mbdet .fplist>.ugt,#htasks .fplist>.ugt{margin:0}#helpbody .ugt summary{list-style:none;cursor:pointer}#helpbody .ugt summary::-webkit-details-marker{display:none}#helpbody .ugt .ugtop b{flex:1}
@@ -1023,15 +1033,29 @@ function drawTasks(list) {
     if (g === 'reports:streak') return has('reports') ? '<button class="btn line sm" type="button" data-anpreset="streak">See who</button>' : '';
     return g && has(g) ? '<button class="btn ' + (t.mine ? 'red' : 'line') + ' sm" type="button" data-taskgo="' + esc(g) + '">' + label + '</button>' : '';
   };
+  const rateOf = t => { const m = /(\d+(?:\.\d+)?)%\s*$/.exec(String(t.title || '')); return m ? Number(m[1]) : null; };
+  const isLow = t => /^low-/.test(String(t.id || '')) && rateOf(t) !== null;
+  const lows = list.filter(t => isLow(t) && !t.mine);
+  if (lows.length > 1) {
+    lows.sort((a, b) => rateOf(a) - rateOf(b));
+    const g = {id: 'low-group', grp: lows, level: 'info', title: lows.length + ' campuses under 70%', detail: lows[0].detail.replace(/^Under 70%\s*/, '').replace(/^over/, 'Over').replace(/^at/, 'At'),
+      owner: 'Campus MDs', campus: lows.map(t => t.campus).join(' '), rehearsal: lows[0].rehearsal, mine: false};
+    const first = list.indexOf(lows[0]);
+    list = list.filter(t => lows.indexOf(t) === -1); list.splice(Math.min(first, list.length), 0, g);
+  }
   fpPanel('tasks', 'htasks', {title: 'Waiting today', sub: 'What is waiting, and who it is waiting for.' + (others ? ' Work that is not yours is shown so you can follow it up; "Do it instead" opens it with a reason and tells the owner.' : ''),
     items: list || [], chips: 'role', empty: 'Nothing is waiting today.',
     fields: [{k: 'q', label: 'Search', ph: 'A task, a desk, a campus', type: 'text', get: t => [t.title, t.detail, t.owner, t.campus].join(' ')},
       {k: 'role', label: 'Role', type: 'list', get: roleOf, optsAll: OVER ? ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge', 'System Administrator', 'Desk A', 'Desk B', 'Desk C', 'Desk D', 'Campus MD'] : null},
       {k: 'rehearsal', label: 'Rehearsal', type: 'list', get: t => t.rehearsal ? [t.rehearsal] : [], ph: 'R001, R002…'},
-      {k: 'owner', label: 'Desk or campus', type: 'list', get: t => t.owner === 'You' ? 'You' : t.owner},
+      {k: 'owner', label: 'Desk or campus', type: 'list', get: t => t.grp ? t.grp.map(x => x.owner) : t.owner === 'You' ? 'You' : t.owner},
       {k: 'level', label: 'How urgent', type: 'list', get: t => TKLEV[t.level][0]}],
     card: t => { const lv = {now: ['no', '!'], soon: ['warn', '!'], info: ['ask', 'i']}[t.level] || ['ask', 'i'];
-      return tile({tone: lv[0], icon: lv[1], title: t.title, pill: TKLEV[t.level][0], pillCls: TKLEV[t.level][2],
+      if (t.grp) return tile({tone: 'ask', icon: esc(String(t.grp.length)), num: true, title: t.title, pill: TKLEV.info[0], pillCls: TKLEV.info[2],
+        body: '<div class="mt">' + esc(t.detail) + (t.rehearsal ? ' · ' + esc(t.rehearsal) : '') + '</div><div class="tkg">' + t.grp.map(x => { const r = rateOf(x);
+          return '<div class="tkgr"><span class="ugi ugn" style="background:' + rateColor(r) + '">' + r + '%</span><span class="tkgn"><b>' + esc(x.campus || x.owner) + '</b><span>' + esc(x.owner) + (x.nudge ? ' · reminded by ' + esc(x.nudge.by) : '') + '</span></span><span class="tkga">' + nudgeBtn(x) + goBtn(x) + '</span></div>'; }).join('') + '</div>'});
+      const r = isLow(t) ? rateOf(t) : null;
+      return tile({tone: lv[0], icon: r !== null ? r + '%' : lv[1], num: r !== null, iconColor: r !== null ? rateColor(r) : '', title: t.title, pill: TKLEV[t.level][0], pillCls: TKLEV[t.level][2],
         body: '<div class="mt">' + esc(t.detail) + '</div><div class="tkside" style="justify-content:flex-start;margin-top:10px">' + (t.count > 1 ? '<span class="tkn">' + t.count + ' waiting</span>' : '') + (t.nudge ? '<span class="pill p-pend">' + (t.mine ? 'Reminder from ' : 'Reminded by ') + esc(t.nudge.by) + ' · ' + esc(tm(t.nudge.atMs)) + '</span>' : '') + (t.rehearsal ? '<span class="pill p-info">' + esc(t.rehearsal) + '</span>' : '') + '<span class="pill ' + (t.mine ? 'p-ok' : 'p-val') + '">' + esc(t.owner) + '</span></div>',
         actions: nudgeBtn(t) + goBtn(t)}); }});
 }
@@ -3109,7 +3133,7 @@ document.addEventListener('click', async ev => {
 /** The shared card tile, reachable from functions that have their own local 'tile'. */
 function mkTile(o) { return tile(o); }
 function tile(o) {
-  return '<div class="ugt ' + (o.tone || 'ask') + (o.cls ? ' ' + o.cls : '') + '"' + (o.attr ? ' ' + o.attr : '') + '><div class="ugtop"><span class="ugi">' + (o.icon || '') + '</span><b>' + esc(o.title) + '</b>' + (o.pill ? '<span class="pill ' + (o.pillCls || 'p-pend') + '">' + esc(o.pill) + '</span>' : '') + '</div>' +
+  return '<div class="ugt ' + (o.tone || 'ask') + (o.cls ? ' ' + o.cls : '') + '"' + (o.attr ? ' ' + o.attr : '') + '><div class="ugtop"><span class="ugi' + (o.num ? ' ugn' : '') + '"' + (o.iconColor ? ' style="background:' + o.iconColor + '"' : '') + '>' + (o.icon || '') + '</span><span class="ugtt">' + (o.pill ? '<span class="pill ugtag ' + (o.pillCls || 'p-pend') + '">' + esc(o.pill) + '</span>' : '') + '<b>' + esc(o.title) + '</b></span></div>' +
     (o.label ? '<div class="ugk">' + esc(o.label) + '</div>' : '') + (o.body ? '<div class="ugh"' + (o.label ? '' : ' style="margin-top:10px"') + '>' + o.body + '</div>' : '') + (o.actions ? '<div class="actions" style="margin:10px 0 0">' + o.actions + '</div>' : '') + '</div>';
 }
 function contactFor() {
