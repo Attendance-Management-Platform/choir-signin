@@ -274,6 +274,16 @@ input[list].in{position:relative}
 .row2 .pill{min-width:92px;text-align:center;margin:0}
 .qrhero{background:radial-gradient(520px 320px at 100% 0,rgba(255,255,255,.14) 0,transparent 65%),linear-gradient(160deg,#C8101B,#8E0008);color:#fff;border:0;display:flex;gap:24px;align-items:center;flex-wrap:wrap;padding:24px;box-shadow:0 18px 40px rgba(142,0,8,.22)}
 .qbox{background:#fff;border-radius:18px;padding:14px;display:flex}
+/* Check-in not open: a calm waiting state instead of an empty white box and faint red writing */
+.qrhero.qoff .qbox{background:rgba(255,255,255,.12);border:2px dashed rgba(255,255,255,.45);padding:22px}
+.qoffi{display:flex;flex-direction:column;align-items:center;gap:8px;line-height:1.2;color:#fff}
+.qoffi svg{width:84px;height:84px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.qoffi span{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#FFD9DC}
+.qrhero .qs.qwarn{color:#fff;font-weight:700}
+.qrhero .qwhen{display:block;margin-top:6px;font-size:12.5px;color:#FFD9DC;font-weight:600}
+.qact{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.qrhero.qoff .qact{justify-content:inherit}
+.qact .btn{margin:0;width:auto;background:#fff;color:#8E0008;border:0;box-shadow:0 6px 16px rgba(0,0,0,.18)}.qact .btn.ghost2{background:rgba(255,255,255,.14);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,.45)}
+@media(max-width:899px){.qact{justify-content:center}}
 .qrhero .eb{font-size:12px;letter-spacing:.02em;font-weight:900;color:#FFD9DC}
 .qrhero .qh{font-size:24px;font-weight:900;line-height:1.1;margin:6px 0}
 .qrhero .qs,.qrhero .qs.s{color:#FFE9EA;font-size:14px}.qrhero .qs.bad{color:#fff;font-weight:700}
@@ -720,7 +730,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),
 
 <div id="s3" class="pg hide">
 <div class="two">
-<div class="c1"><div class="card qrhero rise"><div class="qbox"><div id="q"></div></div><div style="flex:1 1 220px"><div class="eb">Show this to your members</div><div class="qh">Scan to check in</div><div id="m3" class="s qs"></div></div></div></div>
+<div class="c1"><div class="card qrhero rise"><div class="qbox"><div id="q"></div></div><div style="flex:1 1 220px"><div class="eb" id="qeb">Show this to your members</div><div class="qh" id="qh">Scan to check in</div><div id="m3" class="s qs"></div><div id="qact" class="qact"></div></div></div></div>
 <div class="c2"><div class="card pad rise" style="animation-delay:.06s"><div class="ct">Safety settings</div><div style="display:flex;gap:10px;align-items:center;margin-top:12px"><input type="checkbox" checked disabled aria-label="New QR every 5 minutes"><span>New QR every 5 minutes</span></div><p class="sub" style="margin-top:12px">A shared photo stops working within minutes. Members also need to be at the venue to check in.</p></div></div>
 </div>
 <div class="note rise" style="animation-delay:.1s"><b>If the Campus MD is absent,</b> the Global Admin or the Assistant Global Admin switches on "Campus Music Director is away" on the Home page. Then Desk D, the Assistant Global Admin and the Global Admin can show this QR.</div>
@@ -3254,18 +3264,33 @@ let runId = 0;
 async function start() {
   const me = ++runId;
   show('s3'); clearTimeout(timer);
-  const stamp = () => new Date().toLocaleTimeString();
+  const stamp = () => new Date().toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+  // The heading, message and buttons in the red card. "off" = check-in is not open: no code, a clear message, and it keeps checking by itself.
+  const paint = (off, head, msg, warn, retrySec) => {
+    $('s3').querySelector('.qrhero').classList.toggle('qoff', off);
+    $('qeb').textContent = off ? 'Nothing to scan yet' : 'Show this to your members'; $('qh').textContent = head;
+    $('m3').className = 's qs' + (warn ? ' qwarn' : ''); $('m3').innerHTML = esc(msg) + (retrySec ? '<span class="qwhen">Checked at ' + esc(stamp()) + '. Checking again by itself every ' + retrySec + ' seconds.</span>' : '');
+    $('qact').innerHTML = off ? '<button class="btn sm" type="button" data-qretry="1">Check now</button>' + (myTabs.indexOf('rehearsal') !== -1 ? '<button class="btn sm ghost2" type="button" data-taskgo="rehearsal">Open Rehearsals</button>' : '') : '';
+    if (off) $('q').innerHTML = '<div class="qoffi"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3M21 14v.01M14 21h3M21 18v3"/></svg><span>Waiting</span></div>';
+  };
   try {
     const j = await call({action: 'qr', token});
     if (me !== runId) return;
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { say('m3', 'At ' + stamp() + ': ' + (j.error || 'Not available.') + ' Trying again in 10 seconds. (The old code may no longer work.)', 'bad'); timer = setTimeout(start, 10000); return; }
+    if (!j.ok) {
+      const notOpen = /not open/i.test(j.error || '');
+      if (notOpen) paint(true, 'Check-in is not open yet', 'The code appears here by itself as soon as check-in opens. Check-in opens up to one hour before a rehearsal starts and closes at its finish time.' + (myTabs.indexOf('rehearsal') !== -1 ? ' You can open it early from Rehearsals.' : ''), false, 30);
+      else paint(true, 'The code is not available', (j.error || 'Not available.') + ' Any code shown before may no longer work.', true, 15);
+      timer = setTimeout(start, notOpen ? 30000 : 15000); return;
+    }
+    paint(false, 'Scan to check in', '', false, 0);
     $('q').innerHTML = ''; new QRCode($('q'), {text: j.url, width: 260, height: 260});
     const wait = Math.min(300000, Math.max(5000, Number(j.renewInMs) + 1000 || 60000));
-    say('m3', 'This QR renews itself every 5 minutes. Do not share a photo of this screen.');
+    $('m3').className = 's qs'; $('m3').textContent = 'This code renews itself every 5 minutes. Do not share a photo of this screen.';
     timer = setTimeout(start, wait);
-  } catch (e) { if (me !== runId) return; say('m3', 'At ' + stamp() + ': network problem (' + (e && e.message ? e.message : 'unknown') + '). Trying again in 10 seconds.', 'bad'); timer = setTimeout(start, 10000); }
+  } catch (e) { if (me !== runId) return; paint(true, 'No connection', 'The page could not reach the system. Check the internet on this phone. Any code shown before may no longer work.', true, 10); timer = setTimeout(start, 10000); }
 }
+document.addEventListener('click', ev => { if (ev.target.closest && ev.target.closest('[data-qretry]')) start(); });
 pgClearInstall();
 if (token) { const first = n => call({action: 'me', token}).then(j => { if (j.ok) { setMe(j); drawTabs(); land(); welcome(); } else if (j.signedOut || n >= 2) signedOutNow(); else setTimeout(() => first(n + 1), 2500); }).catch(() => { if (n < 2) setTimeout(() => first(n + 1), 2500); else signedOutNow(); }); first(0); }
 </script><script>
