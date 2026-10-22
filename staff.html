@@ -69,6 +69,7 @@ button[style*="background:none"]{box-shadow:none}
 ul.hp{margin:0;padding-left:1.1rem}ul.hp li{margin:.25rem 0}
 @keyframes pop{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
 #tabs{position:sticky;bottom:10px;z-index:10;box-shadow:0 10px 30px rgba(20,35,61,.16)}
+@media(max-width:899px){body.kbd #tabs{display:none!important}}
 button,.card{-webkit-tap-highlight-color:rgba(182,0,10,.14)}
 .tab{white-space:nowrap;background:#fff;color:var(--fg);border:1px solid #D5DAE3;box-shadow:none;margin-top:0}
 .tab.on{background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(182,0,10,.25)}
@@ -1772,6 +1773,23 @@ function cbShow(inp, chosen, keep) {
   inp.placeholder = chosen ? chosen + cbTap() : (inp.dataset.ph0 || 'Type or choose');
   const w = inp.parentNode; if (w && w.classList && w.classList.contains('cbw')) { w.classList.toggle('cbpick', !!chosen); w.classList.toggle('cbset', !!chosen && inp.dataset.noclear !== '1'); }
 }
+// On a phone: while you type, the menu at the bottom steps aside, and an open list fits between the box and the keyboard.
+function cbPhone() { return window.matchMedia && matchMedia('(max-width:899px)').matches; }
+function cbFit(inp, box) {
+  if (!cbPhone()) { box.style.maxHeight = ''; return; }
+  const vv = window.visualViewport, vh = vv ? vv.height : window.innerHeight, top0 = vv ? vv.offsetTop : 0;
+  let r = inp.getBoundingClientRect(), rt = r.top - top0;
+  if (rt < 56 || rt + r.height + 200 > vh) { window.scrollBy(0, rt - 64); r = inp.getBoundingClientRect(); rt = r.top - top0; }
+  box.style.maxHeight = Math.max(140, Math.min(340, vh - (rt + r.height) - 14)) + 'px';
+}
+(function () {
+  const isTyping = e => e && ((e.tagName === 'INPUT' && !/^(checkbox|radio|button|submit|range|color|file)$/i.test(e.type)) || e.tagName === 'TEXTAREA');
+  document.addEventListener('focusin', ev => { if (cbPhone() && isTyping(ev.target)) document.body.classList.add('kbd'); });
+  document.addEventListener('focusout', () => setTimeout(() => { if (!isTyping(document.activeElement)) document.body.classList.remove('kbd'); }, 120));
+  let t = 0;
+  const refit = () => { clearTimeout(t); t = setTimeout(() => { if (CBOPEN && CBOPEN.classList.contains('on') && CBOPEN.__inp) cbFit(CBOPEN.__inp, CBOPEN); }, 60); };
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', refit);
+})();
 // Every search or type-ahead box gets a small x inside it that empties just that box.
 function cbWrap(inp) {
   if (inp.parentNode && inp.parentNode.classList.contains('cbw')) return inp.parentNode;
@@ -1797,7 +1815,7 @@ function cbAttach(inp, optsFn, onPick) {
     hit.sort((a, b) => (a.i === 0 ? 0 : 1) - (b.i === 0 ? 0 : 1));
     st.items = hit.map(x => x.o).slice(0, 40); st.hi = st.items.length && t ? 0 : -1;
     box.innerHTML = st.items.length ? st.items.map((o, i) => '<div class="cbo' + (i === st.hi ? ' hi' : '') + '" role="option" data-i="' + i + '"><span>' + hl(o.label, t) + (o.sub ? '<br><small>' + esc(o.sub) + '</small>' : '') + '</span>' + (o.n != null ? '<span class="ct2">' + o.n + '</span>' : '') + '</div>').join('') + (hit.length > 40 ? '<div class="cbn">Keep typing to narrow down…</div>' : '') : '<div class="cbn">No match. Try fewer letters, or clear the other filters.</div>';
-    box.classList.add('on');
+    box.classList.add('on'); box.__inp = inp; cbFit(inp, box);
   };
   const hl = (txt, t) => { const i = t ? txt.toLowerCase().indexOf(t) : -1; return i < 0 ? esc(txt) : esc(txt.slice(0, i)) + '<b>' + esc(txt.slice(i, i + t.length)) + '</b>' + esc(txt.slice(i + t.length)); };
   const choose = i => { const o = st.items[i]; if (!o) return; box.classList.remove('on'); st.picking = true; if (inp.classList.contains('cbpk')) st.typed = false; try { st.pick(o, inp); } finally { st.picking = false; } box.classList.remove('on'); if (CBOPEN === box) CBOPEN = null; };
