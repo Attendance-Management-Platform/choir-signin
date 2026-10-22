@@ -491,6 +491,9 @@ body.bigtext .wrap{zoom:1.12}
 #smine,#saccess,#semail,#ssys,#pmailbox,#ssyshealth{display:flex;flex-direction:column;gap:18px}
 #smine:empty,#saccess:empty,#semail:empty,#ssys:empty,#pmailbox:empty,#ssyshealth:empty{display:none}
 #s18 .mrow{padding:16px 0;gap:14px 20px}
+/* Staff with no email or system cards (most roles): My settings and My access sit side by side and use the whole width */
+#s18 .two:not(:has(.c2 .card))>.c2{display:none}
+#s18 .two:not(:has(.c2 .card))>.c1{flex:1 1 100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(440px,100%),1fr));gap:18px;align-items:start}
 #s18 .mrow .mtx b{margin-bottom:4px;line-height:1.35}
 #s18 .mrow .mtx span{display:block;line-height:1.5}
 #s18 .card .sub{margin-bottom:10px!important;line-height:1.55}
