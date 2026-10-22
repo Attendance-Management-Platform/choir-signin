@@ -458,6 +458,55 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 .stats{gap:18px}#hgrid.stats{gap:18px}.stat{padding:18px 22px}
 #htasks .fplist{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
 @media(max-width:480px){.ugt{padding:16px 18px 16px 20px}.ugt:before{top:16px;bottom:16px}#htasks .fplist,#hnotes .fplist,#mbupd .fplist,#mbreq .fplist,#mbdet .fplist,#pwait .fplist,#pready .fplist,#pmine .fplist,.tgrid{gap:16px;padding:6px 6px 10px 2px}#qrows{gap:16px}#qrows .qrow{padding:16px 18px 16px 20px}.fprow{padding:14px 16px}}
+/* Calendar: Day, Week and Month */
+.rc-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.rc-segs{display:inline-flex;background:#F1F3F7;border-radius:12px;padding:4px;gap:2px}
+.rc-seg{border:0;background:transparent;font:inherit;font-size:14px;font-weight:800;color:#5E6A7E;padding:8px 16px;border-radius:9px;cursor:pointer;min-height:0;box-shadow:none;width:auto;margin:0}
+.rc-seg.on{background:#fff;color:#8E0008;box-shadow:0 2px 8px rgba(20,35,61,.12)}
+.rc-nav{display:inline-flex;gap:6px}
+.rc-btn{border:1px solid #E1E5EC;background:#fff;font:inherit;font-size:18px;font-weight:800;color:#172039;min-width:42px;height:40px;padding:0 12px;border-radius:10px;cursor:pointer;box-shadow:none;width:auto;margin:0;line-height:1}
+.rc-btn:hover{border-color:#B6000A;color:#B6000A}.rc-today{font-size:14px}
+.rc-title{font-size:22px;font-weight:900;color:#172039;margin:16px 2px 6px;letter-spacing:-.01em}
+.rc-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 2px 14px;font-size:12px;color:#5E6A7E;font-weight:700}
+.rc-key{display:inline-flex;align-items:center;gap:6px}.rc-key i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.rc-key i.rc-pl,.rc-chip.rc-pl{background:#E7EEFB;color:#2F4F86}.rc-key i.rc-pl{background:#2F4F86}
+.rc-key i.rc-op,.rc-chip.rc-op{background:#E3F4EC;color:#20775A}.rc-key i.rc-op{background:#20775A}
+.rc-key i.rc-hd,.rc-chip.rc-hd{background:#EEF0F4;color:#5E6A7E}.rc-key i.rc-hd{background:#8A94A6}
+.rc-key i.rc-cx,.rc-chip.rc-cx{background:#FDECEC;color:#B4232A;text-decoration:line-through}.rc-key i.rc-cx{background:#B4232A}
+.rc-key i.rc-away,.rc-chip.rc-away{background:#FFF3DC;color:#9A5B00}.rc-key i.rc-away{background:#D98A00}
+.rc-key i.rc-cover,.rc-chip.rc-cover,.rc-chip.rc-open{background:#F2EAFB;color:#6A3FA0}.rc-key i.rc-cover{background:#8456C2}
+.rc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.rc-wd{font-size:12px;font-weight:800;color:#8A94A6;text-align:center;text-transform:uppercase;letter-spacing:.06em;padding:4px 0}
+.rc-cell{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:3px;min-height:96px;padding:8px 6px 6px;border:1px solid #E8EBF0;border-radius:12px;background:#fff;cursor:pointer;text-align:left;font:inherit;color:#172039;box-shadow:none;width:auto;margin:0;transition:border-color .15s,box-shadow .15s,transform .15s}
+.rc-cell:hover{border-color:#E6B3B6;box-shadow:0 6px 18px rgba(142,0,8,.08);transform:translateY(-1px)}
+.rc-cell.rc-out{background:transparent;border-color:transparent;cursor:default;opacity:.35;pointer-events:none}
+.rc-cell.rc-past{background:#FAFBFC}.rc-cell.rc-past .rc-dn{color:#8A94A6}
+.rc-cell.rc-now{border:2px solid #B6000A;box-shadow:0 6px 18px rgba(182,0,10,.12)}
+.rc-dn{font-size:14px;font-weight:900;margin-bottom:2px}.rc-now .rc-dn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#B6000A;color:#fff}
+.rc-chip{display:block;font-size:11px;font-weight:800;border-radius:6px;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-more{font-size:11px;font-weight:800;color:#5E6A7E;padding-left:4px}
+.rc-week{display:flex;flex-direction:column;gap:10px}
+.rc-row{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid #E8EBF0;border-radius:16px;padding:14px;box-shadow:0 4px 14px rgba(20,35,61,.04)}
+.rc-row.rc-now{border:2px solid #B6000A;box-shadow:0 8px 22px rgba(182,0,10,.10)}
+.rc-row.rc-empty{padding:8px 14px;background:#FBFBFD;box-shadow:none}.rc-row.rc-empty .rc-date{width:56px;padding:4px 0}.rc-row.rc-empty .rc-date b{font-size:18px}
+.rc-date{flex:none;width:64px;display:flex;flex-direction:column;align-items:center;gap:0;border:0;border-radius:12px;background:#F6F7FA;padding:8px 0;cursor:pointer;font:inherit;color:#172039;box-shadow:none;margin:0;min-height:0}
+.rc-date span{font-size:11px;font-weight:800;color:#8A94A6;text-transform:uppercase;letter-spacing:.06em}.rc-date b{font-size:24px;font-weight:900;line-height:1.1}
+.rc-now .rc-date{background:#B6000A}.rc-now .rc-date span,.rc-now .rc-date b{color:#fff}
+.rc-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.rc-none{font-size:13px;color:#8A94A6;font-weight:600;padding-top:6px}
+.rc-ev{border-radius:12px;padding:10px 12px;border-left:5px solid #2F4F86;background:linear-gradient(160deg,#fff 40%,#EEF3FC)}
+.rc-ev.rc-op{border-left-color:#20775A;background:linear-gradient(160deg,#fff 40%,#E6F5EE)}.rc-ev.rc-hd{border-left-color:#8A94A6;background:#F6F7FA}.rc-ev.rc-cx{border-left-color:#B4232A;background:linear-gradient(160deg,#fff 40%,#FDEEEE)}
+.rc-evt{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.rc-evt b{font-size:16px;font-weight:900;color:#172039}.rc-cx .rc-evt b{text-decoration:line-through}
+.rc-time{font-size:14px;font-weight:700;color:#354052}
+.rc-pill{margin-left:auto;font-size:12px;font-weight:800;border-radius:999px;padding:3px 10px}
+.rc-pill.rc-pl{background:#E7EEFB;color:#2F4F86}.rc-pill.rc-op{background:#E3F4EC;color:#20775A}.rc-pill.rc-hd{background:#EEF0F4;color:#5E6A7E}.rc-pill.rc-cx{background:#FDECEC;color:#B4232A}
+.rc-sub{font-size:13px;color:#5E6A7E;margin-top:4px}
+.rc-tag{font-size:13px;font-weight:700;border-radius:10px;padding:7px 10px}.rc-tag.rc-away{background:#FFF6E3;color:#8A5200}.rc-tag.rc-cover,.rc-tag.rc-open{background:#F4EEFC;color:#5D3790}
+.rc-acts{display:flex;gap:8px;flex-wrap:wrap}.rc-acts .btn{margin:0;width:auto;min-height:0;height:auto;font-size:14px;padding:9px 14px;line-height:1.3}
+.rc-oneday .rc-row{padding:18px}.rc-oneday .rc-date{width:84px;padding:12px 0}.rc-oneday .rc-date b{font-size:32px}
+.rc-load{padding:30px;text-align:center;color:#8A94A6;font-weight:700}
+@media(max-width:640px){.rc-grid{gap:3px}.rc-cell{min-height:58px;padding:4px 3px;border-radius:9px}.rc-chip{font-size:0;height:6px;padding:0;border-radius:3px;margin-top:2px}.rc-chip.rc-pl{background:#2F4F86}.rc-chip.rc-op{background:#20775A}.rc-chip.rc-hd{background:#8A94A6}.rc-chip.rc-cx{background:#B4232A}.rc-chip.rc-away{background:#D98A00}.rc-chip.rc-cover,.rc-chip.rc-open{background:#8456C2}.rc-more{font-size:9px}.rc-dn{font-size:12px}.rc-now .rc-dn{width:22px;height:22px}
+  .rc-title{font-size:19px}.rc-seg{padding:8px 12px}.rc-row{gap:10px;padding:12px}.rc-date{width:54px}.rc-date b{font-size:20px}}
 </style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
@@ -558,8 +607,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:
 </div>
 
 <div id="s14" class="pg hide">
-<div class="card pad rise"><div style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap"><button class="btn line sm" type="button" id="calprev">&larr; Earlier</button><div id="caltitle" class="ct" style="margin:0"></div><button class="btn line sm" type="button" id="calnext">Later &rarr;</button></div>
-<div id="calgrid" class="calgrid"></div><div id="calday"></div></div>
+<div class="card pad rise"><div id="rcal"></div></div>
 <p id="m14" class="s"></p>
 </div>
 
@@ -804,7 +852,7 @@ const PAGEHEAD = {
   s16: ['Change log', 'What was changed in the system and by whom, and petitions about changes. Admin and operations are shown apart.'],
   s17: ['Members', 'Add members, edit details, fill in parts, deactivate or reactivate. Every change has a reason and is recorded.'],
   s15: ['Process attendance', 'Turn the checked check-ins and approved absences of a held rehearsal into Present, Excused and Absent.'],
-  s14: ['Calendar', 'Rehearsals by month. Senior roles also see who is away and who is covering.'],
+  s14: ['Calendar', 'Rehearsals, who is away and desk covers, by day, week or month. Tap a day to see it in full.'],
   s13: ['Attendance records', 'The official record of each rehearsal, and one member\'s record, from ATTENDANCE LOG. Empty until a rehearsal has been published.'],
   s12: ['People and access', 'Ask for a change, say yes to a request, and see what is waiting. Every step is recorded.'],
   s11: ['Reports', 'Official attendance by rehearsal, month or campus, from ATTENDANCE SUMMARY and ATTENDANCE LOG.'],
@@ -1484,46 +1532,138 @@ document.addEventListener('click', async ev => {
 let calMonth = '';
 const CALSTAT = {Planned: 'p-pend', Open: 'p-ok', Held: 'p-val', Cancelled: 'p-no'};
 function rbDeskB() { return myRoles.indexOf('Global Admin') === -1 && myRoles.indexOf('Assistant Global Admin') === -1; }
-async function loadCalendar(m) {
-  say('m14', 'Loading…');
-  try {
-    const j = await call({action: 'calendar.state', token, month: m || calMonth || ''});
-    if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) return say('m14', j.error || 'Not available.', 'bad');
-    calMonth = j.month; say('m14', '');
-    const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    let h = names.map(n => '<div class="calh">' + n + '</div>').join('');
-    for (let i = 0; i < j.firstWeekday; i++) h += '<div class="calc calx"></div>';
-    for (let d = 1; d <= j.days; d++) {
-      const day = j.month + '-' + String(d).padStart(2, '0'), es = j.entries[day] || [];
-      h += '<button type="button" class="calc' + (day === j.today ? ' caltoday' : '') + '" data-cal="' + day + '"><span class="cald">' + d + '</span>' + es.slice(0, 3).map(e => '<span class="calp ' + (e.type === 'rehearsal' ? (CALSTAT[e.status] || '') : 'p-pend') + '">' + esc(e.type === 'rehearsal' ? e.id : (e.type === 'away' ? 'Away' : e.type === 'cover' ? 'Cover' : 'Opened')) + '</span>').join('') + (es.length > 3 ? '<span class="calp">+' + (es.length - 3) + '</span>' : '') + '</button>';
+// ---- Calendar: Day, Week and Month views (the same on the staff and member pages) ----
+// RC.mount(boxId, {load: month => Promise(calendar.state result), actions: (day, entries, j) => html, onError: text => void})
+const RC = (function () {
+  const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const WD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], WDL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const ST = {Planned: ['rc-pl', 'Planned'], Open: ['rc-op', 'Check-in open'], Held: ['rc-hd', 'Held'], Cancelled: ['rc-cx', 'Cancelled']};
+  const e = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+  const d0 = iso => new Date(iso + 'T12:00:00Z');
+  const iso = d => d.toISOString().slice(0, 10);
+  const add = (s, n) => { const d = d0(s); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
+  const wd = s => (d0(s).getUTCDay() + 6) % 7; // Monday = 0
+  const monday = s => add(s, -wd(s));
+  const tm = ms => new Date(ms).toLocaleTimeString('en-GB', {timeZone: 'Africa/Lagos', hour: '2-digit', minute: '2-digit'});
+  const pref = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (x) { return null; } };
+  const S = {box: null, opt: null, view: '', at: '', today: '', cache: {}, staff: false};
+
+  function months(view, at) {
+    if (view === 'month') return [at.slice(0, 7)];
+    if (view === 'day') return [at.slice(0, 7)];
+    const a = monday(at), b = add(a, 6);
+    return a.slice(0, 7) === b.slice(0, 7) ? [a.slice(0, 7)] : [a.slice(0, 7), b.slice(0, 7)];
+  }
+  async function get(m) {
+    if (S.cache[m]) return S.cache[m];
+    const j = await S.opt.load(m);
+    if (j && j.ok) { S.cache[m] = j; if (j.today) S.today = j.today; S.staff = j.staff === true; }
+    return j;
+  }
+  const entries = day => { const j = S.cache[day.slice(0, 7)]; return (j && j.entries && j.entries[day]) || []; };
+
+  function card(r, day) {
+    const st = ST[r.status] || ST.Planned;
+    const time = r.startMs ? tm(r.startMs) + (r.finishMs ? ' – ' + tm(r.finishMs) : '') : '';
+    return '<div class="rc-ev ' + st[0] + '"><div class="rc-evt"><b>' + e(r.id) + '</b>' + (time ? '<span class="rc-time">' + e(time) + '</span>' : '') + '<span class="rc-pill ' + st[0] + '">' + e(st[1]) + '</span></div>' +
+      (r.venue ? '<div class="rc-sub">' + e(r.venue) + '</div>' : '') + (r.description ? '<div class="rc-sub">' + e(r.description) + '</div>' : '') + '</div>';
+  }
+  const other = x => '<div class="rc-tag rc-' + e(x.type) + '">' + e(x.label) + '</div>';
+
+  function head() {
+    const v = S.view, at = S.at;
+    let title = '';
+    if (v === 'month') title = MON[Number(at.slice(5, 7)) - 1] + ' ' + at.slice(0, 4);
+    else if (v === 'week') { const a = monday(at), b = add(a, 6), da = d0(a), db = d0(b);
+      title = da.getUTCDate() + (a.slice(5, 7) !== b.slice(5, 7) ? ' ' + MON[da.getUTCMonth()].slice(0, 3) : '') + ' – ' + db.getUTCDate() + ' ' + MON[db.getUTCMonth()].slice(0, 3) + ' ' + b.slice(0, 4); }
+    else { const d = d0(at); title = WDL[wd(at)] + ' ' + d.getUTCDate() + ' ' + MON[d.getUTCMonth()] + ' ' + at.slice(0, 4); }
+    const seg = ['day', 'week', 'month'].map(k => '<button type="button" class="rc-seg' + (v === k ? ' on' : '') + '" data-rcv="' + k + '">' + k.charAt(0).toUpperCase() + k.slice(1) + '</button>').join('');
+    const legend = [['rc-pl', 'Planned'], ['rc-op', 'Check-in open'], ['rc-hd', 'Held'], ['rc-cx', 'Cancelled']].concat(S.staff ? [['rc-away', 'Away'], ['rc-cover', 'Cover']] : [])
+      .map(x => '<span class="rc-key"><i class="' + x[0] + '"></i>' + x[1] + '</span>').join('');
+    return '<div class="rc-head"><div class="rc-segs" role="group" aria-label="Calendar view">' + seg + '</div>' +
+      '<div class="rc-nav"><button type="button" class="rc-btn" data-rcgo="-1" aria-label="Earlier">&#8249;</button><button type="button" class="rc-btn rc-today" data-rcgo="0">Today</button><button type="button" class="rc-btn" data-rcgo="1" aria-label="Later">&#8250;</button></div></div>' +
+      '<div class="rc-title">' + e(title) + '</div><div class="rc-legend">' + legend + '</div>';
+  }
+
+  function monthHtml() {
+    const m = S.at.slice(0, 7), first = m + '-01', start = monday(first);
+    let h = '<div class="rc-grid">' + WD.map(x => '<div class="rc-wd">' + x + '</div>').join('');
+    let day = start;
+    for (let i = 0; i < 42; i++) {
+      const inM = day.slice(0, 7) === m;
+      if (!inM && i >= 35) break;
+      const es = inM ? entries(day) : [], rs = es.filter(x => x.type === 'rehearsal'), os = es.filter(x => x.type !== 'rehearsal');
+      const chips = rs.slice(0, 2).map(r => '<span class="rc-chip ' + (ST[r.status] || ST.Planned)[0] + '">' + e(r.id) + (r.startMs ? ' ' + e(tm(r.startMs)) : '') + '</span>').join('') +
+        (os.length ? '<span class="rc-chip rc-' + e(os[0].type) + '">' + e((os[0].type === 'away' ? 'Away' : os[0].type === 'cover' ? 'Cover' : 'Opened') + (os.length > 1 ? ' +' + (os.length - 1) : '')) + '</span>' : '') +
+        (rs.length > 2 ? '<span class="rc-more">+' + (rs.length - 2) + '</span>' : '');
+      h += '<button type="button" class="rc-cell' + (inM ? '' : ' rc-out') + (day === S.today ? ' rc-now' : '') + (day < S.today ? ' rc-past' : '') + (es.length ? ' rc-has' : '') + '" data-rcday="' + day + '"' + (inM ? '' : ' tabindex="-1"') + '>' +
+        '<span class="rc-dn">' + d0(day).getUTCDate() + '</span>' + chips + '</button>';
+      day = add(day, 1);
     }
-    $('calgrid').innerHTML = h; $('caltitle').textContent = j.month; $('calday').innerHTML = '';
-    window.__cal = j;
-    const lt = ms => new Date(ms).toLocaleTimeString('en-GB', {timeZone: 'Africa/Lagos', hour: '2-digit', minute: '2-digit'});
-    const tip = day => { const es = j.entries[day] || []; return '<b>' + esc(day) + '</b>' + (es.length ? es.map(e => '<br>' + (e.type === 'rehearsal' ? esc(e.id) + ' · ' + esc(e.status) + (e.startMs ? ' · ' + esc(lt(e.startMs)) : '') + (e.venue ? '<br>' + esc(e.venue) : '') + (e.description ? '<br>' + esc(e.description) : '') : esc(e.label))).join('') : '<br>Nothing planned. Click to see what you can do.'); };
-    let tp = document.getElementById('caltip'); if (!tp) { tp = document.createElement('div'); tp.id = 'caltip'; tp.className = 'caltip hide'; tp.setAttribute('role', 'tooltip'); document.body.appendChild(tp); }
-    const hideTip = () => tp.classList.add('hide');
-    document.querySelectorAll('[data-cal]').forEach(b => {
-      const day = b.dataset.cal, es = j.entries[day] || [];
-      if (!es.length) b.classList.add('calfree');
-      const showTip = () => { tp.innerHTML = tip(day); tp.classList.remove('hide'); const r = b.getBoundingClientRect(), w = tp.offsetWidth, h = tp.offsetHeight; tp.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + 'px'; tp.style.top = (r.top - h - 8 > 8 ? r.top - h - 8 : r.bottom + 8) + 'px'; };
-      b.onmouseenter = showTip; b.onfocus = showTip; b.onmouseleave = hideTip; b.onblur = hideTip;
-      b.onclick = () => {
-        hideTip();
-        const isPast = day < j.today, has = k => myTabs.indexOf(k) !== -1, rehs = es.filter(e => e.type === 'rehearsal' && e.status !== 'Cancelled'), live = rehs.filter(e => e.status === 'Planned' || e.status === 'Open');
-        const acts = [];
-        if (!isPast && !rehs.length && has('rehearsal')) acts.push('<button class="btn red sm" type="button" data-calmake="' + esc(day) + '">Set up a rehearsal on this day</button>');
-        if (live.length && has('rehearsal')) acts.push('<button class="btn line sm" type="button" data-calgo="s8">Open ' + esc(live[0].id) + ' to edit it</button>');
-        if (!isPast && live.length && has('absence') && !myStaffOnly) acts.push('<button class="btn line sm" type="button" data-calgo="s6">Ask to be absent for ' + esc(live[0].id) + '</button>');
-        if (!isPast && has('absence')) acts.push('<button class="btn line sm" type="button" data-calaway="' + esc(day) + '">Ask for time away from this day</button>');
-        $('calday').innerHTML = '<div class="ct" style="margin-top:14px">' + esc(day) + '</div>' + (es.length ? es.map(e => e.type === 'rehearsal'
-          ? '<p class="sub" style="margin:6px 0 0"><b>' + esc(e.id) + '</b> · ' + esc(e.status) + (e.startMs ? ' · ' + esc(lt(e.startMs)) : '') + (e.venue ? ' · ' + esc(e.venue) : '') + (e.description ? ' · ' + esc(e.description) : '') + '</p>'
-          : '<p class="sub" style="margin:6px 0 0">' + esc(e.label) + '</p>').join('') : '<p class="sub">' + (isPast ? 'Nothing was on this day.' : 'Nothing is planned on this day.') + '</p>') +
-          (acts.length ? '<div class="calact">' + acts.join('') + '</div>' : '') + (isPast || !has('rehearsal') || rbDeskB() ? '' : '<p class="sub" style="margin:8px 0 0">Setting up a rehearsal in place of Desk B needs a reason, and Desk B is told.</p>');
-      };
-    });
-  } catch (e) { say('m14', 'Network problem. Try again.', 'bad'); }
+    return h + '</div>';
+  }
+
+  function dayRow(day, open) {
+    const es = entries(day), rs = es.filter(x => x.type === 'rehearsal'), os = es.filter(x => x.type !== 'rehearsal'), d = d0(day);
+    const acts = S.opt.actions ? S.opt.actions(day, es, S.cache[day.slice(0, 7)], open) : '';
+    return '<div class="rc-row' + (day === S.today ? ' rc-now' : '') + (es.length ? '' : ' rc-empty') + (day < S.today ? ' rc-past' : '') + '">' +
+      '<button type="button" class="rc-date" data-rcday="' + day + '"><span>' + WD[wd(day)] + '</span><b>' + d.getUTCDate() + '</b><span>' + MON[d.getUTCMonth()].slice(0, 3) + '</span></button>' +
+      '<div class="rc-body">' + (es.length ? rs.map(r => card(r, day)).join('') + os.map(other).join('') : '<div class="rc-none">' + (day < S.today ? 'Nothing was on.' : 'Nothing planned.') + '</div>') +
+      (acts ? '<div class="rc-acts">' + acts + '</div>' : '') + '</div></div>';
+  }
+  function weekHtml() { const a = monday(S.at); let h = '<div class="rc-week">'; for (let i = 0; i < 7; i++) h += dayRow(add(a, i), false); return h + '</div>'; }
+  function dayHtml() { return '<div class="rc-week rc-oneday">' + dayRow(S.at, true) + '</div>'; }
+
+  async function draw() {
+    if (!S.box) return;
+    S.box.innerHTML = head() + '<div class="rc-main"><div class="rc-load">Loading…</div></div>';
+    try {
+      const js = await Promise.all(months(S.view, S.at).map(get));
+      const bad = js.filter(j => !j || !j.ok)[0];
+      if (bad) { S.box.querySelector('.rc-main').innerHTML = ''; if (S.opt.onError) S.opt.onError(bad && bad.signedOut ? 'signedOut' : (bad && bad.error) || 'Not available.'); return; }
+      S.box.innerHTML = head() + '<div class="rc-main">' + (S.view === 'month' ? monthHtml() : S.view === 'week' ? weekHtml() : dayHtml()) + '</div>';
+      if (S.opt.onError) S.opt.onError('');
+    } catch (x) { S.box.querySelector('.rc-main').innerHTML = ''; if (S.opt.onError) S.opt.onError('Network problem. Try again.'); }
+  }
+  function go(step) {
+    if (step === 0) S.at = S.today;
+    else if (S.view === 'month') { const d = d0(S.at.slice(0, 7) + '-01'); d.setUTCMonth(d.getUTCMonth() + step); S.at = iso(d); }
+    else S.at = add(S.at, S.view === 'week' ? 7 * step : step);
+    draw();
+  }
+  function mount(id, opt) {
+    S.box = document.getElementById(id); S.opt = opt || {}; S.cache = {};
+    const now = new Date(Date.now() + 3600000); S.today = S.today || iso(now);
+    S.at = (S.opt.at || S.at || S.today);
+    S.view = S.opt.view || pref('rbcCalView') || (window.innerWidth < 700 ? 'week' : 'month');
+    if (!S.box.__rc) {
+      S.box.__rc = true;
+      S.box.addEventListener('click', ev => {
+        const v = ev.target.closest('[data-rcv]'); if (v) { S.view = v.dataset.rcv; pref('rbcCalView', S.view); draw(); return; }
+        const g = ev.target.closest('[data-rcgo]'); if (g) { go(Number(g.dataset.rcgo)); return; }
+        const d = ev.target.closest('[data-rcday]'); if (d && !ev.target.closest('.rc-acts')) { S.at = d.dataset.rcday; S.view = 'day'; draw(); }
+      });
+    }
+    draw();
+  }
+  return {mount: mount, refresh: () => { S.cache = {}; draw(); }};
+})();
+async function loadCalendar(m) {
+  say('m14', '');
+  RC.mount('rcal', {at: m ? m + '-01' : undefined, load: month => call({action: 'calendar.state', token, month: month}),
+    onError: t => { if (t === 'signedOut') { signedOutNow(); return; } say('m14', t, t ? 'bad' : ''); }, actions: calActs});
+}
+/** What a staff member can do from one day (Day view only), by role. */
+function calActs(day, es, j, dayView) {
+  if (!dayView) return '';
+  const today = (j && j.today) || '', isPast = day < today, has = k => myTabs.indexOf(k) !== -1;
+  const rehs = es.filter(e => e.type === 'rehearsal' && e.status !== 'Cancelled'), live = rehs.filter(e => e.status === 'Planned' || e.status === 'Open');
+  const acts = [];
+  if (!isPast && !rehs.length && has('rehearsal')) acts.push('<button class="btn red sm" type="button" data-calmake="' + esc(day) + '">Set up a rehearsal on this day</button>');
+  if (live.length && has('rehearsal')) acts.push('<button class="btn line sm" type="button" data-calgo="s8">Open ' + esc(live[0].id) + ' to edit it</button>');
+  if (!isPast && live.length && has('absence') && !myStaffOnly) acts.push('<button class="btn line sm" type="button" data-calgo="s6">Ask to be excused from ' + esc(live[0].id) + '</button>');
+  if (!isPast && has('absence')) acts.push('<button class="btn line sm" type="button" data-calaway="' + esc(day) + '">Ask for time away from this day</button>');
+  return acts.join('') + (acts.length && !isPast && has('rehearsal') && !rbDeskB() && !rehs.length ? '<div class="rc-sub" style="width:100%">Setting up a rehearsal in place of Desk B needs a reason, and Desk B is told.</div>' : '');
 }
 document.addEventListener('click', ev => {
   const t = ev.target.closest && ev.target.closest('[data-calmake],[data-calgo],[data-calaway]'); if (!t) return;
@@ -1531,8 +1671,6 @@ document.addEventListener('click', ev => {
   else if (t.dataset.calaway) { window.__awPref = t.dataset.calaway; go(awayBox() === 'aaw' ? 's6' : 's12'); }
   else go(t.dataset.calgo);
 });
-function calShift(n) { const [y, m] = (calMonth || new Date().toISOString().slice(0, 7)).split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); loadCalendar(d.toISOString().slice(0, 7)); }
-$('calprev').onclick = () => calShift(-1); $('calnext').onclick = () => calShift(1);
 
 // ---- People and access ----
 const PKIND_HELP = {
