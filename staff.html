@@ -459,10 +459,14 @@ body .pg .nt .ct,body .pg .note .ct{font-size:15px!important;letter-spacing:0!im
 .ugtag{font-size:11px!important;font-weight:800;padding:2px 9px!important;margin:0!important;line-height:1.5;letter-spacing:.02em}
 .ugi.ugn{flex:0 0 auto;min-width:52px;height:34px;padding:0 9px;border-radius:12px;font-size:14px;letter-spacing:-.01em;box-shadow:0 4px 10px rgba(20,35,61,.15)}
 /* A grouped tile: one line per campus with its rate and its own buttons */
-.tkg{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-.tkgr{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 10px;border:1px solid #E7ECF6;border-radius:12px;background:#fff}
+.tkg{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:10px;margin-top:12px}
+/* Waiting today: cards keep their own height (no tall empty cards), and a grouped tile takes the full width with its campus lines in columns */
+#htasks .fplist{align-items:start;grid-auto-flow:row dense}
+#htasks .fplist>.ugt.tkgrp{grid-column:1/-1}
+.tkgr{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;column-gap:10px;row-gap:8px;padding:10px 12px;border:1px solid #E7ECF6;border-radius:12px;background:#fff;margin:0}
+.tkgr .tkga{grid-column:1/-1}
 .tkgr .ugi.ugn{min-width:60px;height:30px;font-size:13px}
-.tkgr .tkgn{flex:1 1 140px;min-width:0}.tkgr .tkgn b{display:block;font-size:14px}.tkgr .tkgn span{font-size:12px;color:var(--mut)}
+.tkgr .tkgn{min-width:0}.tkgr .tkgn b{display:block;font-size:14px}.tkgr .tkgn span{font-size:12px;color:var(--mut)}
 .tkgr .tkga{display:flex;gap:8px;flex-wrap:wrap}.tkgr .btn{margin:0}
 @media(max-width:640px){.ugt .actions .btn,.tkgr .btn{height:36px;min-height:0;padding:0 14px;font-size:13px}.ugt .actions{gap:8px!important;margin-top:12px!important}}
 .ugk{margin:12px 0 4px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:900;color:var(--mut)}.ugh{font-size:13px;line-height:1.55;color:var(--fg)}
@@ -1077,7 +1081,7 @@ function drawTasks(list) {
         const shown = rows.length ? rows : t.grp, low = t.gk === 'low', n = shown.length, part = n < t.grp.length ? n + ' of ' + t.grp.length : String(n);
         const tot = shown.reduce((a, x) => a + (Number(x.count) || 0), 0), glv = shown.map(x => x.level || 'info').sort((p, q2) => LVO.indexOf(p) - LVO.indexOf(q2))[0];
         const gtone = ({now: 'no', soon: 'warn', info: 'ask'})[glv] || 'ask', rowCol = l => ({now: '#AE2D37', soon: '#C98A1B', info: '#2F4F7E'})[l || 'info'];
-        return tile({tone: gtone, icon: esc(String(low ? n : tot || n)), num: true, title: low ? part + ' campuses under 70%' : t.title + ' \u00b7 ' + part + ' campuses', pill: TKLEV[glv][0], pillCls: TKLEV[glv][2],
+        return tile({tone: gtone, cls: 'tkgrp', icon: esc(String(low ? n : tot || n)), num: true, title: low ? part + ' campuses under 70%' : t.title + ' \u00b7 ' + part + ' campuses', pill: TKLEV[glv][0], pillCls: TKLEV[glv][2],
         body: '<div class="mt">' + (low ? esc(t.detail) : (tot ? tot + ' in all, across ' : 'Across ') + n + ' campuses') + (t.rehearsal ? ' \u00b7 ' + esc(t.rehearsal) : '') + '</div><div class="tkg">' + shown.map(x => { const r = low ? rateOf(x) : null;
           return '<div class="tkgr"><span class="ugi ugn" style="background:' + (low ? rateColor(r) : rowCol(x.level)) + '">' + (low ? r + '%' : esc(String(x.count || 1))) + '</span><span class="tkgn"><b>' + esc(x.campus || x.owner) + '</b><span>' + esc(x.owner) + (low ? '' : ' \u00b7 ' + esc(x.detail)) + (x.nudge ? ' \u00b7 reminded by ' + esc(x.nudge.by) : '') + '</span></span><span class="tkga">' + nudgeBtn(x) + goBtn(x) + '</span></div>'; }).join('') + '</div>'});
       }
