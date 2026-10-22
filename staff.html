@@ -442,7 +442,12 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 .hquick .hi{flex:none;width:38px;height:38px;border-radius:12px;background:#FFF0F1;color:#B6000A;display:flex;align-items:center;justify-content:center}.hquick svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .hca,.hcb{min-width:0}
 @media(min-width:1440px){.hcols{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(380px,1fr);gap:0 26px;align-items:start}
-  .hcb #hgrid.stats{grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr))}}
+  .hcb #hgrid.stats{grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr))}
+  /* Both columns: every section bar has the same space above and below, so the two columns line up bar for bar */
+  .hcols .hsec.fold{margin:20px 0 14px!important}
+  .hcols #hgrid.stats{gap:14px!important;margin:0!important}
+  .hcols #hgrid.stats>.hsec.fold{margin:20px 0 0!important}
+  .hca,.hcb{margin-top:-20px}}
 .hsec{font-size:13px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8E0008;margin:22px 4px 10px}
 #hgrid.stats>.hsec{grid-column:1/-1;margin:6px 4px 0}.hhero .hr .s,.hhero .hr .k,.hhero .hr .v{color:#fff!important}
 body #hgrid.stats{margin-bottom:18px;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))}#hgrid.stats>.stat{flex:1 1 230px!important}
