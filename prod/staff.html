@@ -1106,11 +1106,12 @@ document.addEventListener('change', ev => {
   const v = String(el.value || '').trim();
   if (el.id === 'anreh') {
     const last = ANC.last && ANC.last.id, hit = ANC.series.filter(x => x.id.toLowerCase() === v.toLowerCase())[0], dm = /^all on (\d{4}-\d\d-\d\d)$/i.exec(v), dh = dm && anDays(ANC).indexOf(dm[1]) !== -1 ? dm[1] : '';
-    if (!v) ANREH = ''; else if (dh) ANREH = 'day:' + dh; else if (hit) ANREH = hit.id === last ? '' : hit.id; else { anRedraw(); return; }
+    if (!v) return; else if (dh) ANREH = 'day:' + dh; else if (hit) ANREH = hit.id === last ? '' : hit.id; else { anRedraw(); return; }
     ANROWS = null; anRedraw(); anLoad();
   } else {
     const hit = ANROWS ? ANROWS.rows.filter(r => String(r.campus).toLowerCase() === v.toLowerCase())[0] : null;
-    ANCAMP = v && hit ? hit.campus : ''; anRedraw();
+    if (!v) return; // an empty box keeps the current campus; Clear goes back to all campuses
+    ANCAMP = hit ? hit.campus : ANCAMP; anRedraw();
   }
 });
 function wireHome() {
@@ -1186,8 +1187,8 @@ function homeCharts(c, drill, canSee, canPick) {
   const TB = [['ov', 'Overview'], ['tr', 'Trend'], ['cp', c.campusOnly ? 'By part' : 'By campus']].concat(parts ? [['pt', 'By part']] : []);
   const tab = TB.some(x => x[0] === ANTAB) ? ANTAB : 'ov', hid = k => tab === k ? '' : ' hidden';
   const rid = ANROWS ? ANROWS.id : (last.id || '');
-  const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="Type or choose" onfocus="this.select()" value="' + esc(rid) + '"><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + anDays(c).map(d => '<option value="All on ' + esc(d) + '">Whole day, ' + c.series.filter(x => x.date === d).length + ' rehearsals</option>').join('') + '</datalist></div>' +
-    (ANROWS ? '<div class="anpick"><label class="lb" for="ancamp">Campus</label><input id="ancamp" class="in" list="ancampl" autocomplete="off" placeholder="All campuses" onfocus="this.select()" value="' + esc(ANCAMP) + '"><datalist id="ancampl">' + Array.from(new Set(ANROWS.rows.map(r => r.campus).filter(Boolean))).sort().map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' : '') + '<button class="btn line sm anclear" type="button" data-anclear="1"' + (ANREH || ANCAMP ? '' : ' disabled') + '>Clear</button>' + '</div>' : '';
+  const pick = canPick ? '<div class="anpicks"><div class="anpick"><label class="lb" for="anreh">Rehearsal</label><input id="anreh" class="in" list="anrehl" autocomplete="off" placeholder="' + esc(rid ? rid + ' \u00b7 tap to change' : 'Choose a rehearsal') + '" value=""><datalist id="anrehl">' + c.series.slice().reverse().map(x => '<option value="' + esc(x.id) + '">' + esc(x.date || '') + '</option>').join('') + anDays(c).map(d => '<option value="All on ' + esc(d) + '">Whole day, ' + c.series.filter(x => x.date === d).length + ' rehearsals</option>').join('') + '</datalist></div>' +
+    (ANROWS ? '<div class="anpick"><label class="lb" for="ancamp">Campus</label><input id="ancamp" class="in" list="ancampl" autocomplete="off" placeholder="' + esc(ANCAMP ? ANCAMP + ' \u00b7 tap to change' : 'All campuses') + '" value=""><datalist id="ancampl">' + Array.from(new Set(ANROWS.rows.map(r => r.campus).filter(Boolean))).sort().map(x => '<option value="' + esc(x) + '">').join('') + '</datalist></div>' : '') + '<button class="btn line sm anclear" type="button" data-anclear="1"' + (ANREH || ANCAMP ? '' : ' disabled') + '>Clear</button>' + '</div>' : '';
   const kp = (k, v, s, col) => '<div class="kpi" style="--kc:' + col + '"><div class="kk">' + k + '</div><div class="kv">' + v + '</div><div class="ks">' + s + '</div></div>';
   const kpis = '<div class="kpis">' + kp('Attendance rate', L.rate + '%', esc(L.id || '') + (delta === null ? '' : ' · ' + anVs(L.rate, delta).toLowerCase()), rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'approved absences', SOFT) + '</div>';
   const idl = (L.id || '') + (L.date ? ' · ' + L.date : '') + (ANCAMP ? ' · ' + ANCAMP : '');
@@ -3161,12 +3162,14 @@ if (token) { const first = n => call({action: 'me', token}).then(j => { if (j.ok
     else if (title === 'Being away') open = card.textContent.indexOf('Waiting for your answer') >= 0;
     else open = SHUT.indexOf(title) < 0;
     paint(card, bar, title, open);
-    function flip() {
+    function flip(ev) {
+      // a click on a box, list or button inside the heading (for example the rehearsal and campus pickers) does not fold the card
+      if (ev && ev.target && ev.target.closest && ev.target.closest('input,select,textarea,button:not(.fh),label,datalist,a,.anpicks')) return;
       var o = card.classList.contains('shut');
       st[title] = {o: o, n: n}; save(); paint(card, bar, title, o);
     }
     bar.addEventListener('click', flip);
-    bar.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
+    bar.addEventListener('keydown', function (e) { if (e.target !== bar) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
   }
   function scan() { var l = document.querySelectorAll('.pg .card:not([data-fold])'); for (var i = 0; i < l.length; i++) build(l[i]); }
   var q = 0;
