@@ -1045,15 +1045,22 @@ function drawTasks(list) {
   }
   fpPanel('tasks', 'htasks', {title: 'Waiting today', sub: 'What is waiting, and who it is waiting for.' + (others ? ' Work that is not yours is shown so you can follow it up; "Do it instead" opens it with a reason and tells the owner.' : ''),
     items: list || [], chips: 'role', empty: 'Nothing is waiting today.',
-    fields: [{k: 'q', label: 'Search', ph: 'A task, a desk, a campus', type: 'text', get: t => [t.title, t.detail, t.owner, t.campus].join(' ')},
+    fields: [{k: 'q', label: 'Search', ph: 'A task, a desk, a campus', type: 'text', get: t => t.grp ? t.grp.map(x => [x.title, x.detail, x.owner, x.campus].join(' ')).join(' ') : [t.title, t.detail, t.owner, t.campus].join(' ')},
       {k: 'role', label: 'Role', type: 'list', get: roleOf, optsAll: OVER ? ['Global Admin', 'Assistant Global Admin', 'Global Music Director', 'Pastor in Charge', 'System Administrator', 'Desk A', 'Desk B', 'Desk C', 'Desk D', 'Campus MD'] : null},
       {k: 'rehearsal', label: 'Rehearsal', type: 'list', get: t => t.rehearsal ? [t.rehearsal] : [], ph: 'R001, R002…'},
       {k: 'owner', label: 'Desk or campus', type: 'list', get: t => t.grp ? t.grp.map(x => x.owner) : t.owner === 'You' ? 'You' : t.owner},
       {k: 'level', label: 'How urgent', type: 'list', get: t => TKLEV[t.level][0]}],
     card: t => { const lv = {now: ['no', '!'], soon: ['warn', '!'], info: ['ask', 'i']}[t.level] || ['ask', 'i'];
-      if (t.grp) return tile({tone: 'ask', icon: esc(String(t.grp.length)), num: true, title: t.title, pill: TKLEV.info[0], pillCls: TKLEV.info[2],
-        body: '<div class="mt">' + esc(t.detail) + (t.rehearsal ? ' · ' + esc(t.rehearsal) : '') + '</div><div class="tkg">' + t.grp.map(x => { const r = rateOf(x);
+      if (t.grp) {
+        // A filter by campus, desk or search words keeps only the matching campus lines; one line left shows as its own card.
+        const v = (FP.tasks && FP.tasks.v) || {}, ow = String(v.owner || '').trim().toLowerCase(), q = String(v.q || '').trim().toLowerCase();
+        const rows = t.grp.filter(x => (!ow || ow.split(',').map(y => y.trim()).filter(Boolean).some(y => String(x.owner).toLowerCase() === y || String(x.campus || '').toLowerCase() === y)) && (!q || [x.title, x.detail, x.owner, x.campus].join(' ').toLowerCase().indexOf(q) !== -1));
+        if (rows.length === 1) return FP.tasks.o.card(rows[0]);
+        const shown = rows.length ? rows : t.grp;
+        return tile({tone: 'ask', icon: esc(String(shown.length)), num: true, title: (shown.length < t.grp.length ? shown.length + ' of ' + t.grp.length : shown.length) + ' campuses under 70%', pill: TKLEV.info[0], pillCls: TKLEV.info[2],
+        body: '<div class="mt">' + esc(t.detail) + (t.rehearsal ? ' · ' + esc(t.rehearsal) : '') + '</div><div class="tkg">' + shown.map(x => { const r = rateOf(x);
           return '<div class="tkgr"><span class="ugi ugn" style="background:' + rateColor(r) + '">' + r + '%</span><span class="tkgn"><b>' + esc(x.campus || x.owner) + '</b><span>' + esc(x.owner) + (x.nudge ? ' · reminded by ' + esc(x.nudge.by) : '') + '</span></span><span class="tkga">' + nudgeBtn(x) + goBtn(x) + '</span></div>'; }).join('') + '</div>'});
+      }
       const r = isLow(t) ? rateOf(t) : null;
       return tile({tone: lv[0], icon: r !== null ? r + '%' : lv[1], num: r !== null, iconColor: r !== null ? rateColor(r) : '', title: t.title, pill: TKLEV[t.level][0], pillCls: TKLEV[t.level][2],
         body: '<div class="mt">' + esc(t.detail) + '</div><div class="tkside" style="justify-content:flex-start;margin-top:10px">' + (t.count > 1 ? '<span class="tkn">' + t.count + ' waiting</span>' : '') + (t.nudge ? '<span class="pill p-pend">' + (t.mine ? 'Reminder from ' : 'Reminded by ') + esc(t.nudge.by) + ' · ' + esc(tm(t.nudge.atMs)) + '</span>' : '') + (t.rehearsal ? '<span class="pill p-info">' + esc(t.rehearsal) + '</span>' : '') + '<span class="pill ' + (t.mine ? 'p-ok' : 'p-val') + '">' + esc(t.owner) + '</span></div>',
