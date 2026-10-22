@@ -342,7 +342,7 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .drill:hover{opacity:.85}.drill:focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px;border-radius:8px}
 
-.cbw{position:relative}.cbw>input{padding-right:34px!important;display:block}.cbx{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;min-height:0;padding:0;border:0;border-radius:50%;background:#F1F3F8;color:#5E6A7E;font-size:17px;line-height:1;cursor:pointer;align-items:center;justify-content:center;box-shadow:none}.cbx:hover{background:#FFE4E6;color:#8E0008;transform:translateY(-50%)}.cbw>input:not(:placeholder-shown)~.cbx{display:flex}.cbhost{display:block;position:relative}.cbhost .cbw{width:100%}
+.cbw{position:relative}.cbw>input{padding-right:34px!important;display:block}.cbx{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;min-height:0;padding:0;border:0;border-radius:50%;background:#F1F3F8;color:#5E6A7E;font-size:17px;line-height:1;cursor:pointer;align-items:center;justify-content:center;box-shadow:none}.cbx:hover{background:#FFE4E6;color:#8E0008;transform:translateY(-50%)}.cbw>input:not(:placeholder-shown)~.cbx,.cbw.cbset>.cbx{display:flex}.cbw.cbpick>input::placeholder{color:#5E6A7E;opacity:1}.cbhost{display:block;position:relative}.cbhost .cbw{width:100%}
 .cbl{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:60;background:#fff;border:1px solid #E4D3D6;border-radius:14px;box-shadow:0 18px 40px rgba(142,0,8,.14),0 2px 6px rgba(23,32,57,.06);max-height:260px;overflow-y:auto;padding:6px;display:none}
 .cbl.on{display:block}
 .cbo{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;font-size:14px;color:#172039}
@@ -1305,11 +1305,11 @@ function prDraw() {
   }).join('') + '</div>' + (hit.length ? '' : '<p class="sub">No rehearsal matches. Clear the search or the filters.</p>') : '<p class="sub">No rehearsal has been held yet. A day taken on a Google Form shows here too, once it has an attendance sheet on the REHEARSALS tab.</p>';
 }
 $('prq').oninput = () => { prShown = 10; prDraw(); };
-$('prq').onchange = () => { prShown = 10; prDraw(); const e = prState && prState.rehearsals.filter(r => r.id.toLowerCase() === $('prq').value.trim().toLowerCase())[0]; if (e) prOpen(e.id, e.processed); };
+$('prq').onchange = () => { prShown = 10; const e = prState && prState.rehearsals.filter(r => r.id.toLowerCase() === $('prq').value.trim().toLowerCase())[0]; if (e) { $('prq').value = ''; $('prq').placeholder = e.id + ' \u00b7 opened below \u00b7 tap to search again'; } prDraw(); if (e) prOpen(e.id, e.processed); };
 $('prst').onchange = $('prsrc').onchange = () => { prShown = 10; prDraw(); };
 $('prmore').onclick = () => { prShown += 10; prDraw(); };
 $('prchips').addEventListener('click', ev => { const b = ev.target.closest('[data-prchip]'); if (!b) return; $('prst').value = b.dataset.prchip; prShown = 10; prDraw(); });
-$('prx').onclick = () => { $('prq').value = ''; $('prst').value = ''; $('prsrc').value = ''; prShown = 10; prDraw(); $('prdetail').innerHTML = ''; $('prdetail').dataset.id = ''; };
+$('prx').onclick = () => { $('prq').value = ''; $('prq').placeholder = 'Search: R104, 2026-09 or a date'; $('prst').value = ''; $('prsrc').value = ''; prShown = 10; prDraw(); $('prdetail').innerHTML = ''; $('prdetail').dataset.id = ''; };
 /** "Check my Google Form days": why a form day does or does not appear on Process. */
 async function loadFormCheckCard() {
   const box = $('prform'); if (!box) return;
@@ -1760,7 +1760,7 @@ function cbWrap(inp) {
   inp.style.cssText = 'width:100%;max-width:none;margin-top:0'; if (!inp.placeholder) inp.placeholder = ' ';
   inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
   const x = document.createElement('button'); x.type = 'button'; x.className = 'cbx'; x.tabIndex = -1; x.setAttribute('aria-label', 'Clear this box'); x.innerHTML = '&times;';
-  x.addEventListener('mousedown', ev => { ev.preventDefault(); inp.value = ''; inp.dispatchEvent(new Event('input', {bubbles: true})); inp.dispatchEvent(new Event('change', {bubbles: true})); inp.focus(); if (inp.__cb && inp.__cb.open) inp.__cb.open(); });
+  x.addEventListener('mousedown', ev => { ev.preventDefault(); if (inp.__cbClear) inp.__cbClear(); inp.value = ''; inp.dispatchEvent(new Event('input', {bubbles: true})); inp.dispatchEvent(new Event('change', {bubbles: true})); inp.focus(); if (inp.__cb && inp.__cb.open) inp.__cb.open(); });
   w.appendChild(x); return w;
 }
 function cbAttach(inp, optsFn, onPick) {
@@ -1804,7 +1804,16 @@ function cbUpSelect(sel) {
   if (sel.id) document.querySelectorAll('label[for="' + sel.id + '"]').forEach(l => l.setAttribute('for', inp.id));
   const label = () => { const o = sel.options[sel.selectedIndex]; return o && o.value !== '' ? o.text : ''; };
   const ph = () => { const e = Array.from(sel.options).filter(o => o.value === '')[0]; return e ? e.text : 'Choose…'; };
-  const sync = () => { inp.value = label(); inp.placeholder = ph(); inp.disabled = sel.disabled; };
+  // The box stays empty and shows the current choice in grey. Tap it: the whole list opens. Pick one: it is used and the box empties again.
+  const hasAny = () => Array.from(sel.options).some(o => o.value === '');
+  const sync = () => {
+    const l = label(), typing = document.activeElement === inp && inp.__cb && inp.__cb.typed;
+    if (!typing) inp.value = '';
+    inp.placeholder = l ? l + ' \u00b7 tap to change' : sel.options.length ? ph() : 'Nothing to choose yet';
+    inp.disabled = sel.disabled;
+    const w = inp.parentNode; if (w && w.classList) { w.classList.toggle('cbpick', !!l); w.classList.toggle('cbset', !!l && hasAny()); }
+  };
+  inp.__cbClear = () => { if (sel.value !== '' && hasAny()) { sel.value = ''; sel.dispatchEvent(new Event('change', {bubbles: true})); } };
   const d = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
   Object.defineProperty(sel, 'value', {get() { return d.get.call(sel); }, set(v) { d.set.call(sel, v); sync(); }, configurable: true});
   new MutationObserver(sync).observe(sel, {childList: true, subtree: true, attributes: true, attributeFilter: ['disabled']});
@@ -1812,13 +1821,12 @@ function cbUpSelect(sel) {
   cbAttach(inp, () => {
     if (sel.__cbFn) return sel.__cbFn();
     return Array.from(sel.options).filter(o => o.value !== '' && !o.disabled).map(o => ({v: o.value, label: o.text}));
-  }, o => { sel.value = o.v; sel.dispatchEvent(new Event('change', {bubbles: true})); });
+  }, o => { inp.__cb.typed = false; sel.value = o.v; sel.dispatchEvent(new Event('change', {bubbles: true})); sync(); });
   // An "any" choice is always at the top, so you can go back to everything.
-  const any = Array.from(sel.options).filter(o => o.value === '')[0];
-  const keep = inp.__cb.fn; inp.__cb.fn = t => { const l = keep(t) || []; return any ? [{v: '', label: any.text}].concat(l) : l; };
-  inp.addEventListener('input', () => { if (inp.value === '' && sel.value !== '') { sel.value = ''; sel.dispatchEvent(new Event('change', {bubbles: true})); } });
-  inp.addEventListener('focus', () => inp.select());
-  inp.addEventListener('blur', () => setTimeout(() => { if (inp.value.trim() === '' && sel.value !== '') { sel.value = ''; sel.dispatchEvent(new Event('change', {bubbles: true})); } sync(); }, 120));
+  const keep = inp.__cb.fn; inp.__cb.fn = t => { const any = Array.from(sel.options).filter(o => o.value === '')[0], l = keep(t) || []; return any ? [{v: '', label: any.text}].concat(l) : l; };
+  // Leaving the box without picking keeps the current choice; the x (or the "any" line at the top) goes back to everything.
+  inp.addEventListener('blur', () => setTimeout(() => { if (document.activeElement === inp) return; if (inp.__cb) inp.__cb.typed = false; sync(); }, 150));
+  sync();
 }
 function cbUpList(inp) {
   const id = inp.getAttribute('list'), dl = id && document.getElementById(id); if (!dl || inp.__cb) return;
