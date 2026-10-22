@@ -237,6 +237,13 @@ a.card.stat{text-decoration:none;color:inherit;display:block}.lift{cursor:pointe
 .nt{border:1px solid #EFE3CC;border-radius:16px;padding:18px 20px;margin:0 0 14px;background:#fff}.nt:last-child{margin-bottom:0}.nt .ct{font-size:16px}
 @media(max-width:899px){.anl .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.anl .anr{grid-template-columns:1fr}}
 @media(max-width:480px){.anl,.ntc{padding:20px 16px}.anl .kpis{gap:12px}.anl .kpi .kv{font-size:26px}}
+/* Insight cards: change since last time, lowest and highest */
+.ainr{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:12px;margin:16px 0 0}
+.ain{border:1px solid #E7ECF6;border-left:4px solid var(--ic,#8A94A6);border-radius:14px;background:linear-gradient(160deg,#fff 55%,var(--it,#F5F7FB));padding:12px 14px;min-width:0}
+.ain.up{--ic:#20775A;--it:#EAF6F0}.ain.dn{--ic:#B4232A;--it:#FCEEEE}.ain.eq{--ic:#8A94A6;--it:#F3F5F8}.ain.lo{--ic:#D98A00;--it:#FFF6E3}.ain.hi{--ic:#2F4F86;--it:#EEF3FC}
+.aink{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#5E6A7E}
+.ainv{font-size:19px;font-weight:900;color:#172039;margin-top:4px;line-height:1.2}.ain.up .ainv{color:#20775A}.ain.dn .ainv{color:#B4232A}
+.ains{font-size:12.5px;color:#5E6A7E;margin-top:3px}
 .anpicks{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}.anpick{min-width:170px;flex:0 1 200px}
 input[list].in::-webkit-calendar-picker-indicator{opacity:0;position:absolute;right:0;width:38px;height:100%;cursor:pointer}
 input[list].in{position:relative}
@@ -1174,10 +1181,30 @@ function drawNotes(items) {
 let ANC = null, ANREH = '', ANCAMP = '', ANROWS = null, ANCACHE = {};
 function anDays(c) { const n = {}; (c.series || []).forEach(x => { if (x.date) n[x.date] = (n[x.date] || 0) + 1; }); return Object.keys(n).filter(d => n[d] > 1).sort().reverse(); }
 /** Plain words for a change: "Down from 92% at the rehearsal before". */
-function anVs(rate, delta) { const prev = Math.round((Number(rate) - Number(delta)) * 10) / 10; return delta === 0 ? 'Same as the rehearsal before' : (delta > 0 ? 'Up' : 'Down') + ' from ' + prev + '% at the rehearsal before'; }
-function anHero(L, delta) {
+function anVs(rate, delta, pid) { const prev = Math.round((Number(rate) - Number(delta)) * 10) / 10, ref = (pid ? esc(pid) + ' (' + prev + '%)' : prev + '%'); return delta === 0 ? 'Same as ' + ref : (delta > 0 ? 'Up ' : 'Down ') + Math.abs(delta) + ' points from ' + ref; }
+/** Three small cards under the numbers: the change since the rehearsal before, the lowest and the highest campus (or part). Used on Home and Reports. */
+function anInsights(o) {
+  const t = [], card = (cls, k, v, sub) => '<div class="ain ' + cls + '"><div class="aink">' + k + '</div><div class="ainv">' + v + '</div><div class="ains">' + sub + '</div></div>';
+  if (o.delta !== null && o.delta !== undefined) {
+    const d = Number(o.delta), prev = Math.round((Number(o.rate) - d) * 10) / 10;
+    t.push(card(d > 0 ? 'up' : d < 0 ? 'dn' : 'eq', 'Since the rehearsal before', (d > 0 ? '\u25B2 ' : d < 0 ? '\u25BC ' : '') + (d === 0 ? 'No change' : Math.abs(d) + ' points ' + (d > 0 ? 'up' : 'down')), 'was ' + prev + '%' + (o.prevId ? ' at ' + esc(o.prevId) : '')));
+  }
+  const l = (o.list || []).filter(x => x && x.name).slice().sort((a, b) => a.value - b.value), kind = o.kind || 'campus';
+  if (l.length > 1) {
+    const lo = l[0], hi = l[l.length - 1];
+    if (lo.value === hi.value) t.push(card('eq', 'Every ' + kind, lo.value + '%', 'the same everywhere'));
+    else {
+      const lows = l.filter(x => x.value === lo.value), highs = l.filter(x => x.value === hi.value);
+      const nm = a => a.length === 1 ? esc(a[0].name) : a.length === 2 ? esc(a[0].name) + ' and ' + esc(a[1].name) : esc(a[0].name) + ' and ' + (a.length - 1) + ' others';
+      t.push(card('lo', 'Lowest ' + kind, nm(lows), '<b style="color:' + rateColor(lo.value) + '">' + lo.value + '%</b> attended'));
+      t.push(card('hi', 'Highest ' + kind, nm(highs), '<b style="color:' + rateColor(hi.value) + '">' + hi.value + '%</b> attended'));
+    }
+  }
+  return t.length ? '<div class="ainr">' + t.join('') + '</div>' : '';
+}
+function anHero(L, delta, pid) {
   const tot = Math.max(1, Number(L.eligible) || (L.present + L.absent + L.excused) || 1);
-  const dl = delta === null || delta === undefined ? '' : '<span class="pill ' + (delta >= 0 ? 'p-ok' : 'p-no') + '">' + anVs(L.rate, delta) + '</span>';
+  const dl = delta === null || delta === undefined ? '' : '<span class="pill ' + (delta >= 0 ? 'p-ok' : 'p-no') + '">' + anVs(L.rate, delta, pid) + '</span>';
   const row = (k, n, col) => '<div class="ans"><div class="ansh"><span class="ansl"><i style="background:' + col + '"></i>' + k + '</span><span class="ansn">' + n + '<small>' + Math.round(1000 * n / tot) / 10 + '% of ' + tot + '</small></span></div><div class="ansbar"><div style="width:' + Math.max(n ? 1.5 : 0, Math.min(100, 100 * n / tot)) + '%;background:' + col + '"></div></div></div>';
   return '<div class="anhero"><div class="anring">' + ring(L.rate, rateColor(L.rate)) + '<div class="anrid">' + esc(L.id || '') + (L.date ? ' · ' + esc(L.date) : '') + '</div>' + dl + '</div>' +
     '<div class="anst">' + row('Present', L.present, NAVY) + row('Absent', L.absent, ATTN) + row('Excused', L.excused, SOFT) + '</div></div>' +
@@ -1191,33 +1218,26 @@ function homeSummary(c, canOpen) {
   if (!c.series || !c.series.length || !c.last) return '<div class="card pad rise"><p class="sub" style="margin:0">No official attendance yet. It appears here once a rehearsal has been processed and published.</p>' + open + '</div>';
   const L = c.last, prev = c.series.length > 1 ? c.series[c.series.length - 2] : null, delta = prev ? Math.round((L.rate - prev.rate) * 10) / 10 : null;
   const kp = (k, v, sub, col) => '<div class="kpi" style="--kc:' + col + '"><div class="kk">' + k + '</div><div class="kv">' + v + '</div><div class="ks">' + sub + '</div></div>';
-  const lines = [];
-  if (delta !== null) lines.push(anVs(L.rate, delta) + ' (' + esc(prev.id) + ').');
-  if (c.campusOnly) {
-    const ps = (c.parts || []).filter(p => p.eligible > 0).slice().sort((a, b) => a.rate - b.rate);
-    if (ps.length > 1) lines.push('Lowest part: <b>' + esc(ps[0].part) + '</b> (' + ps[0].rate + '%). Highest: <b>' + esc(ps[ps.length - 1].part) + '</b> (' + ps[ps.length - 1].rate + '%).');
-  } else {
-    const cs = (c.campuses || []).filter(x => x.active > 0).slice().sort((a, b) => a.rate - b.rate);
-    if (cs.length > 1) lines.push('Lowest campus: <b>' + esc(cs[0].campus) + '</b> (' + cs[0].rate + '%). Highest: <b>' + esc(cs[cs.length - 1].campus) + '</b> (' + cs[cs.length - 1].rate + '%).');
-  }
+  const ins = anInsights({rate: L.rate, delta, prevId: prev ? prev.id : '', kind: c.campusOnly ? 'part' : 'campus',
+    list: c.campusOnly ? (c.parts || []).filter(p => p.eligible > 0).map(p => ({name: p.part, value: p.rate})) : (c.campuses || []).filter(x => x.active > 0).map(x => ({name: x.campus, value: x.rate}))});
   const when = esc(L.id) + (L.date ? ' · ' + esc(L.date) : '') + (c.campusOnly ? ' · ' + esc(c.campusOnly) + ' only' : ' · all campuses');
   window.__hsumLast = L.id + ' · ' + L.rate + '%';
   return '<div class="card pad rise"><p class="sub" style="margin:0 0 12px">' + when + '</p><div class="kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr));gap:12px;margin:0">' +
     kp('Attendance', L.rate + '%', 'were present', rateColor(L.rate)) + kp('Present', L.present, 'of ' + L.eligible + ' members', NAVY) + kp('Absent', L.absent, 'no approved reason', ATTN) + kp('Excused', L.excused, 'absence approved', SOFT) + '</div>' +
-    (lines.length ? '<p class="sub" style="margin:14px 0 0;color:var(--fg)">' + lines.join(' ') + '</p>' : '') + open + '</div>';
+    ins + open + '</div>';
 }
 function homeCharts(c, drill, canSee, canPick) {
   ANC = c;
   if (!c) return '';
   if (!c.series.length) return '<div class="card pad rise"><div class="ct">Attendance</div><p class="sub">No official attendance yet. It appears here once a rehearsal has been processed and published to ATTENDANCE SUMMARY and ATTENDANCE LOG.</p></div>';
   const last = c.last || {id: '', date: '', present: 0, eligible: 0, absent: 0, excused: 0, rate: 0};
-  let L = last, camps = c.campuses.slice().sort((a, b) => b.rate - a.rate).map(r => ({name: r.campus, value: r.rate, a: r.present, b: r.active})), parts = null, delta = null;
+  let anPrevId = '', L = last, camps = c.campuses.slice().sort((a, b) => b.rate - a.rate).map(r => ({name: r.campus, value: r.rate, a: r.present, b: r.active})), parts = null, delta = null;
   const rows = ANROWS ? (ANCAMP ? ANROWS.rows.filter(r => r.campus === ANCAMP) : ANROWS.rows) : null;
   if (rows) {
     const t = anTally(rows), sr = c.series.filter(x => x.id === ANROWS.id)[0] || {};
     L = {id: ANROWS.id, date: sr.date || ANROWS.date || '', present: t.present, absent: t.absent, excused: t.excused, eligible: t.total, rate: t.rate};
     camps = anGroup(ANCAMP ? rows : ANROWS.rows, 'campus', 'No campus'); parts = anGroup(rows, 'part', 'No part');
-  } else { const prev = c.series.length > 1 ? c.series[c.series.length - 2] : null; delta = prev ? (Math.round((L.rate - prev.rate) * 10) / 10) : null; }
+  } else { const prev = c.series.length > 1 ? c.series[c.series.length - 2] : null; delta = prev ? (Math.round((L.rate - prev.rate) * 10) / 10) : null; anPrevId = prev ? prev.id : ''; }
   if (c.campusOnly && !ANROWS) camps = (c.parts || []).map(x => ({name: x.part, value: x.rate, a: x.present, b: x.eligible})).sort((a, b) => b.value - a.value);
   const TB = [['ov', 'Overview'], ['tr', 'Trend'], ['cp', c.campusOnly ? 'By part' : 'By campus']].concat(parts ? [['pt', 'By part']] : []);
   const tab = TB.some(x => x[0] === ANTAB) ? ANTAB : 'ov', hid = k => tab === k ? '' : ' hidden';
@@ -1231,7 +1251,7 @@ function homeCharts(c, drill, canSee, canPick) {
     : '<div class="anbox"><div class="ct" style="margin-bottom:8px">' + (c.campusOnly ? esc(c.campusOnly) + ' · by part · ' : 'By campus · ') + esc(L.id || 'last rehearsal') + '</div>' + rankBars(camps, {unit: '%', drill: c.campusOnly ? false : drill}) + '</div>';
   return '<div class="card anl rise"><div class="anh"><div><div class="ct">Latest rehearsal</div><p class="sub">Official attendance' + (idl ? ' · ' + esc(idl) : '') + '</p></div>' + pick + '</div>' +
     '<div class="fpchips antabs" style="margin-top:16px">' + TB.map(x => '<button type="button" class="fpchip' + (tab === x[0] ? ' on' : '') + '" data-antab="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
-    '<div class="anp" data-p="ov"' + hid('ov') + '>' + anHero(L, delta) + '</div>' +
+    '<div class="anp" data-p="ov"' + hid('ov') + '>' + anHero(L, delta, anPrevId) + anInsights({rate: L.rate, delta, prevId: anPrevId, kind: (c.campusOnly || ANCAMP) ? 'part' : 'campus', list: ((c.campusOnly || ANCAMP) && parts ? parts : camps).filter(x => x.b === undefined || x.b > 0)}) + '</div>' +
     '<div class="anp" data-p="tr"' + hid('tr') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">Last ' + c.series.length + ' rehearsals</div>' + colChart(c.series.map(p => ({name: p.id, value: p.rate})), {unit: '%', drill: drill, label: 'Attendance rate, last rehearsals'}) + '</div></div>' +
     '<div class="anp" data-p="cp"' + hid('cp') + '>' + cpBody + '</div>' +
     (parts ? '<div class="anp" data-p="pt"' + hid('pt') + '><div class="anbox"><div class="ct" style="margin-bottom:8px">By part · ' + esc((ANCAMP ? ANCAMP + ' · ' : '') + (L.id || '')) + '</div>' + rankBars(parts, {unit: '%', drill: false}) + '</div></div>' : '') + '</div>';
