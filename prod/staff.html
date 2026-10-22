@@ -332,6 +332,8 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
   body:not(.out) .wrap{max-width:none;width:auto;margin:0 0 0 68px;padding:26px 30px 60px;transition:margin-left .3s var(--ease)}
   body.rail-open:not(.out) .wrap{margin-left:248px}
   body:not(.out) .wrap>*{max-width:1200px}
+  /* Wide computer screens: Home uses the width. The welcome card runs across the top; below it, Last rehearsal and Needs attention on the left, the rest on the right */
+  body:not(.out) .wrap>#s10,body:not(.out) .wrap>#ph{max-width:1760px}
   #hgrid.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(165px,100%),1fr));gap:12px}
   body:not(.out){font-size:13.5px}
   body:not(.out) .ct{font-size:15px}
@@ -427,6 +429,9 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
 .hquick a{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border:1px solid #E6E9EF;border-radius:16px;text-decoration:none;color:#172039;font-weight:800;font-size:14.5px;transition:transform .2s,box-shadow .2s,border-color .2s}
 .hquick a:hover{transform:translateY(-3px);border-color:#E9A9AE;box-shadow:0 14px 30px rgba(142,0,8,.14)}
 .hquick .hi{flex:none;width:38px;height:38px;border-radius:12px;background:#FFF0F1;color:#B6000A;display:flex;align-items:center;justify-content:center}.hquick svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hca,.hcb{min-width:0}
+@media(min-width:1440px){.hcols{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(380px,1fr);gap:0 26px;align-items:start}
+  .hcb #hgrid.stats{grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr))}}
 .hsec{font-size:13px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:#8E0008;margin:22px 4px 10px}
 #hgrid.stats>.hsec{grid-column:1/-1;margin:6px 4px 0}.hhero .hr .s,.hhero .hr .k,.hhero .hr .v{color:#fff!important}
 body #hgrid.stats{margin-bottom:18px;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))}#hgrid.stats>.stat{flex:1 1 230px!important}
@@ -722,13 +727,16 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),
 
 <div id="s10" class="pg hide">
 <div id="hhero"></div>
+<div class="hcols"><div class="hca">
 <button type="button" class="hsec fold" data-hfold="charts" id="hfc" hidden>Last rehearsal</button><div id="hsum"></div>
 <button type="button" class="hsec fold" data-hfold="tasks" id="hft" hidden>Needs attention</button><div id="htasks"></div>
+</div><div class="hcb">
 <div id="hgrid" class="stats rise"></div>
 <button type="button" class="hsec fold" data-hfold="health" id="hfh" hidden>System health</button><div id="hhealth"></div>
 <div id="hquick"></div>
 <button type="button" class="hsec fold" data-hfold="notes" id="hfn" hidden>Updates</button><div id="hnotes"></div>
 <button type="button" class="hsec fold" data-hfold="qr" id="hfq" hidden>Campus Music Director away?</button><div id="hqr"></div>
+</div></div>
 <p id="m10" class="s"></p>
 </div>
 
