@@ -334,6 +334,17 @@ ul.hp{margin:.3rem 0;padding-left:1.1rem}ul.hp li{margin:.3rem 0}
   body:not(.out) .wrap>*{max-width:1200px}
   /* Wide computer screens: Home uses the width. The welcome card runs across the top; below it, Last rehearsal and Needs attention on the left, the rest on the right */
   body:not(.out) .wrap>#s10,body:not(.out) .wrap>#ph{max-width:1760px}
+  /* Wide computer screens (1440px and up): menus that are lists or tiles use the full width with more cards per row;
+     menus with a form and side cards grow a little and keep the form at a comfortable width; Process attendance keeps its reading width */
+  @media(min-width:1440px){
+    body:not(.out) .wrap>#s4,body:not(.out) .wrap>#s7,body:not(.out) .wrap>#s9,body:not(.out) .wrap>#s11,body:not(.out) .wrap>#s12,body:not(.out) .wrap>#s13,body:not(.out) .wrap>#s14,body:not(.out) .wrap>#s16,body:not(.out) .wrap>#s17{max-width:1760px}
+    body:not(.out) .wrap>#s3,body:not(.out) .wrap>#s5,body:not(.out) .wrap>#s6,body:not(.out) .wrap>#s8{max-width:1560px}
+    #s3 .two>.c1,#s5 .two>.c1,#s6 .two>.c1,#s8 .two>.c1{flex:1.5 1 520px;max-width:900px}
+    #s3 .two>.c2,#s5 .two>.c2,#s6 .two>.c2,#s8 .two>.c2{flex:1 1 380px}
+    #roombox .fplist,#rollbox .fplist,#chbox .fplist,#mbbox .fplist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(520px,100%),1fr));gap:12px;align-content:start;align-items:start}
+    #roombox .fplist>*,#rollbox .fplist>*,#chbox .fplist>*,#mbbox .fplist>*{margin:0!important;min-width:0}
+    .fplist{max-height:min(70vh,760px)}
+  }
   #hgrid.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(165px,100%),1fr));gap:12px}
   body:not(.out){font-size:13.5px}
   body:not(.out) .ct{font-size:15px}
