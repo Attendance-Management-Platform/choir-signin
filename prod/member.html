@@ -225,7 +225,103 @@ input.in{height:48px;padding:0 14px}
 .rc-load{padding:30px;text-align:center;color:#8A94A6;font-weight:700}
 @media(max-width:640px){.rc-grid{gap:3px}.rc-cell{min-height:58px;padding:4px 3px;border-radius:9px}.rc-chip{font-size:0;height:6px;padding:0;border-radius:3px;margin-top:2px}.rc-chip.rc-pl{background:#2F4F86}.rc-chip.rc-op{background:#20775A}.rc-chip.rc-hd{background:#8A94A6}.rc-chip.rc-cx{background:#B4232A}.rc-chip.rc-away{background:#D98A00}.rc-chip.rc-cover,.rc-chip.rc-open{background:#8456C2}.rc-more{font-size:9px}.rc-dn{font-size:12px}.rc-now .rc-dn{width:22px;height:22px}
   .rc-title{font-size:19px}.rc-seg{padding:8px 12px}.rc-row{gap:10px;padding:12px}.rc-date{width:54px}.rc-date b{font-size:20px}}
-</style></head><body>
+</style>
+<style id="rbcdark">
+:root[data-theme="dark"]{--red:#FF666E;--acc:#FF666E;--deep:#FF666F;--fg:#CDD0DA;--ink:#CDD0DA;--text:#C3C5CB;--mut:#B0B3B8;--muted:#B0B3B8;--line:#3E4147;--rose:#34191B;--page:#1C2532;--ok:#86DFC1;--bad:#E0858C}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#1B2029;--page:#11151C;--fg:#E7EAF0;--ink:#E7EAF0;--text:#C9CFDA;--mut:#A3ACBB;--muted:#A3ACBB;--card:#1B2029;--acc:#FF5A64;--red:#FF5A64;--ok:#5FCB9F;--bad:#F07A83;--line:#2D3440;--rose:#2A1618;--deep:#FF7A82}
+:root[data-theme="dark"] body{background:radial-gradient(420px 260px at 100% 0,#321819 0,transparent 65%),var(--page)}
+:root[data-theme="dark"] .btn-line{border:1px solid #3E4146;background:#1B202A}
+:root[data-theme="dark"] .in{border:1px solid #3E4146;background:#1B202A}
+:root[data-theme="dark"] .card{background:#1B202A}
+:root[data-theme="dark"] .lift:hover{border-color:#4E3738}
+:root[data-theme="dark"] .p-ok{background:#1C2D23;color:#86DFC1}
+:root[data-theme="dark"] .p-no{background:#34191B;color:#E0858C}
+:root[data-theme="dark"] .p-pend{background:#312817;color:#E6BA7F}
+:root[data-theme="dark"] .p-app{background:#231832;color:#A88BDA}
+:root[data-theme="dark"] .note{background:#312817;color:#E6BA7F}
+:root[data-theme="dark"] .good{background:#1C2D23;color:#86DFC1}
+:root[data-theme="dark"] .info{background:#182433;color:#90ACD5}
+:root[data-theme="dark"] .tile{background:#1B202A}
+:root[data-theme="dark"] .rp{background:radial-gradient(520px 320px at 100% 100%,#321819 0,transparent 65%),var(--page)}
+:root[data-theme="dark"] .sc{background:#1B202A}
+:root[data-theme="dark"] .mbox{background:#1B202A}
+:root[data-theme="dark"] .nav{background:#1B202A}
+:root[data-theme="dark"] .sb{background:#1B202A}
+:root[data-theme="dark"] .chip .so{background:#1B202A;border:1px solid #3E4146}
+:root[data-theme="dark"] .tl{background:#1A1F29;border:1px solid #4E3738}
+:root[data-theme="dark"] .tl.am{background:#312817;border-color:#4E4537}
+:root[data-theme="dark"] .tl.am .a, :root[data-theme="dark"] .tl.am .n, :root[data-theme="dark"] .tl.am .c{color:#E6BA7F}
+:root[data-theme="dark"] .mfchip{border:1px solid #3A404A;background:#1B202A;color:#C7CAD0}
+:root[data-theme="dark"] .mfchip b{color:#FF666F}
+:root[data-theme="dark"] .mfchip:hover{background:#1A1F29;border-color:#4D383A}
+:root[data-theme="dark"] .mfchip.on{background:#324067}
+:root[data-theme="dark"] .mfbar{background:linear-gradient(160deg,#1B202A 0%,#1A1F29 60%,#1A1F29 100%);border:1px solid #4C393B}
+:root[data-theme="dark"] .cbx{background:#1E222D;color:#B0B3B8}
+:root[data-theme="dark"] .cbx:hover{background:#321819;color:#FF666F}
+:root[data-theme="dark"] .cbl{background:#1B202A;border:1px solid #473E3F}
+:root[data-theme="dark"] .cbo b{color:#FF666F}
+:root[data-theme="dark"] .cbo.hi, :root[data-theme="dark"] .cbo:hover{background:#34191B}
+:root[data-theme="dark"] .cbo .ct2{background:#1D2331;color:#FF666F}
+:root[data-theme="dark"] .mfpg button{border:1px solid #3A404A;background:#1B202A}
+:root[data-theme="dark"] .dh{border-left:4px solid #4E3738;background:#1B202A}
+:root[data-theme="dark"] .dh.done{border-left-color:#3B4A42}
+:root[data-theme="dark"] .dh.no{border-left-color:#4E3738}
+:root[data-theme="dark"] .dh.wd{border-left-color:#3E4146}
+:root[data-theme="dark"] .cth, :root[data-theme="dark"] .kick{color:#FF666F!important}
+:root[data-theme="dark"] .ptitle{color:#FF666F!important}
+:root[data-theme="dark"] .ugt{background:linear-gradient(160deg,#1B202A 55%,var(--tint,#1B202A))}
+:root[data-theme="dark"] .ugt.ok{--tint:#1C2D24}
+:root[data-theme="dark"] .ugt.warn{--tint:#322917}
+:root[data-theme="dark"] .ugt.ask{--tint:#182232}
+:root[data-theme="dark"] .ugt.no{--tint:#33181B}
+:root[data-theme="dark"] .ugt.gr{--tint:#1F242D}
+:root[data-theme="dark"] .rc-segs{background:#1F232C}
+:root[data-theme="dark"] .rc-seg{color:#B0B3B8}
+:root[data-theme="dark"] .rc-seg.on{background:#1B202A;color:#FF666F}
+:root[data-theme="dark"] .rc-btn{border:1px solid #3E4147;background:#1B202A;color:#CDD0DA}
+:root[data-theme="dark"] .rc-btn:hover{color:#FF666E}
+:root[data-theme="dark"] .rc-title{color:#CDD0DA}
+:root[data-theme="dark"] .rc-legend{color:#B0B3B8}
+:root[data-theme="dark"] .rc-key i.rc-pl, :root[data-theme="dark"] .rc-chip.rc-pl{background:#172132;color:#8EA9D7}
+:root[data-theme="dark"] .rc-key i.rc-op, :root[data-theme="dark"] .rc-chip.rc-op{background:#1A2C23;color:#86DFC1}
+:root[data-theme="dark"] .rc-key i.rc-hd, :root[data-theme="dark"] .rc-chip.rc-hd{background:#202329;color:#B0B3B8}
+:root[data-theme="dark"] .rc-key i.rc-cx, :root[data-theme="dark"] .rc-chip.rc-cx{background:#331818;color:#E67F84}
+:root[data-theme="dark"] .rc-key i.rc-away, :root[data-theme="dark"] .rc-chip.rc-away{background:#302817;color:#FFC066}
+:root[data-theme="dark"] .rc-key i.rc-cover, :root[data-theme="dark"] .rc-chip.rc-cover, :root[data-theme="dark"] .rc-chip.rc-open{background:#241832;color:#B2A8BF}
+:root[data-theme="dark"] .rc-cell{border:1px solid #3E4146;background:#1B202A;color:#CDD0DA}
+:root[data-theme="dark"] .rc-cell:hover{border-color:#4C3839}
+:root[data-theme="dark"] .rc-cell.rc-past{background:#1A1F29}
+:root[data-theme="dark"] .rc-more{color:#B0B3B8}
+:root[data-theme="dark"] .rc-row{background:#1B202A;border:1px solid #3E4146}
+:root[data-theme="dark"] .rc-row.rc-tap:hover{border-color:#4C3839}
+:root[data-theme="dark"] .rc-open{color:#FF666E}
+:root[data-theme="dark"] .rc-row.rc-empty{background:#1A1F29}
+:root[data-theme="dark"] .rc-date{background:#20232D;color:#CDD0DA}
+:root[data-theme="dark"] .rc-ev{background:linear-gradient(160deg,#1B202A 40%,#182233)}
+:root[data-theme="dark"] .rc-ev.rc-op{background:linear-gradient(160deg,#1B202A 40%,#1A2D24)}
+:root[data-theme="dark"] .rc-ev.rc-hd{background:#20232D}
+:root[data-theme="dark"] .rc-ev.rc-cx{background:linear-gradient(160deg,#1B202A 40%,#341818)}
+:root[data-theme="dark"] .rc-evt b{color:#CDD0DA}
+:root[data-theme="dark"] .rc-time{color:#C3C6CB}
+:root[data-theme="dark"] .rc-pill.rc-pl{background:#172132;color:#8EA9D7}
+:root[data-theme="dark"] .rc-pill.rc-op{background:#1A2C23;color:#86DFC1}
+:root[data-theme="dark"] .rc-pill.rc-hd{background:#202329;color:#B0B3B8}
+:root[data-theme="dark"] .rc-pill.rc-cx{background:#331818;color:#E67F84}
+:root[data-theme="dark"] .rc-sub{color:#B0B3B8}
+:root[data-theme="dark"] .rcd-g{border:1px solid #393F4B;background:#1B202A}
+:root[data-theme="dark"] .rcd-h{color:#B0B3B8}
+:root[data-theme="dark"] .rcd-h b{color:#CDD0DA}
+:root[data-theme="dark"] .rc-you-ok{background:#1A2C23;color:#86DFC1}
+:root[data-theme="dark"] .rc-you-wait{background:#302817;color:#FFC066}
+:root[data-theme="dark"] .rc-you-no{background:#331818;color:#E67F84}
+:root[data-theme="dark"] .rc-tag.rc-away{background:#322917;color:#FFC166}
+:root[data-theme="dark"] .rc-tag.rc-cover, :root[data-theme="dark"] .rc-tag.rc-open{background:#241833;color:#B7AEC4}
+:root[data-theme="dark"] [style*="background:#F7F9FC"]{background:#1C2532 !important}
+:root[data-theme="dark"] [style*="background:#EEF1F6"]{background:#1E232C !important}
+:root[data-theme="dark"] [style*="color:#4A5568"]{color:#BABCC1 !important}
+:root[data-theme="dark"] .tile:has(> img), :root[data-theme="dark"] .rtb img, :root[data-theme="dark"] img[src*="logo"]{background:#fff}
+</style>
+<script id="rbcthemeboot">/* Light or dark: the person's choice in Settings, or the phone's own setting (Kinnor idea, 29 Oct 2026). */(function(){function apply(){var t='auto';try{t=localStorage.getItem('rbcTheme')||'auto';}catch(e){}var d=t==='dark'||(t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light');}window.rbcThemeApply=apply;apply();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',apply);}catch(e){}})();</script></head><body>
 <div id="outv">
  <div class="lp"><div class="lbrand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
   <div class="lhero rise"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. Check in at rehearsal, ask to be excused, and see your own attendance.</div></div></div>
