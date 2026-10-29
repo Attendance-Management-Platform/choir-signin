@@ -698,6 +698,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),
 <label id="ancw" style="flex:1 1 190px;display:flex;gap:8px;align-items:center;font-size:14px;min-height:44px"><input id="ancmp" type="checkbox"> Compare with the period before</label></div>
 <div class="actions"><button id="anrun" class="btn red" type="button">Show</button><button id="anx" class="btn line" type="button">Clear</button></div></div>
 <div id="anout"></div>
+<div id="rppat"></div>
 
 <p id="m11" class="s"></p>
 </div>
@@ -2571,7 +2572,7 @@ async function loadReports() {
     const j = await call({action: 'reports.state', token});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) return say('m11', j.error || 'Not available.', 'bad');
-    loadOutlook();
+    loadOutlook(); loadPatterns();
     rpState = j; say('m11', j.empty || '');
     ANREH = ''; ANCAMP = ''; ANROWS = null; ANCACHE = {};
     $('hcharts').innerHTML = j.latest ? homeCharts(j.latest, true, true, myTabs.indexOf('records') !== -1) : '';
@@ -2584,6 +2585,36 @@ function table(cols, rows, raw) {
   return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr>' + cols.map(c => '<th style="text-align:left;padding:8px 10px;font-size:12px;color:#5E6A7E;border-bottom:1px solid #E6E9EF">' + esc(c) + '</th>').join('') + '</tr></thead><tbody>' +
     rows.map(r => '<tr>' + r.map(v => '<td style="padding:9px 10px;border-top:1px solid #E6E9EF">' + (raw ? v : esc(v)) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
 }
+
+// ---- Attendance patterns (Kinnor idea, 29 Oct 2026): who may need a word. It shows; a person decides. ----
+let PATW = 8, PATT = '', PATJ = null;
+const PATTH = [['', 'Everyone'], ['late3', 'Late 3 or more'], ['abs2', 'Absent 2 or more'], ['exc4', 'Excused 4 or more']];
+const patKeep = r => PATT === 'late3' ? r.late >= 3 : PATT === 'abs2' ? r.absent >= 2 : PATT === 'exc4' ? r.excused >= 4 : true;
+async function loadPatterns() {
+  const box = $('rppat'); if (!box) return;
+  try {
+    const j = await call({action: 'reports.patterns', token, weeks: PATW});
+    if (!j.ok) { box.innerHTML = ''; return; }
+    PATJ = j; drawPatterns();
+  } catch (e) { box.innerHTML = ''; }
+}
+function drawPatterns() {
+  const j = PATJ, box = $('rppat'); if (!j || !box) return;
+  const chips = (list, cur, attr) => '<div class="fpchips" style="margin:0 0 10px">' + list.map(x => '<button type="button" class="fpchip' + (String(cur) === String(x[0]) ? ' on' : '') + '" ' + attr + '="' + esc(String(x[0])) + '">' + esc(x[1]) + '</button>').join('') + '</div>';
+  const items = j.rows.filter(patKeep);
+  box.innerHTML = '<div class="card pad rise"><div class="ct">Attendance patterns</div><p class="sub">One line per person over the period, from the official attendance: how often they were late, excused or absent. It only shows who may need a word; nothing changes by itself.' + (j.campusOnly ? ' You see your own campus.' : '') + '</p>' +
+    chips([[4, '4 weeks'], [8, '8 weeks'], [13, '3 months'], [52, 'A year']], PATW, 'data-patw') + chips(PATTH, PATT, 'data-patt') +
+    '<p class="sub" style="margin:0 0 8px">' + j.rehearsals + ' rehearsal' + (j.rehearsals === 1 ? '' : 's') + ' from ' + esc(j.from) + ' to ' + esc(j.to) + '.</p><div id="rppatl"></div></div>';
+  const line = r => [r.late ? r.late + ' late' : '', r.lateAllowed ? r.lateAllowed + ' late (allowed)' : '', r.absent ? r.absent + ' absent' : '', r.excused ? r.excused + ' excused' : ''].filter(Boolean).join(' · ') || 'No lateness or absence';
+  fpPanel('pat', 'rppatl', {bare: true, items: items, page: 20, empty: PATT ? 'Nobody meets that in this period.' : 'No official attendance in this period yet.',
+    fields: [{k: 'q', label: 'Search name', ph: 'Type a name, or choose', type: 'text', get: r => r.name, sug: r => [r.name]}, {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus}, {k: 'part', label: 'Part', type: 'list', get: r => r.part || '(no part)'}],
+    card: r => '<div class="fprow" style="border-left-color:' + (r.absent >= 2 || r.late >= 3 ? '#AE2D37' : r.absent || r.late ? '#C98A1E' : '#1F7A4D') + '"><div><div class="nm">' + esc(r.name) + '</div><div class="mt">' + esc(r.campus) + ' · ' + esc(r.part || '(no part)') + ' · ' + esc(line(r)) + '</div></div><span class="pill p-info">' + r.present + ' of ' + r.expected + '</span></div>'});
+}
+document.addEventListener('click', ev => {
+  const w = ev.target.closest && ev.target.closest('[data-patw]'), t = ev.target.closest && ev.target.closest('[data-patt]');
+  if (w) { PATW = Number(w.dataset.patw) || 8; loadPatterns(); }
+  else if (t) { PATT = t.dataset.patt || ''; drawPatterns(); }
+});
 
 // ---- Build a report (Reports) ----
 let rpPreset = '', anLast = null;
@@ -3352,6 +3383,7 @@ const TABHELP = {
   changes: ['Change log', 'See what has changed in the last two weeks, including steps done by an admin instead of the usual desk, and send a petition if you disagree.']
 };
 const FAQ = [
+  {t: ['reports'], q: 'What is Attendance patterns on Reports?', a: 'One line per person for the period you choose (4 weeks to a year): how many rehearsals they were expected at, present, late, late (allowed), excused and absent. Tap Late 3 or more, Absent 2 or more or Excused 4 or more to see only those people. It comes from the official attendance, and it never changes a record or sends anything: it only shows who may need a word.'},
   {t: ['checkins', 'process', 'reports'], q: 'What do Early, Late and Late (allowed) mean?', a: 'Everyone who checks in counts as Present. Early means they checked in before the rehearsal\'s late time. Late means after it. Late (allowed) means late, but the leaders agreed beforehand: Desk B or an admin presses Late (allowed) on the Check-ins page, with a reason. Reports show the three apart for rehearsals processed from now on.'},
   {t: ['rehearsal', 'calendar'], q: 'How do I set up a rehearsal?', a: 'Open Rehearsals (or click an empty future date in the Calendar), choose the date, start and finish times, and the venue, then save. Times are Lagos time and at most three rehearsals can be planned at once. If it is normally Desk A\'s job and you are the Global Admin or Assistant, you give a reason and Desk A is told.'},
   {t: ['rehearsal'], q: 'How do I open and close check-in?', a: 'On the Rehearsals page, use Open check-in. You can open it by hand from one hour before the start. If nobody does, it opens by itself at the start time and closes by itself at the finish time. Use Close check-in to close it earlier; it then stays closed until you open it again.'},
