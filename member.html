@@ -257,7 +257,7 @@ input.in{height:48px;padding:0 14px}
    <button id="t5" class="nv"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Calendar</button>
    <button id="t4" class="nv"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Profile</button>
   </nav>
-  <div class="sbfoot"><b style="color:var(--ink)">Need help?</b><br>No phone, camera or location? Tell your Campus Music Director or Desk D and they will mark you by hand.</div>
+  <div class="sbfoot"><b style="color:var(--ink)">Need help?</b><br>No phone, camera or location? Tell your Campus Music Director or Desk B and they will mark you by hand.</div>
  </div>
  <div class="mainw">
   <div class="dtop"><div class="tt"><div class="t1">LAGOS REGION CHOIR</div><div class="t2">Check in, ask to be excused and follow your own attendance.</div></div><div class="chip"><div id="av" class="av"></div><div style="line-height:1.25"><b id="dname" style="font-size:14px"></b><div id="dsub" style="font-size:12px;color:var(--muted)"></div></div><a class="so staffgo hide" href="staff.html" style="text-decoration:none;margin-right:6px">Staff page</a><button class="so" id="out">Sign out</button></div></div>
@@ -602,15 +602,15 @@ function drawHome() {
     let m = h.mine;
     if (m === 'none' && mineReq && mineReq.status === 'Approved') m = 'excused';
     const set = html => { $('state').innerHTML = html; };
-    if (m === 'waiting') { status = 'Waiting for a yes'; set('<div><span class="pill p-pend">Waiting for a yes</span></div><div class="s" style="font-size:14px">You are checked in. Your Campus MD or Desk D now says yes that you are in the room. You do nothing more.</div>'); }
-    else if (m === 'checked') { status = 'Checked in'; set('<div><span class="pill p-ok">Checked in</span></div><div class="s" style="font-size:14px">A Desk D team member will check it. It counts once that is done.</div>'); }
-    else if (m === 'notroom') { status = 'Not in the room'; set('<div><span class="pill p-no">Not in the room</span></div><div class="s" style="font-size:14px">You were marked as not in the room. If that is wrong, tell your Campus MD or Desk D.</div>'); }
+    if (m === 'waiting') { status = 'Waiting for a yes'; set('<div><span class="pill p-pend">Waiting for a yes</span></div><div class="s" style="font-size:14px">You are checked in. Your Campus MD or Desk B now says yes that you are in the room. You do nothing more.</div>'); }
+    else if (m === 'checked') { status = 'Checked in'; set('<div><span class="pill p-ok">Checked in</span></div><div class="s" style="font-size:14px">A Desk B team member will check it. It counts once that is done.</div>'); }
+    else if (m === 'notroom') { status = 'Not in the room'; set('<div><span class="pill p-no">Not in the room</span></div><div class="s" style="font-size:14px">You were marked as not in the room. If that is wrong, tell your Campus MD or Desk B.</div>'); }
     else if (m === 'excused') { status = 'Excused'; set('<div><span class="pill p-app">Excused</span></div><div class="s" style="font-size:14px">Your absence request for this rehearsal was approved.</div>'); }
     else if (h.staffOnly) { status = '-'; set('<div class="note">You are signed in for staff duties. Check-in and requests are for choir members.</div>'); }
     else if (rh.finished) { status = 'Finished'; set('<div class="s" style="font-size:14px">This rehearsal has finished.</div>'); }
     else if (rh.checkInOpen) {
       status = 'Open now';
-      set('<div class="good"><b>Check-in is open.</b> It uses your phone location, so you must be at the venue. No QR needed.</div><div class="s" style="font-size:13px">Cannot use Google? Scan the QR in the room instead. No phone or location? Tell your Campus MD or Desk D.</div>');
+      set('<div class="good"><b>Check-in is open.</b> It uses your phone location, so you must be at the venue. No QR needed.</div><div class="s" style="font-size:13px">Cannot use Google? Scan the QR in the room instead. No phone or location? Tell your Campus MD or Desk B.</div>');
       let agreed = false; try { agreed = localStorage.getItem('rbcConsent') === '1'; } catch (e) {}
       $(agreed ? 'ci' : 'consent').classList.remove('hide');
     } else {
@@ -645,7 +645,7 @@ $('ci').onclick = () => {
   navigator.geolocation.getCurrentPosition(p => {
     reading = {lat: p.coords.latitude, lon: p.coords.longitude, accuracyM: p.coords.accuracy};
     sendCheckIn();
-  }, () => say('m2', 'Location not available. Tell your Campus MD or Desk D to mark you by hand.', 'bad'), {enableHighAccuracy: true, timeout: 15000});
+  }, () => say('m2', 'Location not available. Tell your Campus MD or Desk B to mark you by hand.', 'bad'), {enableHighAccuracy: true, timeout: 15000});
 };
 async function sendCheckIn() {
   if (!gTok || Date.now() - gAt > 8 * 60 * 1000) { gTok = ''; onFresh = sendCheckIn; $('regoogle').classList.remove('hide'); return say('m2', 'Please press the Google button to confirm it is you.', 'bad'); }

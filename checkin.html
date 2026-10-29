@@ -23,7 +23,7 @@ button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;
 <p id="how" class="s hide">No QR needed. Sign in with the Google account you gave the choir, then check your location. Your phone is remembered, so next time it is quick.</p>
 <div id="gwrap" class="hide"><div id="gbtn" style="margin:.4rem 0"></div><p id="gmsg" class="s"></p><p id="orid" class="s" style="margin:.2rem 0">Or type your Member ID:</p></div>
 <input id="mid" autocomplete="off" placeholder="Member ID">
-<p id="noqr" class="s bad hide">To check in without the QR code you need to sign in with Google. If Google does not work for you, scan the QR code your Campus MD shows, or ask your Campus MD or Desk D to mark you.</p>
+<p id="noqr" class="s bad hide">To check in without the QR code you need to sign in with Google. If Google does not work for you, scan the QR code your Campus MD shows, or ask your Campus MD or Desk B to mark you.</p>
 <button id="loc">2. Check my location</button>
 <p id="locmsg" class="s"></p></div>
 
@@ -33,7 +33,7 @@ button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;
 <button id="send">Check me in</button>
 <p id="out" class="s"></p></div>
 
-<p class="s">No phone, camera or location? Tell your Campus MD or Desk D and they will mark you.</p>
+<p class="s">No phone, camera or location? Tell your Campus MD or Desk B and they will mark you.</p>
 <script>
 // Set to the Apps Script web app URL when the back end is wired. Empty means demo mode.
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyPAYTBNK11xxnOyjI3wfNRIE64Os2wqJJ4jFoyJ6uDVVIkX-qiYYd-kt1DYT4eYVxo/exec';
@@ -74,7 +74,7 @@ $('loc').onclick = () => {
     // Sent once to the back end for the venue check, never stored there.
     reading = {lat: p.coords.latitude, lon: p.coords.longitude, accuracyM: p.coords.accuracy};
     locOk = true; $('locmsg').textContent = 'Location checked.'; $('locmsg').className = 's ok'; $('step3').classList.remove('hide');
-  }, e => { $('locmsg').textContent = 'Location not available. Tell your Campus MD or Desk D to mark you by hand.'; $('locmsg').className = 's bad'; },
+  }, e => { $('locmsg').textContent = 'Location not available. Tell your Campus MD or Desk B to mark you by hand.'; $('locmsg').className = 's bad'; },
   {enableHighAccuracy: true, timeout: 15000});
 };
 // A private random marker kept on this phone, so staff can see if one phone checked in several people.
