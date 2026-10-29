@@ -781,6 +781,20 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),
 <p id="m18" class="s"></p>
 </div>
 
+<div id="s19" class="pg hide">
+<p class="sub" style="margin:0 0 12px">Your own place as a choir member: your next rehearsal, your attendance and your details. Only you can see this page.</p>
+<div class="two"><div class="c1"><div id="mynext" class="card pad rise"><div class="ct">My next rehearsal</div><p class="sub">Loading…</p></div><div id="myatt"></div></div>
+<div class="c2"><div id="mydet" class="card pad rise"><div class="ct">My details</div><p class="sub">Loading…</p></div>
+<div class="card pad rise" id="mywrong"><div class="ct">Something wrong?</div><p class="sub">You cannot edit these yourself. Ask <span class="mydgo">Desk A</span> to correct your name, email, campus or part.</p>
+<div class="actions"><button id="mydask" class="btn red" type="button"><span>Ask <span class="mydgo">Desk A</span> to correct my details</span></button></div>
+<div id="mydform" class="hide"><label for="mydkind" class="lb">What is wrong?</label><select id="mydkind" class="in"><option value="">Choose one</option><option>Name</option><option>Email</option><option>Campus</option><option>Section</option><option>Other</option></select>
+<label for="mydtext" class="lb">What it should be</label><input id="mydtext" class="in" maxlength="200" autocomplete="off" placeholder="Write the correct detail">
+<label for="mydnote" class="lb">Anything <span class="mydgo">Desk A</span> should know (optional)</label><input id="mydnote" class="in" maxlength="200" autocomplete="off">
+<div class="actions"><button id="mydsend" class="btn red" type="button"><span>Send to <span class="mydgo">Desk A</span></span></button><button id="mydcancel" class="btn line" type="button">Cancel</button></div></div>
+<div id="mydlist"></div></div></div></div>
+<p id="m19" class="s"></p>
+</div>
+
 <div id="s10" class="pg hide">
 <div id="hhero"></div>
 <div class="hcols"><div class="hca">
@@ -970,12 +984,12 @@ async function call1(body) {
     if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
-const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People and access'], records: ['s13', 'Attendance records'], settings: ['s18', 'Settings'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process attendance'], changes: ['s16', 'Change log'], members: ['s17', 'Members'], qr: ['s3', 'Show QR code'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'Mark by hand'], absence: ['s6', 'My absence'], requests: ['s7', 'Absence requests'], rehearsal: ['s8', 'Rehearsals'], help: ['s9', 'Help']};
+const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People and access'], records: ['s13', 'Attendance records'], settings: ['s18', 'Settings'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process attendance'], changes: ['s16', 'Change log'], members: ['s17', 'Members'], qr: ['s3', 'Show QR code'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'Mark by hand'], absence: ['s6', 'My absence'], mine: ['s19', 'My choir'], requests: ['s7', 'Absence requests'], rehearsal: ['s8', 'Rehearsals'], help: ['s9', 'Help']};
 const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 let myBypass = {};
 var myStaffOnly = false;
-function setMe(j) { myTabs = (j.tabs || ['absence']).filter(x => x !== 'help').concat('help'); myStaffOnly = j.staffOnly === true; myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
+function setMe(j) { myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
 const ICON = {
   reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
   process: '<path d="M9 11l3 3 8-8"/><path d="M4 6h9M4 12h3M4 18h9"/>',
@@ -987,6 +1001,7 @@ const ICON = {
   checkins: '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/>',
   hand: '<path d="M8 13V6a2 2 0 014 0v5M12 11V4a2 2 0 014 0v7M16 11V7a2 2 0 014 0v6a8 8 0 01-8 8h-1a6 6 0 01-5-3l-2-4a2 2 0 013-2l1 1"/>',
   absence: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/>',
+  mine: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
   requests: '<path d="M4 4h16v12H8l-4 4z"/><path d="M8 9h8M8 12h5"/>',
   rehearsal: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
   changes: '<path d="M4 6h16M4 12h10M4 18h6"/><path d="M17 14l3 3-3 3"/>',
@@ -1017,7 +1032,8 @@ const NAVGROUPS = [
   {k: 'home', name: '', tabs: ['home']},
   {k: 'before', name: 'Before rehearsal', tabs: ['rehearsal', 'calendar']},
   {k: 'at', name: 'At rehearsal', tabs: ['qr', 'checkins', 'hand']},
-  {k: 'abs', name: 'Absences', tabs: ['absence', 'requests']},
+  {k: 'me', name: 'Me', tabs: ['mine', 'absence']},
+  {k: 'abs', name: 'Absences', tabs: ['requests']},
   {k: 'after', name: 'After rehearsal', tabs: ['process', 'records', 'reports']},
   {k: 'mem', name: 'Members and access', tabs: ['members', 'people']},
   {k: 'sys', name: 'System', tabs: ['changes', 'settings', 'help']}];
@@ -1043,9 +1059,9 @@ function navHtml() {
 function drawTabs() {
   $('tabs').innerHTML = '<button type="button" class="rt rtmenu" id="railtg" title="Show or hide the menu" aria-label="Show or hide the menu">' + MENU + '<span>Hide menu</span></button>' +
     '<div class="rt rtb"><img src="logo.png" alt="CCW logo"><div class="n1">CELEBRATION<br>CHURCH WORSHIP</div><div class="n2">LAGOS REGION CHOIR</div></div>' +
-    navHtml() + (myTabs.indexOf('absence') !== -1 && !myStaffOnly ? '<button class="tab" type="button" data-mp="1" title="Your own attendance, absences and details" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg><span>My member page</span></button>' : '') +
+    navHtml() +
     '<div class="rt rtu"><b>' + esc(myName || 'Signed in') + '</b>' + myRoles.map(r => '<span style="display:block;white-space:normal">' + esc(r) + '</span>').join('') + '</div>';
-  document.querySelectorAll('.tab').forEach(b => b.onclick = () => b.dataset.mp ? (location.href = 'member.html') : go(b.dataset.v));
+  document.querySelectorAll('.tab').forEach(b => b.onclick = () => go(b.dataset.v));
   document.querySelectorAll('.gh').forEach(h => h.onclick = () => { const g = h.dataset.ng, shut = !NAVSHUT[g]; NAVSHUT[g] = shut; try { localStorage.setItem('rbcNavShut', JSON.stringify(NAVSHUT)); } catch (e) {} h.parentNode.classList.toggle('shut', shut); h.setAttribute('aria-expanded', shut ? 'false' : 'true'); });
   $('railtg').onclick = () => { const open = document.body.classList.toggle('rail-open'); try { localStorage.setItem('rbcRail', open ? '1' : '0'); } catch (e) {} };
   const ini = String(myName || '').trim().split(/\s+/).filter(Boolean), inits = ini.length ? (ini[0][0] + (ini.length > 1 ? ini[ini.length - 1][0] : '')).toUpperCase() : '';
@@ -1063,7 +1079,7 @@ function go(v) {
   clearTimeout(timer);
   { const cur = Array.from(document.querySelectorAll('.pg')).filter(x => !x.classList.contains('hide'))[0]; if (!cur || cur.id !== v) filtersReset(); }
   if (v === 's3') return start();
-  show(v); if (v === 's18') loadSettings(); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal();
+  show(v); if (v === 's18') loadSettings(); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal(); if (v === 's19') loadMine();
 }
 /** "Clear this page": empties the boxes and filters on a menu page, closes anything open on it and reloads it fresh. It never deletes saved data. */
 const CLEARABLE = ['s4', 's5', 's6', 's7', 's8', 's11', 's12', 's13', 's15', 's16', 's17'];
@@ -1082,7 +1098,7 @@ function pgClear(id) {
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-pgx]'); if (b) pgClear(b.dataset.pgx); });
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); sessionStorage.removeItem('rbcMTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17','s18']) $(x).classList.toggle('hide', x !== id);
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17','s18','s19']) $(x).classList.toggle('hide', x !== id);
   const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17','s18'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   const ph = PAGEHEAD[id]; $('ph').classList.toggle('hide', !ph);
   const dk = Object.keys(TABDEF).filter(k => TABDEF[k][0] === id && myBypass[k])[0];
@@ -2230,7 +2246,7 @@ function drawSettingsMine() {
     '<div class="mrow"><span class="mtx"><b>Calendar opens on</b><span>' + (view ? 'Your choice' : 'Phones open on Week, computers on Month') + '</span></span><span class="rc-segs" role="group" aria-label="Calendar opens on">' + seg + '</span></div>' +
     '<div class="mrow"><span class="mtx"><b>Larger text</b><span>Makes everything on the staff page a little bigger</span></span>' + swHtml(big, 'data-bigtext="1" aria-label="Larger text"', 'On', 'Off') + '</div>' +
     '<div class="mrow"><span class="mtx"><b>Page layout</b><span>Opens every card and menu group you have folded shut</span></span><button class="btn line sm" type="button" data-resetlayout="1">Reset my layout</button></div>' +
-    (myStaffOnly ? '' : '<div class="mrow"><span class="mtx"><b>My details</b><span>Your phone, email and part, on your member page</span></span><a class="btn line sm" href="member.html">Open my member page</a></div>') +
+    (myStaffOnly ? '' : '<div class="mrow"><span class="mtx"><b>My details</b><span>Your name, email, campus and part, on My choir</span></span><button class="btn line sm" type="button" data-gotab="s19">Open My choir</button></div>') +
     '<div class="mrow"><span class="mtx"><b>Sign me out everywhere</b><span>For a lost or shared phone: every device signed in as you, this one too, must sign in again</span></span><button class="btn warn sm" type="button" data-soall="1">Sign out everywhere</button></div>' +
     '<p class="s" id="mmine" style="margin:8px 0 0"></p></div>';
 }
@@ -3325,6 +3341,7 @@ const TABHELP = {
   checkins: ['Check-ins', 'See who has checked in and mark each one as checked. Late and hand-marked ones come first. Nobody checks their own. Members who checked in with Google, without the QR, wait for a yes in the room from their Campus MD or Desk D.'],
   hand: ['Mark by hand', 'The roll call: everyone on the choir list, to mark Present, Absent or Excused. The Campus MD goes first for their own campus; Desk D marks from 45 minutes before the end. Someone else always checks a hand mark.'],
   absence: ['My absence', 'Ask to be excused from the next rehearsal. Requests close 36 hours before it starts.'],
+  mine: ['My choir', 'Your own next rehearsal and check-in, your attendance this year, and your details. Ask Desk A here if a detail is wrong.'],
   requests: ['Absence requests', 'Validate or decide absence requests, and see members without a part for your campus.'],
   process: ['Process attendance', 'After a rehearsal, process attendance, then publish it to the official attendance. The Global Admin and Assistant can correct one person with a reason.'],
   records: ['Attendance records', 'See who checked in for each rehearsal, filter by campus or part, and look up one member.'],
@@ -3394,6 +3411,95 @@ document.addEventListener('click', async ev => {
 });
 /** The shared card tile, reachable from functions that have their own local 'tile'. */
 function mkTile(o) { return tile(o); }
+// ---- My choir: a staff member's own place as a choir member (owner decision, 29 Oct 2026: no separate member page for staff) ----
+let myDet = [], myDgo = 'Desk A';
+const myPill = (cls, t) => '<span class="pill ' + cls + '">' + esc(t) + '</span>';
+async function loadMine() {
+  say('m19', '');
+  try {
+    const [h, a, t] = await Promise.all([call({action: 'me.home', token}), call({action: 'me.attendance', token}), call({action: 'absence.state', token})]);
+    if (h.signedOut || a.signedOut) { signedOutNow(); return; }
+    myNextDraw(h, t && t.ok ? t : null); myAttDraw(a); myDetDraw(h);
+  } catch (e) { say('m19', 'Network problem. Try again.', 'bad'); }
+  myDetLoad();
+}
+function myNextDraw(h, t) {
+  const box = $('mynext');
+  if (!h || !h.ok) { box.innerHTML = '<div class="ct">My next rehearsal</div><p class="sub">' + esc((h && h.error) || 'Not available.') + '</p>'; return; }
+  const rh = h.rehearsal;
+  if (!rh) { box.innerHTML = '<div class="ct">My next rehearsal</div><p class="sub">No rehearsal is set up yet.</p>'; return; }
+  const req = t ? (t.mine || []).filter(r => r.rehearsalId === rh.id && r.status !== 'Withdrawn')[0] : null;
+  let m = h.mine; if (m === 'none' && req && req.status === 'Approved') m = 'excused';
+  const S = {waiting: ['p-pend', 'Waiting for a yes', 'You are checked in. Your Campus MD or Desk D now says yes that you are in the room.'],
+    checked: ['p-ok', 'Checked in', 'Desk D checks it. It counts once that is done.'], notroom: ['p-no', 'Not in the room', 'You were marked as not in the room. If that is wrong, tell your Campus MD or Desk D.'],
+    excused: ['p-ok', 'Excused', 'Your absence request for this rehearsal was approved.']}[m];
+  let st;
+  if (S) st = myPill(S[0], S[1]) + '<p class="sub">' + esc(S[2]) + '</p>';
+  else if (rh.finished) st = '<p class="sub">This rehearsal has finished.</p>';
+  else if (rh.checkInOpen) st = myPill('p-ok', 'Check-in is open') + '<p class="sub">Scan the QR code in the room to check in. No phone or location? Tell your Campus MD or Desk D.</p>';
+  else if (req) st = myPill(req.status === 'Approved' ? 'p-ok' : req.status === 'Rejected' ? 'p-no' : 'p-pend', 'Request: ' + req.status) + '<p class="sub">Your absence request for this rehearsal. See My absence for the details.</p>';
+  else st = '<p class="sub">Check-in opens 1 hour before the start.' + (t && t.rehearsal && t.rehearsal.open ? ' Can\'t come? Ask to be excused on My absence before ' + esc(lagos(t.rehearsal.closeMs)) + '.' : '') + '</p>';
+  box.innerHTML = '<div class="ct">My next rehearsal</div>' + tile({tone: 'ask', icon: '♪', title: lagos(rh.startMs), label: rh.venue || 'Venue to be confirmed'}) + '<div style="margin-top:10px">' + st + '</div>' +
+    (!S && !rh.finished && !req && t && t.rehearsal && t.rehearsal.open ? '<div class="actions"><button class="btn line sm" type="button" data-gotab="s6">Ask to be excused</button></div>' : '');
+}
+function myAttDraw(j) {
+  if (!j || !j.ok) { $('myatt').innerHTML = '<div class="card pad rise"><div class="ct">My attendance</div><p class="sub">' + esc((j && j.error) || 'Not available.') + '</p></div>'; return; }
+  const fd = x => { const d = new Date(String(x) + 'T12:00:00'); return isNaN(d) ? String(x || '') : d.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'}); };
+  const mo = r => { const d = new Date(String(r.date) + 'T12:00:00'); return isNaN(d) ? '' : d.toLocaleDateString('en-GB', {month: 'long', year: 'numeric'}); };
+  const pc = {Present: 'p-ok', Excused: 'p-info', Absent: 'p-no'};
+  fpPanel('myatt', 'myatt', {title: 'My attendance', items: (j.rehearsals || []).slice().sort((x, y) => String(y.date).localeCompare(String(x.date))), page: 10, chips: 'status', chipsAll: 'All rehearsals',
+    sub: j.of ? j.attended + ' of ' + j.of + ' rehearsals (' + Math.round(100 * j.attended / j.of) + '%) · ' + j.excused + ' excused · ' + j.absent + ' absent' : '',
+    empty: 'Your attendance shows here once rehearsals are published.',
+    fields: [{k: 'q', label: 'Search', ph: 'A date or rehearsal number', type: 'text', get: r => [fd(r.date), r.id, r.date].join(' ')}, {k: 'month', label: 'Month', type: 'list', get: mo}, {k: 'status', label: 'Status', type: 'list', get: r => r.status || '', all: ['Present', 'Excused', 'Absent']}],
+    card: r => '<div class="fprow"><div><div class="nm">' + esc(fd(r.date)) + '</div><div class="mt">' + esc(r.id || '') + '</div></div>' + myPill(pc[r.status] || 'p-pend', r.status || '') + '</div>'});
+}
+function myDetDraw(h) {
+  if (!h || !h.ok) return;
+  const pr = (ic, k, v) => tile({tone: 'ask', icon: ic, title: v || '-', label: k});
+  $('mydet').innerHTML = '<div class="ct">My details</div><div class="tgrid">' + pr('#', 'Member ID', h.memberId) + pr('C', 'Campus', h.campus) + pr('S', 'Part', h.part) + pr('@', 'Email', h.email) + '</div>';
+}
+async function myDetLoad() {
+  try {
+    const j = await call({action: 'me.details', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) return;
+    myDet = j.requests || []; myDgo = j.goesTo || 'Desk A';
+    document.querySelectorAll('.mydgo').forEach(e => { e.textContent = myDgo; });
+    $('mydask').classList.toggle('hide', j.canAsk === false || !$('mydform').classList.contains('hide'));
+    const tone = r => r.status === 'Done' ? 'ok' : r.status === 'Waiting' ? 'warn' : r.status === 'Withdrawn' ? 'ask' : 'no';
+    const pl = r => r.status === 'Waiting' ? ['p-pend', 'Waiting for ' + myDgo] : r.status === 'Done' ? ['p-ok', 'Done'] : r.status === 'Withdrawn' ? ['p-info', 'Withdrawn'] : ['p-no', 'Not changed'];
+    fpPanel('mydet', 'mydlist', {bare: true, items: myDet, empty: '', chips: 'status', chipsAll: 'All requests',
+      fields: [{k: 'q', label: 'Search', ph: 'Words from your request or the answer', type: 'text', get: r => [r.kind, r.text, r.note, r.answer].join(' ')}, {k: 'status', label: 'Status', type: 'list', get: r => r.status, all: ['Waiting', 'Done', 'Not changed', 'Withdrawn']}],
+      card: r => tile({tone: tone(r), icon: r.status === 'Done' ? '✓' : r.status === 'Waiting' ? '…' : r.status === 'Withdrawn' ? '–' : '✕', title: r.kind, pill: pl(r)[1], pillCls: pl(r)[0], label: 'Sent ' + lagos(r.atMs),
+        body: '<div class="s">Should be: ' + esc(r.text) + '</div>' + (r.note ? '<div class="s">Your note: ' + esc(r.note) + '</div>' : '') + (r.answer ? '<div class="s">' + esc(myDgo) + ': ' + esc(r.answer) + '</div>' : ''),
+        actions: (r.status === 'Waiting' ? '<button class="btn line sm" type="button" data-mydw="' + esc(r.id) + '">Withdraw this request</button>' : '') +
+          (r.status === 'Not changed' ? '<button class="btn line sm" type="button" data-mydagain="' + esc(r.id) + '">Ask again</button><button class="btn line sm" type="button" data-mydseen="' + esc(r.id) + '">Got it</button>' : '')})});
+  } catch (e) { /* the list stays as it was */ }
+}
+document.addEventListener('click', async ev => {
+  const t = ev.target.closest && ev.target.closest('[data-mydw],[data-mydagain],[data-mydseen],#mydask,#mydcancel,#mydsend'); if (!t) return;
+  if (t.id === 'mydask') { $('mydform').classList.remove('hide'); $('mydask').classList.add('hide'); say('m19', ''); return; }
+  if (t.id === 'mydcancel') { $('mydform').classList.add('hide'); $('mydask').classList.remove('hide'); say('m19', ''); return; }
+  if (t.dataset.mydagain) { const r = myDet.filter(x => x.id === t.dataset.mydagain)[0]; if (!r) return; $('mydform').classList.remove('hide'); $('mydask').classList.add('hide'); $('mydkind').value = r.kind; $('mydtext').value = r.text; $('mydnote').value = r.note || ''; say('m19', 'Check it, change anything that was wrong, then send it again.'); $('mydform').scrollIntoView({behavior: 'smooth', block: 'center'}); return; }
+  t.disabled = true;
+  try {
+    let j;
+    if (t.id === 'mydsend') {
+      const kind = $('mydkind').value, text = $('mydtext').value.trim();
+      if (!kind) { t.disabled = false; return say('m19', 'Choose what is wrong.', 'bad'); }
+      if (text.length < 2) { t.disabled = false; return say('m19', 'Write what it should be.', 'bad'); }
+      say('m19', 'Sending…');
+      j = await call({action: 'me.details.ask', token, kind, text, note: $('mydnote').value.trim()});
+      if (j && j.ok) { $('mydform').classList.add('hide'); $('mydkind').value = ''; $('mydtext').value = ''; $('mydnote').value = ''; $('mydask').classList.remove('hide'); }
+    } else if (t.dataset.mydseen) j = await call({action: 'ack.seen', token, id: t.dataset.mydseen});
+    else j = await call({action: 'me.details.withdraw', token, id: t.dataset.mydw});
+    if (j && j.signedOut) { signedOutNow(); return; }
+    say('m19', j && j.ok ? (t.id === 'mydsend' ? 'Sent to ' + myDgo + '.' : t.dataset.mydw ? 'Withdrawn.' : '') : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
+    await myDetLoad();
+  } catch (e) { say('m19', 'Network problem. Try again.', 'bad'); }
+  t.disabled = false;
+});
+
 function tile(o) {
   return '<div class="ugt ' + (o.tone || 'ask') + (o.cls ? ' ' + o.cls : '') + '"' + (o.attr ? ' ' + o.attr : '') + '><div class="ugtop"><span class="ugi' + (o.num ? ' ugn' : '') + '"' + (o.iconColor ? ' style="background:' + o.iconColor + '"' : '') + '>' + (o.icon || '') + '</span><span class="ugtt">' + (o.pill ? '<span class="pill ugtag ' + (o.pillCls || 'p-pend') + '">' + esc(o.pill) + '</span>' : '') + '<b>' + esc(o.title) + '</b></span></div>' +
     (o.label ? '<div class="ugk">' + esc(o.label) + '</div>' : '') + (o.body ? '<div class="ugh"' + (o.label ? '' : ' style="margin-top:10px"') + '>' + o.body + '</div>' : '') + (o.actions ? '<div class="actions" style="margin:10px 0 0">' + o.actions + '</div>' : '') + '</div>';
