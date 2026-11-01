@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" id="kinnorfont">
-<title>CCW Choir Staff</title>
+<title>CCW Choir Portal</title>
 <style>
 :root{--bg:#fff;--page:#F6F5F2;--fg:#1F1E1C;--mut:#5F5E5A;--card:#fff;--acc:#B6000A;--ok:#20775A;--bad:#AE2D37;--line:#E2E0D9;--rose:#FFF0F1;--deep:#8E0008}
 *{box-sizing:border-box}
@@ -941,7 +941,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 :root[data-theme="dark"] .tile:has(> img), :root[data-theme="dark"] .rtb img, :root[data-theme="dark"] img[src*="logo"]{background:#fff}
 </style>
 <script id="rbcthemeboot">/* Light or dark: the person's choice in Settings, or the phone's own setting (Kinnor idea, 29 Oct 2026). */(function(){function apply(){var t='auto';try{t=localStorage.getItem('rbcTheme')||'auto';}catch(e){}var d=t==='dark'||(t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light');}window.rbcThemeApply=apply;apply();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',apply);}catch(e){}})();</script><style id="kinnordark">:root[data-theme="dark"]{--kb:#E0323C;--kbt:#3A1A1D;--kbx:#FF9AA0;--kpage:#141318;--kline:#34323C;--kmut:#A9A6B3}:root[data-theme="dark"] body:not(.out){background:var(--kpage)}</style></head><body class="out">
-<div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Staff</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
+<div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Portal</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap">
 <p id="notconn" class="hide" style="background:#fdecea;color:#8a1c14;padding:10px;border-radius:8px">This page is not connected to the production system yet.</p>
 
@@ -953,7 +953,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 
 <div id="s1" class="card">
 <div class="si-t">Sign in</div>
-<div class="si-d">Press Sign in with Google. If your email is on the staff list, you are in. No code to wait for.</div>
+<div class="si-d">For every choir member and staff member. Press Sign in with Google: if your email is on the choir list or the staff list, you are in. No code to wait for.</div>
 <div id="gwrap" class="hide"><div id="gbtn" style="margin:.2rem 0 .6rem"></div><div class="s">Share an email with someone else in the choir? Type your Member ID in the box below first, then press the Google button.</div><div class="or"><span></span>No Google account? Use an email code<span></span></div></div>
 <label for="mid" class="lbl">Member ID or email</label>
 <input id="mid" autocomplete="off" placeholder="Member ID, or your email if you are not a choir member">
@@ -1224,7 +1224,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
 <footer class="rbcfoot"><a href="../about.html" target="_blank" rel="noopener">About</a> · <a href="../privacy.html" target="_blank" rel="noopener">Privacy notice</a></footer></main></div>
 <div id="shbox" class="ov hide" role="dialog" aria-modal="true" aria-labelledby="shtitle"><div class="box" style="max-width:37.5rem"><div class="bh" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><div class="k">SIGN-IN HELP</div><div class="n" id="shtitle">What went wrong?</div></div><button type="button" id="shx" aria-label="Close help" style="width:40px;height:40px;margin:0;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:20px;box-shadow:none">&times;</button></div><div class="bb">
-<div class="issue" style="margin-top:0"><i>1</i><div><b>It says my email is not found</b><span>Your email may not be on the staff list yet. Try your Member ID, or ask Desk A (the System Administrator) to check your row.</span></div></div>
+<div class="issue" style="margin-top:0"><i>1</i><div><b>It says my email is not found</b><span>Your email may not be on the choir list or the staff list yet. Try your Member ID, or ask Desk A (the System Administrator) to check your row.</span></div></div>
 <div class="issue"><i>2</i><div><b>I did not get the code</b><span>Look in spam. You can ask for a new code after 2 minutes. Always use the newest email.</span></div></div>
 <div class="issue"><i>3</i><div><b>Too many wrong codes</b><span>After 5 wrong tries, sign-in is locked for 15 minutes.</span></div></div>
 <div class="issue"><i>4</i><div><b>I signed in but I cannot see my screens</b><span>Your role may not be set yet. The Global Admin or System Administrator can fix it.</span></div></div>
@@ -1286,7 +1286,7 @@ const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 let myBypass = {};
 var myStaffOnly = false;
-function setMe(j) { myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
+function setMe(j) { if ((j.tabs || []).indexOf('home') === -1 && j.staffOnly !== true && /member\.html$|staff\.html$|\/$/.test(location.pathname)) { location.replace('member.html'); return; } /* one sign-in: a member with no staff role goes to the member page */ myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
 const ICON = {
   reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
   process: '<path d="M9 11l3 3 8-8"/><path d="M4 6h9M4 12h3M4 18h9"/>',
@@ -3655,7 +3655,7 @@ $('send').onclick = async () => {
 $('verify').onclick = async () => {
   say('m2', 'Checking…');
   try {
-    const j = await call({action: 'signin.verify', page: 'staff', memberId: $('mid').value.trim(), code: $('code').value.trim()});
+    const j = await call({action: 'signin.verify', page: 'portal', memberId: $('mid').value.trim(), code: $('code').value.trim()});
     if (!j.ok) return say('m2', j.error || 'Could not sign in.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
     setMe(j); drawTabs(); land(); welcome();
@@ -3917,7 +3917,7 @@ const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.go
 async function googleDone(resp) {
   say('m1', 'Checking with Google…');
   try {
-    const j = await call({action: 'signin.google', page: 'staff', idToken: resp.credential, memberId: $('mid').value.trim()});
+    const j = await call({action: 'signin.google', page: 'portal', idToken: resp.credential, memberId: $('mid').value.trim()});
     if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
     setMe(j); drawTabs(); land(); welcome();

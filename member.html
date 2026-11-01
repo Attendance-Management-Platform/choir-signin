@@ -532,7 +532,7 @@ async function call(body) {
 }
 function signedOutNow(msg) {
   token = ''; try { sessionStorage.removeItem('rbcMTok'); sessionStorage.removeItem('rbcTok'); } catch (e) {}
-  $('inv').classList.add('hide'); $('outv').classList.remove('hide'); say('m1', msg || '', msg ? 'bad' : '');
+  location.replace('staff.html'); /* one sign-in page for everyone */
 }
 const TITLES = ['', 'Home', 'My requests', 'My attendance', 'My profile', 'Rehearsal calendar'];
 function tab(n) {
@@ -722,7 +722,7 @@ function gisInit() {
   } catch (e) { say('m1', 'Google sign-in is not available right now.', 'bad'); } };
   document.head.appendChild(gs);
 }
-function enter(name) { $('outv').classList.add('hide'); $('inv').classList.remove('hide'); setWho({name: name}); tab(1); call({action: 'me', token}).then(m => { if (m && m.ok && (m.tabs || []).indexOf('home') !== -1) document.querySelectorAll('.staffgo').forEach(a => a.classList.remove('hide')); }).catch(() => {}); }
+function enter(name) { $('outv').classList.add('hide'); $('inv').classList.remove('hide'); setWho({name: name}); tab(1); call({action: 'me', token}).then(m => { if (m && m.ok && ((m.tabs || []).indexOf('home') !== -1 || m.staffOnly === true)) location.replace('staff.html'); }).catch(() => {}); } /* staff use the staff page, which has My choir */
 function setWho(h) {
   const sub = [h.campus ? h.campus + ' Campus' : '', h.part || ''].filter(Boolean).join(' · ') || 'Choir Member';
   $('hello').textContent = 'Hello, ' + short(h.name); $('hsub').textContent = sub;
@@ -1043,6 +1043,7 @@ $('dsend').onclick = async () => {
   } catch (e) { say('m5', 'Network problem. Try again.', 'bad'); }
   $('dsend').disabled = false;
 };
+if (!token) location.replace('staff.html'); /* one sign-in page for everyone */
 gisInit();
 if (token) { const first = (n) => call({action: 'me.home', token}).then(j => { if (j && j.ok) { home = j; enter(j.name); } else if (j && j.signedOut) signedOutNow(); else if (n < 2) setTimeout(() => first(n + 1), 2500); else signedOutNow(); }).catch(() => { if (n < 2) setTimeout(() => first(n + 1), 2500); else signedOutNow(); }); first(0); }
 
