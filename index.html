@@ -1,21 +1,22 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" id="kinnorfont">
 <title>Celebration Church Worship Choir Portal</title>
 <style>
-:root{--page:#F7F9FC;--fg:#172039;--mut:#5E6A7E;--acc:#B6000A;--deep:#8E0008;--line:#E6E9EF;--rose:#FFF0F1;--ease:cubic-bezier(.2,.7,.2,1)}
+:root{--page:#F6F5F2;--fg:#1F1E1C;--mut:#5F5E5A;--acc:#B6000A;--deep:#8E0008;--line:#E2E0D9;--rose:#FFF0F1;--ease:cubic-bezier(.2,.7,.2,1)}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{font:16px/1.5 Lato,system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0;min-height:100vh;background:var(--page);-webkit-tap-highlight-color:rgba(182,0,10,.12)}
+body{font:16px/1.5 system-ui,'Segoe UI',Arial,sans-serif;color:var(--fg);margin:0;min-height:100vh;background:var(--page);-webkit-tap-highlight-color:rgba(182,0,10,.12)}
 .shell{min-height:100vh;display:flex;flex-direction:column}
-.hero{position:relative;overflow:hidden;color:#fff;padding:22px 22px 54px;background:radial-gradient(420px 260px at 92% 0,rgba(255,255,255,.16) 0,transparent 65%),linear-gradient(160deg,#C8101B,#8E0008);border-radius:0 0 34px 34px}
+.hero{position:relative;overflow:hidden;color:#fff;padding:22px 22px 54px;background:var(--acc,#B6000A);border-radius:0 0 34px 34px}
 .hero:before,.hero:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.16);pointer-events:none}
 .hero:before{width:260px;height:260px;right:-90px;top:60px}
 .hero:after{width:420px;height:420px;right:-190px;top:10px}
 .brand{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
 .tile{background:#fff;border-radius:16px;padding:8px 10px;display:flex;box-shadow:0 8px 22px rgba(0,0,0,.18)}.tile img{height:46px;width:auto;display:block}
-.b1{font-weight:900;font-size:15px;line-height:1.2}.b2{font-size:11px;letter-spacing:.14em;font-weight:700;color:#FFD9DC}
+.b1{font-weight:700;font-size:15px;line-height:1.2}.b2{font-size:11px;letter-spacing:.14em;font-weight:700;color:#FFD9DC}
 .lead{position:relative;z-index:1;margin-top:34px;max-width:30rem}
-.lead h1{margin:0;font-size:32px;font-weight:900;line-height:1.1;letter-spacing:-.01em}
+.lead h1{margin:0;font-size:32px;font-weight:700;line-height:1.1;letter-spacing:-.01em}
 .lead p{margin:12px 0 0;color:#FFE9EA;font-size:16px}
 .tag{display:none}
 main{flex:1;width:100%;max-width:40rem;margin:-30px auto 0;padding:0 16px 20px;display:grid;gap:14px;align-content:start;position:relative;z-index:2}
@@ -24,16 +25,16 @@ main{flex:1;width:100%;max-width:40rem;margin:-30px auto 0;padding:0 16px 20px;d
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .ico{flex:none;width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:var(--rose);color:var(--acc);transition:background-color .25s,color .25s,transform .25s var(--ease)}
 .ico svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.card h2{margin:0;font-size:20px;font-weight:900;color:var(--deep)}
+.card h2{margin:0;font-size:20px;font-weight:700;color:var(--deep)}
 .card p{margin:4px 0 0;color:var(--mut);font-size:15px}
-.go{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:linear-gradient(180deg,#C8101B,#B6000A);color:#fff;font-weight:700;border-radius:12px;padding:.7rem 1.2rem;box-shadow:0 4px 12px rgba(182,0,10,.25);transition:box-shadow .25s,transform .25s var(--ease)}
+.go{display:inline-flex;align-items:center;gap:8px;margin-top:14px;background:var(--acc,#B6000A);color:#fff;font-weight:700;border-radius:12px;padding:.7rem 1.2rem;box-shadow:none;transition:box-shadow .25s,transform .25s var(--ease)}
 .go svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s var(--ease)}
 .soon{display:inline-block;margin-top:12px;font-size:13px;font-weight:700;color:#95621D;background:#FFF4DF;border-radius:999px;padding:4px 12px}
 a.card:active{transform:scale(.99)}
 @media (hover:hover){
   a.card:hover{transform:translateY(-4px);box-shadow:0 20px 44px rgba(142,0,8,.16);border-color:#E9A9AE}
   a.card:hover .ico{background:var(--acc);color:#fff;transform:rotate(-6deg) scale(1.05)}
-  a.card:hover .go{box-shadow:0 10px 22px rgba(182,0,10,.35)}
+  a.card:hover .go{box-shadow:none}
   a.card:hover .go svg{transform:translateX(4px)}
 }
 .how{background:none;border:1px dashed #E9A9AE;box-shadow:none;color:var(--mut);font-size:15px;display:block;padding:16px 18px}
@@ -43,7 +44,7 @@ footer{padding:6px 16px 28px;display:flex;justify-content:center;gap:10px;flex-w
 .pill svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .pill .ext{width:14px;height:14px;opacity:.6;transition:transform .2s var(--ease)}
 .pill:active{transform:scale(.97);background:var(--rose)}
-@media (hover:hover){.pill:hover{background:var(--acc);border-color:var(--acc);color:#fff;transform:translateY(-2px);box-shadow:0 10px 22px rgba(182,0,10,.28)}.pill:hover .ext{opacity:1;transform:translate(2px,-2px)}}
+@media (hover:hover){.pill:hover{background:var(--acc);border-color:var(--acc);color:#fff;transform:translateY(-2px);box-shadow:none}.pill:hover .ext{opacity:1;transform:translate(2px,-2px)}}
 :focus-visible{outline:3px solid rgba(226,78,91,.6);outline-offset:2px}
 @media(min-width:900px){
   .shell{display:grid;grid-template-columns:minmax(340px,5fr) 7fr}
@@ -56,7 +57,69 @@ footer{padding:6px 16px 28px;display:flex;justify-content:center;gap:10px;flex-w
   footer{padding-bottom:40px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style></head><body>
+/* KINNOR-LOOK START: generated by tools/kinnor-look/kinnor.py; RBC red and logo kept */
+:root{--kb:#B6000A;--kbt:#FDECEC;--kbx:#8E0008;--kpage:#F6F5F2;--kline:#E2E0D9;--kmut:#5F5E5A}
+body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans',sans-serif!important;letter-spacing:0}
+body:not(.out){background:var(--kpage)}
+.card,.ugt,.anl,.ntc,.anl .kpi,.anl .anbox,.anl .anhero{box-shadow:none!important}
+.card{border-radius:16px}
+.anl,.ntc{background:var(--card,#fff)!important;border:1px solid var(--kline)!important}
+.anl::before,.ntc::before{display:none!important}
+.anl .kpi{border:1px solid var(--kline)!important;border-radius:12px!important;background:var(--kpage)!important}
+button,.btn{box-shadow:none!important;font-weight:600;border-radius:12px}
+button:hover,.btn:hover{transform:none!important}
+.ct,body .ntc .ct,body .card>.fh .ct,body .fh>.ct,body .card>.tblh .ct,.card>b:first-child,.hsec{font-size:15px!important;font-weight:600!important;letter-spacing:0!important;text-transform:none!important;color:var(--fg)!important}
+button.hsec.fold{background:var(--card,#fff)!important;border:1px solid var(--kline)!important;border-left:1px solid var(--kline)!important;border-radius:16px!important;box-shadow:none!important;color:var(--fg)!important}
+button.hsec.fold.shut{background:var(--card,#fff)!important}
+button.hsec.fold:hover{background:var(--kbt)!important}
+.hsec.fold:after{border-color:var(--kmut)!important}
+.hhero{background:none!important;color:var(--fg)!important;box-shadow:none!important;padding:4px 2px!important;border-radius:0!important}
+.hhero:after{display:none!important}
+.hhero .hg{color:var(--kmut);opacity:1;text-transform:none;letter-spacing:0;font-weight:500;font-size:14px}
+.hhero .hn{font-size:26px;font-weight:600}
+.hhero .hb{background:var(--kbt);color:var(--kbx);font-weight:500}
+.hhero .hs{color:var(--kmut);opacity:1}
+.hhero .hr{background:var(--card,#fff)!important;border:1px solid var(--kline)!important;border-radius:16px!important}
+.hhero .hr .k{color:var(--kmut)!important;text-transform:none;letter-spacing:0;font-weight:500;opacity:1}
+.hhero .hr .v{color:var(--fg)!important;font-weight:600}
+.hhero .hr .s{color:var(--kmut)!important}
+.hhero .hr .pill{background:var(--kbt);color:var(--kbx)}
+.pill,.rc-pill{display:inline-flex!important;align-items:center;gap:6px;font-weight:500!important}
+.pill::before,.rc-pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+a.pill::before{content:none!important}
+.hsec .hsum{font-weight:500!important}
+@media (max-width:899px){
+  #tabs .tab.on,.nav .on,nav .on{background:var(--kb)!important;color:#fff!important;box-shadow:none!important}
+  #tabs .tab{border:1px solid var(--kline)}
+}
+.tab.on{font-weight:600}
+#ph .t{color:var(--fg)!important;font-weight:600}
+/* Tiles: flat, one border, no side bars, glows or bubbles (Kinnor .tile) */
+.ain,#hgrid.stats>.stat,.stats .stat,.kpi,.ugt,#htasks .card,.card:has(#fpc_tasks){background:var(--card,#fff)!important;border:1px solid var(--kline)!important;box-shadow:none!important}
+.kpi,.anl .kpi{background:var(--kpage)!important;border-radius:12px!important}
+.ain:before,.ain:after,#hgrid.stats>.stat:before,.ugt:before,#htasks .card::before{display:none!important}
+.ain,#hgrid.stats>.stat{padding-left:16px!important;border-radius:16px!important}
+.ain:hover,.stats .stat:hover,.kpi:hover,.ugt:hover{transform:none!important;box-shadow:none!important;border-color:var(--kb)!important}
+.aink,#hgrid.stats>.stat .k{text-transform:none!important;letter-spacing:0!important;font-weight:500!important;font-size:13px!important;color:var(--kmut)!important}
+.aini{box-shadow:none!important;background:var(--kpage)!important}
+.wpopc{border-top:0!important;border-radius:16px!important}
+/* Member page */
+body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-spacing:0!important;text-transform:none!important;color:var(--fg,var(--ink))!important}
+.ptitle,.sc h1,.dtop .tt .t1{color:var(--fg,var(--ink))!important;font-weight:600!important;letter-spacing:0!important}
+.dtop .tt .t1{text-transform:none}
+.tl,.tl.am{background:var(--card,#fff)!important;border:1px solid var(--kline)!important;border-radius:16px!important}
+.tl .a,.tl.am .a{color:var(--kmut)!important;font-weight:500!important}
+.tl .n,.tl.am .n{color:var(--fg,var(--ink))!important;font-weight:600!important}
+.tl .c,.tl.am .c{color:var(--kmut)!important}
+.lift:hover{transform:none!important;border-color:var(--kb)!important}
+.mfh:after{border-color:var(--kmut)!important}
+/* Member page: floating bottom bar on phones, as in Kinnor */
+@media (max-width:899px){
+  nav.nav{left:10px!important;right:10px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;border:1px solid var(--kline)!important;border-radius:20px!important;padding:7px!important;box-shadow:0 10px 30px rgb(20 35 61 / .16)!important}
+  nav.nav>*{border:1px solid var(--kline);border-radius:14px}
+}
+/* KINNOR-LOOK END */
+</style><style id="kinnordark">:root[data-theme="dark"]{--kb:#E0323C;--kbt:#3A1A1D;--kbx:#FF9AA0;--kpage:#141318;--kline:#34323C;--kmut:#A9A6B3}:root[data-theme="dark"] body:not(.out){background:var(--kpage)}</style></head><body>
 <div class="shell">
 <header class="hero"><div class="brand"><div class="tile"><img src="logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
 <div class="lead"><h1>Celebration Church Worship Choir Portal</h1><p>Attendance, requests and rehearsals in one place. Choose where you are going.</p></div></header>
