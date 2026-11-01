@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CCW Choir Staff</title>
 <style>
 :root{--bg:#fff;--page:#F7F9FC;--fg:#172039;--mut:#5E6A7E;--card:#fff;--acc:#B6000A;--ok:#20775A;--bad:#AE2D37;--line:#E6E9EF;--rose:#FFF0F1;--deep:#8E0008}
@@ -644,7 +644,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),
 .rc-load{padding:30px;text-align:center;color:#8A94A6;font-weight:700}
 @media(max-width:640px){.rc-grid{gap:3px}.rc-cell{min-height:58px;padding:4px 3px;border-radius:9px}.rc-chip{font-size:0;height:6px;padding:0;border-radius:3px;margin-top:2px}.rc-chip.rc-pl{background:#2F4F86}.rc-chip.rc-op{background:#20775A}.rc-chip.rc-hd{background:#8A94A6}.rc-chip.rc-cx{background:#B4232A}.rc-chip.rc-away{background:#D98A00}.rc-chip.rc-cover,.rc-chip.rc-open{background:#8456C2}.rc-more{font-size:9px}.rc-dn{font-size:12px}.rc-now .rc-dn{width:22px;height:22px}
   .rc-title{font-size:19px}.rc-seg{padding:8px 12px}.rc-row{gap:10px;padding:12px}.rc-date{width:54px}.rc-date b{font-size:20px}}
-</style>
+.rbcfoot{text-align:center;font-size:.85rem;margin:28px 0 14px;opacity:.8}.rbcfoot a{color:inherit;text-decoration:underline;text-underline-offset:3px;margin:0 .35rem}.dirlink{display:inline-block;margin-top:4px;font-weight:700;font-size:.9em;color:var(--acc,#B6000A);text-decoration:underline;text-underline-offset:3px}</style>
 <style id="rbcdark">
 :root[data-theme="dark"]{--bg:#1B202A;--page:#1C2532;--fg:#CDD0DA;--mut:#B0B3B8;--card:#1B202A;--acc:#FF666E;--ok:#86DFC1;--bad:#E0858C;--line:#3E4147;--rose:#34191B;--deep:#FF666F}
 :root[data-theme="dark"]{--text:#C3C5CB}
@@ -1151,7 +1151,7 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),
 <div id="s9" class="pg hide"><div id="helpbody"></div></div>
 
 <div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
-</main></div>
+<footer class="rbcfoot"><a href="../about.html" target="_blank" rel="noopener">About</a> · <a href="../privacy.html" target="_blank" rel="noopener">Privacy notice</a></footer></main></div>
 <div id="shbox" class="ov hide" role="dialog" aria-modal="true" aria-labelledby="shtitle"><div class="box" style="max-width:37.5rem"><div class="bh" style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><div class="k">SIGN-IN HELP</div><div class="n" id="shtitle">What went wrong?</div></div><button type="button" id="shx" aria-label="Close help" style="width:40px;height:40px;margin:0;padding:0;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:20px;box-shadow:none">&times;</button></div><div class="bb">
 <div class="issue" style="margin-top:0"><i>1</i><div><b>It says my email is not found</b><span>Your email may not be on the staff list yet. Try your Member ID, or ask Desk A (the System Administrator) to check your row.</span></div></div>
 <div class="issue"><i>2</i><div><b>I did not get the code</b><span>Look in spam. You can ask for a new code after 2 minutes. Always use the newest email.</span></div></div>
@@ -1408,6 +1408,8 @@ document.addEventListener('click', async ev => {
 });
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-taskgo]'); if (b && TABDEF[b.dataset.taskgo]) go(TABDEF[b.dataset.taskgo][0]); });
 function stPill(t) { const k = /approv|valid|accept/i.test(t) ? 'p-ok' : /reject|declin|cancel/i.test(t) ? 'p-no' : /withdr/i.test(t) ? 'p-info' : 'p-pend'; return '<span class="pill ' + k + '">' + esc(t) + '</span>'; }
+/* Directions (security review, 1 Nov 2026): opens Google Maps. Members get the address only; staff who manage rehearsals get the saved position. */
+function dirLink(v) { const q = v && typeof v === 'object' ? (typeof v.lat === 'number' && typeof v.lon === 'number' ? v.lat + ',' + v.lon : v.name) : v; if (!q) return ''; return '<a class="dirlink" href="https://www.google.com/maps/search/?api=1&amp;query=' + encodeURIComponent(String(q)) + '" target="_blank" rel="noopener">Directions \u2197</a>'; }
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 // ---- Staff home: only the tiles this person may use; the server decides, the page just draws ----
@@ -2004,7 +2006,7 @@ const RC = (function () {
     const st = ST[r.status] || ST.Planned;
     const time = r.startMs ? tm(r.startMs) + (r.finishMs ? ' – ' + tm(r.finishMs) : '') : '';
     return '<div class="rc-ev ' + st[0] + '"><div class="rc-evt"><b>' + e(r.id) + '</b>' + (time ? '<span class="rc-time">' + e(time) + '</span>' : '') + '<span class="rc-pill ' + st[0] + '">' + e(st[1]) + '</span></div>' +
-      (r.venue ? '<div class="rc-sub">' + e(r.venue) + '</div>' : '') + (r.description ? '<div class="rc-sub">' + e(r.description) + '</div>' : '') + youLine(r) + '</div>';
+      (r.venue ? '<div class="rc-sub">' + e(r.venue) + ' ' + dirLink(r.venue) + '</div>' : '') + (r.description ? '<div class="rc-sub">' + e(r.description) + '</div>' : '') + youLine(r) + '</div>';
   }
   const other = x => '<div class="rc-tag rc-' + e(x.type) + '">' + e(x.label) + '</div>';
   // "You": the signed-in person's own standing for this rehearsal (choir members only).
@@ -3174,7 +3176,7 @@ async function loadRehearsal() {
     const list = j.rehearsals || [];
     const cur = list.filter(r => r.isCurrent)[0] || null;
     $('rhcount').textContent = j.liveCount + ' of ' + j.max + ' places used';
-    $('rhlist').innerHTML = list.length ? list.map(r => { const dp = lagosParts(r.startMs); return '<div class="rhrow" data-st="' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.isCurrent ? 'current' : 'next') + '"><div class="datebox"><div class="m">' + dp.mon + '</div><div class="d">' + dp.day + '</div></div><div class="mid"><b>Rehearsal ' + esc(r.id) + '</b><span class="s">' + esc(lagos(r.startMs).slice(-5)) + ' to ' + esc(lagos(r.finishMs).slice(-5)) + ' · ' + esc(r.venue ? r.venue.name || '(no name)' : '(no venue)') + '</span>' +
+    $('rhlist').innerHTML = list.length ? list.map(r => { const dp = lagosParts(r.startMs); return '<div class="rhrow" data-st="' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.isCurrent ? 'current' : 'next') + '"><div class="datebox"><div class="m">' + dp.mon + '</div><div class="d">' + dp.day + '</div></div><div class="mid"><b>Rehearsal ' + esc(r.id) + '</b><span class="s">' + esc(lagos(r.startMs).slice(-5)) + ' to ' + esc(lagos(r.finishMs).slice(-5)) + ' · ' + esc(r.venue ? r.venue.name || '(no name)' : '(no venue)') + (r.venue && !r.cancelled && !r.finished ? ' ' + dirLink(r.venue) : '') + '</span>' +
       (rhLive(r) && r.venue ? '<span class="s">Position ' + (r.venue.confirmed ? 'confirmed on site by ' + esc(r.venue.confirmedBy) : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site') + (r.editedBy ? ' · last edited by ' + esc(r.editedByRole) : '') + '</span>' : '') +
       (r.log && r.log.length ? '<details><summary class="sub">Changes</summary>' + r.log.map(l => '<div class="sub">' + esc(lagos(l.t)) + ' · ' + esc(l.by) + ' · ' + esc(l.w) + '</div>').join('') + '</details>' : '') + '</div>' +
       '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' + (r.cancelled ? '<span class="pill p-no">Cancelled</span>' : r.finished ? '<span class="pill p-val">Finished</span>' + (r.checkInOpen ? '<span class="pill p-pend">Check-in still open</span>' : '') : r.isCurrent ? '<span class="pill p-ok">Current</span><span class="pill ' + (r.checkInOpen ? 'p-ok' : 'p-pend') + '">Check-in ' + (r.checkInOpen ? 'open' : 'closed') + '</span>' : '<span class="pill p-pend">Planned</span>') + (r.urgent && rhLive(r) ? '<span class="pill p-no">Urgent</span>' : '') +
@@ -3576,7 +3578,7 @@ function cool(ms) {
 $('send').onclick = async () => {
   if (!$('mid').value.trim()) return say('m1', 'Enter your Member ID, or your email if you are staff but not a choir member.', 'bad');
   say('m1', 'Sending…');
-  try { const j = await call({action: 'signin.start', memberId: $('mid').value.trim()}); if (!j.ok) return say('m1', (j.error || 'Could not send a code.') + ' (the back end could not send the email; it may need email permission or a new version)', 'bad'); say('m1', j.message || 'Done.', 'ok'); if (j.waitMs) cool(j.waitMs); show('s2'); }
+  try { const j = await call({action: 'signin.start', memberId: $('mid').value.trim()}); if (!j.ok) return say('m1', (j.error || 'Could not send a code.') + ' (the back end could not send the email; it may need email permission or a new version)', 'bad'); if (j.limited) return say('m1', j.message, 'bad'); say('m1', j.message || 'Done.', 'ok'); if (j.waitMs) cool(j.waitMs); show('s2'); }
   catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
 };
 $('verify').onclick = async () => {
@@ -3709,7 +3711,7 @@ function myNextDraw(h, t) {
   else if (rh.checkInOpen) st = myPill('p-ok', 'Check-in is open') + '<p class="sub">Scan the QR code in the room to check in. No phone or location? Tell your Campus MD or Desk B.</p>';
   else if (req) st = myPill(req.status === 'Approved' ? 'p-ok' : req.status === 'Rejected' ? 'p-no' : 'p-pend', 'Request: ' + req.status) + '<p class="sub">Your absence request for this rehearsal. See My absence for the details.</p>';
   else st = '<p class="sub">Check-in opens 1 hour before the start.' + (t && t.rehearsal && t.rehearsal.open ? ' Can\'t come? Ask to be excused on My absence before ' + esc(lagos(t.rehearsal.closeMs)) + '.' : '') + '</p>';
-  box.innerHTML = '<div class="ct">My next rehearsal</div>' + tile({tone: 'ask', icon: '♪', title: lagos(rh.startMs), label: rh.venue || 'Venue to be confirmed'}) + '<div style="margin-top:10px">' + st + '</div>' +
+  box.innerHTML = '<div class="ct">My next rehearsal</div>' + tile({tone: 'ask', icon: '♪', title: lagos(rh.startMs), label: rh.venue || 'Venue to be confirmed'}) + (rh.venue ? '<div>' + dirLink(rh.venue) + '</div>' : '') + '<div style="margin-top:10px">' + st + '</div>' +
     (!S && !rh.finished && !req && t && t.rehearsal && t.rehearsal.open ? '<div class="actions"><button class="btn line sm" type="button" data-gotab="s6">Ask to be excused</button></div>' : '');
 }
 function myAttDraw(j) {

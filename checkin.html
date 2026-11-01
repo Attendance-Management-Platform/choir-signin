@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RBC Choir check-in</title>
 <style>
 :root{--bg:#fff;--fg:#1b1b1f;--mut:#5b5b66;--card:#f3f3f6;--acc:#3b3fb5;--ok:#0b7a3b;--bad:#b3261e}
@@ -9,7 +9,7 @@ h1{font-size:1.3rem}.card{background:var(--card);border-radius:12px;padding:14px
 button{font:inherit;background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:.7rem 1rem;width:100%;margin-top:.5rem}
 button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;padding:.6rem;border-radius:8px;border:1px solid var(--mut);background:var(--bg);color:var(--fg)}
 .s{color:var(--mut);font-size:.9rem}.ok{color:var(--ok)}.bad{color:var(--bad)}.hide{display:none}
-</style></head><body>
+.rbcfoot{text-align:center;font-size:.85rem;margin:28px 0 14px;opacity:.8}.rbcfoot a{color:inherit;text-decoration:underline;text-underline-offset:3px;margin:0 .35rem}</style></head><body>
 <h1>CCW Lagos Region RBC Choir check-in</h1>
 <div id="demo" class="card s hide">Demo mode: nothing is sent or saved.</div>
 
@@ -34,6 +34,7 @@ button[disabled]{opacity:.5}input{font:inherit;width:100%;box-sizing:border-box;
 <p id="out" class="s"></p></div>
 
 <p class="s">No phone, camera or location? Tell your Campus MD or Desk B and they will mark you.</p>
+<footer class="rbcfoot"><a href="about.html" target="_blank" rel="noopener">About</a> · <a href="privacy.html" target="_blank" rel="noopener">Privacy notice</a></footer>
 <script>
 // Set to the Apps Script web app URL when the back end is wired. Empty means demo mode.
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyPAYTBNK11xxnOyjI3wfNRIE64Os2wqJJ4jFoyJ6uDVVIkX-qiYYd-kt1DYT4eYVxo/exec';

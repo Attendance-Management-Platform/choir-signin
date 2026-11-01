@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CCW Choir Members</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap">
 <style>
@@ -225,7 +225,7 @@ input.in{height:48px;padding:0 14px}
 .rc-load{padding:30px;text-align:center;color:#8A94A6;font-weight:700}
 @media(max-width:640px){.rc-grid{gap:3px}.rc-cell{min-height:58px;padding:4px 3px;border-radius:9px}.rc-chip{font-size:0;height:6px;padding:0;border-radius:3px;margin-top:2px}.rc-chip.rc-pl{background:#2F4F86}.rc-chip.rc-op{background:#20775A}.rc-chip.rc-hd{background:#8A94A6}.rc-chip.rc-cx{background:#B4232A}.rc-chip.rc-away{background:#D98A00}.rc-chip.rc-cover,.rc-chip.rc-open{background:#8456C2}.rc-more{font-size:9px}.rc-dn{font-size:12px}.rc-now .rc-dn{width:22px;height:22px}
   .rc-title{font-size:19px}.rc-seg{padding:8px 12px}.rc-row{gap:10px;padding:12px}.rc-date{width:54px}.rc-date b{font-size:20px}}
-</style>
+.rbcfoot{text-align:center;font-size:.85rem;margin:28px 0 14px;opacity:.8}@media(max-width:899px){body:has(nav.nav:not(.hide)) .rbcfoot{padding-bottom:calc(84px + env(safe-area-inset-bottom))}}.rbcfoot a{color:inherit;text-decoration:underline;text-underline-offset:3px;margin:0 .35rem}.dirlink{display:inline-block;margin-top:4px;font-weight:700;font-size:.9em;color:var(--acc,#B6000A);text-decoration:underline;text-underline-offset:3px}</style>
 <style id="rbcdark">
 :root[data-theme="dark"]{--red:#FF666E;--acc:#FF666E;--deep:#FF666F;--fg:#CDD0DA;--ink:#CDD0DA;--text:#C3C5CB;--mut:#B0B3B8;--muted:#B0B3B8;--line:#3E4147;--rose:#34191B;--page:#1C2532;--ok:#86DFC1;--bad:#E0858C}
 :root[data-theme="dark"]{color-scheme:dark;--bg:#1B2029;--page:#11151C;--fg:#E7EAF0;--ink:#E7EAF0;--text:#C9CFDA;--mut:#A3ACBB;--muted:#A3ACBB;--card:#1B2029;--acc:#FF5A64;--red:#FF5A64;--ok:#5FCB9F;--bad:#F07A83;--line:#2D3440;--rose:#2A1618;--deep:#FF7A82}
@@ -365,7 +365,7 @@ input.in{height:48px;padding:0 14px}
     <div id="tiles" class="tiles"></div>
     <div class="grid">
      <div class="card lift rise col"><div class="kick">Next rehearsal</div>
-      <div id="rh" class="big">Loading…</div><div id="rhs" class="s" style="font-size:15px"></div>
+      <div id="rh" class="big">Loading…</div><div id="rhs" class="s" style="font-size:15px"></div><div id="rhdir"></div>
       <div id="state" class="col"></div>
       <div id="consent" class="hide"><p class="s">To confirm you are at rehearsal, this page checks your phone's location once. It is sent once to confirm you are at the venue, then thrown away. It is never stored. Only "location confirmed" is recorded, and only for the rehearsal day. A record that you agreed is kept.</p><button id="agree" class="btn btn-red">I agree</button></div>
       <button id="ci" class="btn btn-red hide" style="margin-top:0">Check in with Google</button>
@@ -434,6 +434,7 @@ input.in{height:48px;padding:0 14px}
 <div class="issue"><i>4</i><div><b>I signed in but I cannot see my screens</b><div class="s">Your role may not be set yet. The Global Admin or System Administrator can fix it.</div></div></div>
 <button id="helpback" class="btn btn-line">Back to sign in</button>
 </div></div></div>
+<footer class="rbcfoot"><a href="about.html" target="_blank" rel="noopener">About</a> · <a href="privacy.html" target="_blank" rel="noopener">Privacy notice</a></footer>
 <script>
 const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyPAYTBNK11xxnOyjI3wfNRIE64Os2wqJJ4jFoyJ6uDVVIkX-qiYYd-kt1DYT4eYVxo/exec';
 const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.googleusercontent.com';
@@ -471,11 +472,13 @@ function tab(n) {
 // ---- rehearsal calendar (rehearsals only; nothing about staff) ----
 // ---- Calendar: Day, Week and Month views (the same on the staff and member pages) ----
 // RC.mount(boxId, {load: month => Promise(calendar.state result), actions: (day, entries, j) => html, onError: text => void})
+/* Directions (security review, 1 Nov 2026): opens Google Maps. Members get the address only; staff who manage rehearsals get the saved position. */
+function dirLink(v) { const q = v && typeof v === 'object' ? (typeof v.lat === 'number' && typeof v.lon === 'number' ? v.lat + ',' + v.lon : v.name) : v; if (!q) return ''; return '<a class="dirlink" href="https://www.google.com/maps/search/?api=1&amp;query=' + encodeURIComponent(String(q)) + '" target="_blank" rel="noopener">Directions \u2197</a>'; }
 const RC = (function () {
   const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const WD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], WDL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const ST = {Planned: ['rc-pl', 'Planned'], Open: ['rc-op', 'Check-in open'], Held: ['rc-hd', 'Held'], Cancelled: ['rc-cx', 'Cancelled']};
-  const e = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const e = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
   const d0 = iso => new Date(iso + 'T12:00:00Z');
   const iso = d => d.toISOString().slice(0, 10);
   const add = (s, n) => { const d = d0(s); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
@@ -503,7 +506,7 @@ const RC = (function () {
     const st = ST[r.status] || ST.Planned;
     const time = r.startMs ? tm(r.startMs) + (r.finishMs ? ' – ' + tm(r.finishMs) : '') : '';
     return '<div class="rc-ev ' + st[0] + '"><div class="rc-evt"><b>' + e(r.id) + '</b>' + (time ? '<span class="rc-time">' + e(time) + '</span>' : '') + '<span class="rc-pill ' + st[0] + '">' + e(st[1]) + '</span></div>' +
-      (r.venue ? '<div class="rc-sub">' + e(r.venue) + '</div>' : '') + (r.description ? '<div class="rc-sub">' + e(r.description) + '</div>' : '') + youLine(r) + '</div>';
+      (r.venue ? '<div class="rc-sub">' + e(r.venue) + ' ' + dirLink(r.venue) + '</div>' : '') + (r.description ? '<div class="rc-sub">' + e(r.description) + '</div>' : '') + youLine(r) + '</div>';
   }
   const other = x => '<div class="rc-tag rc-' + e(x.type) + '">' + e(x.label) + '</div>';
   // "You": the signed-in person's own standing for this rehearsal (choir members only).
@@ -658,7 +661,7 @@ $('mailcode').onclick = async () => {
   const id = $('mid').value.trim();
   if (!id) return say('m1', 'Type your Member ID first, for example M014.', 'bad');
   say('m1', 'Sending the code…');
-  try { const j = await call({action: 'signin.start', memberId: id}); if (!j.ok) return say('m1', j.error || 'Could not send a code.', 'bad'); say('m1', j.message || 'A code is on its way to the email on file.', 'ok'); $('codebox').classList.remove('hide'); }
+  try { const j = await call({action: 'signin.start', memberId: id}); if (!j.ok) return say('m1', j.error || 'Could not send a code.', 'bad'); if (j.limited) return say('m1', j.message, 'bad'); say('m1', j.message || 'A code is on its way to the email on file.', 'ok'); $('codebox').classList.remove('hide'); }
   catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
 };
 $('codego').onclick = async () => {
@@ -694,7 +697,7 @@ function drawHome() {
   let status = 'Not open yet';
   if (!rh) { $('rh').textContent = 'No rehearsal is set up yet'; $('rhs').textContent = ''; status = '-'; }
   else {
-    $('rh').textContent = dlong(rh.startMs); $('rhs').textContent = tm(rh.startMs) + (rh.venue ? ' · ' + rh.venue : '');
+    $('rh').textContent = dlong(rh.startMs); $('rhs').textContent = tm(rh.startMs) + (rh.venue ? ' · ' + rh.venue : ''); $('rhdir').innerHTML = dirLink(rh.venue);
     let m = h.mine;
     if (m === 'none' && mineReq && mineReq.status === 'Approved') m = 'excused';
     const set = html => { $('state').innerHTML = html; };
