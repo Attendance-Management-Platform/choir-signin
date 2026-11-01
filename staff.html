@@ -3585,7 +3585,7 @@ $('send').onclick = async () => {
 $('verify').onclick = async () => {
   say('m2', 'Checking…');
   try {
-    const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
+    const j = await call({action: 'signin.verify', page: 'staff', memberId: $('mid').value.trim(), code: $('code').value.trim()});
     if (!j.ok) return say('m2', j.error || 'Could not sign in.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
     setMe(j); drawTabs(); land(); welcome();
@@ -3847,7 +3847,7 @@ const GOOGLE_CLIENT_ID = '1016525395610-p0n0nsoc7h7lm3qum50ngq6ckovlklat.apps.go
 async function googleDone(resp) {
   say('m1', 'Checking with Google…');
   try {
-    const j = await call({action: 'signin.google', idToken: resp.credential, memberId: $('mid').value.trim()});
+    const j = await call({action: 'signin.google', page: 'staff', idToken: resp.credential, memberId: $('mid').value.trim()});
     if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
     setMe(j); drawTabs(); land(); welcome();

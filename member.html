@@ -634,7 +634,7 @@ const short = n => { const p = String(n || '').trim().split(/\s+/); return p.len
 async function googleDone(resp) {
   say('m1', 'Checking with Google…');
   try {
-    const j = await call({action: 'signin.google', idToken: resp.credential, memberId: $('mid').value.trim()});
+    const j = await call({action: 'signin.google', page: 'member', idToken: resp.credential, memberId: $('mid').value.trim()});
     if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
     token = j.token; gTok = resp.credential; gAt = Date.now(); try { sessionStorage.setItem('rbcMTok', token); sessionStorage.setItem('rbcTok', token); } catch (e) {}
     enter(j.name);
@@ -666,7 +666,7 @@ $('mailcode').onclick = async () => {
 };
 $('codego').onclick = async () => {
   say('m1', 'Checking the code…');
-  try { const j = await call({action: 'signin.verify', memberId: $('mid').value.trim(), code: $('code').value.trim()});
+  try { const j = await call({action: 'signin.verify', page: 'member', memberId: $('mid').value.trim(), code: $('code').value.trim()});
     if (!j.ok) return say('m1', j.error || 'That code did not work.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcMTok', token); sessionStorage.setItem('rbcTok', token); } catch (e) {} enter(j.name); }
   catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
