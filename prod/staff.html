@@ -1230,7 +1230,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 </div>
 
 <div id="s18" class="pg hide">
-<div class="two"><div class="c1"><div id="smine"></div><div id="saccess"></div></div><div class="c2"><div id="shelpers"></div><div id="semail"></div><div id="ssys"></div></div></div>
+<div class="two"><div class="c1"><div id="smine"></div><div id="saccess"></div></div><div class="c2"><div id="semail"></div><div id="ssys"></div></div></div>
 <p id="m18" class="s"></p>
 </div>
 
@@ -1331,8 +1331,11 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <label for="rhvenue" class="lb">Venue, written as people read it</label><input id="rhvenue" class="in" autocomplete="off" maxlength="150" placeholder="Venue name, street, area, city">
 <label for="rhdesc" class="lb">Description (optional)</label><input id="rhdesc" class="in" autocomplete="off" maxlength="200" placeholder="For example: bring black shoes; full dress rehearsal">
 <label for="rhsign" class="lb">How will members sign in?</label><select id="rhsign" class="in"><option value="qr">QR check-in on the portal</option><option value="form">Google Form, filled in by the sign-in helpers</option></select>
+<div id="rhhelpbox" class="hide"><label for="rhhelpers" class="lb">Sign-in helpers: who will fill in the form (one name per line)</label><textarea id="rhhelpers" class="in" rows="4" maxlength="2600" placeholder="For example:
+Kemi Example
+Tunde Sample"></textarea><p class="sub" style="margin:4px 0 0">They pick their own name first on the form, so every sign-in shows who did it. Remembered for next time.</p></div>
 <label id="rhtestbox" class="rhtestbox hide"><input type="checkbox" id="rhtest" style="margin-top:3px"><span><b>This is a test run</b> (Global Admin only): not counted, nobody is told, ID R900, removed by itself 12 hours after it finishes. The venue is not needed.</span></label>
-<p id="rhsignnote" class="sub hide">Saving makes the Google Form for this rehearsal, linked to the workbook. You then copy its link and send it to the sign-in helpers. Each person they sign in is ticked on the same list as the QR, once. The helper list is in Settings → Sign-in helpers.</p>
+<p id="rhsignnote" class="sub hide">Saving makes the Google Form for this rehearsal, linked to the workbook. You then copy its link and send it to the sign-in helpers. Each person they sign in is ticked on the same list as the QR, once. </p>
 <p class="sub">This text goes in notices. The system finds the map position from it. Check-in can open from one hour before the start and closes at the finish time. At most three rehearsals can be planned at once.</p>
 <details><summary class="sub" style="cursor:pointer;font-weight:700">Position typed by hand (only if the address is not found)</summary>
 <p class="sub">In Google Maps press and hold the venue and tap the two numbers; you can paste "6.5244, 3.3792" into the first box.</p>
@@ -1529,7 +1532,7 @@ function drawHub() {
 const PSEC = {
   s11: [['hcharts', 'Latest rehearsal', 'The last published rehearsal: who came, by campus and by part.', 'reports'], ['rpoutlook', 'Next rehearsal outlook', 'What to expect next time, worked out from the last rehearsals.', 'calendar'],
     ['rppat', 'Members', 'Every member by campus, then part, then person, with their figures.', 'members'], ['anbuild', 'Build a report', 'Choose what to show, how to break it down and for which period. Download as CSV.', 'records']],
-  s18: [['smine', 'My settings', 'How the system looks and works for you.', 'settings'], ['saccess', 'My access', 'Your roles and what they let you do.', 'people'], ['shelpers', 'Sign-in helpers', 'Who signs people in on the Google Form.', 'people'], ['semail', 'Emails', 'Emails the system sends, and replies.', 'requests'], ['ssys', 'System', 'Checks for the System Administrator.', 'changes']],
+  s18: [['smine', 'My settings', 'How the system looks and works for you.', 'settings'], ['saccess', 'My access', 'Your roles and what they let you do.', 'people'], ['semail', 'Emails', 'Emails the system sends, and replies.', 'requests'], ['ssys', 'System', 'Checks for the System Administrator.', 'changes']],
   s12: [['pwait', 'Waiting for your answer', 'Requests that need your yes or no.', 'requests'], ['pready', 'Ready to carry out', 'Approved changes for you to carry out.', 'process'],
     ['pask', 'Ask for a change', 'Ask for a role, access or desk cover change.', 'people'], ['pmine', 'Your requests', 'What you asked for and where it is now.', 'records'], ['paw', 'Time away', 'Away notices and who covers.', 'calendar']]};
 let PSECON = {}, PSECN = {};
@@ -2837,20 +2840,6 @@ function drawSettingsAccess(me) {
   $('saccess').innerHTML = '<div class="card pad rise"><div class="ct">My access</div><p class="sub" style="margin:6px 0 10px">What your roles let you do. To change a role, ask in People and access.</p>' +
     (rows.length ? rows.map(x => '<div class="mrow"><span class="mtx"><b>' + esc(x[0]) + '</b><span>' + esc(x[1]) + '</span></span></div>').join('') : '<p class="sub">No staff role.</p>') + '</div>';
 }
-/** Sign-in helpers (12 Nov 2026): the committee and admin members who sign people in on the Google Form. Names only, one per line. */
-function drawSettingsHelpers(h) {
-  const box = $('shelpers'); if (!box) return;
-  if (!h) { box.innerHTML = ''; return; }
-  box.innerHTML = '<div class="card pad rise"><div class="ct">Sign-in helpers</div><p class="sub" style="margin:6px 0 10px">The committee and admin members who sign people in on a rehearsal\'s Google Form. They choose their own name first on the form, so every sign-in shows who did it. They do not need the portal.</p>' +
-    (h.canEdit ? '<label class="lb" for="shnames">One name per line</label><textarea id="shnames" class="in" rows="6" maxlength="2600" placeholder="For example:\nKemi Example\nTunde Sample">' + esc((h.names || []).join('\n')) + '</textarea><div class="actions"><button class="btn red" type="button" id="shsave">Save the helpers</button></div><p class="sub">A form already made keeps its list until you press Update the name lists on its rehearsal.</p>'
-      : (h.names && h.names.length ? h.names.map(n => '<span class="pillr">' + esc(n) + '</span>').join('') : '<p class="sub">No helpers yet.</p>')) + '<p class="s" id="msh"></p></div>';
-  if ($('shsave')) $('shsave').onclick = async () => {
-    $('shsave').disabled = true;
-    try { const k = await call({action: 'settings.helpers', token, names: $('shnames').value}); if (k.ok) { drawSettingsHelpers(k.helpers); say('msh', 'Saved.', 'ok'); } else say('msh', k.error || 'Could not save.', 'bad'); }
-    catch (e) { say('msh', 'Network problem. Try again.', 'bad'); }
-    if ($('shsave')) $('shsave').disabled = false;
-  };
-}
 function drawSettingsEmail(e) {
   const box = $('semail'); if (!box) return;
   if (!e) { box.innerHTML = ''; return; }
@@ -2879,10 +2868,10 @@ async function loadSettings(quiet) {
     const j = await call({action: 'settings.state', token});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) return say('m18', j.error || 'Not available.', 'bad');
-    const sig = JSON.stringify([j.helpers && j.helpers.names, j.email && j.email.switches, j.email && j.email.replies, j.system && [j.system.live, j.system.practice, j.system.saving]]);
+    const sig = JSON.stringify([j.email && j.email.switches, j.email && j.email.replies, j.system && [j.system.live, j.system.practice, j.system.saving]]);
     if (quiet && sig === setSig) return;
     setSig = sig; say('m18', '');
-    drawSettingsAccess(j.me); drawSettingsHelpers(j.helpers); drawSettingsEmail(j.email); drawSettingsSystem(j.system);
+    drawSettingsAccess(j.me); drawSettingsEmail(j.email); drawSettingsSystem(j.system);
     if (j.email) mailSig = j.email.replies.map(k => k.key + (k.on ? 1 : 0)).join('');
   } catch (e) { if (!quiet) say('m18', 'Network problem. Try again.', 'bad'); }
 }
@@ -3735,6 +3724,8 @@ function rhPreview() {
 function rhSignSync() {
   const form = $('rhsign').value === 'form' && !rhEditing;
   $('rhsignnote').classList.toggle('hide', !form);
+  $('rhhelpbox').classList.toggle('hide', !form);
+  if (form && !$('rhhelpers').value && rhState && rhState.helpers) $('rhhelpers').value = rhState.helpers.join('\n');
   $('rhtestbox').classList.toggle('hide', !(form && rhState && rhState.canTest && !rhState.testRun));
   if ($('rhtestbox').classList.contains('hide')) $('rhtest').checked = false;
 }
@@ -3777,7 +3768,7 @@ $('rhsave').onclick = async () => {
   try {
     const k = await call({action: 'rehearsal.save', token, id: rhEditing ? rhEditing.id : '', rev: rhEditing ? rhEditing.rev : undefined, reason: $('rhreason').value.trim(),
       date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
-      lateAfterMin: $('rhlate').value, venueName: $('rhvenue').value.trim(), description: $('rhdesc').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim(), signIn: rhEditing ? undefined : $('rhsign').value, testRun: !rhEditing && $('rhsign').value === 'form' && $('rhtest').checked ? true : undefined});
+      lateAfterMin: $('rhlate').value, venueName: $('rhvenue').value.trim(), description: $('rhdesc').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim(), signIn: rhEditing ? undefined : $('rhsign').value, testRun: !rhEditing && $('rhsign').value === 'form' && $('rhtest').checked ? true : undefined, helpers: !rhEditing && $('rhsign').value === 'form' ? $('rhhelpers').value : undefined});
     if (k.ok) await loadRehearsal();
     say('m8', k.ok ? (k.test ? 'Test run ' + k.id + ' made. Its form is ready: copy the link from the TEST card below. Nothing on it is counted.' : k.formMade ? 'Saved. The Google Form for ' + k.id + ' is ready: use Copy link on the rehearsal below and send it to the sign-in helpers.' : 'Saved.') + (k.sheetNote ? ' Note: ' + k.sheetNote : '') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
@@ -4103,7 +4094,7 @@ const TABHELP = {
   changes: ['Change log', 'See what has changed in the last two weeks, including steps done by an admin instead of the usual desk, and send a petition if you disagree.']
 };
 const FAQ = [
-  {t: ['rehearsal'], q: 'How do I use a Google Form instead of the QR?', a: 'Put the helpers\' names in Settings → Sign-in helpers once. Then on Rehearsals, make the rehearsal and choose "Google Form" under How will members sign in. Saving makes the form. Press Copy link and send it to the helpers. Opening check-in opens the form; closing it closes the form. Each person is ticked on the one sign-in list once, whichever way they sign in.'},
+  {t: ['rehearsal'], q: 'How do I use a Google Form instead of the QR?', a: 'On Rehearsals, make the rehearsal and choose "Google Form" under How will members sign in. Type the sign-in helpers (one name per line; remembered for next time). Saving makes the form. Press Copy link and send it to the helpers. Opening check-in opens the form; closing it closes the form. Each person is ticked on the one sign-in list once, whichever way they sign in.'},
   {t: ['requests'], q: 'What happens if nobody answers an absence request?', a: 'It passes to a backup after 24 hours, or after 2 hours when the rehearsal is less than a day away. If the Campus Music Director has not checked it, the Global Admin or Assistant can answer it with no reason to type. If the Global Admin has not decided a checked request, the Assistant can decide it. It shows as "Passed to you: not answered in time". A request is never approved by itself: a person always decides.'},
   {t: ['reports'], q: 'What is Members on Reports?', a: 'Every member from the official attendance, by campus, then part, then person. Tap a campus to see its parts, a part to see its members, and a name to see their full record: present, early, late, excused and absent, each with its %, the excused-adjusted %, the last 4 rehearsals, the trend and each rehearsal. Choose All time, 4 weeks, 12 weeks or a year; use Jump to a member to go straight to someone. Needs a word means absent 3 in a row, absent 2 of the last 3, or late 3 or more times: it only shows who may need a conversation. The same figures are in the MEMBER SUMMARY tab of the workbook, rebuilt after every Publish. A Campus MD sees their own campus.'},
   {t: ['checkins', 'process', 'reports'], q: 'What do Early, Late and Late (allowed) mean?', a: 'Everyone who checks in counts as Present. Early means they checked in before the rehearsal\'s late time. Late means after it. Late (allowed) means late, but the leaders agreed beforehand: Desk B or an admin presses Late (allowed) on the Check-ins page, with a reason. Reports show the three apart for rehearsals processed from now on.'},
