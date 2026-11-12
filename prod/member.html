@@ -296,6 +296,8 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 .incard.scrolling::-webkit-scrollbar-thumb{background:rgb(120 120 135 / .5)}
 .incard.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent);mask-image:linear-gradient(#000 calc(100% - 28px),transparent)}
 .incard thead th{position:sticky;top:0;z-index:1;background:var(--card,#fff)}
+/* A card with nothing in it (for example an empty list) takes no space (12 Nov 2026) */
+.card:empty{display:none!important}
 /* KINNOR-LOOK END */
 </style>
 <style id="rbcdark">
@@ -848,9 +850,10 @@ async function loadReqs() {
     if (!j.ok) { $('rmine').innerHTML = ''; return say('m3', j.error || 'Not available.', 'bad'); }
     abs = j; const rh = j.rehearsal;
     const live = j.live === true || j.mine.some(r => rh && r.rehearsalId === rh.id && r.status !== 'Withdrawn');
-    $('rwhich').textContent = rh ? dlong(rh.startMs) + ', ' + tm(rh.startMs) : 'No rehearsal is open for requests yet';
+    $('rwhich').textContent = rh ? dlong(rh.startMs) + ', ' + tm(rh.startMs) : (j.formDay ? j.formDay.id + ' · Google Form' : 'No rehearsal is open for requests yet');
     const box = $('rinfo');
-    if (!rh) { box.className = 'note'; box.textContent = 'There is no rehearsal to ask about yet.'; }
+    if (!rh && j.formDay) { box.className = 'note'; box.textContent = 'The next rehearsal (' + j.formDay.id + ', ' + new Date(j.formDay.date + 'T12:00:00').toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'long'}) + ') is taken on the Google Form, so you cannot ask here. Tell your Campus Music Director; the Global Admin or Assistant enters the excuse for you.'; }
+    else if (!rh) { box.className = 'note'; box.textContent = 'There is no rehearsal to ask about yet.'; }
     else if (rh.open) { box.className = 'good'; box.textContent = 'You are in time. Requests close ' + dtm(rh.closeMs) + '.'; }
     else { box.className = 'note'; box.textContent = 'Requests for this rehearsal are closed. Please contact the Global Admin or Assistant Global Admin.'; }
     $('rform').classList.toggle('hide', !(rh && rh.open && !live));
