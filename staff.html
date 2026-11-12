@@ -646,6 +646,42 @@ body #hgrid.stats{grid-template-columns:repeat(auto-fill,minmax(min(230px,100%),
 @media(max-width:640px){.rc-grid{gap:3px}.rc-cell{min-height:58px;padding:4px 3px;border-radius:9px}.rc-chip{font-size:0;height:6px;padding:0;border-radius:3px;margin-top:2px}.rc-chip.rc-pl{background:#2F4F86}.rc-chip.rc-op{background:#20775A}.rc-chip.rc-hd{background:#8A94A6}.rc-chip.rc-cx{background:#B4232A}.rc-chip.rc-away{background:#D98A00}.rc-chip.rc-cover,.rc-chip.rc-open{background:#8456C2}.rc-more{font-size:9px}.rc-dn{font-size:12px}.rc-now .rc-dn{width:22px;height:22px}
   .rc-title{font-size:19px}.rc-seg{padding:8px 12px}.rc-row{gap:10px;padding:12px}.rc-date{width:54px}.rc-date b{font-size:20px}}
 .rbcfoot{text-align:center;font-size:.85rem;margin:28px 0 14px;opacity:.8}.rbcfoot a{color:inherit;text-decoration:underline;text-underline-offset:3px;margin:0 .35rem}.dirlink{display:inline-block;margin-top:4px;font-weight:700;font-size:.9em;color:var(--acc,#B6000A);text-decoration:underline;text-underline-offset:3px}
+/* Members on Reports (12 Nov 2026): campus → part → person */
+.mbbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:4px 0 12px}
+.mbq{position:relative;flex:1 1 240px}.mbq .in{width:100%}
+#mbqs{position:absolute;left:0;right:0;top:100%;z-index:20;background:var(--card,#fff);border:1px solid #E7E4DD;border-radius:12px;box-shadow:0 12px 30px rgba(20,35,61,.12);overflow:hidden}#mbqs:empty{display:none}
+#mbqs button{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid #F0EDE7;padding:9px 12px;font:inherit;font-size:13.5px;cursor:pointer;color:inherit}#mbqs button:hover{background:#FAF9F6}
+.mbcrumb{font-size:13.5px;color:#8A877F;margin:0 0 14px;line-height:1.9}.mbcrumb b{color:var(--ink,#1F1E1C);font-weight:600}.mbcrumb a{color:var(--acc,#B6000A);text-decoration:none;font-weight:500}
+.mblbl{font-size:12px;color:#8A877F;margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em}
+.mbtwo{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px}
+@media (max-width:899px){.mbtwo{grid-template-columns:minmax(0,1fr)}}
+.mbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.mbgc{border:1px solid #E7E4DD;border-radius:16px;padding:14px 16px;background:var(--card,#fff);display:flex;gap:14px;align-items:center;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.mbgc:hover,.mbgc:focus-visible{border-color:var(--acc,#B6000A)}
+.mbgc .t{font-weight:600;font-size:15px}.mbgc .m{font-size:12.5px;color:#8A877F;line-height:1.7}
+.mbflag{color:#AE2D37;font-weight:500}
+.mbring{width:64px;height:64px;border-radius:50%;background:conic-gradient(var(--c) 0 var(--v),#EFECE6 0);display:grid;place-items:center;flex:none}
+.mbring>div{width:48px;height:48px;border-radius:50%;background:var(--card,#fff);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:600;text-align:center;line-height:1.1}
+.mbring.big{width:120px;height:120px;margin:0 auto}.mbring.big>div{width:92px;height:92px;font-size:21px}.mbring small{display:block;font-size:11px;color:#8A877F;font-weight:400}
+.mbcmp .r{display:grid;grid-template-columns:minmax(70px,120px) 1fr 54px;gap:10px;align-items:center;font-size:13px;margin:7px 0}.mbcmp .r span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mbcmp .b{height:10px;border-radius:6px;background:#EFECE6;overflow:hidden}.mbcmp .b i{display:block;height:100%;border-radius:6px}
+.mbstack{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:6px 0;background:#EFECE6}.mbstack i{display:block}
+.mbleg{font-size:12px;color:#5F5E5A;display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:4px}
+.mbtiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.mbtile{border:1px solid #E7E4DD;border-radius:14px;padding:12px 16px;background:var(--card,#fff);text-align:left;font:inherit;color:inherit;cursor:pointer}.mbtile:hover{border-color:var(--acc,#B6000A)}
+.mbtile span{display:block;font-size:13px;color:#5F5E5A}.mbtile b{display:block;font-size:24px;font-weight:600;margin-top:2px}
+.mbcols{display:flex;gap:8px;align-items:flex-end;height:120px;overflow-x:auto;padding-bottom:2px}
+.mbcols>div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:34px;flex:0 0 auto}
+.mbcols i{display:block;width:26px;background:var(--acc,#B6000A);border-radius:6px 6px 0 0;opacity:.85}.mbcols span{font-size:10.5px;color:#8A877F;margin-top:4px}
+.mbt td,.mbt th{white-space:nowrap}.mbt tbody tr{cursor:pointer}.mbt tbody tr:hover td{background:#FAF9F6}
+.mbrec{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start;background:#FAF9F6;border-radius:14px;padding:16px}
+@media (max-width:899px){.mbrec{grid-template-columns:minmax(0,1fr)}}
+.mbkv td{padding:6px 8px}.mbdots i{display:inline-block;width:15px;height:15px;border-radius:50%;margin:0 5px 5px 0}
+/* Process: the day's list grouped by campus, then part (12 Nov 2026) */
+.prg.shut tr:not(.prgh){display:none}.prgh td{background:#FAF9F6;padding:0!important}
+.prgb{display:block;width:100%;text-align:left;background:none;border:0;padding:11px 12px;font:inherit;font-size:14px;cursor:pointer;color:inherit}.prgb:hover{color:var(--acc,#B6000A)}
+.prga{display:inline-block;transition:transform .15s}.prg:not(.shut) .prgh .prga,.prgp:not(.shut) .prga{transform:rotate(90deg)}tr.phide{display:none}
+.prgp td{padding:0 0 0 18px!important;font-size:13px}.prgp .prgb{padding:9px 12px;font-size:13.5px}
 /* KINNOR-LOOK START: generated by tools/kinnor-look/kinnor.py; RBC red and logo kept */
 :root{--kb:#B6000A;--kbt:#FDECEC;--kbx:#8E0008;--kpage:#F6F5F2;--kline:#E2E0D9;--kmut:#5F5E5A}
 body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans',sans-serif!important;letter-spacing:0}
@@ -929,6 +965,29 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 :root[data-theme="dark"] .rc-tag.rc-away{background:#322917;color:#FFC166}
 :root[data-theme="dark"] .rc-tag.rc-cover, :root[data-theme="dark"] .rc-tag.rc-open{background:#241833;color:#B7AEC4}
 :root[data-theme="dark"] .dirlink{color:var(--acc,#FF666E)}
+:root[data-theme="dark"] #mbqs{background:var(--card,#1B202A);border:1px solid #46443F}
+:root[data-theme="dark"] #mbqs button{border-bottom:1px solid #47443E}
+:root[data-theme="dark"] #mbqs button:hover{background:#2D2A20}
+:root[data-theme="dark"] .mbcrumb{color:#ABAAA9}
+:root[data-theme="dark"] .mbcrumb b{color:var(--ink,#D9D8D8)}
+:root[data-theme="dark"] .mbcrumb a{color:var(--acc,#FF666E)}
+:root[data-theme="dark"] .mblbl{color:#ABAAA9}
+:root[data-theme="dark"] .mbgc{border:1px solid #46443F;background:var(--card,#1B202A)}
+:root[data-theme="dark"] .mbgc .m{color:#ABAAA9}
+:root[data-theme="dark"] .mbflag{color:#E0858C}
+:root[data-theme="dark"] .mbring{background:conic-gradient(var(--c) 0 var(--v),#27241E 0)}
+:root[data-theme="dark"] .mbring>div{background:var(--card,#1B202A)}
+:root[data-theme="dark"] .mbring small{color:#ABAAA9}
+:root[data-theme="dark"] .mbcmp .b{background:#27241E}
+:root[data-theme="dark"] .mbstack{background:#27241E}
+:root[data-theme="dark"] .mbleg{color:#BDBCBB}
+:root[data-theme="dark"] .mbtile{border:1px solid #46443F;background:var(--card,#1B202A)}
+:root[data-theme="dark"] .mbtile span{color:#BDBCBB}
+:root[data-theme="dark"] .mbcols span{color:#ABAAA9}
+:root[data-theme="dark"] .mbt tbody tr:hover td{background:#2D2A20}
+:root[data-theme="dark"] .mbrec{background:#2D2A20}
+:root[data-theme="dark"] .prgh td{background:#2D2A20}
+:root[data-theme="dark"] .prgb:hover{color:var(--acc,#FF666E)}
 :root[data-theme="dark"] .anl, :root[data-theme="dark"] .ntc{background:var(--card,#1B202A)!important}
 :root[data-theme="dark"] button.hsec.fold{background:var(--card,#1B202A)!important}
 :root[data-theme="dark"] button.hsec.fold.shut{background:var(--card,#1B202A)!important}
@@ -944,6 +1003,10 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 :root[data-theme="dark"] [style*="color:#AE2D37"]{color:#E0858C !important}
 :root[data-theme="dark"] [style*="color:#B4232A"]{color:#E67F84 !important}
 :root[data-theme="dark"] [style*="color:#5E6A7E"]{color:#B0B3B8 !important}
+:root[data-theme="dark"] [style*="background:#9A9A9A"]{background:#07090B !important}
+:root[data-theme="dark"] [style*="color:#1F8A4C"]{color:#82E3AB !important}
+:root[data-theme="dark"] [style*="color:#D98E04"]{color:#FCC869 !important}
+:root[data-theme="dark"] [style*="color:#C8102E"]{color:#F47187 !important}
 :root[data-theme="dark"] [style*="background:#FFF4DF"]{background:#312817 !important}
 :root[data-theme="dark"] [style*="border-color:#F0E2C9"]{border-color:#4E4537 !important}
 :root[data-theme="dark"] [style*="color:#95621D"]{color:#E6BA7F !important}
@@ -1884,7 +1947,7 @@ async function prOpen(id, done) {
       (j.canNote ? '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px"><input id="prnotetxt" class="in" style="flex:1 1 260px" maxlength="300" placeholder="What was found later, and why (10 to 300 characters)"><button class="btn line sm" type="button" data-prnote="' + esc(j.id) + '">Add note</button></div>' : '') + '</div>' : '';
     $('prdetail').innerHTML = earlyNote + head + rnote + todo + names + list + notesCard;
     $('prdetail').dataset.id = j.id;
-    prWire('pt', '#prtablecard tbody tr', (tr, f) => (!f.s || tr.dataset.st === f.s), n => { $('prtcount').textContent = '· ' + n + ' of ' + rows.length; });
+    prWire('pt', '#prtablecard tbody tr[data-k]', (tr, f) => (!f.s || tr.dataset.st === f.s), n => { $('prtcount').textContent = '· ' + n + ' of ' + rows.length; prGroupsSync(); });
     if ($('pnq')) prWire('pn', '.prnm', () => true, n => { $('pncount').textContent = n === j.review.length ? '' : 'Showing ' + n + ' of ' + j.review.length + '.'; });
     if (done) prFlagCard(j.id);
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
@@ -1948,9 +2011,34 @@ function prPicker(rowEl, srcRow) {
   draw();
 }
 function prTable(rows, canFix) {
-  return '<div style="overflow-x:auto"><table class="tbl" style="margin:0"><thead><tr><th>Name</th><th>Campus</th><th>Status</th><th>How</th>' + (canFix ? '<th></th>' : '') + '</tr></thead><tbody>' + rows.map(r => '<tr data-st="' + esc(r.status) + '" data-k="' + esc((r.name + ' ' + r.memberId).toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-p="' + esc(r.part || '') + '"><td>' + esc(r.name) + '<div class="s">' + esc(r.memberId) + '</div></td><td>' + esc(r.campus) + (r.part ? '<div class="s">' + esc(r.part) + '</div>' : '') + '</td><td><span class="pill ' + (SPILL[r.status] || '') + '">' + esc(r.status) + '</span>' + (r.late ? ' <span class="pill p-pend">Late</span>' : '') + (r.corrected ? ' <span class="s">was ' + esc(r.previous) + '</span>' : '') + '</td><td>' + esc(r.source) + '</td>' +
-    (canFix ? '<td><button class="btn line sm" type="button" data-prfix="' + esc(r.memberId) + '" data-prcur="' + esc(r.status) + '" data-prname="' + esc(r.name) + '">Correct</button></td>' : '') + '</tr>').join('') + '</tbody></table></div>';
+  // Grouped by campus, then part (owner, 12 Nov 2026): each campus folds open on tap, so the card is not crowded. Searching or filtering opens the groups that match.
+  const one = r => '<tr data-st="' + esc(r.status) + '" data-k="' + esc((r.name + ' ' + r.memberId).toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-p="' + esc(r.part || '') + '"><td>' + esc(r.name) + '<div class="s">' + esc(r.memberId) + '</div></td><td>' + esc(r.campus) + (r.part ? '<div class="s">' + esc(r.part) + '</div>' : '') + '</td><td><span class="pill ' + (SPILL[r.status] || '') + '">' + esc(r.status) + '</span>' + (r.late ? ' <span class="pill p-pend">Late</span>' : '') + (r.corrected ? ' <span class="s">was ' + esc(r.previous) + '</span>' : '') + '</td><td>' + esc(r.source) + '</td>' +
+    (canFix ? '<td><button class="btn line sm" type="button" data-prfix="' + esc(r.memberId) + '" data-prcur="' + esc(r.status) + '" data-prname="' + esc(r.name) + '">Correct</button></td>' : '') + '</tr>';
+  const n = 4 + (canFix ? 1 : 0), byC = {};
+  rows.forEach(r => { (byC[r.campus || '(no campus)'] = byC[r.campus || '(no campus)'] || []).push(r); });
+  const cnt = list => ['Present', 'Excused', 'Absent'].map(s => { const k = list.filter(r => r.status === s).length; return k ? k + ' ' + s.toLowerCase() : ''; }).filter(Boolean).join(' · ');
+  return '<div style="overflow-x:auto"><table class="tbl prgt" style="margin:0"><thead><tr><th>Name</th><th>Campus</th><th>Status</th><th>How</th>' + (canFix ? '<th></th>' : '') + '</tr></thead>' +
+    Object.keys(byC).sort().map(c => { const list = byC[c].slice().sort((x, y) => ((x.part || '') + x.name < (y.part || '') + y.name ? -1 : 1)); let last = null;
+      return '<tbody class="prg shut"><tr class="prgh"><td colspan="' + n + '"><button type="button" class="prgb" data-prg="1"><span class="prga">\u25B8</span> <b>' + esc(c) + '</b> <span class="s">' + list.length + ' · ' + esc(cnt(list)) + '</span></button></td></tr>' +
+        list.map(r => { const pt = r.part || '(no part)', h = pt !== last ? '<tr class="prgp shut"><td colspan="' + n + '"><button type="button" class="prgb" data-prpart="1"><span class="prga">\u25B8</span> <b>' + esc(pt) + '</b> <span class="s">' + list.filter(x => (x.part || '(no part)') === pt).length + ' · ' + esc(cnt(list.filter(x => (x.part || '(no part)') === pt))) + '</span></button></td></tr>' : ''; last = pt; return h + one(r).replace('<tr ', '<tr class="phide" '); }).join('') + '</tbody>'; }).join('') + '</table></div>';
 }
+/** After a search or filter: hide groups with nobody left, open the groups that match while a filter is in use, and hide part headings with nobody under them. */
+function prGroupsSync() {
+  const box = $('prtablecard'); if (!box) return;
+  const busy = ['ptq', 'ptc', 'ptp', 'pttst'].some(id => $(id) && $(id).value);
+  box.querySelectorAll('tbody.prg').forEach(tb => {
+    const rows = Array.from(tb.querySelectorAll('tr[data-k]')), seen = rows.filter(r => r.style.display !== 'none').length;
+    tb.style.display = seen ? '' : 'none';
+    if (busy) { tb.classList.remove('shut'); tb.querySelectorAll('tr.prgp').forEach(h => h.classList.remove('shut')); tb.querySelectorAll('tr.phide').forEach(r => r.classList.remove('phide')); }
+    tb.querySelectorAll('tr.prgp').forEach(h => { let x = h.nextElementSibling, any = false; while (x && !x.classList.contains('prgp')) { if (x.dataset.k && x.style.display !== 'none') any = true; x = x.nextElementSibling; } h.style.display = any ? '' : 'none'; });
+  });
+}
+document.addEventListener('click', ev => {
+  const g = ev.target.closest && ev.target.closest('[data-prg],[data-prpart]'); if (!g) return;
+  if (g.dataset.prg) { g.closest('tbody').classList.toggle('shut'); return; }
+  const h = g.closest('tr'), open = h.classList.toggle('shut') === false; let x = h.nextElementSibling;
+  while (x && !x.classList.contains('prgp')) { if (x.dataset.k) x.classList.toggle('phide', !open); else if (!open && x.id === 'prfix') x.remove(); x = x.nextElementSibling; }
+});
 /** Who has answered the absences nobody asked for: one line per campus. Desk B uses it to chase; the Global Admin can send the list again. */
 async function prFlagCard(id) {
   try {
@@ -2917,34 +3005,145 @@ function table(cols, rows, raw) {
     rows.map(r => '<tr>' + r.map(v => '<td style="padding:9px 10px;border-top:1px solid #E6E9EF">' + (raw ? v : esc(v)) + '</td>').join('') + '</tr>').join('') + '</tbody></table></div>';
 }
 
-// ---- Attendance patterns (Kinnor idea, 29 Oct 2026): who may need a word. It shows; a person decides. ----
-let PATW = 8, PATT = '', PATJ = null;
-const PATTH = [['', 'Everyone'], ['late3', 'Late 3 or more'], ['abs2', 'Absent 2 or more'], ['exc4', 'Excused 4 or more']];
-const patKeep = r => PATT === 'late3' ? r.late >= 3 : PATT === 'abs2' ? r.absent >= 2 : PATT === 'exc4' ? r.excused >= 4 : true;
+// ---- Members (owner decision, 12 Nov 2026; replaces Attendance patterns): campus → part → person, from the official attendance.
+// The figures come from the server (the same as the MEMBER SUMMARY tab); this only adds up groups (people, never averaged percentages) and draws them.
+let MBS = {p: 'all', campus: '', part: '', who: '', f: ''}, MBJ = null;
+const MBP = [['all', 'All time'], ['4', '4 weeks'], ['12', '12 weeks'], ['52', 'A year']];
+const MBK = ['expected', 'present', 'early', 'late', 'lateAllowed', 'excused', 'absent'];
+const MBHERE = c => 'EPLW'.indexOf(c) !== -1;
+const mbPct = (n, d) => (d ? Math.round(1000 * n / d) / 10 : 0);
+const mbCol = v => (v >= 75 ? '#1F8A4C' : v >= 60 ? '#D98E04' : '#B6000A');
+const mbTr = t => '<span class="pill ' + (t === 'Up' ? 'p-ok' : t === 'Down' ? 'p-no' : 'p-info') + '">' + esc(t) + '</span>';
+const mbRing = (v, big) => '<div class="mbring' + (big ? ' big' : '') + '" style="--v:' + v + '%;--c:' + mbCol(v) + '"><div>' + (big ? v + '%<small>attendance</small>' : Math.round(v) + '%') + '</div></div>';
 async function loadPatterns() {
   const box = $('rppat'); if (!box) return;
   try {
-    const j = await call({action: 'reports.patterns', token, weeks: PATW});
+    const j = await call(Object.assign({action: 'reports.patterns', token}, MBS.p === 'all' ? {all: true} : {weeks: Number(MBS.p)}));
     if (!j.ok) { box.innerHTML = ''; return; }
-    PATJ = j; drawPatterns();
+    MBJ = j; if (j.campusOnly) MBS.campus = j.campusOnly; drawPatterns();
   } catch (e) { box.innerHTML = ''; }
 }
-function drawPatterns() {
-  const j = PATJ, box = $('rppat'); if (!j || !box) return;
-  const chips = (list, cur, attr) => '<div class="fpchips" style="margin:0 0 10px">' + list.map(x => '<button type="button" class="fpchip' + (String(cur) === String(x[0]) ? ' on' : '') + '" ' + attr + '="' + esc(String(x[0])) + '">' + esc(x[1]) + '</button>').join('') + '</div>';
-  const items = j.rows.filter(patKeep);
-  box.innerHTML = '<div class="card pad rise"><div class="ct">Attendance patterns</div><p class="sub">One line per person over the period, from the official attendance: how often they were late, excused or absent. It only shows who may need a word; nothing changes by itself.' + (j.campusOnly ? ' You see your own campus.' : '') + '</p>' +
-    chips([[4, '4 weeks'], [8, '8 weeks'], [13, '3 months'], [52, 'A year']], PATW, 'data-patw') + chips(PATTH, PATT, 'data-patt') +
-    '<p class="sub" style="margin:0 0 8px">' + j.rehearsals + ' rehearsal' + (j.rehearsals === 1 ? '' : 's') + ' from ' + esc(j.from) + ' to ' + esc(j.to) + '.</p><div id="rppatl"></div></div>';
-  const line = r => [r.late ? r.late + ' late' : '', r.lateAllowed ? r.lateAllowed + ' late (allowed)' : '', r.absent ? r.absent + ' absent' : '', r.excused ? r.excused + ' excused' : ''].filter(Boolean).join(' · ') || 'No lateness or absence';
-  fpPanel('pat', 'rppatl', {bare: true, items: items, page: 20, empty: PATT ? 'Nobody meets that in this period.' : 'No official attendance in this period yet.',
-    fields: [{k: 'q', label: 'Search name', ph: 'Type a name, or choose', type: 'text', get: r => r.name, sug: r => [r.name]}, {k: 'campus', label: 'Campus', type: 'list', get: r => r.campus}, {k: 'part', label: 'Part', type: 'list', get: r => r.part || '(no part)'}],
-    card: r => '<div class="fprow" style="border-left-color:' + (r.absent >= 2 || r.late >= 3 ? '#AE2D37' : r.absent || r.late ? '#C98A1E' : '#1F7A4D') + '"><div><div class="nm">' + esc(r.name) + '</div><div class="mt">' + esc(r.campus) + ' · ' + esc(r.part || '(no part)') + ' · ' + esc(line(r)) + '</div></div><span class="pill p-info">' + r.present + ' of ' + r.expected + '</span></div>'});
+/** Add up a group: counts summed over people; trend from the group's last 4 rehearsals against the 4 before. */
+function mbSum(rows) {
+  const t = {n: rows.length, word: 0, down: 0}; MBK.forEach(k => { t[k] = 0; });
+  rows.forEach(r => { MBK.forEach(k => { t[k] += Number(r[k]) || 0; }); if (r.flag) t.word++; if (r.trend === 'Down') t.down++; });
+  t.rate = mbPct(t.present, t.expected);
+  const per = mbSeries(rows), idx = per.map((x, i) => (x.e ? i : -1)).filter(i => i >= 0);
+  const sum = list => list.reduce((a, i) => ({e: a.e + per[i].e, p: a.p + per[i].p}), {e: 0, p: 0});
+  const a = sum(idx.slice(-4)), b = sum(idx.slice(-8, -4)), ra = mbPct(a.p, a.e), rb = mbPct(b.p, b.e);
+  t.trend = idx.length < 4 || !b.e ? 'Steady' : (ra - rb > 10 ? 'Up' : rb - ra > 10 ? 'Down' : 'Steady');
+  return t;
 }
-document.addEventListener('click', ev => {
-  const w = ev.target.closest && ev.target.closest('[data-patw]'), t = ev.target.closest && ev.target.closest('[data-patt]');
-  if (w) { PATW = Number(w.dataset.patw) || 8; loadPatterns(); }
-  else if (t) { PATT = t.dataset.patt || ''; drawPatterns(); }
+function mbSeries(rows) {
+  return (MBJ.rehearsals || []).map((r, i) => { let e = 0, p = 0; rows.forEach(x => { const c = x.seq[i]; if (c && c !== '-') { e++; if (MBHERE(c)) p++; } }); return {id: r.id, date: r.date, e: e, p: p, v: mbPct(p, e)}; });
+}
+function mbBars(list) {
+  return '<div class="mbcmp">' + list.map(x => '<div class="r"><span>' + esc(x[0]) + '</span><div class="b"><i style="width:' + x[1] + '%;background:' + (x[2] || 'var(--acc,#B6000A)') + '"></i></div><b>' + x[1] + '%</b></div>').join('') + '</div>';
+}
+function mbCards(groups, key) {
+  return '<div class="mbgrid">' + groups.map(g => '<button type="button" class="mbgc" data-mbgo="' + key + '|' + esc(g.name) + '">' + mbRing(g.t.rate) + '<div><div class="t">' + esc(g.name) + '</div><div class="m">' + g.t.n + ' member' + (g.t.n === 1 ? '' : 's') + ' · ' + mbTr(g.t.trend) + '<br>' +
+    (g.t.word ? '<span class="mbflag">' + g.t.word + ' need' + (g.t.word === 1 ? 's' : '') + ' a word</span>' : 'Nobody needs a word') + '</div></div></button>').join('') + '</div>';
+}
+function mbGroups(rows, k) {
+  const m = {}; rows.forEach(r => { (m[r[k]] = m[r[k]] || []).push(r); });
+  return Object.keys(m).sort().map(n => ({name: n, rows: m[n], t: mbSum(m[n])}));
+}
+function mbSplit(t) {
+  const on = t.present - t.late - t.lateAllowed, w = n => mbPct(n, t.expected);
+  return '<div class="mbstack"><i style="width:' + w(on) + '%;background:#1F8A4C"></i><i style="width:' + w(t.late + t.lateAllowed) + '%;background:#D98E04"></i><i style="width:' + w(t.excused) + '%;background:#9A9A9A"></i><i style="width:' + w(t.absent) + '%;background:#C8102E"></i></div>' +
+    '<div class="mbleg"><span><b style="color:#1F8A4C">●</b> On time ' + w(on) + '%</span><span><b style="color:#D98E04">●</b> Late ' + w(t.late + t.lateAllowed) + '%</span><span><b style="color:#9A9A9A">●</b> Excused ' + w(t.excused) + '%</span><span><b style="color:#C8102E">●</b> Absent ' + w(t.absent) + '%</span></div>';
+}
+function mbColumns(series) {
+  const s = series.filter(x => x.e);
+  if (!s.length) return '<p class="sub">No rehearsals in this period.</p>';
+  return '<div class="mbcols">' + s.map(x => '<div title="' + esc(x.id + ' · ' + x.date + ': ' + x.v + '% (' + x.p + ' of ' + x.e + ')') + '"><i style="height:' + Math.max(3, x.v) + '%"></i><span>' + esc(x.id) + '</span></div>').join('') + '</div>';
+}
+function drawPatterns() {
+  const j = MBJ, box = $('rppat'); if (!j || !box) return;
+  const all = j.rows || [], c1 = all.filter(r => !MBS.campus || r.campus === MBS.campus), c2 = c1.filter(r => !MBS.part || r.part === MBS.part);
+  const who = MBS.who ? all.filter(r => r.memberId === MBS.who)[0] : null;
+  const top = '<div class="mbbar"><div class="fpchips" style="margin:0">' + MBP.map(x => '<button type="button" class="fpchip' + (MBS.p === x[0] ? ' on' : '') + '" data-mbp="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
+    '<div class="mbq"><input id="mbq" class="in" placeholder="Jump to a member: name or ID" autocomplete="off"><div id="mbqs"></div></div>' +
+    (j.canDownload ? '<button class="btn line sm" type="button" data-mbcsv="1">Download CSV</button>' : '') + (j.canRebuild ? '<button class="btn line sm" type="button" data-mbre="1">Rebuild member summary</button>' : '') + '</div>';
+  const link = (lbl, lv) => '<a href="#" data-mblv="' + lv + '">' + esc(lbl) + '</a>';
+  const crumbs = [];
+  if (!j.campusOnly) crumbs.push(MBS.campus ? link('All campuses', 'all') : '<b>All campuses</b>');
+  if (MBS.campus) crumbs.push(MBS.part || who ? link(MBS.campus, 'campus') : '<b>' + esc(MBS.campus) + '</b>');
+  if (MBS.part) crumbs.push(who ? link(MBS.part, 'part') : '<b>' + esc(MBS.part) + '</b>');
+  if (who) crumbs.push('<b>' + esc(who.name) + '</b>');
+  const scope = who ? null : mbSum(c2);
+  const crumb = '<p class="mbcrumb">' + crumbs.join(' › ') + (scope ? ' · ' + scope.n + ' members · ' + scope.rate + '% · ' + mbTr(scope.trend) + (scope.word ? ' · <span class="mbflag">' + scope.word + ' need a word</span>' : '') : ' · ' + esc(who.memberId)) +
+    ' · ' + (j.rehearsals || []).length + ' rehearsal' + ((j.rehearsals || []).length === 1 ? '' : 's') + (j.from ? ' from ' + esc(j.from) + ' to ' + esc(j.to) : ', all time') + '</p>';
+  let body = '';
+  if (!all.length || !(j.rehearsals || []).length) body = '<p class="sub">No official attendance in this period yet. It appears here once a day is published.</p>';
+  else if (who) body = mbPerson(who, all);
+  else if (!MBS.campus) {
+    const g = mbGroups(all, 'campus'), t = mbSum(all);
+    body = '<div class="mbtwo"><div><p class="mblbl">Campuses</p>' + mbCards(g, 'campus') + '</div><div><p class="mblbl">Attendance by campus</p>' + mbBars(g.slice().sort((a, b) => b.t.rate - a.t.rate).map(x => [x.name, x.t.rate])) +
+      '<p class="mblbl" style="margin-top:18px">Everyone</p>' + mbSplit(t) + '<div class="mbtiles"><button type="button" class="mbtile" data-mbf="word"><span>Needs a word</span><b>' + t.word + '</b></button><button type="button" class="mbtile" data-mbf="down"><span>Trending down</span><b>' + t.down + '</b></button></div></div></div>';
+  } else if (!MBS.part) {
+    const g = mbGroups(c1, 'part'), t = mbSum(c1);
+    body = '<div class="mbtwo"><div><p class="mblbl">Parts</p>' + mbCards(g, 'part') + '</div><div><p class="mblbl">' + esc(MBS.campus) + ', rehearsal by rehearsal</p>' + mbColumns(mbSeries(c1)) +
+      (j.campusOnly ? '' : '<p class="mblbl" style="margin-top:16px">' + esc(MBS.campus) + ' and all campuses</p>' + mbBars([[MBS.campus, t.rate], ['All campuses', mbSum(all).rate, '#5F5E5A']])) +
+      '<p class="mblbl" style="margin-top:16px">How they came</p>' + mbSplit(t) + '</div></div>';
+  }
+  if (!who && (MBS.part || MBS.f)) {
+    const base = MBS.part ? c2 : c1, nw = base.filter(r => r.flag).length, nd = base.filter(r => r.trend === 'Down').length;
+    const list = base.filter(r => MBS.f === 'word' ? r.flag : MBS.f === 'down' ? r.trend === 'Down' : true);
+    const cell = (n, p) => n + ' <span class="s">' + p + '%</span>';
+    const tbl = list.length ? '<div style="overflow-x:auto"><table class="tbl mbt" style="margin:0"><thead><tr><th>Member</th><th>Expected</th><th>Present</th><th>Late</th><th>Excused</th><th>Absent</th><th>Excused-adj.</th><th>Last 4</th><th>Trend</th><th>Needs a word</th></tr></thead><tbody>' +
+      list.map(r => '<tr data-mbwho="' + esc(r.memberId) + '"><td><b>' + esc(r.name) + '</b><div class="s">' + esc(r.memberId) + (MBS.part ? '' : ' · ' + esc(r.campus) + ' · ' + esc(r.part)) + (r.status === 'Left' ? ' · Left' : '') + '</div></td><td>' + r.expected + '</td><td>' + cell(r.present, r.presentPct) + '</td><td>' + cell(r.late + r.lateAllowed, mbPct(r.late + r.lateAllowed, r.expected)) + '</td><td>' + cell(r.excused, r.excusedPct) + '</td><td>' + cell(r.absent, r.absentPct) + '</td><td><b>' + r.adjusted + '%</b></td><td>' + r.last4 + '%</td><td>' + mbTr(r.trend) + '</td><td>' + (r.flag ? '<span class="pill p-no">' + esc(r.flag) + '</span>' : '') + '</td></tr>').join('') + '</tbody></table></div>'
+      : '<p class="sub">Nobody here matches that.</p>';
+    body = (MBS.part ? '' : body) + '<div class="fpchips" style="margin:' + (MBS.part ? '0' : '18px 0 0') + ' 0 10px">' + [['', 'Everyone', base.length], ['word', 'Needs a word', nw], ['down', 'Trending down', nd]].map(x => '<button type="button" class="fpchip' + (MBS.f === x[0] ? ' on' : '') + '" data-mbf="' + x[0] + '">' + x[1] + ' <b>' + x[2] + '</b></button>').join('') + '</div>' + tbl;
+  }
+  box.innerHTML = '<div class="card pad rise"><div class="ct">Members</div><p class="sub">From the official attendance. Pick a campus, then a part, then a person. ' + (j.campusOnly ? 'You see your own campus.' : '') + '</p>' + top + crumb + body + '<p class="sub" id="mbmsg" style="margin:10px 0 0"></p></div>';
+}
+function mbPerson(r, all) {
+  const rids = MBJ.rehearsals || [], word = {E: 'Present (early)', P: 'Present', L: 'Present (late)', W: 'Present (late, allowed)', X: 'Excused', A: 'Absent'}, col = {E: '#1F8A4C', P: '#1F8A4C', L: '#D98E04', W: '#E8B04A', X: '#9A9A9A', A: '#C8102E'};
+  const dots = rids.map((x, i) => r.seq[i] && r.seq[i] !== '-' ? '<i style="background:' + col[r.seq[i]] + '" title="' + esc(x.id + ' · ' + x.date + ': ' + word[r.seq[i]]) + '"></i>' : '').join('');
+  const mon = {}; rids.forEach((x, i) => { const c = r.seq[i]; if (!c || c === '-') return; const k = String(x.date).slice(0, 7); const m = mon[k] = mon[k] || {e: 0, p: 0}; m.e++; if (MBHERE(c)) m.p++; });
+  const mn = Object.keys(mon).sort(), MN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const kv = (k, v) => '<tr><td>' + k + '</td><td><b>' + v + '</b></td></tr>';
+  const part = all.filter(x => x.campus === r.campus && x.part === r.part), camp = all.filter(x => x.campus === r.campus);
+  const missed = rids.map((x, i) => (r.seq[i] === 'A' || r.seq[i] === 'X' ? x.id + ' (' + x.date + ', ' + (r.seq[i] === 'A' ? 'absent' : 'excused') + ')' : '')).filter(Boolean);
+  if (!r.expected) return '<p class="sub">' + esc(r.name) + ' has no published rehearsals in this period yet.</p>';
+  return '<div class="mbrec"><div>' + mbRing(r.presentPct, true) + '<p class="sub" style="margin:8px 0 0;text-align:center">' + esc(r.campus) + ' · ' + esc(r.part) + (r.status === 'Left' ? '<br><span class="pill p-pend">Left</span>' : '') + '</p></div>' +
+    '<div><table class="tbl mbkv" style="margin:0"><tbody>' + kv('Present', r.present + ' of ' + r.expected + ' (' + r.presentPct + '%)') + kv('Early', r.early + ' (' + r.earlyPct + '%)') + kv('Late', r.late + ' (' + r.latePct + '%)') + kv('Late (allowed)', r.lateAllowed + ' (' + r.lateAllowedPct + '%)') +
+      kv('Excused', r.excused + ' (' + r.excusedPct + '%)') + kv('Absent', r.absent + ' (' + r.absentPct + '%)') + kv('Excused-adjusted', r.adjusted + '%') + kv('Last 4', r.last4 + '% ' + mbTr(r.trend)) + kv('Absent in a row', r.absentRun + (r.lastPresent ? ' · last present ' + esc(r.lastPresent) : '')) + kv('Best run present', r.bestRun) + '</tbody></table>' +
+      (r.flag ? '<p style="margin:10px 0 0"><span class="pill p-no">' + esc(r.flag) + '</span></p>' : '') + '</div>' +
+    '<div><p class="mblbl">Each rehearsal, oldest first</p><div class="mbdots">' + dots + '</div><div class="mbleg"><span><b style="color:#1F8A4C">●</b> Present</span><span><b style="color:#D98E04">●</b> Late</span><span><b style="color:#9A9A9A">●</b> Excused</span><span><b style="color:#C8102E">●</b> Absent</span></div>' +
+      '<p class="mblbl" style="margin-top:14px">By month</p><div class="mbcols">' + mn.map(k => '<div title="' + mbPct(mon[k].p, mon[k].e) + '%"><i style="height:' + Math.max(3, mbPct(mon[k].p, mon[k].e)) + '%"></i><span>' + MN[Number(k.slice(5)) - 1] + '</span></div>').join('') + '</div>' +
+      '<p class="mblbl" style="margin-top:14px">Compared</p>' + mbBars([[r.name.split(' ')[0], r.presentPct], [r.campus + ' ' + r.part, mbSum(part).rate, '#D98E04'], [r.campus, mbSum(camp).rate, '#5F5E5A']]) + '</div></div>' +
+    '<p class="sub" style="margin:12px 0 0">' + (missed.length ? 'Missed: ' + esc(missed.join(', ')) + '. ' : '') + 'No private reasons are shown.</p>';
+}
+document.addEventListener('click', async ev => {
+  const t = ev.target.closest && ev.target.closest('[data-mbp],[data-mbgo],[data-mblv],[data-mbf],[data-mbwho],[data-mbjump],[data-mbcsv],[data-mbre]');
+  if (!t || !MBJ) return;
+  const d = t.dataset;
+  if (d.mbp) { MBS.p = d.mbp; MBS.who = ''; loadPatterns(); return; }
+  if (d.mbgo) { const p = d.mbgo.split('|'); if (p[0] === 'campus') MBS.campus = p.slice(1).join('|'); else MBS.part = p.slice(1).join('|'); MBS.f = ''; }
+  else if (d.mblv) { ev.preventDefault(); MBS.who = ''; if (d.mblv === 'all') { MBS.campus = MBJ.campusOnly || ''; MBS.part = ''; MBS.f = ''; } else if (d.mblv === 'campus') { MBS.part = ''; MBS.f = ''; } }
+  else if (d.mbf !== undefined) MBS.f = d.mbf;
+  else if (d.mbwho || d.mbjump) { const r = MBJ.rows.filter(x => x.memberId === (d.mbwho || d.mbjump))[0]; if (!r) return; MBS.who = r.memberId; MBS.campus = r.campus; MBS.part = r.part; }
+  else if (d.mbcsv || d.mbre) {
+    t.disabled = true;
+    try {
+      const j = await call(d.mbcsv ? Object.assign({action: 'reports.memberscsv', token}, MBS.p === 'all' ? {all: true} : {weeks: Number(MBS.p)}) : {action: 'reports.memberRebuild', token});
+      if (j.signedOut) { signedOutNow(); return; }
+      if (!j.ok) say('mbmsg', j.error || 'Could not do that.', 'bad');
+      else if (j.csv) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([j.csv], {type: 'text/csv'})); a.download = j.filename; document.body.appendChild(a); a.click(); a.remove(); }
+      else say('mbmsg', 'Done: ' + j.summary + '.', 'ok');
+    } catch (e) { say('mbmsg', 'Network problem. Try again.', 'bad'); }
+    t.disabled = false; return;
+  }
+  drawPatterns();
+  const c = $('rppat'); if (c && c.getBoundingClientRect().top < 0) c.scrollIntoView({behavior: 'smooth', block: 'start'});
+});
+document.addEventListener('input', ev => {
+  if (!ev.target || ev.target.id !== 'mbq' || !MBJ) return;
+  const k = ev.target.value.trim().toLowerCase(), box = $('mbqs');
+  const hit = k.length < 2 ? [] : MBJ.rows.filter(r => (r.name + ' ' + r.memberId).toLowerCase().indexOf(k) !== -1).slice(0, 8);
+  box.innerHTML = hit.map(r => '<button type="button" data-mbjump="' + esc(r.memberId) + '"><b>' + esc(r.name) + '</b> <span class="s">' + esc(r.memberId + ' · ' + r.campus + ' · ' + r.part) + '</span></button>').join('') || (k.length >= 2 ? '<p class="s" style="margin:6px 10px">Nobody matches.</p>' : '');
 });
 
 // ---- Build a report (Reports) ----
@@ -3716,7 +3915,7 @@ const TABHELP = {
 };
 const FAQ = [
   {t: ['requests'], q: 'What happens if nobody answers an absence request?', a: 'It passes to a backup after 24 hours, or after 2 hours when the rehearsal is less than a day away. If the Campus Music Director has not checked it, the Global Admin or Assistant can answer it with no reason to type. If the Global Admin has not decided a checked request, the Assistant can decide it. It shows as "Passed to you: not answered in time". A request is never approved by itself: a person always decides.'},
-  {t: ['reports'], q: 'What is Attendance patterns on Reports?', a: 'One line per person for the period you choose (4 weeks to a year): how many rehearsals they were expected at, present, late, late (allowed), excused and absent. Tap Late 3 or more, Absent 2 or more or Excused 4 or more to see only those people. It comes from the official attendance, and it never changes a record or sends anything: it only shows who may need a word.'},
+  {t: ['reports'], q: 'What is Members on Reports?', a: 'Every member from the official attendance, by campus, then part, then person. Tap a campus to see its parts, a part to see its members, and a name to see their full record: present, early, late, excused and absent, each with its %, the excused-adjusted %, the last 4 rehearsals, the trend and each rehearsal. Choose All time, 4 weeks, 12 weeks or a year; use Jump to a member to go straight to someone. Needs a word means absent 3 in a row, absent 2 of the last 3, or late 3 or more times: it only shows who may need a conversation. The same figures are in the MEMBER SUMMARY tab of the workbook, rebuilt after every Publish. A Campus MD sees their own campus.'},
   {t: ['checkins', 'process', 'reports'], q: 'What do Early, Late and Late (allowed) mean?', a: 'Everyone who checks in counts as Present. Early means they checked in before the rehearsal\'s late time. Late means after it. Late (allowed) means late, but the leaders agreed beforehand: Desk B or an admin presses Late (allowed) on the Check-ins page, with a reason. Reports show the three apart for rehearsals processed from now on.'},
   {t: ['rehearsal', 'calendar'], q: 'How do I set up a rehearsal?', a: 'Open Rehearsals (or click an empty future date in the Calendar), choose the date, start and finish times, and the venue, then save. Times are Lagos time and at most three rehearsals can be planned at once. If it is normally Desk A\'s job and you are the Global Admin or Assistant, you give a reason and Desk A is told.'},
   {t: ['rehearsal'], q: 'How do I open and close check-in?', a: 'On the Rehearsals page, use Open check-in. You can open it by hand from one hour before the start. If nobody does, it opens by itself at the start time and closes by itself at the finish time. Use Close check-in to close it earlier; it then stays closed until you open it again.'},
@@ -4457,4 +4656,4 @@ document.addEventListener('click', async ev => {
     say('m7', j.ok ? 'Asked. It goes to the Global Admin for a yes, then Desk A carries it out. You can still answer the absence.' : (j.error || 'Could not ask.'), j.ok ? 'ok' : 'bad'); return;
   }
 });
-</script><script id="kinnorlists">(function(){var MAX=10,KIDS=/^(DIV|LI|TR|A|BUTTON|LABEL|DETAILS|ARTICLE)$/,t=0;function scrolls(e){var c=getComputedStyle(e);return/(auto|scroll)/.test(c.overflowY)&&c.maxHeight!=="none"&&!e.classList.contains("incard")}function listy(e){var k=e.children;if(k.length<=MAX||!KIDS.test(k[0].tagName))return false;var n=0;for(var i=0;i<k.length;i++)if(k[i].tagName===k[0].tagName&&k[i].className===k[0].className)n++;if(n/k.length<.8)return false;var c=getComputedStyle(e);return e.tagName==="TBODY"||(c.display.indexOf("grid")<0&&!(c.display.indexOf("flex")>=0&&c.flexDirection.indexOf("row")===0))}function boxOf(e){if(e.tagName!=="TBODY")return e;var tb=e.closest("table"),p=tb.parentElement;if(p.children.length===1&&!p.classList.contains("card"))return p;var w=document.createElement("div");p.insertBefore(w,tb);w.appendChild(tb);return w}function fade(b){b.classList.toggle("more",b.scrollTop+b.clientHeight<b.scrollHeight-4)}function off(b){b.classList.remove("incard","more");b.style.maxHeight="";delete b.dataset.icn}function scan(){t=0;document.querySelectorAll(".incard").forEach(function(b){if(!document.contains(b))return;var k=(b.querySelector(":scope>table>tbody")||b).children.length;if(k<=MAX)off(b)});document.querySelectorAll(".card").forEach(function(card){card.querySelectorAll("tbody,div,ul,ol").forEach(function(e){if(!listy(e)||e.closest("[class*=rc-],select"))return;var b=boxOf(e);for(var a=b.parentElement;a&&a!==card.parentElement;a=a.parentElement)if(scrolls(a))return;if(scrolls(b))return;var k=e.children.length;if(b.dataset.icn==String(k))return;var top=b.getBoundingClientRect().top,tenth=e.children[MAX-1].getBoundingClientRect();if(!tenth.height)return;b.style.maxHeight=Math.ceil(tenth.bottom-top+b.scrollTop+4)+"px";b.classList.add("incard");b.dataset.icn=k;if(!b.__kl){b.__kl=1;b.addEventListener("scroll",function(){b.classList.add("scrolling");clearTimeout(b.__ks);b.__ks=setTimeout(function(){b.classList.remove("scrolling")},900);fade(b)},{passive:true})}fade(b)})})}function soon(){if(!t)t=setTimeout(scan,150)}new MutationObserver(function(m){for(var i=0;i<m.length;i++){var x=m[i].target;if(m[i].type!=="attributes"||!(x.classList&&x.classList.contains("incard"))){soon();return}}}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});addEventListener("resize",function(){document.querySelectorAll(".incard").forEach(function(b){delete b.dataset.icn});soon()});soon()})();</script></body></html>
+</script><script id="kinnorlists">(function(){var MAX=10,KIDS=/^(DIV|LI|TR|A|BUTTON|LABEL|DETAILS|ARTICLE)$/,t=0;function scrolls(e){var c=getComputedStyle(e);return/(auto|scroll)/.test(c.overflowY)&&c.maxHeight!=="none"&&!e.classList.contains("incard")}function listy(e){var k=e.children;if(k.length<=MAX||!KIDS.test(k[0].tagName))return false;var n=0;for(var i=0;i<k.length;i++)if(k[i].tagName===k[0].tagName&&k[i].className===k[0].className)n++;if(n/k.length<.8)return false;var c=getComputedStyle(e);return e.tagName==="TBODY"?e.parentElement.tBodies.length===1:(c.display.indexOf("grid")<0&&!(c.display.indexOf("flex")>=0&&c.flexDirection.indexOf("row")===0))}function boxOf(e){if(e.tagName!=="TBODY")return e;var tb=e.closest("table"),p=tb.parentElement;if(p.children.length===1&&!p.classList.contains("card"))return p;var w=document.createElement("div");p.insertBefore(w,tb);w.appendChild(tb);return w}function fade(b){b.classList.toggle("more",b.scrollTop+b.clientHeight<b.scrollHeight-4)}function off(b){b.classList.remove("incard","more");b.style.maxHeight="";delete b.dataset.icn}function scan(){t=0;document.querySelectorAll(".incard").forEach(function(b){if(!document.contains(b))return;var k=(b.querySelector(":scope>table>tbody")||b).children.length;if(k<=MAX)off(b)});document.querySelectorAll(".card").forEach(function(card){card.querySelectorAll("tbody,div,ul,ol").forEach(function(e){if(!listy(e)||e.closest("[class*=rc-],select"))return;var b=boxOf(e);for(var a=b.parentElement;a&&a!==card.parentElement;a=a.parentElement)if(scrolls(a))return;if(scrolls(b))return;var k=e.children.length;if(b.dataset.icn==String(k))return;var top=b.getBoundingClientRect().top,tenth=e.children[MAX-1].getBoundingClientRect();if(!tenth.height)return;b.style.maxHeight=Math.ceil(tenth.bottom-top+b.scrollTop+4)+"px";b.classList.add("incard");b.dataset.icn=k;if(!b.__kl){b.__kl=1;b.addEventListener("scroll",function(){b.classList.add("scrolling");clearTimeout(b.__ks);b.__ks=setTimeout(function(){b.classList.remove("scrolling")},900);fade(b)},{passive:true})}fade(b)})})}function soon(){if(!t)t=setTimeout(scan,150)}new MutationObserver(function(m){for(var i=0;i<m.length;i++){var x=m[i].target;if(m[i].type!=="attributes"||!(x.classList&&x.classList.contains("incard"))){soon();return}}}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});addEventListener("resize",function(){document.querySelectorAll(".incard").forEach(function(b){delete b.dataset.icn});soon()});soon()})();</script></body></html>
