@@ -1077,7 +1077,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <p class="sub" id="prnote"></p>
 <div id="prchips" class="fpchips"></div>
 <div id="prfind" class="hide" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><input id="prq" class="in" list="prids" placeholder="Search: R104, 2026-09 or a date" style="flex:2 1 200px" autocomplete="off"><datalist id="prids"></datalist>
-<select id="prst" class="in" style="flex:1 1 130px"><option value="">All days</option><option value="todo">To process</option><option value="done">Processed</option><option value="wait">Not ready</option></select>
+<select id="prst" class="in" style="flex:1 1 130px"><option value="">All days</option><option value="up">Upcoming</option><option value="todo">To process</option><option value="done">Processed</option><option value="wait">Not ready</option></select>
 <select id="prsrc" class="in" style="flex:1 1 130px"><option value="">Any source</option><option value="Google Form">Google Form</option><option value="QR check-in">QR check-in</option><option value="Google check-in">Google check-in (no QR)</option><option value="Marked by hand">Marked by hand</option></select><button id="prx" class="btn line sm" type="button">Clear</button></div>
 <p class="sub" id="prcount" style="margin:8px 0 0"></p><div id="prlist"></div><div class="actions"><button id="prmore" class="btn line hide" type="button">Show 10 more</button></div></div>
 <div id="prundo"></div>
@@ -1860,14 +1860,15 @@ function prDraw() {
   const j = prState; if (!j) return;
   const q = $('prq').value.trim().toLowerCase(), st = $('prst').value, src = $('prsrc').value;
   const hit = j.rehearsals.filter(r => (!q || (r.id + ' ' + r.date).toLowerCase().indexOf(q) !== -1) &&
-    (!src || (r.sources && r.sources.length ? r.sources.map(prSrc).indexOf(src) !== -1 : prSrc(r.source) === src)) && (!st || (st === 'done' ? r.processed : st === 'wait' ? (!r.processed && r.blocked) : (!r.processed && !r.blocked))));
+    (!src || (r.sources && r.sources.length ? r.sources.map(prSrc).indexOf(src) !== -1 : prSrc(r.source) === src)) && (!st || (st === 'up' ? r.upcoming : st === 'done' ? r.processed : st === 'wait' ? (!r.processed && r.blocked) : (!r.upcoming && !r.processed && !r.blocked))));
   $('prfind').classList.remove('hide');
-  { const all = j.rehearsals, cn = {'': all.length, todo: all.filter(r => !r.processed && !r.blocked).length, wait: all.filter(r => !r.processed && r.blocked).length, done: all.filter(r => r.processed).length};
-    $('prchips').innerHTML = [['', 'All days'], ['todo', 'To process'], ['wait', 'Not ready'], ['done', 'Processed']].map(c => '<button type="button" class="fpchip' + (st === c[0] ? ' on' : '') + '" data-prchip="' + c[0] + '">' + c[1] + '<b>' + cn[c[0]] + '</b></button>').join(''); }
+  { const all = j.rehearsals, cn = {'': all.length, todo: all.filter(r => !r.upcoming && !r.processed && !r.blocked).length, up: all.filter(r => r.upcoming).length, wait: all.filter(r => !r.processed && r.blocked).length, done: all.filter(r => r.processed).length};
+    $('prchips').innerHTML = [['', 'All days'], ['up', 'Upcoming'], ['todo', 'To process'], ['wait', 'Not ready'], ['done', 'Processed']].filter(c => c[0] !== 'up' || cn.up).map(c => '<button type="button" class="fpchip' + (st === c[0] ? ' on' : '') + '" data-prchip="' + c[0] + '">' + c[1] + '<b>' + cn[c[0]] + '</b></button>').join(''); }
   $('prfind').style.display = 'flex';
-  $('prcount').textContent = j.rehearsals.length ? 'Showing ' + Math.min(prShown, hit.length) + ' of ' + hit.length + (hit.length !== j.rehearsals.length ? ' (' + j.rehearsals.length + ' held in all)' : '') + ', newest first.' : '';
+  $('prcount').textContent = j.rehearsals.length ? 'Showing ' + Math.min(prShown, hit.length) + ' of ' + hit.length + (hit.length !== j.rehearsals.length ? ' (' + j.rehearsals.length + ' in all)' : '') + ', newest first.' : '';
   $('prmore').classList.toggle('hide', hit.length <= prShown);
   $('prlist').innerHTML = j.rehearsals.length ? '<div class="tgrid">' + hit.slice(0, prShown).map(r => {
+    if (r.upcoming) return tile({tone: 'ask', icon: '\u25F7', title: r.id + ' · ' + r.date, pill: 'Upcoming', pillCls: 'p-info', body: '<div><span class="pill p-info">Google Form</span></div><p class="sub" style="margin:8px 0 0">The form is attached (' + esc(r.sheet || '') + '). This rehearsal is still to come. It can be processed after 11 pm Lagos time on ' + esc(r.date) + '.</p>'});
     const st = r.processed ? ['ok', '✓', 'Processed', 'p-ok'] : r.blocked ? ['warn', '!', 'Not ready', 'p-pend'] : r.unchecked ? ['ask', '?', 'Not yet looked at', 'p-info'] : ['ask', '→', 'Ready', 'p-val'];
     const srcs = (r.sources && r.sources.length ? r.sources : [r.source]).map(x => '<span class="pill p-info">' + esc(prSrc(x)) + '</span>').join(' ');
     const body = '<div>' + srcs + '</div>' + (r.counts ? '<p class="sub" style="margin:8px 0 0">' + r.counts.present + ' present · ' + r.counts.excused + ' excused · ' + r.counts.absent + ' absent · ' + r.counts.late + ' late</p>' : '') +
@@ -1895,7 +1896,7 @@ document.addEventListener('click', async ev => {
     if (j && j.signedOut) { signedOutNow(); return; }
     if (!j || !j.ok) { $('prfcres').innerHTML = '<p class="sub">' + esc((j && j.error) || 'Could not check.') + '</p>'; b.disabled = false; return; }
     const tiles = j.days.slice().reverse().slice(0, 30).map(x => mkTile({tone: x.level === 'problem' ? 'no' : x.level === 'waiting' ? 'ask' : 'ok', icon: x.level === 'problem' ? '✕' : x.level === 'waiting' ? 'i' : '✓', title: x.id + ' · ' + (x.date || 'no date'),
-      pill: x.level === 'problem' ? 'Fix this' : x.level === 'waiting' ? 'Still to come' : 'Ready', pillCls: x.level === 'problem' ? 'p-no' : x.level === 'waiting' ? 'p-val' : 'p-ok',
+      pill: x.level === 'problem' ? 'Fix this' : x.level === 'waiting' ? 'Upcoming' : 'Ready', pillCls: x.level === 'problem' ? 'p-no' : x.level === 'waiting' ? 'p-val' : 'p-ok',
       body: '<div class="s" style="font-size:13px">Tab: ' + esc(x.sheet) + '</div>' + x.problems.map(p => '<div style="margin-top:6px;color:#AE2D37">' + esc(p) + '</div>').join('') + x.notes.map(p => '<div class="s" style="font-size:13px;margin-top:6px">' + esc(p) + '</div>').join('')}));
     const orph = (j.orphans || []).map(n => mkTile({tone: 'warn', icon: '!', title: n, pill: 'Not used', pillCls: 'p-pend', body: 'No row in the REHEARSALS tab uses this tab yet. Add a row (Rehearsal ID, Date, Status and this tab name under Attendance Sheet) so the day appears on Process.'}));
     const all = orph.concat(tiles);
@@ -1911,7 +1912,7 @@ async function loadProcess() {
     if (!j.ok) return say('m15', j.error || 'Not available.', 'bad');
     prState = j; say('m15', j.saving ? '' : 'Saving is switched off, so nothing can be processed now.', j.saving ? '' : 'bad');
     $('prnote').textContent = j.note || '';
-    prShown = 10; $('prq').value = ''; $('prst').value = j.rehearsals.some(r => !r.processed && !r.blocked) ? 'todo' : ''; $('prsrc').value = '';
+    prShown = 10; $('prq').value = ''; $('prst').value = j.rehearsals.some(r => !r.upcoming && !r.processed && !r.blocked) ? 'todo' : ''; $('prsrc').value = '';
     $('prids').innerHTML = j.rehearsals.slice(0, 500).map(r => '<option value="' + esc(r.id) + '">' + esc(r.date) + '</option>').join('');
     prDraw(); loadUndo('prundo', 'process'); loadFormCheckCard();
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
