@@ -288,6 +288,14 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
   nav.nav{left:10px!important;right:10px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;border:1px solid var(--kline)!important;border-radius:20px!important;padding:7px!important;box-shadow:0 10px 30px rgb(20 35 61 / .16)!important}
   nav.nav>*{border:1px solid var(--kline);border-radius:14px}
 }
+/* Lists of more than 10 scroll inside their card, as in Kinnor (owner, 12 Nov 2026). The scroll bar shows only while you scroll; a soft fade says there is more. */
+.incard{overflow-y:auto!important;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:transparent transparent}
+.incard.scrolling{scrollbar-color:rgb(120 120 135 / .5) transparent}
+.incard::-webkit-scrollbar{width:6px;height:6px;background:transparent}
+.incard::-webkit-scrollbar-thumb{background:transparent;border-radius:6px}
+.incard.scrolling::-webkit-scrollbar-thumb{background:rgb(120 120 135 / .5)}
+.incard.more{-webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent);mask-image:linear-gradient(#000 calc(100% - 28px),transparent)}
+.incard thead th{position:sticky;top:0;z-index:1;background:var(--card,#fff)}
 /* KINNOR-LOOK END */
 </style>
 <style id="rbcdark">
@@ -388,6 +396,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 :root[data-theme="dark"] .hhero .hr{background:var(--card,#1B202A)!important}
 :root[data-theme="dark"] .ain, :root[data-theme="dark"] #hgrid.stats>.stat, :root[data-theme="dark"] .stats .stat, :root[data-theme="dark"] .kpi, :root[data-theme="dark"] .ugt, :root[data-theme="dark"] #htasks .card, :root[data-theme="dark"] .card:has(#fpc_tasks){background:var(--card,#1B202A)!important}
 :root[data-theme="dark"] .tl, :root[data-theme="dark"] .tl.am{background:var(--card,#1B202A)!important}
+:root[data-theme="dark"] .incard thead th{background:var(--card,#1B202A)}
 :root[data-theme="dark"] [style*="background:#F7F9FC"]{background:#1C2532 !important}
 :root[data-theme="dark"] [style*="background:#EEF1F6"]{background:#1E232C !important}
 :root[data-theme="dark"] [style*="color:#4A5568"]{color:#BABCC1 !important}
@@ -1084,4 +1093,4 @@ if (token) { const first = (n) => call({action: 'me.home', token}).then(j => { i
   paint(m);
   tg.addEventListener('click', function () { var n = !sb.classList.contains('min'); paint(n); try { localStorage.setItem('rbcMSb', n ? '1' : '0'); } catch (e) {} });
 })();
-</script></body></html>
+</script><script id="kinnorlists">(function(){var MAX=10,KIDS=/^(DIV|LI|TR|A|BUTTON|LABEL|DETAILS|ARTICLE)$/,t=0;function scrolls(e){var c=getComputedStyle(e);return/(auto|scroll)/.test(c.overflowY)&&c.maxHeight!=="none"&&!e.classList.contains("incard")}function listy(e){var k=e.children;if(k.length<=MAX||!KIDS.test(k[0].tagName))return false;var n=0;for(var i=0;i<k.length;i++)if(k[i].tagName===k[0].tagName&&k[i].className===k[0].className)n++;if(n/k.length<.8)return false;var c=getComputedStyle(e);return e.tagName==="TBODY"||(c.display.indexOf("grid")<0&&!(c.display.indexOf("flex")>=0&&c.flexDirection.indexOf("row")===0))}function boxOf(e){if(e.tagName!=="TBODY")return e;var tb=e.closest("table"),p=tb.parentElement;if(p.children.length===1&&!p.classList.contains("card"))return p;var w=document.createElement("div");p.insertBefore(w,tb);w.appendChild(tb);return w}function fade(b){b.classList.toggle("more",b.scrollTop+b.clientHeight<b.scrollHeight-4)}function off(b){b.classList.remove("incard","more");b.style.maxHeight="";delete b.dataset.icn}function scan(){t=0;document.querySelectorAll(".incard").forEach(function(b){if(!document.contains(b))return;var k=(b.querySelector(":scope>table>tbody")||b).children.length;if(k<=MAX)off(b)});document.querySelectorAll(".card").forEach(function(card){card.querySelectorAll("tbody,div,ul,ol").forEach(function(e){if(!listy(e)||e.closest("[class*=rc-],select"))return;var b=boxOf(e);for(var a=b.parentElement;a&&a!==card.parentElement;a=a.parentElement)if(scrolls(a))return;if(scrolls(b))return;var k=e.children.length;if(b.dataset.icn==String(k))return;var top=b.getBoundingClientRect().top,tenth=e.children[MAX-1].getBoundingClientRect();if(!tenth.height)return;b.style.maxHeight=Math.ceil(tenth.bottom-top+b.scrollTop+4)+"px";b.classList.add("incard");b.dataset.icn=k;if(!b.__kl){b.__kl=1;b.addEventListener("scroll",function(){b.classList.add("scrolling");clearTimeout(b.__ks);b.__ks=setTimeout(function(){b.classList.remove("scrolling")},900);fade(b)},{passive:true})}fade(b)})})}function soon(){if(!t)t=setTimeout(scan,150)}new MutationObserver(function(m){for(var i=0;i<m.length;i++){var x=m[i].target;if(m[i].type!=="attributes"||!(x.classList&&x.classList.contains("incard"))){soon();return}}}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});addEventListener("resize",function(){document.querySelectorAll(".incard").forEach(function(b){delete b.dataset.icn});soon()});soon()})();</script></body></html>
