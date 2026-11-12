@@ -776,7 +776,9 @@ function drawHome() {
   ['ci', 'req', 'consent', 'regoogle'].forEach(i => $(i).classList.add('hide'));
   $('state').innerHTML = '';
   let status = 'Not open yet';
-  if (!rh) { $('rh').textContent = 'No rehearsal is set up yet'; $('rhs').textContent = ''; status = '-'; }
+  const fdLong = x => { const d = new Date(String(x) + 'T12:00:00'); return isNaN(d) ? String(x || '') : d.toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'long'}); };
+  if (!rh && h.formDay) { $('rh').textContent = fdLong(h.formDay.date); $('rhs').textContent = h.formDay.id + ' · attendance is taken on the Google Form'; status = 'Google Form'; }
+  else if (!rh) { $('rh').textContent = 'No rehearsal is set up yet'; $('rhs').textContent = ''; status = '-'; }
   else {
     $('rh').textContent = dlong(rh.startMs); $('rhs').textContent = tm(rh.startMs) + (rh.venue ? ' · ' + rh.venue : ''); $('rhdir').innerHTML = dirLink(rh.venue);
     let m = h.mine;
@@ -803,7 +805,7 @@ function drawHome() {
   const mine = a ? a.mine : [], recent = mine.slice(0, 3);
   $('mini').innerHTML = recent.length ? recent.map(r => '<div class="rq"><div><b>' + esc(dshort(r.rehearsalStartMs)) + ' rehearsal</b><div class="s">' + esc(subOf(r)) + '</div></div>' + pill(r.status, r) + '</div>').join('') : '<div class="s">You have no requests yet.</div>';
   const pend = mine.filter(r => r.status === 'Pending').length;
-  window.__tiles = {when: rh ? dshort(rh.startMs) : '-', time: rh ? tm(rh.startMs) + (rh.venue ? ' · ' + rh.venue : '') : '', status: status, pend: pend};
+  window.__tiles = {when: rh ? dshort(rh.startMs) : (h.formDay ? fdLong(h.formDay.date) : '-'), time: rh ? tm(rh.startMs) + (rh.venue ? ' · ' + rh.venue : '') : (h.formDay ? h.formDay.id + ' · Google Form' : ''), status: status, pend: pend};
   drawTiles();
 }
 function drawTiles() {

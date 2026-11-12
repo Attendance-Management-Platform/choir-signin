@@ -3278,6 +3278,7 @@ function drawHero(j, t, has) {
   const line = mine ? 'You have <b>' + mine + '</b> thing' + (mine === 1 ? '' : 's') + ' waiting for you today.' : 'Nothing is waiting for you today. Well done.';
   const r = t.rehearsal;
   const rh = r ? '<' + (has('rehearsal') ? 'a href="#" data-go="' + TABDEF.rehearsal[0] + '"' : 'div') + ' class="hr"><div class="k">Next rehearsal</div><div class="v">' + esc(r.id) + '</div><div class="s">' + esc(tm(r.startMs)) + '</div><div class="s">' + esc(r.venue || 'No venue yet') + '</div><span class="pill">Check-in ' + (r.checkInOpen ? 'open' : 'closed') + '</span></' + (has('rehearsal') ? 'a' : 'div') + '>'
+    : t.formDay ? '<' + (has('process') ? 'a href="#" data-go="' + TABDEF.process[0] + '"' : 'div') + ' class="hr"><div class="k">Next rehearsal</div><div class="v">' + esc(t.formDay.id) + '</div><div class="s">' + esc(new Date(t.formDay.date + 'T12:00:00').toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'long'})) + '</div><div class="s">Attendance on the Google Form</div><span class="pill p-info">Upcoming</span></' + (has('process') ? 'a' : 'div') + '>'
     : '<div class="hr"><div class="k">Next rehearsal</div><div class="v">None set up</div></div>';
   $('hhero').innerHTML = '<div class="hhero rise"><div class="hw"><div class="hg">' + gr + '</div><div class="hn">' + esc(first) + '</div><div>' + badges + '</div><p class="hs">' + line + '</p></div>' + rh + '</div>';
   document.querySelectorAll('#hhero [data-go]').forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.go); });
