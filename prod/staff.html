@@ -3669,7 +3669,7 @@ document.addEventListener('click', async ev => {
   await loadRoll();
   say('m5', j && j.ok ? (j.summary || 'Saved.') : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
 });
-function say(id, text, cls) { $(id).textContent = text; $(id).className = 's ' + (cls || ''); }
+function say(id, text, cls) { const e = $(id); e.textContent = text; e.className = 's ' + (cls || ''); if (!text) return; const r = e.getBoundingClientRect(); if (r.height && (r.top < 0 || r.bottom > innerHeight)) e.scrollIntoView({behavior: 'smooth', block: 'center'}); }
 let cd = null;
 function cool(ms) {
   clearInterval(cd);
