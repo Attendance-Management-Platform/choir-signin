@@ -779,10 +779,22 @@ async function loadHome() {
     home = h; abs = a.ok ? a : null; setWho(h); drawHome(); loadAttLine(); drawNotices(h.notices || []);
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 }
+// "Needs your attention": changes someone else made for you. Press Got it once you have seen one (remembered on this device).
+let NOTES = [];
+const noteKey = n => [n.kind, n.rehearsalId, n.atMs].join('|');
+const noteSeen = () => { try { return JSON.parse(localStorage.getItem('rbcNoteSeen') || '[]') || []; } catch (e) { return []; } };
 const drawNotices = ns => {
-  $('anotes').innerHTML = ns.slice(0, 3).map(n => '<div class="' + (n.kind === 'cancelled' ? 'note' : 'good') + '"><b>' + (n.kind === 'cancelled' ? 'An absence was cancelled' : 'An absence was entered for you') + '</b><br>' +
-    (n.kind === 'cancelled' ? 'The Global Admin cancelled the absence entered for ' : 'An admin entered an approved absence for ') + esc(n.rehearsalId || 'a rehearsal') + ' (' + esc(dtm(n.atMs)) + '). See My requests for the details.</div>').join('');
+  NOTES = ns || [];
+  const seen = noteSeen(), left = NOTES.filter(n => seen.indexOf(noteKey(n)) === -1).slice(0, 3);
+  $('anotes').innerHTML = left.length ? '<div class="card" style="padding:16px"><b style="display:block;margin-bottom:8px">Needs your attention</b>' + left.map(n => '<div class="' + (n.kind === 'cancelled' ? 'note' : 'good') + '" style="margin-top:8px"><b>' + (n.kind === 'cancelled' ? 'An absence was cancelled' : 'An absence was entered for you') + '</b><br>' +
+    (n.kind === 'cancelled' ? 'The Global Admin cancelled the absence entered for ' : 'An admin entered an approved absence for ') + esc(n.rehearsalId || 'a rehearsal') + ' (' + esc(dtm(n.atMs)) + '). See My requests for the details.' +
+    '<div style="margin-top:8px"><button class="btn btn-line" type="button" style="margin-top:0;min-height:40px;font-size:14px" data-noteseen="' + esc(noteKey(n)) + '">Got it</button></div></div>').join('') + '</div>' : '';
 };
+document.addEventListener('click', ev => {
+  const b = ev.target.closest && ev.target.closest('[data-noteseen]'); if (!b) return;
+  const l = noteSeen(); l.push(b.dataset.noteseen); try { localStorage.setItem('rbcNoteSeen', JSON.stringify(l.slice(-50))); } catch (e) {}
+  drawNotices(NOTES);
+});
 const subOf = r => r.status === 'Withdrawn' && /^Cancelled by/.test(r.note || '') ? 'Cancelled by the Global Admin' : r.enteredBy && r.status === 'Approved' ? 'Counted as excused · entered by the ' + r.enteredBy : r.status === 'Approved' ? 'Counted as excused' : r.status === 'Pending' ? 'Waiting for your Campus Music Director' : r.status === 'Rejected' ? (r.canAppeal ? 'Rejected · you can appeal' : 'Rejected') : r.status === 'Appeal' ? 'Appeal with the Global Music Director' : r.status === 'Withdrawn' ? 'You withdrew this request' : '';
 function drawHome() {
   const h = home, rh = h.rehearsal, a = abs;
