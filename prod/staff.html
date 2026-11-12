@@ -2023,7 +2023,7 @@ document.addEventListener('click', async ev => {
   }
   const of = ev.target.closest && ev.target.closest('[data-prof]');
   if (of) {
-    if (!confirm('Publish ' + of.dataset.prof + ' to the official attendance now? This is practice mode: an undo clears it.')) return;
+    if (!confirm('Publish ' + of.dataset.prof + ' to the official attendance now? A published day is final and cannot be changed.')) return;
     of.disabled = true;
     try { const j = await call({action: 'process.official', token, rehearsalId: of.dataset.prof}); if (j.signedOut) { signedOutNow(); return; }
       if (!j.ok) { of.disabled = false; return say('m15', j.error || 'Could not publish.', 'bad'); }
