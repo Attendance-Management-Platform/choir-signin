@@ -3019,6 +3019,7 @@ async function loadPatterns() {
   try {
     const j = await call(Object.assign({action: 'reports.patterns', token}, MBS.p === 'all' ? {all: true} : {weeks: Number(MBS.p)}));
     if (!j.ok) { box.innerHTML = ''; return; }
+    if (!Array.isArray(j.rehearsals)) { box.innerHTML = '<div class="card pad rise"><div class="ct">Members</div><p class="sub">This appears once the latest system update has been put live (production deploy and New version).</p></div>'; return; }
     MBJ = j; if (j.campusOnly) MBS.campus = j.campusOnly; drawPatterns();
   } catch (e) { box.innerHTML = ''; }
 }
