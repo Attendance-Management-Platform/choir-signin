@@ -3736,7 +3736,8 @@ function gfWhoHtml(h) {
   return '<div class="lb">Who gets which form</div>' + ['all', 'Soprano', 'Alto', 'Tenor'].map(k => '<div class="mrow"><span class="mtx"><b>' + GFLAB[k] + '</b><span>' +
     ((h[k] || []).length ? esc(h[k].join(', ')) : (k === 'all' ? 'Nobody yet: put "Admin" in RBC Role on the members tab' : 'Nobody on PART LEADERS: no ' + k + ' form; admins cover ' + k)) + '</span></span></div>').join('') +
     (h.notes && h.notes.length ? '<p class="s bad" style="margin:6px 0 0">' + h.notes.map(esc).join('<br>') + '</p>' : '') +
-    '<p class="sub" style="margin:6px 0 0">Each person gets an email with the link to their own form. They sign in to Google with their registered email, then pass the phone round.</p>';
+    '<p class="sub" style="margin:6px 0 0">Each person gets an email with the link to their own form. They sign in to Google with their registered email, then pass the phone round.</p>' +
+    '<div class="mrow"><span class="mtx"><b>Form look</b><span>' + (h.template ? 'Every form copies the <a href="' + esc(h.template) + '" target="_blank" rel="noopener">template form</a>. Style it once: palette icon → Header: upload CCW-Form-Header.png → Color: #AF0100 → lightest Background.' : 'The template form is made the first time you save a Google Form rehearsal. Its link then shows here, to style it once.') + '</span></span></div>';
 }
 /** The forms of a rehearsal, each with who it is for, Open and Copy link. */
 function gfFormsHtml(r, j, test) {
