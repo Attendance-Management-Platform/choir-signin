@@ -765,7 +765,8 @@ details.gfsec>summary:after{content:"";width:8px;height:8px;border-right:2px sol
 details.gfsec[open]>summary:after{transform:rotate(-135deg)}
 .gfsecb{padding:0 16px 14px}.gfsw{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.gfper{flex-wrap:wrap}
 .gfaddr{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0}.gfaddr .in{flex:1 1 160px;margin:0;width:auto}.gfaddr .btn{white-space:nowrap}
-.chips{display:flex!important;flex-direction:row!important;gap:8px;flex-wrap:wrap}
+.chips.hide{display:none!important}
+.chips:not(.hide){display:flex!important;flex-direction:row!important;gap:8px;flex-wrap:wrap}
 .chips>.chip{width:auto!important;flex:0 0 auto!important;max-width:100%}
 .chip{border:1px solid var(--line);background:var(--card,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;color:inherit;cursor:pointer;min-height:36px}
 .chip[aria-pressed="true"]{background:#FDECEC;color:#8E0008;border-color:#AF0100}
@@ -773,6 +774,92 @@ details.gfsec[open]>summary:after{transform:rotate(-135deg)}
 .gfadd{margin-top:12px}.gfmail{padding:10px 0;border-top:1px solid var(--line)}.gfmail:first-of-type{border-top:0}
 .safebar{position:sticky;top:0;z-index:40;background:#FFF4D6;color:#5C4300;border:1px solid #F0D58A;border-radius:12px;padding:10px 14px;margin:8px 0 12px;font-size:14px;line-height:1.4}
 :root[data-theme="dark"] .safebar{background:#3A3016;color:#FFE6A3;border-color:#6B5A26}
+/* Background glow (owner, 15 Nov 2026): on a layer pinned to the whole screen, so it fades out smoothly behind the bottom bar instead of stopping in a straight line. */
+body:not(.out){background:var(--page)!important}
+body:not(.out) .shell{background:transparent!important}
+body:not(.out)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(800px 380px at 100% 0,#FFE4E6 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#FFEEEF 0,transparent 65%),radial-gradient(520px 320px at 100% 100%,#FFE4E6 0,transparent 65%)}
+:root[data-theme="dark"] body:not(.out)::before{background:radial-gradient(800px 380px at 100% 0,#321819 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#34181A 0,transparent 65%),radial-gradient(520px 320px at 100% 100%,#321819 0,transparent 65%)}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) body:not(.out)::before{background:radial-gradient(800px 380px at 100% 0,#321819 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#34181A 0,transparent 65%),radial-gradient(520px 320px at 100% 100%,#321819 0,transparent 65%)}}
+/* ===== Kinnor shell (owner, 15 Nov 2026) ===== */
+/* top bar: logo, choir and role; initials and Sign out on the right */
+body:not(.out) #bar{display:flex!important;align-items:center;gap:12px;background:transparent!important;border:0!important;box-shadow:none!important;padding:10px 0!important;margin:0 0 8px!important;border-bottom:1px solid var(--line)!important;border-radius:0!important}
+.tbbrand{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto}
+.tbbrand img{width:36px;height:36px;object-fit:contain;background:#fff;border-radius:10px;padding:4px;border:1px solid var(--line);flex:none}
+.tbbrand>span{display:flex;flex-direction:column;min-width:0}.tbbrand b{font-size:15px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbbrand small{font-size:12.5px;color:var(--mut,#5F5E5A);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body:not(.out) #bar #who{flex:0 1 auto;min-width:0}
+body:not(.out) #bar #out{flex:none}
+@media (min-width:900px){body:not(.out) .tbbrand{display:none}}
+@media (max-width:899px){
+  body:not(.out) .shell>aside,body:not(.out) .shell>.side{display:none!important}
+  body:not(.out) #bar{position:sticky;top:0;z-index:30;margin:0 -16px 10px!important;padding:8px 16px!important;background:var(--page)!important}
+  body:not(.out) #bar #who .wtx{display:none!important}
+  body:not(.out) #bar #out{font-size:0!important;width:40px;height:40px;padding:0!important;justify-content:center;border-radius:50%!important}
+  body:not(.out) #bar #out svg{margin:0!important}
+}
+/* side menu: Kinnor's groups, open by default, 72px when hidden */
+.ngh{display:none;margin:0;padding:14px 12px 6px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut,#5F5E5A)}
+@media (min-width:900px){
+  body.rail-open:not(.out) #tabs .ngh{display:block}
+  body.rail-open:not(.out) #tabs .tab{justify-content:flex-start!important;min-height:42px}
+  body:not(.rail-open):not(.out) #tabs .ngh{display:block;height:1px;padding:0;margin:8px 10px;background:var(--line);font-size:0;overflow:hidden}
+}
+/* the hover label beside the collapsed menu */
+#navtip{position:fixed;z-index:200;left:0;top:0;transform:translate(-6px,-50%) scale(.96);opacity:0;pointer-events:none;background:#AF0100;color:#fff;font-size:13.5px;font-weight:600;letter-spacing:.01em;padding:7px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 8px 24px rgba(175,1,0,.28);transition:opacity .18s ease,transform .22s cubic-bezier(.2,.9,.3,1.2)}
+#navtip::before{content:"";position:absolute;left:-5px;top:50%;width:10px;height:10px;background:#AF0100;transform:translateY(-50%) rotate(45deg);border-radius:2px}
+#navtip.on{opacity:1;transform:translate(0,-50%) scale(1)}
+@media (prefers-reduced-motion:reduce){#navtip{transition:none}}
+/* phone: the floating bar swipes when there are more menus than fit */
+@media (max-width:899px){
+  body:not(.out) #tabs{overflow-x:auto!important;scrollbar-width:none;justify-content:flex-start!important}
+  body:not(.out) #tabs::-webkit-scrollbar{display:none}
+  body:not(.out) #tabs .tab{flex:1 0 52px!important;min-width:52px!important}
+  body:not(.out) #tabs .ngh{display:none!important}
+}
+/* Kinnor folding: folded cards sit side by side as compact tiles; open ones take the full width */
+.foldflow:not(.hide):not(.psecoff){display:flex!important;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.foldflow>*{flex:1 1 100%;min-width:0;margin-top:0!important;margin-bottom:0!important}
+.foldflow>.fold.shut{flex:1 1 min(100%,17rem)}
+/* nothing wider than the screen */
+html,body{max-width:100%;overflow-x:hidden}
+.pg,.card,.wrap{min-width:0;overflow-wrap:anywhere}
+/* Help as Kinnor, Members ⋯, Cut-off check (owner, 15 Nov 2026) */
+.hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;margin:0 0 14px;align-items:start}
+.hgrid>.card{margin:0!important}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);min-width:0}
+.ct+.hrow,.hrow:first-child{border-top:0}
+.hrow>span{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}.hrow small{font-size:12.5px;color:var(--mut,#5F5E5A)}
+.hrow .btn{flex:none}
+.hok>span::before{content:"✓ ";color:#1F7A4D;font-weight:700}
+.hok>span{display:block}
+.hfoot{display:flex;justify-content:center;gap:18px;margin:18px 0 6px;font-size:13.5px}.hfoot a{color:var(--mut,#5F5E5A);text-decoration:underline;text-underline-offset:3px}
+.mbmore{position:relative}.mbmore>summary{list-style:none;cursor:pointer;width:40px;height:40px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;font-size:20px;background:var(--card,#fff)}
+.mbmore>summary::-webkit-details-marker{display:none}
+.mbmore>div{position:absolute;right:0;top:46px;z-index:20;display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(20,35,61,.14);min-width:220px}
+.cutgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.cutsaved{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:var(--rose,#FDECEC);font-size:14px}
+.cutsaved summary{cursor:pointer;font-weight:600}
+.cutbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.cutck{flex:none}
+.cutruns{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;margin-top:10px}
+.cutrun{border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.cutrun small{color:var(--mut,#5F5E5A);font-size:12.5px}.cutcounts{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+#cutpick .chip{display:inline-flex;align-items:center;gap:6px}
+body.pilot [data-pilotoff],body.pilot [data-prremind]{display:none!important}
+@media (max-width:899px){body:not(.out) #tabs{-webkit-mask-image:linear-gradient(to right,#000 86%,transparent);mask-image:linear-gradient(to right,#000 86%,transparent)}}
+/* Change log (owner, 15 Nov 2026): what changed and what you can undo side by side on a computer */
+.chcols{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
+@media (min-width:1100px){.chcols{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)}}
+.chside>*>.card,.chmain>*>.card{margin-top:0}
+/* small phones: the Members ⋯ menu opens in place; small tiles stack */
+@media (max-width:599px){.mbmore>div{position:static;box-shadow:none;margin-top:6px;min-width:0}.mbmore{flex:1 1 100%}}
+@media (max-width:420px){.ainr{grid-template-columns:minmax(0,1fr)!important}}
+@media (min-width:600px) and (max-width:899px){.ainr{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+.chside .tgrid{grid-template-columns:minmax(0,1fr)!important}
+@media (max-width:420px){.tgrid{grid-template-columns:minmax(0,1fr)!important}}
+@media (max-width:420px){.ugtop{flex-wrap:wrap}.ugtop>b{flex:1 1 60%;min-width:0}}
+@media (max-width:899px){.anhero{grid-template-columns:minmax(0,1fr)!important}}
+body .fh>.ct:first-child,body .fh>.ct{flex:1 1 0!important;min-width:0!important;overflow-wrap:anywhere}.fh>.fch{flex:none}
 /* KINNOR-LOOK START: generated by tools/kinnor-look/kinnor.py; RBC red and logo kept */
 :root{--kb:#B6000A;--kbt:#FDECEC;--kbx:#8E0008;--kpage:#F6F5F2;--kline:#E2E0D9;--kmut:#5F5E5A}
 body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans',sans-serif!important;letter-spacing:0}
@@ -1129,6 +1216,19 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 :root[data-theme="dark"] .chip[aria-pressed="true"]{background:#331818;color:#FF666F}
 :root[data-theme="dark"] .safebar{background:#2F2816;color:#E1D8C1;border:1px solid #524A33}
 :root[data-theme="dark"] :root[data-theme="dark"] .safebar{background:#685931}
+:root[data-theme="dark"] body:not(.out)::before{background:radial-gradient(800px 380px at 100% 0,#321819 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#34181A 0,transparent 65%),radial-gradient(520px 320px at 100% 100%,#321819 0,transparent 65%)}
+:root[data-theme="dark"] :root[data-theme="dark"] body:not(.out)::before{background:radial-gradient(800px 380px at 100% 0,#623739 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#633639 0,transparent 65%),radial-gradient(520px 320px at 100% 100%,#623739 0,transparent 65%)}
+:root[data-theme="dark"] html:not([data-theme="light"]) body:not(.out)::before{background:radial-gradient(800px 380px at 100% 0,#623739 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#633639 0,transparent 65%),radial-gradient(520px 320px at 100% 100%,#623739 0,transparent 65%)}
+:root[data-theme="dark"] .tbbrand img{background:#1B202A}
+:root[data-theme="dark"] .tbbrand small{color:var(--mut,#BDBCBB)}
+:root[data-theme="dark"] .ngh{color:var(--mut,#BDBCBB)}
+:root[data-theme="dark"] .hrow small{color:var(--mut,#BDBCBB)}
+:root[data-theme="dark"] .hok>span::before{color:#85E0B3}
+:root[data-theme="dark"] .hfoot a{color:var(--mut,#BDBCBB)}
+:root[data-theme="dark"] .mbmore>summary{background:var(--card,#1B202A)}
+:root[data-theme="dark"] .mbmore>div{background:var(--card,#1B202A)}
+:root[data-theme="dark"] .cutsaved{background:var(--rose,#331818)}
+:root[data-theme="dark"] .cutrun small{color:var(--mut,#BDBCBB)}
 :root[data-theme="dark"] .anl, :root[data-theme="dark"] .ntc{background:var(--card,#1B202A)!important}
 :root[data-theme="dark"] button.hsec.fold{background:var(--card,#1B202A)!important}
 :root[data-theme="dark"] button.hsec.fold.shut{background:var(--card,#1B202A)!important}
@@ -1145,21 +1245,15 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 :root[data-theme="dark"] [style*="color:#5E6A7E"]{color:#B0B3B8 !important}
 :root[data-theme="dark"] [style*="background:#9A9A9A"]{background:#07090B !important}
 :root[data-theme="dark"] [style*="color:#1F8A4C"]{color:#82E3AB !important}
-:root[data-theme="dark"] [style*="color:#D98E04"]{color:#FCC869 !important}
 :root[data-theme="dark"] [style*="color:#C8102E"]{color:#F47187 !important}
+:root[data-theme="dark"] [style*="color:#D98E04"]{color:#FCC869 !important}
 :root[data-theme="dark"] [style*="background:#FFF4DF"]{background:#312817 !important}
 :root[data-theme="dark"] [style*="border-color:#F0E2C9"]{border-color:#4E4537 !important}
 :root[data-theme="dark"] [style*="color:#95621D"]{color:#E6BA7F !important}
 :root[data-theme="dark"] [style*="color:#3C4558"]{color:#C0C3C8 !important}
 :root[data-theme="dark"] .tile:has(> img), :root[data-theme="dark"] .rtb img, :root[data-theme="dark"] img[src*="logo"]{background:#fff}
 </style>
-<script id="rbcthemeboot">/* Light or dark: the person's choice in Settings, or the phone's own setting (Kinnor idea, 29 Oct 2026). */(function(){function apply(){var t='auto';try{t=localStorage.getItem('rbcTheme')||'auto';}catch(e){}var d=t==='dark'||(t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light');}window.rbcThemeApply=apply;apply();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',apply);}catch(e){}})();</script><style id="kinnordark">:root[data-theme="dark"]{--kb:#E0323C;--kbt:#3A1A1D;--kbx:#FF9AA0;--kpage:#141318;--kline:#34323C;--kmut:#A9A6B3}:root[data-theme="dark"] body:not(.out){background:var(--kpage)}/* Background glow (owner, 15 Nov 2026): on a layer pinned to the whole screen, so it fades out smoothly behind the bottom bar instead of stopping in a straight line. */
-body:not(.out){background:var(--page)!important}
-body:not(.out) .shell{background:transparent!important}
-body:not(.out)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(800px 380px at 100% 0,#FFE4E6 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#FFEEEF 0,transparent 65%),radial-gradient(520px 320px at 100% 100%,#FFE4E6 0,transparent 65%)}
-:root[data-theme="dark"] body:not(.out)::before{background:radial-gradient(800px 380px at 100% 0,#321819 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#34181A 0,transparent 65%),radial-gradient(520px 320px at 100% 100%,#321819 0,transparent 65%)}
-@media (prefers-color-scheme:dark){html:not([data-theme="light"]) body:not(.out)::before{background:radial-gradient(800px 380px at 100% 0,#321819 0,transparent 65%),radial-gradient(640px 320px at 0 100%,#34181A 0,transparent 65%),radial-gradient(520px 320px at 100% 100%,#321819 0,transparent 65%)}}
-</style></head><body class="out">
+<script id="rbcthemeboot">/* Light or dark: the person's choice in Settings, or the phone's own setting (Kinnor idea, 29 Oct 2026). */(function(){function apply(){var t='auto';try{t=localStorage.getItem('rbcTheme')||'auto';}catch(e){}var d=t==='dark'||(t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light');}window.rbcThemeApply=apply;apply();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',apply);}catch(e){}})();</script><style id="kinnordark">:root[data-theme="dark"]{--kb:#E0323C;--kbt:#3A1A1D;--kbx:#FF9AA0;--kpage:#141318;--kline:#34323C;--kmut:#A9A6B3}:root[data-theme="dark"] body:not(.out){background:var(--kpage)}</style></head><body class="out">
 <div class="shell"><aside class="side"><div class="brand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div><h1>CCW Choir Portal</h1><p class="tag">Sign in once. You see the tabs for your role.</p><div class="hero"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. You see the tabs for your role. Nobody needs to open the sheet.</div></div></aside>
 <main class="wrap"><div id="safebar" class="safebar hide" role="status"></div>
 <p id="notconn" class="hide" style="background:#fdecea;color:#8a1c14;padding:10px;border-radius:8px">This page is not connected to the production system yet.</p>
@@ -1188,6 +1282,15 @@ body:not(.out)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-even
 <button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
 <div id="s11" class="pg hide">
+<div id="rpcut"></div>
+<div id="rpreg"><div class="card pad rise"><div class="ct">Official attendance register</div><p class="sub" style="margin:4px 0 0">Everyone expected at the rehearsal: present, excused or absent. Tap a name for their history.</p>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
+<div style="flex:2 1 220px"><label for="rcrid" class="lb" style="margin-top:0">Rehearsal</label><select id="rcrid" class="in"></select></div>
+</div>
+<div id="rcout"></div></div>
+<div id="rcmem"></div>
+<div hidden><input id="rcq"><select id="rcmc"></select><select id="rcmp"></select><button id="rcx" type="button"></button><div id="rcmatch"></div></div>
+<p id="m13" class="s"></p></div>
 <div id="hcharts"></div>
 <div id="rpoutlook"></div>
 <div class="card pad rise" id="anbuild"><div class="ct">Build a report</div>
@@ -1233,10 +1336,9 @@ body:not(.out)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-even
 </div>
 
 <div id="s16" class="pg hide">
-<div id="chundo"></div>
-<div id="chpet"></div>
-<div id="chrange"></div>
-<div id="chbox"></div>
+<div class="chcols"><div class="chmain"><div id="chrange"></div>
+<div id="chbox"></div></div><div class="chside"><div id="chundo"></div>
+<div id="chpet"></div></div></div>
 <p id="m16" class="s"></p>
 </div>
 
@@ -1264,16 +1366,7 @@ body:not(.out)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-even
 <p id="m14" class="s"></p>
 </div>
 
-<div id="s13" class="pg hide">
-<div class="card pad rise"><div class="ct">Who checked in</div>
-<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-top:8px">
-<div style="flex:2 1 220px"><label for="rcrid" class="lb" style="margin-top:0">Rehearsal</label><select id="rcrid" class="in"></select></div>
-</div>
-<div id="rcout"></div></div>
-<div id="rcmem"></div>
-<div hidden><input id="rcq"><select id="rcmc"></select><select id="rcmp"></select><button id="rcx" type="button"></button><div id="rcmatch"></div></div>
-<p id="m13" class="s"></p>
-</div>
+<div id="s13" class="pg hide"></div>
 
 <div id="s12" class="pg hide">
 <div class="card pad rise hide npc"><div class="ct">Members without a part</div>
@@ -1282,14 +1375,14 @@ body:not(.out)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-even
 <div id="paw"></div>
 <div id="phand"></div>
 <div id="prun"></div>
-<div id="pwait"></div>
-<div id="pready"></div>
-<div class="card pad rise" id="pask"><div class="ct">Ask for a change</div>
+<div id="pwait" data-pilotoff></div>
+<div id="pready" data-pilotoff></div>
+<div class="card pad rise" id="pask" data-pilotoff><div class="ct">Ask for a change</div>
 <label for="pkind" class="lb">What is it about?</label><select id="pkind" class="in"></select>
 <div id="pform"></div>
 <div style="margin-top:14px"><button id="psend" class="btn red" type="button">Send request</button></div>
 <p id="m12b" class="s"></p></div>
-<div id="pmine"></div>
+<div id="pmine" data-pilotoff></div>
 <p id="m12" class="s"></p>
 </div>
 
@@ -1321,7 +1414,7 @@ body:not(.out)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-even
 </div><div class="hcb">
 <div id="hgrid" class="stats rise"></div>
 <button type="button" class="hsec fold" data-hfold="notes" id="hfn" hidden>Updates</button><div id="hnotes"></div>
-<button type="button" class="hsec fold" data-hfold="qr" id="hfq" hidden>Campus Music Director away?</button><div id="hqr"></div>
+<button type="button" class="hsec fold" data-hfold="qr" id="hfq" data-pilotoff hidden>Campus Music Director away?</button><div id="hqr"></div>
 </div></div>
 <p id="m10" class="s"></p>
 </div>
@@ -1335,7 +1428,7 @@ body:not(.out)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-even
 </div>
 
 <div id="s4" class="pg hide">
-<div id="roombox"></div>
+<div id="roombox" data-pilotoff></div>
 <div id="ckpick" class="card pad hide"><label class="s" style="margin-top:0">Rehearsal</label><select id="ckrid"></select></div>
 <span id="vsum" class="hide"></span>
 <div id="vstats" class="stats rise"></div>
@@ -1445,7 +1538,7 @@ body:not(.out)::before{content:"";position:fixed;inset:0;z-index:-1;pointer-even
 <p id="m7" class="s" style="padding:12px 20px;margin:0"></p></div>
 </div>
 
-<div id="s9" class="pg hide"><div class="card pad" style="margin-bottom:14px"><div class="ct">About and privacy</div><p class="sub" style="margin:4px 0 10px">What this system is, who runs it, and how members' details are used and kept.</p><div class="actions" style="margin:0"><a class="btn line" href="../about.html" target="_blank" rel="noopener">About</a><a class="btn line" href="../privacy.html" target="_blank" rel="noopener">Privacy notice</a></div></div><div id="helpbody"></div></div>
+<div id="s9" class="pg hide"><div id="helpbody"></div></div>
 
 <div id="tabs" class="card hide" style="display:none;gap:6px;flex-wrap:wrap"></div>
 <footer class="rbcfoot"><a href="../about.html" target="_blank" rel="noopener">About</a> · <a href="../privacy.html" target="_blank" rel="noopener">Privacy notice</a></footer></main></div>
@@ -1512,7 +1605,7 @@ const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 let myBypass = {};
 var myStaffOnly = false;
-function setMe(j) { safeBar(j.safeTest); if ((j.tabs || []).indexOf('home') === -1 && j.staffOnly !== true && /member\.html$|staff\.html$|\/$/.test(location.pathname)) { location.replace('member.html'); return; } /* one sign-in: a member with no staff role goes to the member page */ myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
+function setMe(j) { safeBar(j.safeTest); document.body.classList.toggle('pilot', j.pilot === true); if ((j.tabs || []).indexOf('home') === -1 && j.staffOnly !== true && /member\.html$|staff\.html$|\/$/.test(location.pathname)) { location.replace('member.html'); return; } /* one sign-in: a member with no staff role goes to the member page */ myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
 const ICON = {
   reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
   process: '<path d="M9 11l3 3 8-8"/><path d="M4 6h9M4 12h3M4 18h9"/>',
@@ -1568,12 +1661,14 @@ try { NAVSHUT = JSON.parse(localStorage.getItem('rbcNavShut') || '{}') || {}; } 
    waiting; a page opened from a card has "Back to …". A menu with one page for your role opens that page straight away. Settings and Help are
    under your name ("You"). On a phone the five menus sit in a floating glass bar; on a computer they are the side menu. */
 const MAINS = [
-  {k: 'home', name: 'Home', tabs: ['home'], icon: 'home'},
-  {k: 'day', name: 'On the day', d: 'Before and during a rehearsal: set it up, show the QR code, see check-ins and mark by hand.', tabs: ['rehearsal', 'calendar', 'qr', 'checkins', 'hand'], icon: 'qr'},
-  {k: 'att', name: 'Attendance', d: 'After a rehearsal: decide requests, process, publish and look back.', tabs: ['requests', 'process', 'reports', 'records'], icon: 'process'},
-  {k: 'people', name: 'People', d: 'Members, who has access to what, and every change made.', tabs: ['members', 'people', 'changes'], icon: 'people'},
-  {k: 'mine', name: 'My choir', d: 'Your own rehearsals, attendance and absences.', tabs: ['mine', 'absence'], icon: 'mine'},
-  {k: 'you', name: 'You', d: 'Your settings, and help with the system.', tabs: ['settings', 'help'], icon: 'settings', bar: false}];
+  {k: 'home', name: 'Home', tabs: ['home'], icon: 'home', grp: 'Your choir'},
+  {k: 'mine', name: 'My choir', d: 'Your own rehearsals, attendance and absences.', tabs: ['mine', 'absence'], icon: 'mine', grp: 'Your choir'},
+  {k: 'plan', name: 'Plan', d: 'Set up rehearsals, the Google Forms and the calendar.', tabs: ['rehearsal', 'calendar'], icon: 'calendar', grp: 'Leading'},
+  {k: 'run', name: 'Run', d: 'On the day: show the QR code, see check-ins and mark by hand.', tabs: ['qr', 'checkins', 'hand'], icon: 'qr', grp: 'Leading'},
+  {k: 'att', name: 'Attendance', d: 'After a rehearsal: decide requests, then process and publish.', tabs: ['requests', 'process'], icon: 'process', grp: 'Leading'},
+  {k: 'people', name: 'People', d: 'Members, who has access to what, and every change made.', tabs: ['members', 'people', 'changes'], icon: 'people', grp: 'Leading'},
+  {k: 'reports', name: 'Reports', d: 'The latest rehearsal, the official register, what to expect next, every member and your own reports.', tabs: ['reports'], icon: 'reports', grp: 'Leading'},
+  {k: 'you', name: 'You', d: 'Your settings, and help with the system.', tabs: ['settings', 'help'], icon: 'settings', grp: 'Account', bar: false}];
 let HUB = '', TASKS = [];
 const mainOf = tab => MAINS.filter(m => m.tabs.indexOf(tab) !== -1)[0] || null;
 const mainTabs = m => m.tabs.filter(k => myTabs.indexOf(k) !== -1);
@@ -1594,8 +1689,8 @@ function drawHub() {
 }
 /** Pages with several big cards open to cards too (Reports, Settings). Each section opens on its own with "Back to <page>". */
 const PSEC = {
-  s11: [['hcharts', 'Latest rehearsal', 'The last published rehearsal: who came, by campus and by part.', 'reports'], ['rpoutlook', 'Next rehearsal outlook', 'What to expect next time, worked out from the last rehearsals.', 'calendar'],
-    ['rppat', 'Members', 'Every member by campus, then part, then person, with their figures.', 'members'], ['anbuild', 'Build a report', 'Choose what to show, how to break it down and for which period. Download as CSV.', 'records']],
+  s11: [['hcharts', 'Latest rehearsal', 'The last published rehearsal: who came, by campus and by part.', 'reports'], ['rpreg', 'Official attendance register', 'Each rehearsal: who was present, excused or absent, and each person\'s history.', 'records'], ['rpoutlook', 'Next rehearsal outlook', 'What to expect next time, worked out from the last rehearsals.', 'calendar'],
+    ['rppat', 'Members', 'Every member by campus, then part, then person, with their figures.', 'members'], ['anbuild', 'Build a report', 'Choose what to show, how to break it down and for which period. Download as CSV.', 'records'], ['rpcut', 'Cut-off check', 'Who meets the minimum attendance. Save presets, compare them, and save the result to MEMBER SUMMARY.', 'process']],
   s8: [['rhsmake', 'Make a rehearsal', 'Date, times, venue and how members sign in.', 'rehearsal'], ['rhsplan', 'Planned rehearsals', 'Check-in, finish time and the rehearsals coming up.', 'calendar'],
     ['rhstest', 'Test run', 'Try signing in without counting anything.', 'checkins'], ['rhsgf', 'Google Form settings', 'Who can use the forms, the names on them, the emails and the look.', 'settings']],
   s18: [['smine', 'My settings', 'How the system looks and works for you.', 'settings'], ['ssafe', 'Safe test', 'Try new things on the live system: real records stay as they are and emails are held.', 'process'], ['saccess', 'My access', 'Your roles and what they let you do.', 'people'], ['semail', 'Emails', 'Emails the system sends, and replies.', 'requests'], ['ssys', 'System', 'Checks for the System Administrator.', 'changes']],
@@ -1606,7 +1701,7 @@ let PSECON = {}, PSECN = {};
 function psecDraw(id) {
   const list = PSEC[id], pg = $(id); if (!list || !pg) return;
   let grid = pg.querySelector(':scope > .psecg'); if (!grid) { grid = document.createElement('div'); grid.className = 'psecg'; pg.insertBefore(grid, pg.firstChild); }
-  const on = PSECON[id] || '', have = list.filter(x => { const e = $(x[0]); return e && e.innerHTML.trim() && !e.classList.contains('hide'); });
+  const on = PSECON[id] || '', have = list.filter(x => { const e = $(x[0]); return e && e.innerHTML.trim() && !e.classList.contains('hide') && !(document.body.classList.contains('pilot') && e.hasAttribute('data-pilotoff')); });
   list.forEach(x => { const e = $(x[0]); if (e) e.classList.toggle('psecoff', !!(on ? x[0] !== on : true)); });
   const pb = $('ph') && $('ph').querySelector('.hubback'); if (pb) pb.style.display = on ? 'none' : '';
   if (on) { const e = $(on); if (e) [e].concat([].slice.call(e.querySelectorAll('.fold'))).forEach(c => { if (c.classList.contains('fold') && c.classList.contains('shut')) { c.classList.remove('shut'); if (c.firstElementChild) c.firstElementChild.setAttribute('aria-expanded', 'true'); } });
@@ -1620,7 +1715,7 @@ document.addEventListener('click', ev => {
   if (t.dataset.hubgo) { go(TABDEF[t.dataset.hubgo][0]); window.scrollTo(0, 0); return; }
   if (t.dataset.main) { openMain(t.dataset.main); window.scrollTo(0, 0); return; }
   if (t.dataset.hubback) { openMain(t.dataset.hubback); window.scrollTo(0, 0); return; }
-  if (t.dataset.psec) { const p = t.dataset.psec.split('|'); PSECON[p[0]] = p[1]; if (t.dataset.mbword && typeof MBS !== 'undefined' && MBJ) { MBS.f = 'word'; MBS.campus = MBJ.campusOnly || ''; MBS.part = ''; MBS.who = ''; drawPatterns(); } psecDraw(p[0]); window.scrollTo(0, 0); return; }
+  if (t.dataset.psec) { const p = t.dataset.psec.split('|'); PSECON[p[0]] = p[1]; if (p[1] === 'rpreg' && typeof loadRecords === 'function') loadRecords(); if (p[1] === 'rpcut') cutLoad(); if (t.dataset.mbword && typeof MBS !== 'undefined' && MBJ) { MBS.f = 'word'; MBS.campus = MBJ.campusOnly || ''; MBS.part = ''; MBS.who = ''; drawPatterns(); } psecDraw(p[0]); window.scrollTo(0, 0); return; }
   if (t.dataset.psecback) { PSECON[t.dataset.psecback] = ''; psecDraw(t.dataset.psecback); window.scrollTo(0, 0); }
 });
 /** Light touch on the menu: which main menu is on, and a red dot where something is waiting. */
@@ -1636,10 +1731,13 @@ function navOpenFor(viewId) {
   if (g && NAVSHUT[g.k]) { NAVSHUT[g.k] = false; try { localStorage.setItem('rbcNavShut', JSON.stringify(NAVSHUT)); } catch (e) {} const el = document.querySelector('.ng[data-g="' + g.k + '"]'); if (el) { el.classList.remove('shut'); const h = el.querySelector('.gh'); if (h) h.setAttribute('aria-expanded', 'true'); } }
 }
 function navHtml() {
-  const btn = m => '<button class="tab tabm" type="button" data-main="' + m.k + '" title="' + esc(m.name) + '" aria-label="' + esc(m.name) + '" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true">' + (ICON[m.icon] || '') + '</svg><span>' + esc(m.name) + '</span></button>';
+  const btn = m => '<button class="tab tabm" type="button" data-main="' + m.k + '" data-name="' + esc(m.name) + '" aria-label="' + esc(m.name) + '" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true">' + (ICON[m.icon] || '') + '</svg><span>' + esc(m.name) + '</span></button>';
   const you = MAINS.filter(m => m.k === 'you')[0];
-  return MAINS.filter(m => m.bar !== false && mainTabs(m).length).map(btn).join('') +
-    mainTabs(you).map(k => '<button class="tab tabyou" type="button" data-v="' + TABDEF[k][0] + '" title="' + TABDEF[k][1] + '" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true">' + (ICON[k] || '') + '</svg><span>' + TABDEF[k][1] + '</span></button>').join('');
+  let last = '', out = '';
+  MAINS.filter(m => m.bar !== false && mainTabs(m).length).forEach(m => { if (m.grp !== last) { out += '<p class="ngh">' + esc(m.grp) + '</p>'; last = m.grp; } out += btn(m); });
+  const yk = mainTabs(you);
+  if (yk.length) out += '<p class="ngh">Account</p>' + yk.map(k => '<button class="tab tabyou" type="button" data-v="' + TABDEF[k][0] + '" data-name="' + TABDEF[k][1] + '" aria-label="' + TABDEF[k][1] + '" style="width:auto;flex:1"><svg viewBox="0 0 24 24" aria-hidden="true">' + (ICON[k] || '') + '</svg><span>' + TABDEF[k][1] + '</span></button>').join('');
+  return out;
 }
 function drawTabs() {
   $('tabs').innerHTML = '<button type="button" class="rt rtmenu" id="railtg" title="Show or hide the menu" aria-label="Show or hide the menu">' + MENU + '<span>Hide menu</span></button>' +
@@ -1649,12 +1747,29 @@ function drawTabs() {
   document.querySelectorAll('.tab[data-v]').forEach(b => b.onclick = () => go(b.dataset.v));
   $('who').onclick = () => { if (window.matchMedia && matchMedia('(max-width:899px)').matches) { openMain('you'); window.scrollTo(0, 0); } };
   document.querySelectorAll('.gh').forEach(h => h.onclick = () => { const g = h.dataset.ng, shut = !NAVSHUT[g]; NAVSHUT[g] = shut; try { localStorage.setItem('rbcNavShut', JSON.stringify(NAVSHUT)); } catch (e) {} h.parentNode.classList.toggle('shut', shut); h.setAttribute('aria-expanded', shut ? 'false' : 'true'); });
-  $('railtg').onclick = () => { const open = document.body.classList.toggle('rail-open'); try { localStorage.setItem('rbcRail', open ? '1' : '0'); } catch (e) {} };
+  $('railtg').onclick = () => { const open = document.body.classList.toggle('rail-open'); try { localStorage.setItem('rbcRail', open ? '1' : '0'); } catch (e) {} $('railtg').querySelector('span').textContent = open ? 'Hide menu' : 'Show menu'; navTipHide(); };
   const ini = String(myName || '').trim().split(/\s+/).filter(Boolean), inits = ini.length ? (ini[0][0] + (ini.length > 1 ? ini[ini.length - 1][0] : '')).toUpperCase() : '';
   $('who').innerHTML = (inits ? '<span class="wav" aria-hidden="true">' + esc(inits) + '</span>' : '') + '<span class="wtx"><b>' + esc(myName || 'Signed in') + '</b>' + (myRoles.length ? '<span class="wrl">' + myRoles.map(r => '<i>' + esc(r) + '</i>').join('') + '</span>' : '') + '</span>';
   $('out').title = 'Sign out'; $('out').setAttribute('aria-label', 'Sign out');
+  if (!$('tbbrand')) $('bar').insertAdjacentHTML('afterbegin', '<span id="tbbrand" class="tbbrand"><img src="' + ($('railtg') && document.querySelector('.rtb img') ? document.querySelector('.rtb img').getAttribute('src') : 'logo.png') + '" alt=""><span><b>RBC Choir</b><small></small></span></span>');
+  $('tbbrand').querySelector('small').textContent = (myRoles[0] || 'Signed in') + ' · Lagos Region';
+  $('railtg').querySelector('span').textContent = document.body.classList.contains('rail-open') ? 'Hide menu' : 'Show menu';
+  navTipInstall();
+  if (myRoles.indexOf('Global Admin') !== -1) cutLoad(); else if ($('rpcut')) $('rpcut').innerHTML = '';
+  if ($('rpreg')) $('rpreg').classList.toggle('hide', myTabs.indexOf('records') === -1);
 }
-try { if (localStorage.getItem('rbcRail') === '1') document.body.classList.add('rail-open'); } catch (e) {}
+try { if (localStorage.getItem('rbcRail') !== '0') document.body.classList.add('rail-open'); } catch (e) { document.body.classList.add('rail-open'); }
+/** Collapsed side menu: after a short hover, the menu name slides out beside the icon in a red label (owner, 15 Nov 2026). */
+let navTipT = 0;
+function navTipHide() { clearTimeout(navTipT); const t = $('navtip'); if (t) t.classList.remove('on'); }
+function navTipInstall() {
+  if (!$('navtip')) document.body.insertAdjacentHTML('beforeend', '<div id="navtip" aria-hidden="true"></div>');
+  document.querySelectorAll('#tabs .tab, #railtg').forEach(b => { if (b.dataset.tip) return; b.dataset.tip = '1';
+    b.addEventListener('mouseenter', () => { if (document.body.classList.contains('rail-open') || !matchMedia('(min-width:900px) and (hover:hover)').matches) return;
+      clearTimeout(navTipT); navTipT = setTimeout(() => { const t = $('navtip'), r = b.getBoundingClientRect(); t.textContent = b.dataset.name || (b.id === 'railtg' ? 'Show menu' : '');
+        t.style.top = (r.top + r.height / 2) + 'px'; t.style.left = (r.right + 12) + 'px'; t.classList.add('on'); }, 450); });
+    b.addEventListener('mouseleave', navTipHide); b.addEventListener('click', navTipHide); });
+}
 /** Every search and filter box starts empty when a menu page is opened from another page. Choices made on a page are not remembered. */
 function filtersReset() {
   Object.keys(FP).forEach(k => { delete FP[k]; }); chDays = 7;
@@ -1662,6 +1777,7 @@ function filtersReset() {
   ['prst', 'prsrc', 'rcmc', 'rcmp', 'pkind'].forEach(id => { const e = $(id); if (e && e.value !== '') { e.value = ''; e.dispatchEvent(new Event('change', {bubbles: true})); } });
 }
 function go(v) {
+  if (v === 's13') { go('s11'); setTimeout(() => { PSECON.s11 = 'rpreg'; psecDraw('s11'); if (typeof loadRecords === 'function') loadRecords(); }, 0); return; }   // Records is now a card on Reports
   if (v !== 's17' && $('gfback')) $('gfback').remove();
   clearTimeout(timer);
   { const cur = Array.from(document.querySelectorAll('.pg')).filter(x => !x.classList.contains('hide'))[0]; if (!cur || cur.id !== v) filtersReset(); }
@@ -3273,9 +3389,9 @@ function mbGroups(rows, k) {
   return Object.keys(m).sort().map(n => ({name: n, rows: m[n], t: mbSum(m[n])}));
 }
 function mbSplit(t) {
-  const on = t.present - t.late - t.lateAllowed, w = n => mbPct(n, t.expected);
-  return '<div class="mbstack"><i style="width:' + w(on) + '%;background:#1F8A4C"></i><i style="width:' + w(t.late + t.lateAllowed) + '%;background:#D98E04"></i><i style="width:' + w(t.excused) + '%;background:#9A9A9A"></i><i style="width:' + w(t.absent) + '%;background:#C8102E"></i></div>' +
-    '<div class="mbleg"><span><b style="color:#1F8A4C">●</b> On time ' + w(on) + '%</span><span><b style="color:#D98E04">●</b> Late ' + w(t.late + t.lateAllowed) + '%</span><span><b style="color:#9A9A9A">●</b> Excused ' + w(t.excused) + '%</span><span><b style="color:#C8102E">●</b> Absent ' + w(t.absent) + '%</span></div>';
+  const w = n => mbPct(n, t.expected);   // Present, Excused, Absent only: the Google Form does not record early or late (owner, 15 Nov 2026)
+  return '<div class="mbstack"><i style="width:' + w(t.present) + '%;background:#1F8A4C"></i><i style="width:' + w(t.excused) + '%;background:#9A9A9A"></i><i style="width:' + w(t.absent) + '%;background:#C8102E"></i></div>' +
+    '<div class="mbleg"><span><b style="color:#1F8A4C">●</b> Present ' + w(t.present) + '%</span><span><b style="color:#9A9A9A">●</b> Excused ' + w(t.excused) + '%</span><span><b style="color:#C8102E">●</b> Absent ' + w(t.absent) + '%</span></div>';
 }
 function mbColumns(series) {
   const s = series.filter(x => x.e);
@@ -3288,7 +3404,7 @@ function drawPatterns() {
   const who = MBS.who ? all.filter(r => r.memberId === MBS.who)[0] : null;
   const top = '<div class="mbbar"><div class="fpchips" style="margin:0">' + MBP.map(x => '<button type="button" class="fpchip' + (MBS.p === x[0] ? ' on' : '') + '" data-mbp="' + x[0] + '">' + x[1] + '</button>').join('') + '</div>' +
     '<div class="mbq"><input id="mbq" class="in" placeholder="Jump to a member: name or ID" autocomplete="off"><div id="mbqs"></div></div>' +
-    (j.canDownload ? '<button class="btn line sm" type="button" data-mbcsv="1">Download CSV</button>' : '') + (j.canRebuild ? '<button class="btn line sm" type="button" data-mbre="1">Rebuild member summary</button>' : '') + '</div>';
+    (j.canDownload || j.canRebuild ? '<details class="mbmore"><summary aria-label="More">⋯</summary><div>' + (j.canDownload ? '<button class="btn line sm" type="button" data-mbcsv="1">Download CSV</button>' : '') + (j.canRebuild ? '<button class="btn line sm" type="button" data-mbre="1">Rebuild member summary</button>' : '') + '</div></details>' : '') + '</div>';
   const link = (lbl, lv) => '<a href="#" data-mblv="' + lv + '">' + esc(lbl) + '</a>';
   const crumbs = [];
   if (!j.campusOnly) crumbs.push(MBS.campus ? link('All campuses', 'all') : '<b>All campuses</b>');
@@ -3315,8 +3431,8 @@ function drawPatterns() {
     const base = MBS.part ? c2 : c1, nw = base.filter(r => r.flag).length, nd = base.filter(r => r.trend === 'Down').length;
     const list = base.filter(r => MBS.f === 'word' ? r.flag : MBS.f === 'down' ? r.trend === 'Down' : true);
     const cell = (n, p) => n + ' <span class="s">' + p + '%</span>';
-    const tbl = list.length ? '<div style="overflow-x:auto"><table class="tbl mbt" style="margin:0"><thead><tr><th>Member</th><th>Expected</th><th>Present</th><th>Late</th><th>Excused</th><th>Absent</th><th>Excused-adj.</th><th>Last 4</th><th>Trend</th><th>Needs a word</th></tr></thead><tbody>' +
-      list.map(r => '<tr data-mbwho="' + esc(r.memberId) + '"><td><b>' + esc(r.name) + '</b><div class="s">' + esc(r.memberId) + (MBS.part ? '' : ' · ' + esc(r.campus) + ' · ' + esc(r.part)) + (r.status === 'Left' ? ' · Left' : '') + '</div></td><td>' + r.expected + '</td><td>' + cell(r.present, r.presentPct) + '</td><td>' + cell(r.late + r.lateAllowed, mbPct(r.late + r.lateAllowed, r.expected)) + '</td><td>' + cell(r.excused, r.excusedPct) + '</td><td>' + cell(r.absent, r.absentPct) + '</td><td><b>' + r.adjusted + '%</b></td><td>' + r.last4 + '%</td><td>' + mbTr(r.trend) + '</td><td>' + (r.flag ? '<span class="pill p-no">' + esc(r.flag) + '</span>' : '') + '</td></tr>').join('') + '</tbody></table></div>'
+    const tbl = list.length ? '<div style="overflow-x:auto"><table class="tbl mbt" style="margin:0"><thead><tr><th>Member</th><th>Present</th><th>Last 4</th><th>Trend</th><th>Needs a word</th></tr></thead><tbody>' +
+      list.map(r => '<tr data-mbwho="' + esc(r.memberId) + '"><td><b>' + esc(r.name) + '</b><div class="s">' + esc(r.memberId) + (MBS.part ? '' : ' · ' + esc(r.campus) + ' · ' + esc(r.part)) + (r.status === 'Left' ? ' · Left' : '') + '</div></td><td><b>' + r.presentPct + '%</b> <span class="s">' + r.present + ' of ' + r.expected + '</span></td><td>' + r.last4 + '%</td><td>' + mbTr(r.trend) + '</td><td>' + (r.flag ? '<span class="pill p-no">' + esc(r.flag) + '</span>' : '') + '</td></tr>').join('') + '</tbody></table></div>'
       : '<p class="sub">Nobody here matches that.</p>';
     body = (MBS.part ? '' : body) + '<div class="fpchips" style="margin:' + (MBS.part ? '0' : '18px 0 0') + ' 0 10px">' + [['', 'Everyone', base.length], ['word', 'Needs a word', nw], ['down', 'Trending down', nd]].map(x => '<button type="button" class="fpchip' + (MBS.f === x[0] ? ' on' : '') + '" data-mbf="' + x[0] + '">' + x[1] + ' <b>' + x[2] + '</b></button>').join('') + '</div>' + tbl;
   }
@@ -3332,7 +3448,7 @@ function mbPerson(r, all) {
   const missed = rids.map((x, i) => (r.seq[i] === 'A' || r.seq[i] === 'X' ? x.id + ' (' + x.date + ', ' + (r.seq[i] === 'A' ? 'absent' : 'excused') + ')' : '')).filter(Boolean);
   if (!r.expected) return '<p class="sub">' + esc(r.name) + ' has no published rehearsals in this period yet.</p>';
   return '<div class="mbrec"><div>' + mbRing(r.presentPct, true) + '<p class="sub" style="margin:8px 0 0;text-align:center">' + esc(r.campus) + ' · ' + esc(r.part) + (r.status === 'Left' ? '<br><span class="pill p-pend">Left</span>' : '') + '</p></div>' +
-    '<div><table class="tbl mbkv" style="margin:0"><tbody>' + kv('Present', r.present + ' of ' + r.expected + ' (' + r.presentPct + '%)') + kv('Early', r.early + ' (' + r.earlyPct + '%)') + kv('Late', r.late + ' (' + r.latePct + '%)') + kv('Late (allowed)', r.lateAllowed + ' (' + r.lateAllowedPct + '%)') +
+    '<div><table class="tbl mbkv" style="margin:0"><tbody>' + kv('Present', r.present + ' of ' + r.expected + ' (' + r.presentPct + '%)') +
       kv('Excused', r.excused + ' (' + r.excusedPct + '%)') + kv('Absent', r.absent + ' (' + r.absentPct + '%)') + kv('Excused-adjusted', r.adjusted + '%') + kv('Last 4', r.last4 + '% ' + mbTr(r.trend)) + kv('Absent in a row', r.absentRun + (r.lastPresent ? ' · last present ' + esc(r.lastPresent) : '')) + kv('Best run present', r.bestRun) + '</tbody></table>' +
       (r.flag ? '<p style="margin:10px 0 0"><span class="pill p-no">' + esc(r.flag) + '</span></p>' : '') + '</div>' +
     '<div><p class="mblbl">Each rehearsal, oldest first</p><div class="mbdots">' + dots + '</div><div class="mbleg"><span><b style="color:#1F8A4C">●</b> Present</span><span><b style="color:#D98E04">●</b> Late</span><span><b style="color:#9A9A9A">●</b> Excused</span><span><b style="color:#C8102E">●</b> Absent</span></div>' +
@@ -3959,6 +4075,69 @@ function drawSafe(j) {
   if ($('safeon')) $('safeon').onclick = () => go2({on: true, hours: Number($('safehours').value)});
   if ($('safeoff')) $('safeoff').onclick = () => go2({on: false});
 }
+/** Reports → Cut-off check (Global Admin): presets, compare, save the result to MEMBER SUMMARY. */
+let CUT = null, CUTRUN = null;
+const CUTM = {all: 'All published rehearsals', range: 'From one rehearsal to another', pick: 'Rehearsals I tick', skipLast: 'All but the last 1 or 2'};
+async function cutLoad() {
+  const box = $('rpcut'); if (!box) return;
+  try { const j = await call({action: 'cutoff.state', token}); if (!j.ok) { box.innerHTML = ''; return; } CUT = j; cutDraw(); psecDraw('s11'); } catch (e) { /* keep */ }
+}
+function cutRule() {
+  const mode = $('cutmode').value, r = {method: $('cutmeth').value, cutoff: Number($('cutpct').value), rehearsals: {mode}};
+  if (mode === 'range') { r.rehearsals.from = $('cutfrom').value; r.rehearsals.to = $('cutto').value; }
+  if (mode === 'pick') r.rehearsals.ids = [].slice.call(document.querySelectorAll('#cutpick input:checked')).map(x => x.value);
+  if (mode === 'skipLast') r.rehearsals.n = Number($('cutn').value);
+  return r;
+}
+function cutFill(rule) {
+  $('cutmeth').value = rule.method; $('cutpct').value = rule.cutoff; $('cutmode').value = rule.rehearsals.mode;
+  if (rule.rehearsals.from) $('cutfrom').value = rule.rehearsals.from; if (rule.rehearsals.to) $('cutto').value = rule.rehearsals.to;
+  if (rule.rehearsals.n) $('cutn').value = rule.rehearsals.n;
+  document.querySelectorAll('#cutpick input').forEach(x => { x.checked = (rule.rehearsals.ids || []).indexOf(x.value) !== -1; });
+  cutModeSync();
+}
+function cutModeSync() { const m = $('cutmode').value; $('cutrange').classList.toggle('hide', m !== 'range'); $('cutpick').classList.toggle('hide', m !== 'pick'); $('cutnbox').classList.toggle('hide', m !== 'skipLast'); }
+function cutDraw() {
+  const j = CUT, box = $('rpcut'); if (!j || !box) return;
+  const opt = (v, t, sel) => '<option value="' + esc(v) + '"' + (sel ? ' selected' : '') + '>' + esc(t) + '</option>';
+  const rs = j.rehearsals || [];
+  const sv = j.saved;
+  box.innerHTML = '<div class="card pad"><div class="ct">Cut-off check</div>' +
+    '<p class="sub" style="margin:4px 0 10px">Who meets the minimum attendance, from the published attendance. "Below cut-off" is only a label: nobody is told and nothing else changes.</p>' +
+    (sv ? '<div class="cutsaved"><b>Saved result: ' + esc(sv.name) + '</b><span>' + esc(sv.text) + ' · saved ' + esc(lagos(sv.atMs)) + ' · ' + sv.count.meets + ' meet it, ' + sv.count.below + ' below</span>' +
+      (sv.changed.length ? '<details><summary>' + sv.changed.length + ' changed since then</summary>' + sv.changed.map(c => '<div class="hrow"><span><b>' + esc(c.name) + '</b><small>' + esc(c.campus) + ' · was ' + esc(c.was) + ', now ' + esc(c.now) + '</small></span></div>').join('') + '</details>' : '<span>Nobody has changed since then.</span>') + '</div>' : '') +
+    '<div class="ct" style="font-size:15px;margin-top:12px">Presets (' + j.presets.length + ' of ' + j.max + ')</div>' +
+    (j.presets.length ? j.presets.map(p => '<div class="hrow"><label class="cutck"><input type="checkbox" data-cutcmp="' + esc(p.name) + '"></label><span><b>' + esc(p.name) + '</b><small>' + esc(p.text) + '</small></span><span class="cutbtns"><button class="btn line sm" type="button" data-cutuse="' + esc(p.name) + '">Use</button><button class="btn red sm" type="button" data-cutsave="' + esc(p.name) + '">Save result</button><button class="btn line sm" type="button" data-cutdel="' + esc(p.name) + '" aria-label="Delete ' + esc(p.name) + '">Delete</button></span></div>').join('') +
+      '<div class="actions" style="margin:8px 0 0"><button class="btn line" type="button" id="cutcmp">Compare ticked</button></div>' : '<p class="sub">No presets yet. Set one up below.</p>') +
+    '<div class="ct" style="font-size:15px;margin-top:16px">Set up a rule</div>' +
+    '<div class="cutgrid"><div><label class="lb" for="cutmeth">How the score is worked out</label><select id="cutmeth" class="in">' + Object.keys(j.methods).map(k => opt(k, j.methods[k])).join('') + '</select></div>' +
+    '<div><label class="lb" for="cutpct">Cut-off (%)</label><input id="cutpct" class="in" type="number" min="1" max="100" step="0.5" value="75"></div>' +
+    '<div><label class="lb" for="cutmode">Which rehearsals count</label><select id="cutmode" class="in">' + Object.keys(CUTM).map(k => opt(k, CUTM[k])).join('') + '</select></div></div>' +
+    '<div id="cutrange" class="cutgrid hide"><div><label class="lb" for="cutfrom">From</label><select id="cutfrom" class="in">' + rs.map(r => opt(r.id, r.id + ' · ' + r.date)).join('') + '</select></div><div><label class="lb" for="cutto">To</label><select id="cutto" class="in">' + rs.map((r, i) => opt(r.id, r.id + ' · ' + r.date, i === rs.length - 1)).join('') + '</select></div></div>' +
+    '<div id="cutpick" class="chips hide" style="margin-top:8px">' + rs.map(r => '<label class="chip"><input type="checkbox" value="' + esc(r.id) + '" checked> ' + esc(r.id) + '</label>').join('') + '</div>' +
+    '<div id="cutnbox" class="hide"><label class="lb" for="cutn">Leave out the last</label><select id="cutn" class="in" style="max-width:220px">' + opt(1, '1 rehearsal') + opt(2, '2 rehearsals') + '</select></div>' +
+    '<div class="cutgrid" style="margin-top:8px"><div><label class="lb" for="cutname">Preset name</label><input id="cutname" class="in" maxlength="30" placeholder="For example: Main 75%"></div></div>' +
+    '<div class="actions"><button class="btn line" type="button" id="cutprev">Preview</button><button class="btn red" type="button" id="cutadd">Save preset</button></div>' +
+    '<p id="m11c" class="s"></p><div id="cutout"></div></div>';
+  $('cutmode').onchange = cutModeSync; cutModeSync();
+  const say2 = (t, ok) => say('m11c', t, ok ? 'ok' : 'bad');
+  $('cutprev').onclick = async () => { try { const k = await call({action: 'cutoff.preview', token, rule: cutRule()}); if (!k.ok) return say2(k.error); say2('', true); cutShow(k); } catch (e) { say2('Network problem. Try again.'); } };
+  $('cutadd').onclick = async () => { try { const k = await call({action: 'cutoff.preset', token, name: $('cutname').value, rule: cutRule()}); if (!k.ok) return say2(k.error); CUT = k; cutDraw(); say('m11c', k.summary, 'ok'); } catch (e) { say2('Network problem. Try again.'); } };
+  if ($('cutcmp')) $('cutcmp').onclick = async () => { const names = [].slice.call(box.querySelectorAll('[data-cutcmp]:checked')).map(x => x.dataset.cutcmp); if (!names.length) return say2('Tick one or more presets first.');
+    try { const k = await call({action: 'cutoff.preview', token, names}); if (!k.ok) return say2(k.error); say2('', true); cutShow(k); } catch (e) { say2('Network problem. Try again.'); } };
+  box.querySelectorAll('[data-cutuse]').forEach(b => b.onclick = () => { const p = j.presets.filter(x => x.name === b.dataset.cutuse)[0]; if (p) { cutFill(p.rule); $('cutname').value = p.name; } });
+  box.querySelectorAll('[data-cutdel]').forEach(b => b.onclick = async () => { if (!confirm('Delete the preset "' + b.dataset.cutdel + '"?')) return; const k = await call({action: 'cutoff.presetDelete', token, name: b.dataset.cutdel}); if (k.ok) { CUT = k; cutDraw(); } say('m11c', k.ok ? k.summary : k.error, k.ok ? 'ok' : 'bad'); });
+  box.querySelectorAll('[data-cutsave]').forEach(b => b.onclick = async () => { if (!confirm('Save the result of "' + b.dataset.cutsave + '" to MEMBER SUMMARY? It stays as it is until you save again.')) return; b.disabled = true;
+    try { const k = await call({action: 'cutoff.save', token, name: b.dataset.cutsave}); if (k.ok) { CUT = k; cutDraw(); } say('m11c', k.ok ? k.summary : k.error, k.ok ? 'ok' : 'bad'); } catch (e) { say2('Network problem. Try again.'); } b.disabled = false; });
+}
+function cutShow(k) {
+  CUTRUN = k; const out = $('cutout'); if (!out) return;
+  const tag = r => '<span class="pill ' + (r === 'Meets cut-off' ? 'p-ok' : r === 'Below cut-off' ? 'p-no' : 'p-pend') + '">' + esc(r) + '</span>';
+  out.innerHTML = '<div class="cutruns">' + k.runs.map(x => '<div class="cutrun"><b>' + esc(x.name) + '</b><small>' + esc(x.text) + '</small><div class="cutcounts"><span class="pill p-ok">' + x.count.meets + ' meet it</span><span class="pill p-no">' + x.count.below + ' below</span>' + (x.count.none ? '<span class="pill p-pend">' + x.count.none + ' not counted</span>' : '') + '</div>' +
+      Object.keys(x.byCampus).sort().map(c => '<div class="hrow"><span><b>' + esc(c) + '</b></span><small>' + x.byCampus[c].meets + ' meet · ' + x.byCampus[c].below + ' below</small></div>').join('') + '</div>').join('') + '</div>' +
+    (k.runs.length > 1 ? '<div class="ct" style="font-size:15px;margin-top:14px">Different between the presets (' + k.differ.length + ')</div>' + (k.differ.length ? k.differ.map(d => '<div class="hrow"><span><b>' + esc(d.name) + '</b><small>' + esc(d.campus) + '</small></span><span class="cutbtns">' + d.results.map(tag).join('') + '</span></div>').join('') : '<p class="sub">Every member gets the same result.</p>') :
+      '<div class="ct" style="font-size:15px;margin-top:14px">Members</div>' + k.runs[0].rows.map(r => '<div class="hrow"><span><b>' + esc(r.name) + '</b><small>' + esc(r.campus) + ' · ' + esc(r.part) + (r.score != null ? ' · ' + r.score + '%' : '') + '</small></span>' + tag(r.result) + '</div>').join(''));
+}
 /** People and access → Hand over jobs · Assistant (as Kinnor): tap the jobs, choose how long, Save. Ends by itself; logged. */
 const HOLONG = {open: 'Until I take it back', rehearsal: 'Just the next rehearsal', days: 'For a number of days'};
 let hoState = null, hoPick = {};
@@ -4336,7 +4515,6 @@ const FAQ = [
   {t: ['rehearsal'], q: 'How do I use a Google Form instead of the QR?', a: 'On Rehearsals, make the rehearsal and choose "Google Form" under How will members sign in. Type the sign-in helpers (one name per line; remembered for next time). Saving makes the form. Press Copy link and send it to the helpers. Opening check-in opens the form; closing it closes the form. Each person is ticked on the one sign-in list once, whichever way they sign in.'},
   {t: ['requests'], q: 'What happens if nobody answers an absence request?', a: 'It passes to a backup after 24 hours, or after 2 hours when the rehearsal is less than a day away. If the Campus Music Director has not checked it, the Global Admin or Assistant can answer it with no reason to type. If the Global Admin has not decided a checked request, the Assistant can decide it. It shows as "Passed to you: not answered in time". A request is never approved by itself: a person always decides.'},
   {t: ['reports'], q: 'What is Members on Reports?', a: 'Every member from the official attendance, by campus, then part, then person. Tap a campus to see its parts, a part to see its members, and a name to see their full record: present, early, late, excused and absent, each with its %, the excused-adjusted %, the last 4 rehearsals, the trend and each rehearsal. Choose All time, 4 weeks, 12 weeks or a year; use Jump to a member to go straight to someone. Needs a word means absent 3 in a row, absent 2 of the last 3, or late 3 or more times: it only shows who may need a conversation. The same figures are in the MEMBER SUMMARY tab of the workbook, rebuilt after every Publish. A Campus MD sees their own campus.'},
-  {t: ['checkins', 'process', 'reports'], q: 'What do Early, Late and Late (allowed) mean?', a: 'Everyone who checks in counts as Present. Early means they checked in before the rehearsal\'s late time. Late means after it. Late (allowed) means late, but the leaders agreed beforehand: Desk B or an admin presses Late (allowed) on the Check-ins page, with a reason. Reports show the three apart for rehearsals processed from now on.'},
   {t: ['rehearsal', 'calendar'], q: 'How do I set up a rehearsal?', a: 'Open Rehearsals (or click an empty future date in the Calendar), choose the date, start and finish times, and the venue, then save. Times are Lagos time and at most three rehearsals can be planned at once. If it is normally Desk A\'s job and you are the Global Admin or Assistant, you give a reason and Desk A is told.'},
   {t: ['rehearsal'], q: 'How do I open and close check-in?', a: 'On the Rehearsals page, use Open check-in. You can open it by hand from one hour before the start. If nobody does, it opens by itself at the start time and closes by itself at the finish time. Use Close check-in to close it earlier; it then stays closed until you open it again.'},
   {t: ['qr'], q: 'How do I show the QR code?', a: 'Open Show QR code while check-in is open and hold the screen up so members can scan it with their phone. They must be at the venue.'},
@@ -4505,6 +4683,7 @@ function contactFor() {
   return hit ? hit[1] : 'the Assistant Global Admin';
 }
 function can() { return myTabs.filter(k => TABHELP[k]); }
+const ABOUT_HREF = '../about.html', PRIVACY_HREF = '../privacy.html';
 function renderHelp() {
   const t = myTabs, shown = can(), faq = FAQ.filter(f => !f.t.length || f.t.some(k => t.indexOf(k) !== -1)).map(f => Object.assign({}, f, {topic: (f.t.filter(k => t.indexOf(k) !== -1).map(k => TABDEF[k] && TABDEF[k][1])[0]) || 'General'}));
   const who = WHODOES;
@@ -4516,30 +4695,34 @@ function renderHelp() {
     ['Done instead', 'A step the Global Admin or Assistant did in place of the usual desk, with a reason. The desk is told.'],
     ['Petition', 'A recorded objection to a change, answered by the right person.']];
   const txt = (...a) => a.join(' ');
+  const pilot = document.body.classList.contains('pilot');
+  const mains = MAINS.filter(m => mainTabs(m).length);
+  const ask = pilot ? [['Anything about the choir system', 'the Global Admin'], ['When the Global Admin is away', 'the Assistant Global Admin'], ['Signing in, or something broken', 'the System Administrator']]
+    : [['Your rehearsals, requests or work', contactFor()], ['Signing in, or something broken', 'the System Administrator']];
+  const row = (b, s2, act) => '<div class="hrow"><span><b>' + b + '</b><small>' + s2 + '</small></span>' + (act || '') + '</div>';
   $('helpbody').innerHTML =
-    '<div class="card pad rise"><div class="sub" style="margin:0">You are signed in as</div><div style="font-size:20px;font-weight:900">' + esc(myName || 'a staff member') + '</div>' +
-      '<div>' + myRoles.filter(r => r !== 'Choir Member').map(r => '<span class="pillr">' + esc(r) + '</span>').join('') + '</div></div>' +
-    '<div class="fpchips hnav">' + ['Your menus', 'How do I\u2026?', 'Who does what', 'Rules that always apply', 'Words you will see', 'What you can undo'].map((t, i) => '<button type="button" class="fpchip' + (i === 0 ? ' on' : '') + '" data-hjump="' + t + '">' + t + '</button>').join('') + '</div>' +
-    '<div id="hb1"></div><div id="hb2"></div><div id="hb3"></div>' +
-    '<div id="hrules"></div>' +
-    undoGuideHtml() +
-    '<div id="hb4"></div>' +
-    '<div class="card pad rise"><div class="ct">Need more help?</div><p style="margin:.2rem 0">Speak to ' + esc(contactFor()) + '. For a sign-in or system problem, speak to the System Administrator.</p></div>';
+    '<div class="hgrid">' +
+      '<div class="card pad"><div class="ct">What you can do here</div>' + mains.map(m => row(esc(m.name), esc(m.d || 'Your home page: what needs you and what is coming up.'), '<button class="btn line sm" type="button" data-main="' + m.k + '">Open</button>')).join('') + '</div>' +
+      '<div class="card pad"><div class="ct">Who to ask</div>' + ask.map(a => row(esc(a[0]), 'Speak to ' + esc(a[1]))).join('') + '</div>' +
+      '<div class="card pad"><div class="ct">Rules that always apply</div><div id="hrules2"></div></div>' +
+    '</div>' +
+    '<div id="hb2"></div>' + (pilot ? '' : '<div id="hb3"></div>') + undoGuideHtml() + '<div id="hb4"></div>' +
+    '<div class="hfoot"><a href="' + ABOUT_HREF + '" target="_blank" rel="noopener">About</a><a href="' + PRIVACY_HREF + '" target="_blank" rel="noopener">Privacy notice</a></div>';
   const mine = name => myRoles.some(r => name.indexOf(r) !== -1 && r !== 'Choir Member');
   const RULES = ['Everything you do is recorded with your name and the time.', 'Nobody checks, approves or changes their own work or record.', 'Nothing is deleted. A member who leaves is made inactive.', 'When an admin does a desk\'s step, they give a reason and that desk is told.', 'Sign out when you finish on a shared phone.'];
-  fpPanel('hmenu', 'hb1', {title: 'Your menus', sub: 'What each menu is for. Use Open to go there.', items: shown, empty: 'No menus yet.',
+  if (false) fpPanel('hmenu', 'hb1', {title: 'Your menus', sub: 'What each menu is for. Use Open to go there.', items: shown, empty: 'No menus yet.',
     fields: [{k: 'q', label: 'Search menus', ph: 'For example: report, member, rehearsal', type: 'text', get: k => txt(TABHELP[k][0], TABHELP[k][1])}],
     card: k => tile({tone: 'ask', icon: '→', title: TABHELP[k][0], body: esc(TABHELP[k][1]), actions: TABDEF[k] ? '<button class="btn line sm" type="button" data-helpgo="' + TABDEF[k][0] + '">Open ' + esc(TABDEF[k][1]) + '</button>' : ''})});
   fpPanel('hfaq', 'hb2', {title: 'How do I…?', sub: 'Short answers for the menus you have. Choose a question to open it.', items: faq, empty: 'No questions yet.',
     fields: [{k: 'q', label: 'Search questions', ph: 'For example: absence, add, report', type: 'text', get: f => txt(f.q, f.a)}, {k: 'topic', label: 'Topic', type: 'list', get: f => f.topic}],
     card: f => '<div class="ugt ask"><details class="hq" style="border:0"><summary class="ugtop"><span class="ugi">?</span><b>' + esc(f.q) + '</b></summary><div class="ugh" style="margin-top:10px">' + esc(f.a) + '</div>' + (function () { const k = (f.t || []).filter(x => TABDEF[x] && myTabs.indexOf(x) !== -1)[0]; return k ? '<div style="margin-top:10px"><button class="btn line sm" type="button" data-helpgo="' + TABDEF[k][0] + '">Take me there: ' + esc(TABDEF[k][1]) + '</button></div>' : ''; })() + '</details></div>'});
-  fpPanel('hwho', 'hb3', {title: 'Who does what', items: who, empty: '',
+  if (!pilot) fpPanel('hwho', 'hb3', {title: 'Who does what', items: who, empty: '',
     fields: [{k: 'q', label: 'Search', ph: 'A role or a job', type: 'text', get: r => txt(r[0], r[1])}],
     card: r => tile({tone: mine(r[0]) ? 'ok' : 'ask', icon: esc(/^Desk /.test(r[0]) ? r[0].slice(-1) : r[0].charAt(0)), title: r[0], pill: mine(r[0]) ? 'Your role' : '', pillCls: 'p-ok', body: esc(r[1])})});
   fpPanel('hgl', 'hb4', {title: 'Words you will see', items: gl, empty: '',
     fields: [{k: 'q', label: 'Search words', ph: 'For example: eligible, petition', type: 'text', get: r => txt(r[0], r[1])}],
     card: r => tile({tone: 'warn', icon: 'i', title: r[0], body: esc(r[1])})});
-  { const rb = $('hrules'); if (rb) rb.innerHTML = '<div class="card pad rise"><div class="ct">Rules that always apply</div><div class="tgrid">' + RULES.map(r => tile({tone: 'ok', icon: '✓', title: r})).join('') + '</div></div>'; }
+  { const rb = $('hrules2'); if (rb) rb.innerHTML = RULES.filter(r => !(pilot && /desk/i.test(r))).map(r => '<div class="hrow hok"><span>' + esc(r) + '</span></div>').join(''); }
 }
 document.addEventListener('click', ev => {
   const j = ev.target.closest && ev.target.closest('[data-hjump]'); if (!j) return;
@@ -4697,7 +4880,10 @@ if (token) { const first = n => call({action: 'me', token}).then(j => { if (j.ok
     pg.querySelectorAll('.fold').forEach(function (c) { if (c.closest('.psecoff')) return; var t = c.dataset.title, n = LIST.indexOf(t) >= 0 ? count(c) : 0; st[t] = {o: !shut, n: n}; paint(c, c.firstElementChild, t, !shut); });
     save();
   });
-  function scan() { var l = document.querySelectorAll('.pg .card:not([data-fold])'); for (var i = 0; i < l.length; i++) build(l[i]); bars(); }
+  function flow() { var seen = []; document.querySelectorAll('.pg .fold').forEach(function (c) { var p = c.parentElement; if (!p || seen.indexOf(p) !== -1) return; seen.push(p);
+    var kids = [].slice.call(p.children).filter(function (k) { return k.classList.contains('fold'); });
+    if (kids.length >= 2 && !p.classList.contains('two') && !p.classList.contains('psecg') && !p.classList.contains('hgrid')) p.classList.add('foldflow'); }); }
+  function scan() { var l = document.querySelectorAll('.pg .card:not([data-fold])'); for (var i = 0; i < l.length; i++) build(l[i]); bars(); flow(); }
   var q = 0;
   new MutationObserver(function () { if (q) return; q = requestAnimationFrame(function () { q = 0; scan(); }); }).observe(document.body, {childList: true, subtree: true});
   scan();
