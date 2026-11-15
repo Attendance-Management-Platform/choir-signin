@@ -1609,7 +1609,9 @@ const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '';
 let myBypass = {};
 var myStaffOnly = false;
-function setMe(j) { safeBar(j.safeTest); document.body.classList.toggle('pilot', j.pilot === true); if ((j.tabs || []).indexOf('home') === -1 && j.staffOnly !== true && /member\.html$|staff\.html$|\/$/.test(location.pathname)) { location.replace('member.html'); return; } /* one sign-in: a member with no staff role goes to the member page */ myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
+function setMe(j) { safeBar(j.safeTest); document.body.classList.toggle('pilot', j.pilot === true);
+  // The sign-in reply does not carry Safe test or two-admin mode: ask once more (owner, 15 Nov 2026: no yellow strip after signing in).
+  if (j.safeTest === undefined && typeof token !== 'undefined' && token) call({action: 'me', token}).then(m => { if (m && m.ok) { safeBar(m.safeTest); document.body.classList.toggle('pilot', m.pilot === true); if (typeof psecDraw === 'function') Object.keys(PSEC).forEach(psecDraw); } }).catch(() => {}); if ((j.tabs || []).indexOf('home') === -1 && j.staffOnly !== true && /member\.html$|staff\.html$|\/$/.test(location.pathname)) { location.replace('member.html'); return; } /* one sign-in: a member with no staff role goes to the member page */ myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myBypass = j.bypassTabs || {}; }
 const ICON = {
   reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
   process: '<path d="M9 11l3 3 8-8"/><path d="M4 6h9M4 12h3M4 18h9"/>',
