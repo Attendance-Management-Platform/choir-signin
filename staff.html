@@ -2825,7 +2825,9 @@ document.addEventListener('click', ev => { if (CBOPEN && !(ev.target.closest && 
 function cbUpSelect(sel) {
   if (sel.__cbUp || sel.multiple || sel.size > 1 || sel.hasAttribute('data-native') || sel.closest('.fplist,td,tr')) return;
   sel.__cbUp = true;
-  const inp = document.createElement('input'); inp.className = sel.className; inp.type = 'text'; inp.autocomplete = 'off'; inp.id = (sel.id || 'cbs' + Math.random().toString(36).slice(2, 7)) + '__t';
+  const inp = document.createElement('input'); inp.className = sel.className; inp.type = 'text'; inp.setAttribute('autocomplete', 'off'); inp.setAttribute('data-1p-ignore', ''); inp.setAttribute('data-lpignore', 'true'); inp.setAttribute('data-form-type', 'other');
+  // A neutral ID: Chrome offered saved email addresses on a box whose ID held "mail" (owner, 15 Nov 2026).
+  inp.id = 'cbp' + Math.random().toString(36).slice(2, 9);
   const w0 = document.createElement('span'); w0.className = 'cbhost'; w0.style.cssText = sel.style.cssText; w0.style.display = 'block'; w0.style.minWidth = '0';
   sel.parentNode.insertBefore(w0, sel); w0.appendChild(inp); w0.appendChild(sel); sel.style.display = 'none'; inp.style.width = '100%'; inp.style.maxWidth = 'none';
   if (sel.id) document.querySelectorAll('label[for="' + sel.id + '"]').forEach(l => l.setAttribute('for', inp.id));
