@@ -313,6 +313,9 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 
 /* Two admins only (owner, 15 Nov 2026): members do not ask to be excused here; the Global Admin uses the Excuse form */
 body.twoadmins #t2,body.twoadmins [data-calask]{display:none!important}
+
+/* iPhone: text boxes at 16px so Safari does not zoom in (owner, 15 Nov 2026) */
+@media (max-width:899px),(hover:none){input,select,textarea{font-size:16px!important}}
 </style>
 <style id="rbcdark">
 :root[data-theme="dark"]{--red:#FF666E;--acc:#FF666E;--deep:#FF666F;--fg:#D9D8D8;--ink:#D9D8D8;--text:#CDCDCC;--mut:#BDBCBB;--muted:#BDBCBB;--line:#454440;--rose:#34191B;--page:#2A2821;--ok:#86DFC1;--bad:#E0858C}
