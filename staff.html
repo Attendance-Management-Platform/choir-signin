@@ -3864,7 +3864,7 @@ async function loadRehearsal() {
     $('rhlist').querySelectorAll('button[data-edit]').forEach(b => b.onclick = () => { PSECON.s8 = 'rhsmake'; psecDraw('s8'); rhOpenForm('edit', b.dataset.edit); window.scrollTo(0, 0); });
     rhq('button[data-trmake]').forEach(b => b.onclick = () => { PSECON.s8 = 'rhsmake'; psecDraw('s8'); rhOpenForm('make'); $('rhsign').value = 'form'; rhSignSync(); $('rhtest').checked = true; rhPreview(); window.scrollTo(0, 0); });
     rhq('button[data-gflive]').forEach(b => b.onclick = () => gfLive(b.dataset.gflive));
-    rhq('button[data-trop]').forEach(b => b.onclick = async () => { b.disabled = true; try { const k = await call({action: 'rehearsal.' + b.dataset.trop, token, id: 'R900'}); await loadRehearsal(); say('m8', k.ok ? 'Test run: check-in ' + (b.dataset.trop === 'open' ? 'opened. The form now takes answers.' : 'closed. The form has stopped taking answers.') : (k.error || 'Could not change it.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); } });
+    rhq('button[data-trop]').forEach(b => b.onclick = async () => { b.disabled = true; try { const k = await call({action: 'rehearsal.' + b.dataset.trop, token, id: 'R900'}); await loadRehearsal(); say('m8', k.ok && k.formWarn ? k.formWarn : k.ok ? 'Test run: check-in ' + (b.dataset.trop === 'open' ? 'opened. The form now takes answers.' : 'closed. The form has stopped taking answers.') : (k.error || 'Could not change it.'), k.ok && !k.formWarn ? 'ok' : 'bad'); } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); } });
     rhq('button[data-trremove]').forEach(b => b.onclick = async () => { if (!confirm('Remove the test run R900? Its sign-ins, its tab and its forms are removed (the forms go to your Google Drive bin).')) return; b.disabled = true; try { const k = await call({action: 'rehearsal.removeTest', token, id: 'R900'}); await loadRehearsal(); say('m8', k.ok ? 'Test run removed (' + (k.summary || '').replace(/^test run removed: /, '') + ').' : (k.error || 'Could not remove it.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); } });
     rhq('button[data-gfcopy]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.gfcopy); say('m8', 'Link copied. Send it to the sign-in helpers.', 'ok'); } catch (e) { prompt('Copy this link:', b.dataset.gfcopy); } });
     rhq('button[data-gfsend]').forEach(b => b.onclick = async () => { b.disabled = true; try { const k = await call({action: 'rehearsal.formSend', token, id: b.dataset.gfsend}); say('m8', k.ok ? 'Links emailed to ' + k.mailed + ' helper' + (k.mailed === 1 ? '' : 's') + '.' : (k.error || 'Could not send.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); } b.disabled = false; });
@@ -3873,7 +3873,7 @@ async function loadRehearsal() {
     $('rhbtns').querySelectorAll('button').forEach(b => b.onclick = async () => {
       const k = await call({action: 'rehearsal.' + b.dataset.op, token});
       await loadRehearsal();
-      say('m8', k.ok ? 'Done.' : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+      say('m8', k.ok && k.formWarn ? k.formWarn : k.ok ? 'Done.' : (k.error || 'Could not save.'), k.ok && !k.formWarn ? 'ok' : 'bad');
     });
     psecDraw('s8'); loadGfSettings();
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
