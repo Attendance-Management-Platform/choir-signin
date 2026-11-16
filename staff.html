@@ -3999,13 +3999,27 @@ document.addEventListener('keydown', e => {
 $('rhsave').onclick = async () => {
   if (!rhState) return;
   $('rhsave').disabled = true;
+  // Making Google Forms can take a minute. A phone may lose the reply (slow network, screen locked), even though it was saved,
+  // so before saying it failed we look at what the server now has.
+  const isTest = !rhEditing && !!($('rhtest') && $('rhtest').checked);
+  const snap = () => ({test: !!(rhState && rhState.testRun), list: JSON.stringify(((rhState && rhState.rehearsals) || []).map(r => r.id + '|' + (r.rev || '')))});
+  const had = snap();
+  if (!rhEditing && $('rhsign').value === 'form') say('m8', 'Saving and making the Google Forms. This can take up to a minute: keep this page open.');
   try {
     const k = await call({action: 'rehearsal.save', token, id: rhEditing ? rhEditing.id : '', rev: rhEditing ? rhEditing.rev : undefined, reason: $('rhreason').value.trim(),
       date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
       lateAfterMin: $('rhlate').value, venueName: $('rhvenue').value.trim(), description: $('rhdesc').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim(), signIn: rhEditing ? undefined : $('rhsign').value, mailMode: !rhEditing && $('rhsign').value === 'form' ? $('rhmail').value : undefined, mailAtMs: !rhEditing && $('rhmail').value === 'at' && $('rhmailat').value ? Date.parse($('rhmailat').value + ':00+01:00') : undefined, testRun: !rhEditing && $('rhsign').value === 'form' && $('rhtest').checked ? true : undefined});
     if (k.ok) { $('rhmail').value = 'hour'; $('rhmailat').value = ''; PSECON.s8 = 'rhsplan'; await loadRehearsal(); }
     say('m8', k.ok ? (k.test ? 'Test run ' + k.id + ' made. Its form is ready: copy the link from the TEST card below. Nothing on it is counted.' : k.formMade ? 'Saved. The Google Forms for ' + k.id + ' are ready' + (k.mailed ? ' and ' + k.mailed + ' helper' + (k.mailed === 1 ? ' was' : 's were') + ' emailed their link.' : '. No email went out: use Copy link on the rehearsal below.') : 'Saved.') + (k.sheetNote ? ' Note: ' + k.sheetNote : '') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
-  } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
+  } catch (e) {
+    say('m8', 'The reply was slow. Checking whether it was saved…');
+    await loadRehearsal();
+    const now = snap(), saved = isTest ? (!had.test && now.test) : now.list !== had.list;
+    if (saved) {
+      $('rhmail').value = 'hour'; $('rhmailat').value = ''; PSECON.s8 = 'rhsplan'; psecDraw('s8');
+      say('m8', isTest ? 'Test run ' + rhState.testRun.id + ' made. Its form is ready: copy the link from the TEST card. Nothing on it is counted.' : 'Saved. The reply was slow, but the rehearsal is in the list below. Check its Google Forms there.', 'ok');
+    } else say('m8', 'It was not saved: the connection dropped. Check your internet and press Save again.', 'bad');
+  }
   $('rhsave').disabled = false;
 };
 
