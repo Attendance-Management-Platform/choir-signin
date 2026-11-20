@@ -1578,11 +1578,10 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 </div></div>
 
 <label for="rhvenue" class="lb">Venue, written as people read it</label><input id="rhvenue" class="in" autocomplete="off" maxlength="150" placeholder="Venue name, street, area, city">
-<label for="rhdesc" class="lb">Description (optional)</label><input id="rhdesc" class="in" autocomplete="off" maxlength="200" placeholder="For example: bring black shoes; full dress rehearsal">
 <label for="rhsign" class="lb qro">How will members sign in?</label><select id="rhsign" class="in qro"><option value="qr">QR check-in on the portal</option><option value="form">Google Form, filled in by the sign-in helpers</option></select>
 <p class="sub qon" style="margin-top:12px"><b>Members sign in with the Google Form.</b> The QR is paused.</p>
 <p id="rhsignnote" class="sub hide">Saving makes the Google Forms for this rehearsal. The helpers get their link by email at the time chosen under Google Forms. Each person signed in is ticked once.</p>
-<p class="sub">This text goes in notices.<span class="qro"> The system finds the map position from it.</span> Check-in can open from one hour before the start and closes at the finish time (with roll calls: only during each roll call). A rehearsal can last up to 12 hours. At most three rehearsal days can be planned at once.</p>
+<p class="sub">The venue goes in notices.<span class="qro"> The system finds the map position from it.</span> Check-in can open from one hour before the start and closes at the finish time (with roll calls: only during each roll call). A rehearsal can last up to 12 hours. At most three rehearsal days can be planned at once.</p>
 <details class="qro"><summary class="sub" style="cursor:pointer;font-weight:700">Position typed by hand (only if the address is not found)</summary>
 <p class="sub">In Google Maps press and hold the venue and tap the two numbers; you can paste "6.5244, 3.3792" into the first box.</p>
 <label for="rhlat" class="lb">Venue latitude</label><input id="rhlat" class="in" autocomplete="off" placeholder="e.g. 6.5244">
@@ -4002,10 +4001,10 @@ function rhOpenForm(mode, id) {
   if (r) {
     const iso = new Date(r.startMs + 3600000).toISOString(), fin = new Date(r.finishMs + 3600000).toISOString();
     $('rhdate').value = iso.slice(0, 10); $('rhstart').value = iso.slice(11, 16); $('rhfinish').value = fin.slice(11, 16);
-    $('rhlate').value = r.lateAfterMin; $('rhvenue').value = r.venue ? r.venue.name : ''; $('rhdesc').value = r.description || '';
+    $('rhlate').value = r.lateAfterMin; $('rhvenue').value = r.venue ? r.venue.name : '';
     $('rhsign').value = r.signIn || 'qr'; $('rhsign').disabled = true;
     $('rhsave').disabled = !!r.checkInOpen; say('m8', r.checkInOpen ? 'Close check-in before changing this rehearsal.' : (r.editedBy ? 'Last edited by the ' + r.editedByRole + '. Only that role or higher can change it now.' : ''));
-  } else { $('rhsign').disabled = false; $('rhsign').value = QROFF ? 'form' : 'qr'; $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; $('rhvenue').value = ''; $('rhdesc').value = ''; $('rhsave').disabled = false; say('m8', ''); }
+  } else { $('rhsign').disabled = false; $('rhsign').value = QROFF ? 'form' : 'qr'; $('rhdate').value = ''; $('rhstart').value = ''; $('rhfinish').value = ''; $('rhlate').value = 30; $('rhvenue').value = ''; $('rhsave').disabled = false; say('m8', ''); }
   if (!r && window.__rhPref) { $('rhdate').value = window.__rhPref; window.__rhPref = ''; }
   $('rhlat').value = ''; $('rhlon').value = ''; $('rhtest').checked = false; rhRollsWire(); if (!r) rhRollsReset(); else rhRollsDraw(); rhSignSync();
   if (r && r.day) { $('rhsave').disabled = true; say('m8', r.id + ' is a roll call of the ' + rhHm(r.day.startMs) + ' to ' + rhHm(r.day.finishMs) + ' rehearsal. A rehearsal with roll calls is not changed: cancel it (every roll call) and make it again.'); }
@@ -4228,7 +4227,7 @@ $('rhsave').onclick = async () => {
   try {
     const k = await call({action: 'rehearsal.save', token, id: rhEditing ? rhEditing.id : '', rev: rhEditing ? rhEditing.rev : undefined, reason: $('rhreason').value.trim(),
       date: $('rhdate').value, start: $('rhstart').value, finish: $('rhfinish').value,
-      lateAfterMin: $('rhlate').value, ...rhRollsBody(), venueName: $('rhvenue').value.trim(), description: $('rhdesc').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim(), signIn: rhEditing ? undefined : $('rhsign').value, mailMode: !rhEditing && $('rhsign').value === 'form' ? $('rhmail').value : undefined, mailAtMs: !rhEditing && $('rhmail').value === 'at' && $('rhmailat').value ? Date.parse($('rhmailat').value + ':00+01:00') : undefined, testRun: !rhEditing && $('rhsign').value === 'form' && $('rhtest').checked ? true : undefined});
+      lateAfterMin: $('rhlate').value, ...rhRollsBody(), venueName: $('rhvenue').value.trim(), lat: $('rhlat').value.trim(), lon: $('rhlon').value.trim(), signIn: rhEditing ? undefined : $('rhsign').value, mailMode: !rhEditing && $('rhsign').value === 'form' ? $('rhmail').value : undefined, mailAtMs: !rhEditing && $('rhmail').value === 'at' && $('rhmailat').value ? Date.parse($('rhmailat').value + ':00+01:00') : undefined, testRun: !rhEditing && $('rhsign').value === 'form' && $('rhtest').checked ? true : undefined});
     if (k.ok) { $('rhmail').value = 'hour'; $('rhmailat').value = ''; PSECON.s8 = 'rhsplan'; await loadRehearsal(); }
     say('m8', k.ok ? (k.test ? 'Test run ' + k.id + ' made. Its form is ready: copy the link from the TEST card below. Nothing on it is counted.' : k.formMade ? 'Saved. The Google Forms for ' + k.id + ' are ready' + (k.mailed ? ' and ' + k.mailed + ' helper' + (k.mailed === 1 ? ' was' : 's were') + ' emailed their link.' : '. No email went out: use Copy link on the rehearsal below.') : 'Saved.') + (k.sheetNote ? ' Note: ' + k.sheetNote : '') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
   } catch (e) {
