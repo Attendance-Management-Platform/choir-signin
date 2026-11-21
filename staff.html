@@ -1685,12 +1685,13 @@ async function call1(body) {
   if (ckRid && /^(validate\.|late\.|handmark|room\.|roll\.)/.test(String(body.action))) body.rehearsalId = ckRid;
   // Changes always name the rehearsal on screen, so the test run (R900) can be checked while safe test is on.
   else if (ckShown && !body.rehearsalId && /^(validate\.(mark|markMany|markAllClean|undo)|late\.correct|handmark|room\.answer|roll\.mark)$/.test(String(body.action))) body.rehearsalId = ckShown;
-  if (++pending === 1) busyT = setTimeout(() => $('busy').classList.remove('hide'), 400);
+  const quiet = body.__quiet === true; delete body.__quiet;   // a background refresh shows no busy sign
+  if (!quiet && ++pending === 1) busyT = setTimeout(() => $('busy').classList.remove('hide'), 400);
   try {
     const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
     return await r.json();
   } finally {
-    if (--pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
+    if (!quiet && --pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
   }
 }
 const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People and access'], records: ['s13', 'Records'], settings: ['s18', 'Settings'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process'], changes: ['s16', 'Change log'], members: ['s17', 'Members'], qr: ['s3', 'Show QR code'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'Mark by hand'], absence: ['s6', 'My absence'], mine: ['s19', 'My choir'], requests: ['s7', 'Requests to decide'], rehearsal: ['s8', 'Rehearsals'], help: ['s9', 'Help']};
@@ -3825,10 +3826,10 @@ async function loadHome() {
   } catch (e) { say('m10', 'Network problem. Try again.', 'bad'); }
 }
 const ROOMLAB = {'': ['Waiting for a yes', 'p-pend'], yes: ['In the room', 'p-ok'], no: ['Not here', 'p-no']};
-async function loadRoom() {
+async function loadRoom(quiet) {
   const box = $('roombox'); if (!box) return;
   try {
-    const j = await call({action: 'room.list', token, rehearsalId: (typeof ckRid !== 'undefined' && ckRid) ? ckRid : undefined});
+    const j = await call({action: 'room.list', token, rehearsalId: (typeof ckRid !== 'undefined' && ckRid) ? ckRid : undefined, __quiet: quiet === true});
     if (!j.ok) { box.innerHTML = ''; return; }
     fpPanel('room', 'roombox', {title: 'Who is in the room?', sub: (j.rehearsalId ? j.rehearsalId + (j.startMs ? ' · ' + new Date(j.startMs).toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'}) : '') + '. ' : '') + 'These members checked in with Google, without the QR. Say yes only if you can see them here.' + (j.campus ? ' You see your own campus.' : ''),
       items: j.rows, empty: j.processed ? 'This rehearsal has been processed, so there is nothing left to answer.' : 'No one has checked in without the QR yet.',
@@ -3849,10 +3850,11 @@ document.addEventListener('click', async ev => {
   await loadRoom(); if (typeof loadRows === 'function') await loadRows();
   say('m4', j && j.ok ? (j.summary || 'Saved.') : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
 });
-async function loadRows() {
-  say('m4', 'Loading…'); loadRoom();
+async function loadRows(quiet) {
+  quiet = quiet === true;
+  if (!quiet) say('m4', 'Loading…'); loadRoom(quiet);
   try {
-    const j = await call({action: 'validate.list', token});
+    const j = await call({action: 'validate.list', token, __quiet: quiet});
     if (j.signedOut) { signedOutNow(); return; }
     if (!j.ok) { $('rows').innerHTML = ''; $('vbar').classList.add('hide'); $('vstats').innerHTML = ''; return say('m4', /cannot see the check-ins/.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad'); }
     const choices = j.rehearsals || []; ckShown = j.rehearsalId || '';
@@ -4243,18 +4245,31 @@ $('rhsave').onclick = async () => {
 };
 
 /** Live sign-ins on a Google Form rehearsal: each part in of expected, Needs checking, excused. */
-async function gfLive(id, boxId) {
+async function gfLive(id, boxId, quiet) {
   const box = $('gflog-' + (boxId || id)); if (!box) return;
-  box.textContent = 'Loading…';
-  try { const k = await call({action: 'forms.live', token, rehearsalId: id});
+  box.dataset.live = id; box.dataset.livebox = boxId || '';
+  if (quiet !== true) box.textContent = 'Loading…';
+  try { const k = await call({action: 'forms.live', token, rehearsalId: id, __quiet: quiet === true});
     if (!k.ok) { box.textContent = k.error || 'Not available.'; return; }
     const full = k.full || [];
     box.innerHTML = Object.keys(k.counts).filter(p => k.counts[p].expected > 0).map(p => '<div class="mrow"><span class="mtx"><b>' + esc(p) + '</b><span>' + k.counts[p].in + ' of ' + k.counts[p].expected + ' signed in' +
         (full.indexOf(p) !== -1 || full.indexOf('*') !== -1 ? ' · all in, its form has closed' : '') + '</span></span></div>').join('') +
       '<div class="mrow"><span class="mtx"><b>Needs checking</b><span>' + (k.checks ? k.checks + ' answer(s) waiting on Check-ins' : 'Nothing waiting') + '</span></span></div>' +
-      '<div class="mrow"><span class="mtx"><b>Excused</b><span>' + k.excused + (k.fromForm ? ' (' + k.fromForm + ' from the Excuse form)' : '') + '</span></span></div>';
+      '<div class="mrow"><span class="mtx"><b>Excused</b><span>' + k.excused + (k.fromForm ? ' (' + k.fromForm + ' from the Excuse form)' : '') + '</span></span></div>' +
+      '<p class="sub" style="margin:6px 0 0">Updates by itself every 20 seconds. Last updated ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'}) + '.</p>';
   } catch (e) { box.textContent = 'Network problem. Try again.'; }
 }
+/** Auto refresh (owner, 21 Nov 2026): Check-ins and any open Live sign-ins update every 20 seconds while on screen.
+ *  Skipped while the page is hidden, while something is saving, or while you are ticking or typing, so nothing you are doing is lost. */
+function autoRefresh() {
+  if (document.hidden || !token || pending > 0) return;
+  const on = id => $(id) && !$(id).classList.contains('hide'), a = document.activeElement;
+  const busyIn = id => a && $(id).contains(a) && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName);
+  if (on('s4') && !$('rows').querySelector('.tick:checked') && !busyIn('s4')) loadRows(true);
+  if (on('s8')) document.querySelectorAll('[id^="gflog-"][data-live]').forEach(b => { if (b.offsetParent) gfLive(b.dataset.live, b.dataset.livebox || undefined, true); });
+}
+setInterval(autoRefresh, 20000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) autoRefresh(); });
 /** Google Form settings: the Global Admin, or the Assistant while handed over. */
 let gfSet = null;
 const GFGRP = {all: 'All parts', Soprano: 'Soprano', Alto: 'Alto', Tenor: 'Tenor'};
