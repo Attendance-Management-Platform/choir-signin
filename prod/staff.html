@@ -943,6 +943,45 @@ body.qroff .qro{display:none!important}.qon{display:none}body.qroff .qon{display
 .rhrow .rhgf{flex:1 1 100%;min-width:0}.rhrow .rhgf .gfp{margin-top:4px}
 #rhlist{grid-template-columns:1fr!important}#rhlist .rhrow{align-items:flex-start}
 @media (min-width:700px){.rhrow .rhgf .gfp{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}.rhrow .rhgf .gfp>.gfph,.rhrow .rhgf .gfp>.gfacts,.rhrow .rhgf .gfp>.gfnote,.rhrow .rhgf .gfp>.gflog{grid-column:1/-1}}
+/* Rehearsals page: today card and coming up (owner, 21 Nov 2026) */
+.rday{padding:20px 22px;margin-bottom:16px}
+.rdhead{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.rdti{flex:1 1 260px;min-width:0}.rdti .sub{margin:3px 0 0}
+.rdt1{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.rdt1 h2{margin:0;font-size:19px;font-weight:700}
+.rdlive{background:#B6000A;color:#fff}
+.rdend{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rdtl{position:relative;height:52px;margin:22px 8px 4px}
+.rdtl .rdtrack,.rdtl .rdpast{position:absolute;left:0;right:0;top:11px;height:4px;border-radius:4px;background:#EFEDE8}
+.rdtl .rdpast{right:auto;background:#E7C6C9}
+.rdtl .rdbrk{position:absolute;top:8px;height:10px;border-radius:4px;background:repeating-linear-gradient(45deg,#D8D5CD 0 4px,#EFEDE8 4px 8px)}
+.rdpt{position:absolute;top:4px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center}
+.rdpt i{width:16px;height:16px;border-radius:50%;background:#C9C6BE;border:3px solid #fff;box-shadow:0 0 0 1px #E2E0D9}
+.rdpt em{font-style:normal;font-size:12px;font-weight:600;white-space:nowrap;margin-top:4px;color:#3A3936}
+.rdpt.dn i{background:#20775A}.rdpt.on i{background:#B6000A;box-shadow:0 0 0 5px rgba(182,0,10,.15)}.rdpt.on em{color:#B6000A}
+.rdpt.rdend i{width:10px;height:10px;background:#8A8781}.rdpt.rdend em{font-weight:500;color:#5F5E5A}
+.rdpt.rdend:first-of-type{transform:none;align-items:flex-start}.rdpt.rdend[style*="100%"]{transform:translateX(-100%);align-items:flex-end}
+.rdnow{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:16px;padding:14px 16px;border-radius:16px;background:#F6F5F2}
+.rdnow.on{background:#FFF4F4;border:1px solid #F0D5D8}
+.rdnow b{display:block;font-size:17px;margin-top:2px}.rdnow .sub{display:block;margin:2px 0 0}
+.rdlbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:#8E0008;text-transform:uppercase}
+.rdbtns{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.rdrolls{margin-top:10px}
+.rdroll{display:grid;grid-template-columns:minmax(90px,140px) minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.rdrn b{display:block;font-size:14px}.rdrn .sub{margin:0}.rdrt{font-size:14px}
+.rdforms{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;padding:12px 14px;border-radius:16px;background:#F6F5F2}
+.rdchip{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;border:1px solid #E7E4DD;border-radius:10px;padding:5px 5px 5px 11px;font-size:13px;font-weight:600;background:#fff}
+.rdchip button{font:inherit;font-size:12px;font-weight:500;border:1px solid #EFE7E7;background:#FFF8F8;border-radius:7px;padding:4px 8px;color:#B6000A;cursor:pointer;min-height:28px}
+.rdmore{margin-left:auto}.rdmore[open]{flex:1 1 100%;display:flex;flex-direction:column;align-items:flex-end}.rdmore>summary{list-style:none;cursor:pointer}.rdmore>summary::-webkit-details-marker{display:none}
+.rdmenu{margin-top:8px;align-self:stretch;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.rdmenu .btn{justify-content:flex-start;width:100%}
+.rdwho{font-size:12.5px;color:#5F5E5A;line-height:1.5;padding:6px 2px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.rdup{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 20px;border-top:1px solid var(--line)}
+.rdup .datebox{transform:scale(.85)}.rdup .rdti b{display:block;font-size:14.5px}
+.rdupf{grid-column:1/-1}.rdupf>summary{cursor:pointer;margin:0}
+@media (max-width:640px){.rdtl{display:none}.rdroll{grid-template-columns:1fr auto}.rdrt{grid-column:1/-1;order:3}.rdup{grid-template-columns:auto minmax(0,1fr)}.rdup>.rdbtns{grid-column:1/-1;justify-content:flex-start}.rdmore{margin-left:0}.rdtl .rdpt:not(.rdend):not(.on) em{font-size:11px}}
+:root[data-theme="dark"] .rdnow,:root[data-theme="dark"] .rdforms{background:#22252C}:root[data-theme="dark"] .rdnow.on{background:#2A1A1C;border-color:#6B3A3E}
+:root[data-theme="dark"] .rdchip,:root[data-theme="dark"] .rdmenu{background:#1B202A;border-color:#3A3D45}:root[data-theme="dark"] .rdchip button{background:#2A1A1C;border-color:#6B3A3E;color:#FF8A92}
+:root[data-theme="dark"] .rdpt i{border-color:#1B202A}:root[data-theme="dark"] .rdpt em{color:#E8E6E1}:root[data-theme="dark"] .rdtl .rdtrack{background:#33363D}
 /* KINNOR-LOOK START: generated by tools/kinnor-look/kinnor.py; RBC red and logo kept */
 :root{--kb:#B6000A;--kbt:#FDECEC;--kbx:#8E0008;--kpage:#F6F5F2;--kline:#E2E0D9;--kmut:#5F5E5A}
 body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans',sans-serif!important;letter-spacing:0}
@@ -1323,6 +1362,26 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 :root[data-theme="dark"] .fhr.me{background:#1A1F29}
 :root[data-theme="dark"] .fhc{background:#1B202A}
 :root[data-theme="dark"] .fhed{background:#1B202A}
+:root[data-theme="dark"] .rdtl .rdtrack, :root[data-theme="dark"] .rdtl .rdpast{background:#27251F}
+:root[data-theme="dark"] .rdtl .rdpast{background:#241617}
+:root[data-theme="dark"] .rdtl .rdbrk{background:repeating-linear-gradient(45deg,#1D1C19 0 4px,#27251F 4px 8px)}
+:root[data-theme="dark"] .rdpt i{background:#0F1218;border:3px solid #363D49}
+:root[data-theme="dark"] .rdpt em{color:#CDCDCC}
+:root[data-theme="dark"] .rdpt.on em{color:#FF666E}
+:root[data-theme="dark"] .rdpt.rdend em{color:#BDBCBB}
+:root[data-theme="dark"] .rdnow{background:#2A2821}
+:root[data-theme="dark"] .rdnow.on{background:#351919;border:1px solid #4C393B}
+:root[data-theme="dark"] .rdlbl{color:#FF666F}
+:root[data-theme="dark"] .rdforms{background:#2A2821}
+:root[data-theme="dark"] .rdchip{border:1px solid #46443F;background:#1B202A}
+:root[data-theme="dark"] .rdchip button{border:1px solid #463E3E;background:#1A1F29;color:#FF666E}
+:root[data-theme="dark"] .rdmenu{background:#1B202A}
+:root[data-theme="dark"] .rdwho{color:#BDBCBB}
+:root[data-theme="dark"] :root[data-theme="dark"] .rdnow, :root[data-theme="dark"] :root[data-theme="dark"] .rdforms{background:#454954}
+:root[data-theme="dark"] :root[data-theme="dark"] .rdnow.on{background:#5B3E42}
+:root[data-theme="dark"] :root[data-theme="dark"] .rdchip, :root[data-theme="dark"] :root[data-theme="dark"] .rdmenu{background:#3F485A}
+:root[data-theme="dark"] :root[data-theme="dark"] .rdchip button{background:#5B3E42}
+:root[data-theme="dark"] :root[data-theme="dark"] .rdtl .rdtrack{background:#474A52}
 :root[data-theme="dark"] .anl, :root[data-theme="dark"] .ntc{background:var(--card,#1B202A)!important}
 :root[data-theme="dark"] button.hsec.fold{background:var(--card,#1B202A)!important}
 :root[data-theme="dark"] button.hsec.fold.shut{background:var(--card,#1B202A)!important}
@@ -1621,7 +1680,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div id="rhmenu" class="hide"><button id="rhmake" type="button" data-noenter="1" class="hide">Make a rehearsal</button></div>
 <div id="rhgfsum" class="card pad rise hide" style="animation-delay:.07s"><div class="ct">Google Forms</div><div id="rhhelpbox" class="gfwho2"></div><label for="rhmail" class="lb">When are the links emailed?</label><select id="rhmail" class="in"><option value="hour">One hour before the start (usual)</option><option value="at">At a time I choose</option><option value="now">Now, when I press Save</option><option value="none">Do not email (I will copy the links)</option></select><input id="rhmailat" class="in hide" type="datetime-local" aria-label="Time the links are emailed (Lagos time)"><p class="sub">Only the form helpers get an email, one each, with the link of every form they hold.</p><label id="rhtestbox" class="rhtestbox hide"><input type="checkbox" id="rhtest" style="margin-top:3px"><span><b>This is a test run</b> (Global Admin only): not counted, nobody is told, ID R900 (and R901, R902 for more roll calls), removed by itself 12 hours after it finishes. The venue is not needed.</span></label></div>
 </div></div></div>
-<div id="rhsplan"><div id="rhfin" class="card pad rise hide" style="animation-delay:.09s"><div class="ct">Finish time today</div><p id="rhfinsub" class="sub"></p>
+<div id="rhsplan"><div id="rhtoday"></div><div id="rhfin" class="card pad rise hide" style="animation-delay:.09s"><div class="ct">Finish time today</div><p id="rhfinsub" class="sub"></p>
 <p class="sub">The roll call, the excuse times and the Process button all follow the finish time. If the rehearsal ends early or runs late, say so here so they open at the right moment.</p>
 <label for="rhfintime" class="lb">New finish time (Lagos time, like 18:30)</label><input id="rhfintime" type="time" class="in">
 <label for="rhfinwhy" class="lb">Reason</label><input id="rhfinwhy" class="in" autocomplete="off" maxlength="200" placeholder="For example: ran late, more songs">
@@ -1630,8 +1689,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div id="rhvbox" class="card pad rise hide qro" style="animation-delay:.1s"><div class="ct">Confirm the venue position on site</div><p id="rhvinfo" class="sub"></p>
 <p class="sub">Do this at the venue shortly before the rehearsal. Either admin can do it. If nobody does, the position found from the address is used.</p>
 <div class="actions"><button id="rhgeo" type="button" data-noenter="1" class="btn line">Confirm the venue position from this phone</button></div></div>
-<div class="card rise tblc" style="animation-delay:.12s"><div class="tblh"><span>Planned rehearsals</span><span id="rhcount" class="pill p-pend"></span></div>
-<div class="sub" style="padding:0 20px 12px">Up to three can be planned at once. A finished or cancelled one frees its place. The next upcoming one is <b>current</b>: members check in to it and only it is notified. The others are scheduled ahead and stay quiet until their turn.</div>
+<div class="card rise tblc" style="animation-delay:.12s"><div class="tblh"><span>Coming up</span><span id="rhcount" class="pill p-pend"></span></div>
 <div id="rhlist"></div><div id="rhhint" class="sub" style="padding:10px 20px;border-top:1px solid var(--line)"></div></div></div>
 <div id="rhstest"></div>
 <div id="rhsgf"></div>
@@ -3962,19 +4020,13 @@ async function loadRehearsal() {
       (tr.form ? gfFormsHtml(tr, j, true) : '') +
       (j.canTest ? '<div class="trfoot"><button class="btn warn" type="button" data-trremove="1" data-noenter="1">Remove the test</button></div>' : '') + '</div>' : '';
     $('rhstest').innerHTML = trHtml || (j.canTest ? '<div class="card pad"><div class="ct">Test run</div><p class="sub">No test run at the moment. A test run lets you try the Google Form or the QR with helpers before the real day. Nothing on it is counted and nobody is told. It is removed by itself 12 hours after it finishes.</p><div class="actions"><button class="btn red" type="button" data-trmake="1" data-noenter="1">Make a test run</button></div></div>' : '');
-    $('rhlist').innerHTML = (list.length ? list.map(r => { const dp = lagosParts(r.startMs); return '<div class="rhrow" data-st="' + (r.cancelled ? 'cancelled' : r.finished ? 'finished' : r.isCurrent ? 'current' : 'next') + '"><div class="datebox"><div class="m">' + dp.mon + '</div><div class="d">' + dp.day + '</div></div><div class="mid"><b>Rehearsal ' + esc(r.id) + (r.day && r.day.of > 1 ? ' · Roll ' + r.day.n + ' of ' + r.day.of : '') + '</b>' + (r.day && r.day.n === 1 ? rhDayLine(r) : '') + '<span class="s">' + esc(lagos(r.startMs).slice(-5)) + ' to ' + esc(lagos(r.finishMs).slice(-5)) + ' · ' + esc(r.venue ? r.venue.name || '(no name)' : '(no venue)') + (r.venue && !r.cancelled && !r.finished ? ' ' + dirLink(r.venue) : '') + '</span>' +
-      (rhLive(r) && r.venue && !QROFF ? '<span class="s">Position ' + (r.venue.confirmed ? 'confirmed on site by ' + esc(r.venue.confirmedBy) : r.venue.source === 'typed' ? 'typed by hand, not yet confirmed on site' : 'found from the address, not yet confirmed on site') + (r.editedBy ? ' · last edited by ' + esc(r.editedByRole) : '') + '</span>' : '') +
-      (r.form && r.formOwner === false ? '<span class="s">Uses the Google Forms of ' + esc(r.day ? r.day.g : '') + '</span>' : '') +
-      (r.log && r.log.length ? '<details><summary class="sub">Changes</summary>' + r.log.map(l => '<div class="sub">' + esc(lagos(l.t)) + ' · ' + esc(l.by) + ' · ' + esc(l.w) + '</div>').join('') + '</details>' : '') + '</div>' +
-      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' + (r.cancelled ? '<span class="pill p-no">Cancelled</span>' : r.finished ? '<span class="pill p-val">Finished</span>' + (r.checkInOpen ? '<span class="pill p-pend">Check-in still open</span>' : '') : r.isCurrent ? '<span class="pill p-ok">Current</span><span class="pill ' + (r.checkInOpen ? 'p-ok' : 'p-pend') + '">Check-in ' + (r.checkInOpen ? 'open' : 'closed') + '</span>' : '<span class="pill p-pend">Planned</span>') + (r.urgent && rhLive(r) ? '<span class="pill p-no">Urgent</span>' : '') +
-      (j.canEdit && rhLive(r) ? '<button class="btn line sm" type="button" data-edit="' + esc(r.id) + '" data-noenter="1">' + (r.day ? 'Cancel this day' : 'Edit or cancel') + '</button>' : '') + '</div>' +
-      (r.form && r.formOwner !== false ? '<div class="rhgf">' + gfFormsHtml(r, j, false) + '</div>' : '') + '</div>'; }).join('') : '<p class="sub" style="padding:14px 20px;margin:0">No rehearsal is set up yet.</p>');
+    $('rhtoday').innerHTML = rhTodayHtml(j, list); $('rhlist').innerHTML = rhUpHtml(j, list);
     // A rehearsal whose time has passed can still have check-in left open. It must be closed before the day can be processed.
     const stuck = list.filter(r => r.checkInOpen && !r.cancelled && !rhLive(r))[0] || null;
     if (stuck) { $('rhbtns').innerHTML = '<button class="btn red" type="button" data-op="close">Close check-in (' + esc(stuck.id) + ')</button>'; }
     else $('rhbtns').innerHTML = cur && rhLive(cur) ? (cur.checkInOpen ? '<button class="btn line" type="button" data-op="close">Close check-in (' + esc(cur.id) + ')</button>' : '<button class="btn red" type="button" data-op="open">Open check-in (' + esc(cur.id) + ')</button>') : '';
     rhFinDraw(list, j.canEdit);
-    $('rhcheck').classList.toggle('hide', !(j.canEdit && ((cur && rhLive(cur)) || stuck)));
+    $('rhcheck').classList.add('hide');
     if (stuck && !(cur && rhLive(cur))) $('rhcisub').textContent = stuck.id + ' has finished but check-in was left open. Close it so its attendance can be processed.';
     if (cur && rhLive(cur)) $('rhcisub').textContent = cur.id + ' is the current rehearsal. Check-in is ' + (cur.checkInOpen ? (cur.autoOpen ? 'open (it opened by itself at the start time).' : 'open.') : 'closed.') + ' You can open it by hand from one hour before the start. If nobody does, it opens by itself at the start time and closes by itself at the finish time.';
     $('rhhint').textContent = j.liveCount >= j.max ? 'Three rehearsal days are planned. Finish or cancel one to make another.' : 'The next one will be ' + j.nextId + '.';
@@ -3983,7 +4035,7 @@ async function loadRehearsal() {
     if (pref) PSECON.s8 = 'rhsmake';
     $('rhvbox').classList.toggle('hide', !cur || !rhLive(cur) || !cur.venue);
     if (cur && cur.venue) $('rhvinfo').textContent = 'Current rehearsal ' + cur.id + ' venue: ' + (cur.venue.name || '(no name)') + ' · position ' + (cur.venue.confirmed ? 'confirmed on site by ' + cur.venue.confirmedBy : 'not yet confirmed on site');
-    $('rhlist').querySelectorAll('button[data-edit]').forEach(b => b.onclick = () => { PSECON.s8 = 'rhsmake'; psecDraw('s8'); rhOpenForm('edit', b.dataset.edit); window.scrollTo(0, 0); });
+    rhq('button[data-edit]').forEach(b => b.onclick = () => { PSECON.s8 = 'rhsmake'; psecDraw('s8'); rhOpenForm('edit', b.dataset.edit); window.scrollTo(0, 0); });
     rhq('button[data-trmake]').forEach(b => b.onclick = () => { PSECON.s8 = 'rhsmake'; psecDraw('s8'); rhOpenForm('make'); $('rhsign').value = 'form'; rhSignSync(); $('rhtest').checked = true; rhPreview(); window.scrollTo(0, 0); });
     rhq('button[data-gflive]').forEach(b => b.onclick = () => gfLive(b.dataset.gflive, b.dataset.gfbox));
     rhq('button[data-trop]').forEach(b => b.onclick = async () => { b.disabled = true; try { const k = await call({action: 'rehearsal.' + b.dataset.trop, token, id: b.dataset.trid || 'R900'}); await loadRehearsal(); say('m8', k.ok && k.formWarn ? k.formWarn : k.ok ? 'Test run ' + (b.dataset.trid || 'R900') + ': check-in ' + (b.dataset.trop === 'open' ? 'opened. The form now takes answers.' : 'closed. The form has stopped taking answers.') : (k.error || 'Could not change it.'), k.ok && !k.formWarn ? 'ok' : 'bad'); } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); } });
@@ -3992,7 +4044,8 @@ async function loadRehearsal() {
     rhq('button[data-gfsend]').forEach(b => b.onclick = async () => { b.disabled = true; try { const k = await call({action: 'rehearsal.formSend', token, id: b.dataset.gfsend}); say('m8', k.ok ? 'Links emailed to ' + k.mailed + ' helper' + (k.mailed === 1 ? '' : 's') + '.' : (k.error || 'Could not send.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); } b.disabled = false; });
     rhq('button[data-gfrepair]').forEach(b => b.onclick = async () => { b.disabled = true; try { const k = await call({action: 'rehearsal.formRepair', token, id: b.dataset.gfrepair}); const box = $('gflog-' + b.dataset.gfrepair); if (box) box.innerHTML = k.ok ? (k.lines || []).map(l => '<div class="sub">' + esc(l) + '</div>').join('') : ''; say('m8', k.ok ? 'Checked and repaired.' : (k.error || 'Could not run.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); } b.disabled = false; });
     rhq('button[data-gfnames]').forEach(b => b.onclick = async () => { b.disabled = true; try { const k = await call({action: 'rehearsal.formNames', token, id: b.dataset.gfnames}); say('m8', k.ok ? 'The name lists on the forms are up to date.' + (k.note ? ' ' + k.note : '') : (k.error || 'Could not update the form.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); } b.disabled = false; });
-    $('rhbtns').querySelectorAll('button').forEach(b => b.onclick = async () => {
+    rhq('button[data-rhfin]').forEach(b => b.onclick = () => { rhFinShow = !rhFinShow; rhFinDraw(list, j.canEdit); if (rhFinShow) $('rhfin').scrollIntoView({behavior: 'smooth', block: 'center'}); });
+    [].slice.call($('rhtoday').querySelectorAll('button[data-op]')).concat([].slice.call($('rhbtns').querySelectorAll('button'))).forEach(b => b.onclick = async () => {
       const k = await call({action: 'rehearsal.' + b.dataset.op, token});
       await loadRehearsal();
       say('m8', k.ok && k.formWarn ? k.formWarn : k.ok ? 'Done.' : (k.error || 'Could not save.'), k.ok && !k.formWarn ? 'ok' : 'bad');
@@ -4001,16 +4054,81 @@ async function loadRehearsal() {
   } catch (e) { say('m8', 'Network problem. Try again.', 'bad'); }
 }
 /** Buttons on the planned list and on the test run card. */
-const rhq = sel => [].slice.call($('rhlist').querySelectorAll(sel)).concat([].slice.call($('rhstest').querySelectorAll(sel)));
+const rhq = sel => [].slice.call($('rhlist').querySelectorAll(sel)).concat([].slice.call($('rhstest').querySelectorAll(sel)), [].slice.call($('rhtoday').querySelectorAll(sel)));
+/* Rehearsals page (owner, 21 Nov 2026: a mix of options A and B). Today: one card for the day with a timeline, what is happening right now,
+   one line per roll call and the forms as chips with a More menu. Coming up: one short line per day. The buttons keep their data-* names. */
+function rhPm(ms) { const d = new Date(Number(ms) + 3600000), h = d.getUTCHours(), m = d.getUTCMinutes(); return (h % 12 || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? ' am' : ' pm'); }
+function rhGroupOf(list, r) { return r && r.day ? list.filter(x => x.day && x.day.g === r.day.g).sort((a, b) => a.day.n - b.day.n) : r ? [r] : []; }
+function rhFormsBit(j, owner, boxId, rolls) {
+  if (!owner || !owner.form) return rolls.some(x => x.form) ? '<p class="sub" style="margin:14px 0 0">The Google Forms are under Settings → Google Form settings.</p>' : '';
+  const h = (j && j.helpers) || {}, f = owner.form.forms || [];
+  return '<div class="rdforms"><span class="rdlbl">Google Forms</span>' + f.map(x => '<span class="rdchip" title="' + esc((h[x.k] || []).join(', ') || 'Nobody listed') + '">' + esc(GFLAB[x.k] || x.k) +
+      '<button type="button" data-gfcopy="' + esc(x.url) + '" data-noenter="1">Copy link</button></span>').join('') +
+    (j.canEdit ? '<details class="rdmore"><summary class="btn line sm">More</summary><div class="rdmenu">' +
+      '<button class="btn line sm" type="button" data-gfnames="' + esc(owner.id) + '" data-noenter="1">Update the name lists</button>' +
+      '<button class="btn line sm" type="button" data-gfsend="' + esc(owner.id) + '" data-noenter="1">Email the links again</button>' +
+      '<button class="btn line sm" type="button" data-gfrepair="' + esc(owner.id) + '" data-noenter="1">Check and repair</button>' +
+      '<div class="rdwho">' + f.map(x => '<div><b>' + esc(GFLAB[x.k] || x.k) + '</b> · ' + esc((h[x.k] || []).join(', ') || 'Nobody listed') + ' · <a href="' + esc(x.url) + '" target="_blank" rel="noopener">Open</a> · <a href="' + esc(x.edit) + '" target="_blank" rel="noopener">Edit</a></div>').join('') + '</div>' +
+      (rolls.some(rhLive) ? '<button class="btn line sm" type="button" data-edit="' + esc(rolls.filter(rhLive)[0].id) + '" data-noenter="1">' + (rolls[0].day ? 'Cancel this day' : 'Edit or cancel') + '</button>' : '') + '</div></details>' : '') +
+    '</div><div class="gflog" id="gflog-' + esc(boxId) + '"></div>';
+}
+function rhTodayHtml(j, list) {
+  const now = Date.now(), cur = list.filter(r => r.isCurrent)[0] || list.filter(r => r.checkInOpen && !r.cancelled)[0] || null;
+  if (!cur) return '';
+  const rolls = rhGroupOf(list, cur), owner = rolls.filter(x => x.form && x.formOwner !== false)[0] || (cur.form && cur.formOwner !== false ? cur : null);
+  const d0 = cur.day ? cur.day.startMs : cur.startMs, d1 = cur.day ? cur.day.finishMs : cur.finishMs, dp = lagosParts(d0);
+  const open = rolls.filter(x => x.checkInOpen && !x.cancelled)[0] || null, next = rolls.filter(x => rhLive(x) && !x.checkInOpen)[0] || null;
+  const on = now >= d0 && now < d1, done = rolls.every(x => x.finished || x.cancelled);
+  const ids = rolls.length > 1 ? rolls[0].id + ' and ' + rolls[rolls.length - 1].id : cur.id;
+  const name = new Date(d0 + 3600000).toLocaleDateString('en-GB', {weekday: 'long', timeZone: 'UTC'}) + ' rehearsal';
+  // Timeline: start, roll calls, breaks, end, and where we are now.
+  const span = Math.max(1, d1 - d0), pos = ms => Math.max(0, Math.min(100, (Number(ms) - d0) / span * 100));
+  const tl = rolls.length > 1 || (cur.day && (cur.day.breaks || []).length) ? '<div class="rdtl" role="img" aria-label="' + esc('The day from ' + rhPm(d0) + ' to ' + rhPm(d1) + ': ' + rolls.map(x => 'Roll ' + x.day.n + ' at ' + rhPm(x.startMs)).join(', ')) + '">' +
+      '<i class="rdtrack"></i>' + (on ? '<i class="rdpast" style="width:' + pos(now).toFixed(1) + '%"></i>' : '') +
+      ((cur.day && cur.day.breaks) || []).map(b => '<i class="rdbrk" style="left:' + pos(b.fromMs).toFixed(1) + '%;width:' + Math.max(1, pos(b.toMs) - pos(b.fromMs)).toFixed(1) + '%"></i>').join('') +
+      '<span class="rdpt rdend" style="left:0"><i></i><em>' + rhPm(d0) + '</em></span><span class="rdpt rdend" style="left:100%"><i></i><em>' + rhPm(d1) + '</em></span>' +
+      rolls.map(x => '<span class="rdpt ' + (x.checkInOpen ? 'on' : x.finished ? 'dn' : '') + '" style="left:' + pos(x.startMs).toFixed(1) + '%"><i></i><em>Roll ' + (x.day ? x.day.n : 1) + ' · ' + rhPm(x.startMs) + '</em></span>').join('') + '</div>' : '';
+  const box = owner ? owner.id : cur.id;
+  const now1 = open ? '<div class="rdnow on"><div><span class="rdlbl">Right now</span><b>' + esc(open.day ? 'Roll ' + open.day.n + ' is open' : 'Check-in is open') + '</b><span class="sub">Closes by itself at ' + esc(rhPm(open.finishMs)) + '.</span></div><div class="rdbtns">' +
+        '<button class="btn red sm" type="button" data-gflive="' + esc(open.id) + '" data-gfbox="' + esc(box) + '" data-noenter="1">See sign-ins</button>' + (j.canEdit && open.isCurrent ? '<button class="btn line sm" type="button" data-op="close" data-noenter="1">Close now</button>' : '') + '</div></div>'
+    : next ? '<div class="rdnow"><div><span class="rdlbl">Next</span><b>' + esc(next.day ? 'Roll ' + next.day.n + ' opens by itself at ' + rhPm(next.startMs) : 'Check-in opens by itself at ' + rhPm(next.startMs)) + '</b><span class="sub">You can open it by hand from an hour before.</span></div><div class="rdbtns">' +
+        (j.canEdit && next.isCurrent && now >= next.startMs - 3600000 ? '<button class="btn red sm" type="button" data-op="open" data-noenter="1">Open now</button>' : '') + '</div></div>'
+    : done ? '<div class="rdnow"><div><span class="rdlbl">Finished</span><b>Every roll call has closed</b><span class="sub">Clear Needs checking on Check-ins, then process it 30 minutes after the end.</span></div></div>' : '';
+  const lines = rolls.length > 1 ? '<div class="rdrolls">' + rolls.map(x => '<div class="rdroll"><span class="rdrn"><b>Roll ' + x.day.n + '</b><span class="sub">' + esc(x.id) + '</span></span><span class="rdrt">' + esc(rhPm(x.startMs) + ' to ' + rhPm(x.finishMs)) + '</span>' +
+      '<span class="rdbtns"><span class="pill ' + (x.cancelled ? 'p-no' : x.checkInOpen ? 'p-ok' : x.finished ? 'p-val' : 'p-pend') + '">' + (x.cancelled ? 'Cancelled' : x.checkInOpen ? 'Open' : x.finished ? 'Closed' : 'Later') + '</span>' +
+      (x.form || owner ? '<button class="btn line sm" type="button" data-gflive="' + esc(x.id) + '" data-gfbox="' + esc(box) + '" data-noenter="1">See sign-ins</button>' : '') + '</span></div>').join('') + '</div>' : '';
+  return '<div class="card rise rday">' +
+    '<div class="rdhead"><div class="datebox"><div class="m">' + dp.mon + '</div><div class="d">' + dp.day + '</div></div><div class="rdti"><div class="rdt1"><h2>' + esc(name) + '</h2>' +
+      (open || on ? '<span class="pill rdlive">On now</span>' : done ? '<span class="pill p-val">Finished</span>' : '<span class="pill p-pend">Planned</span>') + (cur.urgent && !done ? '<span class="pill p-no">Urgent</span>' : '') + '</div>' +
+      '<p class="sub">' + esc(rhPm(d0) + ' to ' + rhPm(d1)) + (cur.venue && cur.venue.name ? ' · ' + esc(cur.venue.name) + ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(cur.venue.name) + '" target="_blank" rel="noopener">Directions</a>' : '') + '</p>' +
+      '<p class="sub">' + (rolls.length > 1 ? rolls.length + ' roll calls, each its own attendance · ' : 'One attendance · ') + esc(ids) + '</p></div>' +
+      (j.canEdit && !done ? '<div class="rdend"><span class="sub">Ends ' + esc(rhPm(d1)) + '</span><button class="btn line sm" type="button" data-rhfin="1" data-noenter="1">Change end time</button></div>' : '') + '</div>' +
+    tl + now1 + lines + rhFormsBit(j, owner, box, rolls) + (owner ? '' : '<div class="gflog" id="gflog-' + esc(box) + '"></div>') + '</div>';
+}
+function rhUpHtml(j, list) {
+  const cur = list.filter(r => r.isCurrent)[0] || list.filter(r => r.checkInOpen && !r.cancelled)[0] || null, today = {};
+  rhGroupOf(list, cur).forEach(x => { today[x.id] = true; });
+  const seen = {}, days = [];
+  list.filter(r => !today[r.id] && !r.cancelled).forEach(r => { const k = r.day ? 'g' + r.day.g : r.id; if (!seen[k]) { seen[k] = true; days.push(rhGroupOf(list, r)); } });
+  if (!days.length) return '<p class="sub" style="padding:14px 20px;margin:0">' + (cur ? 'Nothing else is planned yet.' : 'No rehearsal is set up yet.') + '</p>';
+  return days.map(rs => {
+    const r = rs[0], owner = rs.filter(x => x.form && x.formOwner !== false)[0] || null, d0 = r.day ? r.day.startMs : r.startMs, d1 = r.day ? r.day.finishMs : r.finishMs, dp = lagosParts(d0);
+    return '<div class="rdup"><div class="datebox"><div class="m">' + dp.mon + '</div><div class="d">' + dp.day + '</div></div><div class="rdti"><b>' + esc(new Date(d0 + 3600000).toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC'})) + ' · ' + esc(rs.length > 1 ? rs[0].id + ' to ' + rs[rs.length - 1].id : r.id) + '</b>' +
+      '<span class="sub">' + esc(rhPm(d0) + ' to ' + rhPm(d1)) + (r.venue && r.venue.name ? ' · ' + esc(r.venue.name) : '') + ' · ' + (rs.length > 1 ? rs.length + ' roll calls' : 'one attendance') + '</span></div>' +
+      '<div class="rdbtns">' + (r.finished ? '<span class="pill p-val">Finished</span>' : '<span class="pill p-pend">Planned</span>') + (r.urgent && rhLive(r) ? '<span class="pill p-no">Urgent</span>' : '') +
+      (j.canEdit && rhLive(r) && !owner ? '<button class="btn line sm" type="button" data-edit="' + esc(r.id) + '" data-noenter="1">' + (r.day ? 'Cancel this day' : 'Edit or cancel') + '</button>' : '') + '</div>' +
+      (owner ? '<details class="rdupf"><summary class="sub">Google Forms and more</summary>' + rhFormsBit(j, owner, owner.id, rs) + '</details>' : '') + '</div>';
+  }).join('');
+}
 function rhFinDraw(list, canEdit) {
   const now = Date.now();
   const r = (list || []).filter(x => !x.cancelled && !x.dayProcessed && x.startMs <= now && now < (x.finishMs || x.startMs + 8 * 3600000) + 12 * 3600000).slice(-1)[0] || null;
-  $('rhfin').classList.toggle('hide', !(canEdit && r)); rhFinFor = r;
+  $('rhfin').classList.toggle('hide', !(canEdit && r) || !rhFinShow); rhFinFor = r;
   if (!r) return;
   $('rhfinsub').textContent = r.id + ' is set to finish at ' + lagos(r.finishMs) + (r.finished ? ' (that time has passed).' : '.');
   $('rhfintime').value = new Date(r.finishMs + 3600000).toISOString().slice(11, 16);
 }
-let rhFinFor = null;
+let rhFinFor = null, rhFinShow = false;
 async function rhFinSend(extra) {
   if (!rhFinFor) return;
   const reason = $('rhfinwhy').value.trim();
