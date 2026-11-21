@@ -1047,6 +1047,52 @@ body.qroff .qro{display:none!important}.qon{display:none}body.qroff .qon{display
 #rollbox .fpbar>div:first-child{grid-column:1/-1}
 #rollbox .fpbar>button{align-self:end}
 @media (max-width:520px){#rollbox .fpbar{grid-template-columns:1fr 1fr}#rollbox .fpbar>button{min-height:44px}}
+/* Rehearsals page refresh (owner, 21 Nov 2026): date tile, pin, "…" menu, calmer colours, icon buttons for the forms */
+.rdbhead.card{display:flex;align-items:center;gap:14px;padding:14px 16px;margin:0 0 12px!important}
+.rddt{width:54px;height:58px;border-radius:14px;background:var(--kpage,#F1EFE8);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none}
+.rddt span{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--mut,#5F5E5A)}.rddt b{font-size:22px;line-height:1}
+.rdhx{flex:1;min-width:0}.rdhx h2{margin:4px 0 2px;font-size:18px;font-weight:700}
+.rdhx .rdven{margin:0!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rdib{width:36px;height:36px;border-radius:11px;border:1px solid var(--line);background:var(--card,#fff);display:inline-flex;align-items:center;justify-content:center;color:var(--fg,#3A3936);flex:none;cursor:pointer;padding:0;list-style:none;text-decoration:none}
+.rdib::-webkit-details-marker{display:none}.rdib:hover{background:var(--kbt,#F6F5F2)}
+.rdmenu{position:relative;flex:none}.rdmenu>summary{list-style:none}
+.rdmenub{position:absolute;right:0;top:42px;z-index:20;background:var(--card,#fff);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.14);padding:6px;width:230px}
+.rdmenub button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;background:none;border-radius:10px;font:inherit;font-size:13.5px;font-weight:600;color:inherit;text-align:left;cursor:pointer;min-height:40px}
+.rdmenub button:hover{background:var(--kbt,#F6F5F2)}.rdmenub .rdmx{color:#AE2D37}
+.rdlbl{color:var(--mut,#6B6862)!important}
+.rdnowb.on{background:var(--card,#fff)!important;border-color:var(--line)!important}
+.rdlive{background:#FDECEC!important;color:#8E0008!important}
+.rdstats{display:flex;gap:8px;margin:10px 0}.rdstats>div{flex:1;border:1px solid var(--line);border-radius:12px;padding:9px 11px;min-width:0}
+.rdstats b{display:block;font-size:19px;font-weight:700;line-height:1.15}.rdstats small{font-size:12px;font-weight:600}.rdstats span{font-size:11.5px;color:var(--mut,#5F5E5A)}
+.rdformc{padding:0!important;overflow:hidden}.rdformc>summary{list-style:none}.rdformc>summary::-webkit-details-marker{display:none}
+.rdfsum{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer}
+.rdfst{flex:1;min-width:0}.rdfst b{display:block;font-size:14.5px}.rdfst .sub{margin:1px 0 0}
+.rdkc{width:9px;height:9px;border-right:2.5px solid var(--mut,#5F5E5A);border-bottom:2.5px solid var(--mut,#5F5E5A);transform:rotate(-45deg);margin:0 6px;flex:none;transition:transform .2s}
+.rdformc[open] .rdkc{transform:rotate(45deg);margin-top:-5px}
+.rdformc[open]>summary{border-bottom:1px solid var(--line)}
+.rdformc>.rdfr,.rdformc>.rdbtns,.rdformc>.gflog,.rdformc>p{margin-left:18px;margin-right:18px}
+.rdformc>.rdbtns.rdfx{margin-bottom:14px;justify-content:flex-start}
+.rdformc .rdfr{flex-wrap:nowrap}.rdfi{width:32px;height:32px;border-radius:10px;background:var(--kpage,#F1EFE8);display:inline-flex;align-items:center;justify-content:center;flex:none;color:var(--fg,#3A3936)}
+.rdformc .rdfr .rdbtns{flex-wrap:nowrap}
+.rdlink{color:inherit!important;text-decoration:underline;text-underline-offset:3px;font-weight:600}
+.rdst.on .rdstl i{background:#20775A!important;box-shadow:0 0 0 4px rgba(32,119,90,.16)!important}.rdst.on .rdstt{color:inherit!important}
+/* Kinnor fold chevron everywhere (owner, 21 Nov 2026): a thin ">" that turns down when open, no circle */
+.fch{width:22px!important;height:22px!important;border:0!important;background:none!important;border-radius:0!important;box-shadow:none!important}
+.fch::before{width:9px!important;height:9px!important;border-right:2.5px solid var(--mut,#5F5E5A)!important;border-bottom:2.5px solid var(--mut,#5F5E5A)!important;transform:rotate(-45deg)!important;transition:transform .2s}
+.fold:not(.shut) .fch{transform:none!important;background:none!important}
+.fold:not(.shut) .fch::before{transform:translateY(-3px) rotate(45deg)!important}
+.card>.fh.tblh>span:first-child{font-size:15px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--fg)}
+.rdib{min-height:0!important;height:36px!important;width:36px!important;padding:0!important;box-shadow:none!important}
+.rdmenu>summary.rdib{display:inline-flex!important}
+:root[data-theme="dark"] .fch,:root[data-theme="dark"] .fold:not(.shut) .fch{background:none!important;border:0!important}
+.rdmenu{border:0!important;padding:0!important;background:none!important;min-height:0!important;margin:0!important;box-shadow:none!important}
+@media (max-width:640px){.rdbhead.card{position:relative;align-items:flex-start}.rdbhead>a.rdib{position:absolute;top:12px;right:56px}.rdbhead>.rdmenu{position:absolute;top:12px;right:12px}.rdhx .rdt1{min-height:36px;padding-right:84px}.rdstats b{font-size:16px}}
+:root[data-theme="dark"] .rdlive{background:#3A1A1D!important;color:#FF8A90!important}
+html:root[data-theme="dark"] body .rdnowb.on{background:#1B202A!important;border-color:#2C323D!important}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) .rdlive{background:#3A1A1D!important;color:#FF8A90!important}html:not([data-theme="light"]) body .rdnowb.on{background:#1B202A!important;border-color:#2C323D!important}}
+@media (min-width:641px){.rdbhead>.rdmenu,.rdbhead>a.rdib{align-self:center}.rdmenu>summary{vertical-align:middle}}
+html:root[data-theme="dark"] body .rdst.on .rdstl i{background:#2F9E78!important;box-shadow:0 0 0 4px rgba(47,158,120,.2)!important}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) body .rdst.on .rdstl i{background:#2F9E78!important}}
 /* KINNOR-LOOK START: generated by tools/kinnor-look/kinnor.py; RBC red and logo kept */
 :root{--kb:#B6000A;--kbt:#FDECEC;--kbx:#8E0008;--kpage:#F6F5F2;--kline:#E2E0D9;--kmut:#5F5E5A}
 body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans',sans-serif!important;letter-spacing:0}
@@ -4134,18 +4180,22 @@ async function loadRehearsal() {
 const rhq = sel => [].slice.call($('rhlist').querySelectorAll(sel)).concat([].slice.call($('rhstest').querySelectorAll(sel)), [].slice.call($('rhtoday').querySelectorAll(sel)));
 /* Rehearsals page (owner, 21 Nov 2026: a mix of options A and B). Today: one card for the day with a timeline, what is happening right now,
    one line per roll call and the forms as chips with a More menu. Coming up: one short line per day. The buttons keep their data-* names. */
+const RDI = (() => { const sv = p => '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + p + '</svg>';
+  return {pin: sv('<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.6"/>'), more: sv('<circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/>'),
+    form: sv('<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/>'), open: sv('<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>'),
+    copy: sv('<rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/>'), edit: sv('<path d="M4 20h4L19 9l-4-4L4 16z"/>'), x: sv('<path d="M6 6l12 12M18 6L6 18"/>')}; })();
+document.addEventListener('click', ev => { document.querySelectorAll('details.rdmenu[open]').forEach(m => { if (!m.contains(ev.target) || ev.target.closest('.rdmenub button')) m.open = false; }); });
 function rhPm(ms) { const d = new Date(Number(ms) + 3600000), h = d.getUTCHours(), m = d.getUTCMinutes(); return (h % 12 || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? ' am' : ' pm'); }
 function rhGroupOf(list, r) { return r && r.day ? list.filter(x => x.day && x.day.g === r.day.g).sort((a, b) => a.day.n - b.day.n) : r ? [r] : []; }
 function rhFormsBit(j, owner, boxId, rolls) {
   if (!owner || !owner.form) return rolls.some(x => x.form) ? '<p class="sub" style="margin:0">The Google Forms are under Settings → Google Form settings.</p>' : '';
   const h = (j && j.helpers) || {}, f = owner.form.forms || [], live = rolls.filter(rhLive);
-  return f.map(x => '<div class="rdfr"><span class="rdfn"><b>' + esc(GFLAB[x.k] || x.k) + '</b><span class="sub">' + esc((h[x.k] || []).join(', ') || 'Nobody listed') + '</span></span>' +
-      '<span class="rdbtns"><a class="btn line sm" href="' + esc(x.url) + '" target="_blank" rel="noopener">Open</a><button class="btn line sm" type="button" data-gfcopy="' + esc(x.url) + '" data-noenter="1">Copy link</button></span></div>').join('') +
+  return f.map(x => '<div class="rdfr"><span class="rdfi" aria-hidden="true">' + RDI.form + '</span><span class="rdfn"><b>' + esc(GFLAB[x.k] || x.k) + '</b><span class="sub">' + esc((h[x.k] || []).join(', ') || 'Nobody listed') + '</span></span>' +
+      '<span class="rdbtns"><a class="rdib" href="' + esc(x.url) + '" target="_blank" rel="noopener" title="Open the form" aria-label="Open the ' + esc(GFLAB[x.k] || x.k) + ' form">' + RDI.open + '</a><button class="rdib" type="button" data-gfcopy="' + esc(x.url) + '" data-noenter="1" title="Copy link" aria-label="Copy the ' + esc(GFLAB[x.k] || x.k) + ' link">' + RDI.copy + '</button></span></div>').join('') +
     (j.canEdit ? '<div class="rdbtns rdfx">' +
       '<button class="btn line sm" type="button" data-gfnames="' + esc(owner.id) + '" data-noenter="1">Update the name lists</button>' +
       '<button class="btn line sm" type="button" data-gfsend="' + esc(owner.id) + '" data-noenter="1">Email the links again</button>' +
       '<button class="btn line sm" type="button" data-gfrepair="' + esc(owner.id) + '" data-noenter="1">Check and repair</button></div>' +
-      '<p class="sub rdfedit">Change a form\'s wording: ' + f.map(x => '<a href="' + esc(x.edit) + '" target="_blank" rel="noopener">' + esc(GFLAB[x.k] || x.k) + '</a>').join(' · ') + '</p>' +
       (live.length ? '<p class="rdfx2"><button class="btn line sm" type="button" data-edit="' + esc(live[0].id) + '" data-noenter="1">' + (rolls[0].day ? 'Cancel this day' : 'Edit or cancel') + '</button></p>' : '') : '') +
     '<div class="gflog" id="gflog-' + esc(boxId) + '"></div>';
 }
@@ -4170,15 +4220,20 @@ function rhTodayHtml(j, list) {
         '<span class="sub">Open ' + esc(rhPm(s.r.startMs) + ' to ' + rhPm(s.r.finishMs)) + (s.r.form || owner ? ' · <button class="rdlink" type="button" data-gflive="' + esc(s.r.id) + '" data-gfbox="' + esc(box) + '" data-noenter="1">See sign-ins</button>' : '') + '</span>';
     return '<div class="rdst ' + cls + '"><span class="rdstt">' + esc(rhPm(s.t)) + '</span><span class="rdstl"><i></i><b></b></span><span class="rdstb">' + body + '</span></div>';
   };
-  const nowBox = open ? '<section class="card rdnowb on"><span class="rdlbl">Right now</span><p class="rdbig">' + esc(many ? 'Roll ' + open.day.n + ' is open' : 'Check-in is open') + '</p><p class="sub">Closes by itself at ' + esc(rhPm(open.finishMs)) + '. Anything not counted waits on Check-ins under Needs checking.</p>' +
+  const nowBox = open ? '<section class="card rdnowb on"><span class="rdlbl">Right now</span><p class="rdbig">' + esc(many ? 'Roll ' + open.day.n + ' is open' : 'Check-in is open') + '</p>' +
+        '<div class="rdstats"><div><b>' + Math.max(0, Math.round((open.finishMs - now) / 60000)) + '<small>m</small></b><span>until it closes</span></div><div><b>' + esc(rhPm(open.finishMs)) + '</b><span>closes by itself</span></div>' + (many ? '<div><b>' + open.day.n + '<small> of ' + rolls.length + '</small></b><span>roll calls</span></div>' : '') + '</div>' +
+        '<p class="sub">Anything not counted waits on Check-ins under Needs checking.</p>' +
         '<div class="rdbtns rdl"><button class="btn red sm" type="button" data-gflive="' + esc(open.id) + '" data-gfbox="' + esc(box) + '" data-noenter="1">See sign-ins</button>' + (j.canEdit && open.isCurrent ? '<button class="btn line sm" type="button" data-op="close" data-noenter="1">Close ' + esc(many ? 'Roll ' + open.day.n : 'check-in') + ' now</button>' : '') + '</div></section>'
     : next ? '<section class="card rdnowb"><span class="rdlbl">Next</span><p class="rdbig">' + esc((many ? 'Roll ' + next.day.n : 'Check-in') + ' opens at ' + rhPm(next.startMs)) + '</p><p class="sub">It opens by itself. You can open it by hand from an hour before.</p>' +
         (j.canEdit && next.isCurrent && now >= next.startMs - 3600000 ? '<div class="rdbtns rdl"><button class="btn red sm" type="button" data-op="open" data-noenter="1">Open now</button></div>' : '') + '</section>'
     : done ? '<section class="card rdnowb"><span class="rdlbl">Finished</span><p class="rdbig">Every roll call has closed</p><p class="sub">Clear Needs checking on Check-ins. Processing opens 30 minutes after the end.</p></section>' : '';
-  const forms = owner || rolls.some(x => x.form) ? '<section class="card rdformc"><span class="rdlbl">Google Forms ' + (dayIso === todayIso ? 'for today' : 'for this day') + '</span>' + rhFormsBit(j, owner, box, rolls) + '</section>' : '<div class="gflog" id="gflog-' + esc(box) + '"></div>';
-  return '<div class="rdb"><div class="rdbhead"><div class="rdt1"><h2>' + esc((dayIso === todayIso ? 'Today · ' : 'Next · ') + when) + '</h2>' +
-      (open ? '<span class="pill rdlive">On now</span>' : done ? '<span class="pill p-val">Finished</span>' : '<span class="pill p-pend">Planned</span>') + (cur.urgent && !done ? '<span class="pill p-no">Urgent</span>' : '') + '</div>' +
-      '<p class="sub">' + esc(rhPm(d0) + ' to ' + rhPm(d1)) + (cur.venue && cur.venue.name ? ' · ' + esc(cur.venue.name) + ' · <a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(cur.venue.name) + '" target="_blank" rel="noopener">Directions</a>' : '') + ' · ' + (many ? rolls.length + ' roll calls, each its own attendance' : 'one attendance') + '</p></div>' +
+  const forms = owner || rolls.some(x => x.form) ? '<details class="card rdformc" open><summary class="rdfsum"><span class="rdfi" aria-hidden="true">' + RDI.form + '</span><span class="rdfst"><b>Google Forms ' + (dayIso === todayIso ? 'for today' : 'for this day') + '</b><span class="sub">' + ((owner && owner.form && owner.form.forms) || []).length + ' forms · Open or copy a link</span></span><span class="rdkc" aria-hidden="true"></span></summary>' + rhFormsBit(j, owner, box, rolls).replace('<p class="rdfx2">', '<p class="rdfx2 hide">') + '</details>' : '<div class="gflog" id="gflog-' + esc(box) + '"></div>';
+  const dp0 = new Date(d0 + 3600000), liveOne = rolls.filter(rhLive)[0] || null;
+  const menu = j.canEdit && liveOne ? '<details class="rdmenu"><summary class="rdib" title="More" aria-label="More for this day">' + RDI.more + '</summary><div class="rdmenub"><button type="button" data-edit="' + esc(liveOne.id) + '" data-noenter="1">' + RDI.edit + (many ? 'Edit or cancel this day' : 'Edit this rehearsal') + '</button><button type="button" class="rdmx" data-edit="' + esc(liveOne.id) + '" data-noenter="1">' + RDI.x + 'Cancel ' + (many ? 'this day' : 'this rehearsal') + '</button></div></details>' : '';
+  return '<div class="rdb"><div class="card rdbhead"><div class="rddt"><span>' + esc(dp0.toLocaleDateString('en-GB', {weekday: 'short', timeZone: 'UTC'}).toUpperCase()) + '</span><b>' + dp0.getUTCDate() + '</b></div><div class="rdhx"><div class="rdt1"><span class="rdlbl">' + (dayIso === todayIso ? 'Today' : 'Next') + '</span>' +
+      (open ? '<span class="pill p-no rdlive">On now</span>' : done ? '<span class="pill p-val">Finished</span>' : '<span class="pill p-pend">Planned</span>') + (cur.urgent && !done ? '<span class="pill p-no">Urgent</span>' : '') + '</div>' +
+      '<h2>' + esc(rhPm(d0) + ' to ' + rhPm(d1)) + ' · ' + (many ? rolls.length + ' roll calls' : 'one attendance') + '</h2><p class="sub rdven">' + esc(when) + (cur.venue && cur.venue.name ? ' · ' + esc(cur.venue.name) : '') + (many ? ' · each roll call is its own attendance' : '') + '</p></div>' +
+      (cur.venue && cur.venue.name ? '<a class="rdib" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(cur.venue.name) + '" target="_blank" rel="noopener" title="Open in Maps" aria-label="Open the venue in Maps">' + RDI.pin + '</a>' : '') + menu + '</div>' +
     '<div class="rdbcols"><section class="card rdday"><span class="rdlbl">The day</span><div class="rdsteps">' + steps.map(step).join('') + '</div></section>' +
     '<div class="rdside">' + nowBox + forms + '</div></div></div>';
 }
