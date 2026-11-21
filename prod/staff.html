@@ -1957,7 +1957,7 @@ async function call1(body) {
   if (ckRid && /^(validate\.|late\.|handmark|room\.|roll\.)/.test(String(body.action))) body.rehearsalId = ckRid;
   // Changes always name the rehearsal on screen, so the test run (R900) can be checked while safe test is on.
   else if (ckShown && !body.rehearsalId && /^(validate\.(mark|markMany|markAllClean|undo)|late\.correct|handmark|room\.answer|roll\.mark)$/.test(String(body.action))) body.rehearsalId = ckShown;
-  const quiet = body.__quiet === true || (Date.now() < autoUntil && AUTO_READ.test(String(body.action || ''))); delete body.__quiet;   // a background refresh shows no busy sign
+  const quiet = body.__quiet === true || Date.now() < autoUntil; delete body.__quiet;   // a background refresh shows no busy sign
   if (!quiet && ++pending === 1) busyT = setTimeout(() => $('busy').classList.remove('hide'), 400);
   try {
     const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
@@ -4658,17 +4658,21 @@ document.addEventListener('click', e => {
   autoMark(e);
 }, true);
 function autoBlocked() {
-  if (document.hidden || !token || pending > 0) return true;
+  if (document.hidden || !token || pending > 0 || Date.now() - autoTouched < 12000) return true;
   if (document.querySelector('.ov:not(.hide)')) return true;
   try { if (CBOPEN && CBOPEN.classList.contains('on') && (!CBOPEN.__inp || CBOPEN.__inp.offsetParent)) return true; } catch (e) { /* no picker yet */ }
   const a = document.activeElement; return !!(a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName));
 }
 async function autoRun(fn) {
-  const y = window.scrollY; autoUntil = Date.now() + 15000;
+  // Smooth refresh (owner, 21 Nov 2026): no busy signs, the page keeps its height while it redraws, and your place is kept.
+  const y = window.scrollY, pg = $(autoView()); autoUntil = Date.now() + 15000;
+  if (pg) pg.style.minHeight = pg.offsetHeight + 'px';
   try { await fn(); } catch (e) { /* the next round tries again */ } finally { autoUntil = 0; }
-  const keep = () => { if (window.scrollY < y - 2 && !AUTO_DIRTY[autoView()]) window.scrollTo(0, y); };   // keep your place on the page
-  keep(); setTimeout(keep, 700);
+  const keep = () => { if (Math.abs(window.scrollY - y) > 2 && !AUTO_DIRTY[autoView()]) window.scrollTo(0, y); };   // keep your place on the page
+  keep(); setTimeout(() => { keep(); if (pg) pg.style.minHeight = ''; }, 700);
 }
+// Wait while you are scrolling, touching or reading closely: no refresh within 12 seconds of your last move.
+let autoTouched = 0; ['scroll', 'touchstart', 'pointerdown', 'wheel', 'keydown'].forEach(t => window.addEventListener(t, () => { if (Date.now() >= autoUntil) autoTouched = Date.now(); }, {passive: true, capture: true}));
 function autoRefresh() {   // every 20 seconds: Check-ins and open Live sign-ins
   if (autoBlocked()) return;
   const v = autoView();
@@ -4682,7 +4686,7 @@ function autoRefreshPage() {   // every 30 seconds: the page on screen, unless y
   autoRun(AUTO_LOAD[v]);
 }
 setInterval(autoRefresh, 20000);
-setInterval(autoRefreshPage, 30000);
+setInterval(autoRefreshPage, 45000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { autoRefresh(); autoRefreshPage(); } });
 /** Google Form settings: the Global Admin, or the Assistant while handed over. */
 let gfSet = null;
@@ -5187,7 +5191,7 @@ function emptyCard(icon, title, text, btn) {
   const P = {cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', list: '<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>', wait: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'};
   return '<div class="card emc"><span class="emi ' + esc(icon) + '"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[icon] || P.list) + '</svg></span><b>' + esc(title) + '</b><span class="sub">' + esc(text) + '</span>' + (btn || '') + '</div>';
 }
-function say(id, text, cls) { const e = $(id); e.textContent = text; e.className = 's ' + (cls || ''); if (!text) return; const r = e.getBoundingClientRect(); if ((cls === 'ok' || cls === 'bad') && !(r.height && r.top >= 0 && r.bottom <= innerHeight)) toast(text, cls); }
+function say(id, text, cls) { if (Date.now() < autoUntil && (text === 'Loading…' || !cls)) return; const e = $(id); e.textContent = text; e.className = 's ' + (cls || ''); if (!text) return; const r = e.getBoundingClientRect(); if ((cls === 'ok' || cls === 'bad') && !(r.height && r.top >= 0 && r.bottom <= innerHeight)) toast(text, cls); }
 /** A short note pinned at the bottom of the screen you are on (Kinnor): results never land off screen. It closes itself, or with Got it. */
 function toast(text, cls) {
   let t = $('toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
