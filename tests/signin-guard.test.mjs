@@ -16,7 +16,7 @@ for (const file of ['staff.html', 'prod/staff.html']) {
   test(`${file}: sign-in success always goes through afterSignIn`, () => {
     assert.equal(s.split('function afterSignIn(j)').length - 1, 1, 'afterSignIn is defined once');
     // Three sign-in handlers call it: email code, password, Google.
-    assert.ok(s.split('afterSignIn(j);').length - 1 >= 4, 'defined plus three sign-in calls');
+    assert.equal(s.split('afterSignIn(j);').length - 1, 3, 'three sign-in calls: email code, password, Google');
     // The page-load path keeps its own direct call (it reads the full "me" reply).
     assert.equal(s.split('setMe(j); drawTabs(); land(); welcome();').length - 1, 1, 'only the page-load path calls land() directly');
   });
