@@ -1247,8 +1247,11 @@ body.prpon{overflow:hidden}
 :root[data-theme="dark"] #rhsmake .rhbar .rhsum span{color:#F2C46B!important}:root[data-theme="dark"] #rhsmake .rhseg input{accent-color:#E8E6E1}
 /* Quick fixes (owner, 22 Nov 2026): bottom menu hides on scroll and under panels; the Change box is a centred box on tablets and laptops */
 #tabs{transition:transform .25s ease,opacity .25s ease}
-body.navfaint #tabs{opacity:.45}
-body.navhide #tabs{transform:translateY(140%);opacity:0;pointer-events:none}
+body.navfaint #tabs{opacity:.06}
+body.navhide #tabs{opacity:0;pointer-events:none}
+html:not(.sbshow){scrollbar-color:transparent transparent}
+html:not(.sbshow) ::-webkit-scrollbar-thumb{background:transparent!important}
+html:not(.sbshow) ::-webkit-scrollbar-track{background:transparent!important}
 body.ppon #tabs,body.prpon #tabs,body:has(#prfix) #tabs{display:none!important}
 @media (min-width:520px) and (max-width:1099px){
   #prfix .prsheet{top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;width:min(480px,92vw)!important;max-height:88vh;border-radius:22px!important;box-shadow:0 24px 60px rgba(0,0,0,.25)!important;transform:translate(-50%,-46%)!important}
@@ -4565,7 +4568,12 @@ let lastAct = Date.now();
 ['pointerdown', 'keydown', 'scroll', 'touchstart', 'input'].forEach(ev => window.addEventListener(ev, () => { lastAct = Date.now(); document.body.classList.remove('navfaint'); }, {passive: true, capture: true}));
 setInterval(() => { if (token && Date.now() - lastAct >= 4000) document.body.classList.add('navfaint'); }, 1000);
 setInterval(() => { if (!token) return; if (Date.now() - lastAct >= IDLE_MS) { lastAct = Date.now(); try { toast('You were signed out after 5 minutes with no activity.', 'bad'); } catch (e) {} const o = $('out'); if (o) o.click(); else signedOutNow(); } }, 15000);
-/** The bottom menu slides away while you scroll down and comes back when you scroll up or reach the top (owner, 22 Nov 2026). */
+/** Scrollbars fade out when nothing is happening, and come back on scroll, touch or pointer movement. */
+(function scrollbarsFade() { const root = document.documentElement; let t = 0;
+  const show = () => { root.classList.add('sbshow'); clearTimeout(t); t = setTimeout(() => root.classList.remove('sbshow'), 1200); };
+  ['scroll', 'pointermove', 'touchstart', 'wheel'].forEach(ev => window.addEventListener(ev, show, {passive: true, capture: true}));
+})();
+/** The bottom menu fades away while you scroll down and comes back when you scroll up or reach the top (owner, 22 Nov 2026). */
 (function navAutoHide() { let last = window.scrollY, t = 0;
   window.addEventListener('scroll', () => { const y = window.scrollY; if (Math.abs(y - last) < 8) return;
     document.body.classList.toggle('navhide', y > last && y > 120); last = y; clearTimeout(t); t = setTimeout(() => document.body.classList.remove('navhide'), 1800); }, {passive: true});
