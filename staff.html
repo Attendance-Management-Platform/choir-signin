@@ -1249,6 +1249,9 @@ body.prpon{overflow:hidden}
 #tabs{transition:transform .25s ease,opacity .25s ease}
 body.navfaint #tabs{opacity:.06}
 body.navhide #tabs{opacity:0;pointer-events:none}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid #E2E0D9;border-top-color:#B6000A;border-radius:50%;animation:spinr .8s linear infinite}
+@keyframes spinr{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation-duration:2.4s}}
 html:not(.sbshow){scrollbar-color:transparent transparent}
 html:not(.sbshow) ::-webkit-scrollbar-thumb{background:transparent!important}
 html:not(.sbshow) ::-webkit-scrollbar-track{background:transparent!important}
@@ -1725,7 +1728,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <span id="who" class="s" style="min-width:0"></span>
 <button id="out" class="signout" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign out</button></div>
 <div id="ph" class="hide"></div>
-<div id="busy" class="s hide" style="text-align:center">Working…</div>
+<div id="busy" class="hide" role="status" aria-label="Working" style="position:fixed;top:12px;right:14px;z-index:70"><span class="spin"></span></div>
 
 <div id="s1" class="card">
 <div class="si-t">Sign in</div>
