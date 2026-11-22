@@ -4962,7 +4962,7 @@ function drawSafe(j) {
 /** Control room (Owner only, 21 Nov 2026): switches, and the people who run the system with what each Admin may do. */
 async function loadControl(quiet) {
   if (quiet !== true) say('m21', 'Loading…');
-  try { const j = await call({action: 'owner.state', token}); if (!j.ok) { say('m21', j.error || 'Could not load.', 'bad'); return; } drawControl(j); loadHealth(); if (quiet !== true) say('m21', ''); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); }
+  try { const j = await call({action: 'owner.state', token}); if (!j.ok) { say('m21', j.error || 'Could not load.', 'bad'); return; } drawControl(j); loadHealth(); loadAssign(true); if (quiet !== true) say('m21', ''); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); }
 }
 /** Control room → System health (owner, 21 Nov 2026): one line per check, green, amber or red. Read-only. */
 async function loadHealth() {
@@ -5004,6 +5004,30 @@ function drawControl(j) {
     };
     box.querySelector('.ctlreset').onclick = () => set({action: 'owner.powers', email, reset: true});
   });
+}
+/** Control room → Roles and levels (owner, 22 Nov 2026): a role or roles plus a level (Global, Region, Campus) for a member picked from the choir list. */
+async function loadAssign(quiet) {
+  let box = $('ctlassign'); if (!box) { box = document.createElement('div'); box.id = 'ctlassign'; box.style.marginTop = '16px'; $('ctlpeople').insertAdjacentElement('afterend', box); }
+  try { const j = await call({action: 'owner.assign.list', token}); if (!j.ok) { box.innerHTML = ''; return; } drawAssign(j, quiet); } catch (e) { /* keep what is shown */ }
+}
+function drawAssign(j, quiet) {
+  const box = $('ctlassign'), lbl = a => esc((a.roles || []).map(r => (r === 'Part Leader' && a.part ? a.part + ' ' : '') + r).join(' and ') + ', ' + (a.level === 'Campus' && a.campus ? 'Campus: ' + a.campus : a.level));
+  box.innerHTML = '<div class="card pad"><div class="ct">Roles and levels</div><p class="sub" style="margin:4px 0 8px">Pick a person from the choir list, then their role or roles and their level. Each change is written in the Change log with your name.</p>' +
+    '<label class="lb">Person<select id="asmember" class="in"><option value="">Choose a member</option>' + (j.members || []).map(m => '<option value="' + esc(m.memberId) + '">' + esc(m.name) + (m.campus ? ' · ' + esc(m.campus) : '') + '</option>').join('') + '</select></label>' +
+    '<fieldset style="border:0;padding:0;margin:10px 0 0"><legend class="lb">Roles (one or more)</legend>' + (j.roles || []).map(r => '<label class="ctlck"><input type="checkbox" class="asrole" value="' + esc(r) + '"> ' + esc(r) + '</label>').join('') + '</fieldset>' +
+    '<label class="lb" style="margin-top:10px">Part (for Part Leader)<select id="aspart" class="in"><option value="">Not needed</option>' + (j.parts || []).map(p => '<option value="' + esc(p) + '">' + esc(p) + '</option>').join('') + '</select></label>' +
+    '<label class="lb" style="margin-top:10px">Level<select id="aslevel" class="in"><option value="">Choose a level</option>' + (j.levels || []).map(l => '<option value="' + esc(l) + '">' + esc(l) + '</option>').join('') + '</select></label>' +
+    '<label class="lb" style="margin-top:10px">Ends (optional)<input type="date" id="asuntil" class="in"></label>' +
+    '<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="assave">Save</button></div>' +
+    '<p class="sub" style="margin:12px 0 4px;font-weight:600">Current (' + (j.assignments || []).length + ')</p>' +
+    ((j.assignments || []).length ? (j.assignments || []).map(a => '<div class="mrow"><span class="mtx"><b>' + esc(a.name || a.memberId) + '</b><span>' + lbl(a) + (a.untilMs ? ' · until ' + esc(lagos(a.untilMs)) : '') + '</span></span><button type="button" class="btn line sm asremove" data-id="' + esc(a.memberId) + '">Remove</button></div>').join('') : '<p class="sub">Nobody yet.</p>') +
+    '</div>';
+  const run = async q => { try { const k = await call(Object.assign({token}, q)); if (k.ok) drawAssign(k); say('m21', k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); } };
+  $('assave').onclick = () => {
+    const dv = $('asuntil').value || '';
+    run({action: 'owner.assign.save', memberId: $('asmember').value, roles: [...box.querySelectorAll('.asrole:checked')].map(c => c.value), part: $('aspart').value, level: $('aslevel').value, untilMs: /^\d{4}-\d{2}-\d{2}$/.test(dv) ? Date.parse(dv + 'T23:59:00+01:00') : 0});
+  };
+  box.querySelectorAll('.asremove').forEach(b => { b.onclick = () => run({action: 'owner.assign.remove', memberId: b.dataset.id}); });
 }
 /** Reports → Cut-off check (Global Admin): presets, compare, save the result to MEMBER SUMMARY. */
 let CUT = null, CUTRUN = null;
