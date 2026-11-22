@@ -316,6 +316,11 @@ body.twoadmins #t2,body.twoadmins [data-calask]{display:none!important}
 
 /* iPhone: text boxes at 16px so Safari does not zoom in (owner, 15 Nov 2026) */
 @media (max-width:899px),(hover:none){input,select,textarea{font-size:16px!important}}
+.wave{display:inline-flex;align-items:center;gap:clamp(3px,.5vw,5px);height:clamp(16px,2.2vw,20px);padding:0 clamp(4px,.6vw,6px);border-radius:12px;background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.wave i{display:block;width:clamp(4px,.55vw,5px);height:clamp(4px,.55vw,5px);border-radius:50%;background:#B6000A;animation:wv 1s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.12s}.wave i:nth-child(3){animation-delay:.24s}.wave i:nth-child(4){animation-delay:.36s}.wave i:nth-child(5){animation-delay:.48s}
+@keyframes wv{0%,100%{transform:translateY(0);opacity:.35}50%{transform:translateY(-4px);opacity:1}}
+@media (prefers-reduced-motion: reduce){.wave i{animation-duration:2.4s}}
 </style>
 <style id="rbcdark">
 :root[data-theme="dark"]{--red:#FF666E;--acc:#FF666E;--deep:#FF666F;--fg:#D9D8D8;--ink:#D9D8D8;--text:#CDCDCC;--mut:#BDBCBB;--muted:#BDBCBB;--line:#454440;--rose:#34191B;--page:#2A2821;--ok:#86DFC1;--bad:#E0858C}
@@ -424,6 +429,7 @@ body.twoadmins #t2,body.twoadmins [data-calask]{display:none!important}
 :root[data-theme="dark"] .tile:has(> img), :root[data-theme="dark"] .rtb img, :root[data-theme="dark"] img[src*="logo"]{background:#fff}
 </style>
 <script id="rbcthemeboot">/* Light or dark: the person's choice in Settings, or the phone's own setting (Kinnor idea, 29 Oct 2026). */(function(){function apply(){var t='auto';try{t=localStorage.getItem('rbcTheme')||'auto';}catch(e){}var d=t==='dark'||(t==='auto'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light');}window.rbcThemeApply=apply;apply();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',apply);}catch(e){}})();</script><style id="kinnordark">:root[data-theme="dark"]{--kb:#E0323C;--kbt:#3A1A1D;--kbx:#FF9AA0;--kpage:#141318;--kline:#34323C;--kmut:#A9A6B3}:root[data-theme="dark"] body:not(.out){background:var(--kpage)}</style></head><body>
+<div id="busy" class="hide" role="status" aria-label="Working" style="position:fixed;top:12px;right:14px;z-index:70"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>
 <div id="outv">
  <div class="lp"><div class="lbrand"><div class="tile"><img src="../logo.png" alt="CCW logo"></div><div><div class="b1">CELEBRATION CHURCH WORSHIP</div><div class="b2">LAGOS REGION CHOIR</div></div></div>
   <div class="lhero rise"><div class="h">Attendance, requests and rehearsals in one place.</div><div class="p">Sign in once. Check in at rehearsal, ask to be excused, and see your own attendance.</div></div></div>
@@ -467,15 +473,15 @@ body.twoadmins #t2,body.twoadmins [data-calask]{display:none!important}
     <div id="tiles" class="tiles"></div>
     <div class="grid">
      <div class="card lift rise col"><div class="kick">Next rehearsal</div>
-      <div id="rh" class="big">Loading…</div><div id="rhs" class="s" style="font-size:15px"></div><div id="rhdir"></div>
+      <div id="rh" class="big"></div><div id="rhs" class="s" style="font-size:15px"></div><div id="rhdir"></div>
       <div id="state" class="col"></div>
       <div id="consent" class="hide"><p class="s">To confirm you are at rehearsal, this page checks your phone's location once. It is sent once to confirm you are at the venue, then thrown away. It is never stored. Only "location confirmed" is recorded, and only for the rehearsal day. A record that you agreed is kept.</p><button id="agree" class="btn btn-red">I agree</button></div>
       <button id="ci" class="btn btn-red hide" style="margin-top:0">Check in with Google</button>
       <button id="req" class="btn btn-red hide" style="margin-top:0">Request an absence</button>
       <div id="regoogle" class="hide"><p class="s">For your safety, press this once more to confirm it is you.</p><div id="gbtn2" style="margin:.4rem 0"></div></div>
       <div id="m2" class="s"></div></div>
-     <div class="card lift rise" style="animation-delay:.08s"><div class="rowl"><div class="cth">My requests</div><a id="seeall" href="#" style="font-size:14px">See all</a></div><div id="mini" style="margin-top:6px">Loading…</div></div>
-     <a id="attlink" href="#" class="card lift wide rise s" style="display:block;font-size:14px;font-weight:400;animation-delay:.16s"><span id="attline">Loading…</span></a>
+     <div class="card lift rise" style="animation-delay:.08s"><div class="rowl"><div class="cth">My requests</div><a id="seeall" href="#" style="font-size:14px">See all</a></div><div id="mini" style="margin-top:6px"></div></div>
+     <a id="attlink" href="#" class="card lift wide rise s" style="display:block;font-size:14px;font-weight:400;animation-delay:.16s"><span id="attline"></span></a>
     </div>
    </div>
 
@@ -551,11 +557,14 @@ const dlong = ms => D(ms).toLocaleDateString('en-GB', {weekday: 'long', day: 'nu
 const dshort = ms => D(ms).toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short'});
 const tm = ms => D(ms).toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', hour12: false});
 const dtm = ms => dshort(ms) + ', ' + tm(ms);
+let __pend = 0, __busyT = null;
+function busyOn() { if (++__pend === 1) __busyT = setTimeout(() => { const b = document.getElementById('busy'); if (b) b.classList.remove('hide'); }, 400); }
+function busyOff() { if (--__pend === 0) { clearTimeout(__busyT); const b = document.getElementById('busy'); if (b) b.classList.add('hide'); } }
 async function call(body) {
   for (let i = 0; i < 3; i++) {
     try {
-      const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)});
-      const j = await r.json();
+      busyOn(); let j;
+      try { const r = await fetch(BACKEND_URL, {method: 'POST', body: JSON.stringify(body)}); j = await r.json(); } finally { busyOff(); }
       if (!j.ok && /not available right now/i.test(j.error || '') && i < 2) { await new Promise(r2 => setTimeout(r2, 1500 * (i + 1))); continue; }
       return j;
     } catch (e) { if (i === 2) throw e; await new Promise(r2 => setTimeout(r2, 1500 * (i + 1))); }
@@ -663,7 +672,7 @@ const e = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;
 
   async function draw() {
     if (!S.box) return;
-    S.box.innerHTML = head() + '<div class="rc-main"><div class="rc-load">Loading…</div></div>';
+    S.box.innerHTML = head() + '<div class="rc-main"><div class="rc-load"></div></div>';
     try {
       const js = await Promise.all(months(S.view, S.at).map(get));
       const bad = js.filter(j => !j || !j.ok)[0];
@@ -875,7 +884,7 @@ async function sendCheckIn() {
 
 // ---- requests ----
 async function loadReqs() {
-  say('m3', 'Loading…'); $('rform').classList.add('hide');
+  say('m3', ''); $('rform').classList.add('hide');
   try {
     const j = await call({action: 'absence.state', token});
     if (j.signedOut) return signedOutNow('Please sign in again.');
@@ -1014,7 +1023,7 @@ document.addEventListener('click', ev => {
 const MONTH = ms => D(ms).toLocaleDateString('en-GB', {month: 'long', year: 'numeric'});
 // ---- attendance and profile ----
 async function loadAtt() {
-  say('m4', 'Loading…'); $('attlist').innerHTML = ''; $('attsum').classList.add('hide');
+  say('m4', ''); $('attlist').innerHTML = ''; $('attsum').classList.add('hide');
   try {
     const j = await call({action: 'me.attendance', token});
     if (j.signedOut) return signedOutNow('Please sign in again.');
