@@ -467,15 +467,15 @@ body.twoadmins #t2,body.twoadmins [data-calask]{display:none!important}
     <div id="tiles" class="tiles"></div>
     <div class="grid">
      <div class="card lift rise col"><div class="kick">Next rehearsal</div>
-      <div id="rh" class="big">Loading…</div><div id="rhs" class="s" style="font-size:15px"></div><div id="rhdir"></div>
+      <div id="rh" class="big"></div><div id="rhs" class="s" style="font-size:15px"></div><div id="rhdir"></div>
       <div id="state" class="col"></div>
       <div id="consent" class="hide"><p class="s">To confirm you are at rehearsal, this page checks your phone's location once. It is sent once to confirm you are at the venue, then thrown away. It is never stored. Only "location confirmed" is recorded, and only for the rehearsal day. A record that you agreed is kept.</p><button id="agree" class="btn btn-red">I agree</button></div>
       <button id="ci" class="btn btn-red hide" style="margin-top:0">Check in with Google</button>
       <button id="req" class="btn btn-red hide" style="margin-top:0">Request an absence</button>
       <div id="regoogle" class="hide"><p class="s">For your safety, press this once more to confirm it is you.</p><div id="gbtn2" style="margin:.4rem 0"></div></div>
       <div id="m2" class="s"></div></div>
-     <div class="card lift rise" style="animation-delay:.08s"><div class="rowl"><div class="cth">My requests</div><a id="seeall" href="#" style="font-size:14px">See all</a></div><div id="mini" style="margin-top:6px">Loading…</div></div>
-     <a id="attlink" href="#" class="card lift wide rise s" style="display:block;font-size:14px;font-weight:400;animation-delay:.16s"><span id="attline">Loading…</span></a>
+     <div class="card lift rise" style="animation-delay:.08s"><div class="rowl"><div class="cth">My requests</div><a id="seeall" href="#" style="font-size:14px">See all</a></div><div id="mini" style="margin-top:6px"></div></div>
+     <a id="attlink" href="#" class="card lift wide rise s" style="display:block;font-size:14px;font-weight:400;animation-delay:.16s"><span id="attline"></span></a>
     </div>
    </div>
 
@@ -663,7 +663,7 @@ const e = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;
 
   async function draw() {
     if (!S.box) return;
-    S.box.innerHTML = head() + '<div class="rc-main"><div class="rc-load">Loading…</div></div>';
+    S.box.innerHTML = head() + '<div class="rc-main"><div class="rc-load"></div></div>';
     try {
       const js = await Promise.all(months(S.view, S.at).map(get));
       const bad = js.filter(j => !j || !j.ok)[0];
@@ -875,7 +875,7 @@ async function sendCheckIn() {
 
 // ---- requests ----
 async function loadReqs() {
-  say('m3', 'Loading…'); $('rform').classList.add('hide');
+  say('m3', ''); $('rform').classList.add('hide');
   try {
     const j = await call({action: 'absence.state', token});
     if (j.signedOut) return signedOutNow('Please sign in again.');
@@ -1014,7 +1014,7 @@ document.addEventListener('click', ev => {
 const MONTH = ms => D(ms).toLocaleDateString('en-GB', {month: 'long', year: 'numeric'});
 // ---- attendance and profile ----
 async function loadAtt() {
-  say('m4', 'Loading…'); $('attlist').innerHTML = ''; $('attsum').classList.add('hide');
+  say('m4', ''); $('attlist').innerHTML = ''; $('attsum').classList.add('hide');
   try {
     const j = await call({action: 'me.attendance', token});
     if (j.signedOut) return signedOutNow('Please sign in again.');
