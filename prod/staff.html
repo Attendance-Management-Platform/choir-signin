@@ -1741,7 +1741,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <label for="mid" class="lbl">Email</label>
 <input id="mid" autocomplete="off" placeholder="Your email (choir members: your Member ID)">
 <label for="pw" class="lbl">Password</label>
-<div style="position:relative"><input id="pw" type="password" autocomplete="current-password" placeholder="Your password" style="padding-right:56px;width:100%"><button type="button" id="pwtog" aria-label="Show password" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;color:var(--mut);padding:6px">Show</button></div>
+<div style="position:relative"><input id="pw" type="password" autocomplete="current-password" placeholder="Your password" style="padding-right:56px;width:100%"><button type="button" id="pwtog" aria-label="Show password" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;color:var(--mut);padding:6px;display:flex;align-items:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
 <button id="pwgo">Sign in</button><p id="m3" class="s"></p>
 <div class="s">After 5 wrong tries the password is locked for 15 minutes.</div>
 <details class="pwbox" style="margin:.6rem 0"><summary style="color:#B6000A;text-align:center;cursor:pointer;margin:8px 0">First time, or forgot your password? Get a code</summary>
@@ -5549,7 +5549,8 @@ $('verify').onclick = async () => {
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 };
 $('back').onclick = () => show('s1');
-$('pwtog').onclick = () => { const p = $('pw'); const shown = p.type === 'text'; p.type = shown ? 'password' : 'text'; $('pwtog').textContent = shown ? 'Show' : 'Hide'; };
+const EYE_ON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>', EYE_OFF = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-7-11-7a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 7 11 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+$('pwtog').onclick = () => { const p = $('pw'); const shown = p.type === 'text'; p.type = shown ? 'password' : 'text'; $('pwtog').innerHTML = shown ? EYE_ON : EYE_OFF; $('pwtog').setAttribute('aria-label', shown ? 'Show password' : 'Hide password'); };
 $('pwgo').onclick = async () => {
   if (!$('mid').value.trim() || !$('pw').value) return say('m3', 'Enter your Member ID or email, and your password.', 'bad');
   say('m3', 'Checking…');
