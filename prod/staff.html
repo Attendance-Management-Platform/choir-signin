@@ -1699,6 +1699,12 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <label for="mid" class="lbl">Member ID or email</label>
 <input id="mid" autocomplete="off" placeholder="Member ID, or your email if you are not a choir member">
 <button id="send">Email me a code</button><p id="m1" class="s"></p>
+<details class="pwbox" style="margin:.6rem 0"><summary>Sign in with a password instead</summary>
+<label for="pw" class="lbl">Password</label>
+<input id="pw" type="password" autocomplete="current-password" placeholder="Your password">
+<button id="pwgo">Sign in with password</button><p id="m3" class="s"></p>
+<div class="s">After 5 wrong tries the password is locked for 15 minutes. Forgot it? Use the email code.</div>
+</details>
 <div class="s">We send a 6-digit code to the email on file. It lasts 10 minutes. You can ask for another after 2 minutes.</div>
 <button type="button" id="shelp" class="ghost">Need help signing in?</button>
 </div>
@@ -1709,6 +1715,13 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <button id="verify">Sign in</button><p id="m2" class="s"></p>
 <button id="back" style="background:none;color:var(--acc);border:1px solid var(--acc)">Back</button></div>
 
+<div id="pwset" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;align-items:center;justify-content:center;padding:16px">
+<div class="card pad" style="max-width:420px;width:100%"><div class="ct">Choose a password</div>
+<p class="sub" style="margin:4px 0 8px">Optional. A password lets you sign in without waiting for a code. Use at least 10 characters. Avoid your name, your email and common words.</p>
+<label for="pw1" class="lbl">New password</label><input id="pw1" type="password" autocomplete="new-password">
+<label for="pw2" class="lbl" style="margin-top:8px">Type it again</label><input id="pw2" type="password" autocomplete="new-password">
+<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="pwsave">Save password</button> <button type="button" class="btn line" id="pwlater">Not now</button></div>
+<p id="m4" class="s"></p></div></div>
 <div id="s11" class="pg hide">
 <div id="rpcut"></div>
 <div id="rpreg"><div class="card pad rise"><div class="ct">Official attendance register</div><p class="sub" style="margin:4px 0 0">Everyone expected at the rehearsal: present, excused or absent. Tap a name for their history.</p>
@@ -5019,8 +5032,9 @@ function drawAssign(j, quiet) {
     '<label class="lb" style="margin-top:10px">Level<select id="aslevel" class="in"><option value="">Choose a level</option>' + (j.levels || []).map(l => '<option value="' + esc(l) + '">' + esc(l) + '</option>').join('') + '</select></label>' +
     '<label class="lb" style="margin-top:10px">Ends (optional)<input type="date" id="asuntil" class="in"></label>' +
     '<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="assave">Save</button></div>' +
+    (j.sync ? (j.sync.ok ? '<p class="sub" style="margin:12px 0 0">' + (j.sync.inSync ? 'SYSTEM ACCESS matches the Control room.' : 'SYSTEM ACCESS differs from the Control room: ' + j.sync.toAdd + ' to add, ' + j.sync.toClose + ' to close. Save the assignment again to bring it in line.') + '</p>' : '') : '') +
     '<p class="sub" style="margin:12px 0 4px;font-weight:600">Current (' + (j.assignments || []).length + ')</p>' +
-    ((j.assignments || []).length ? (j.assignments || []).map(a => '<div class="mrow"><span class="mtx"><b>' + esc(a.name || a.memberId) + '</b><span>' + lbl(a) + (a.untilMs ? ' · until ' + esc(lagos(a.untilMs)) : '') + '</span></span><button type="button" class="btn line sm asremove" data-id="' + esc(a.memberId) + '" data-level="' + esc(a.level) + '">Remove</button></div>').join('') : '<p class="sub">Nobody yet.</p>') +
+    ((j.assignments || []).length ? (j.assignments || []).map(a => '<div class="mrow"><span class="mtx"><b>' + esc(a.name || a.memberId) + '</b><span>' + lbl(a) + (a.untilMs ? ' · until ' + esc(lagos(a.untilMs)) : '') + ' · Welcome: ' + esc(a.welcome || 'not sent') + '</span></span><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn line sm asinvite" data-id="' + esc(a.memberId) + '">' + (a.welcome ? 'Send again' : 'Send welcome') + '</button><button type="button" class="btn line sm asremove" data-id="' + esc(a.memberId) + '" data-level="' + esc(a.level) + '">Remove</button></span></div>').join('') : '<p class="sub">Nobody yet.</p>') +
     '</div>';
   const run = async q => { try { const k = await call(Object.assign({token}, q)); if (k.ok) drawAssign(k); say('m21', k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); } };
   $('assave').onclick = () => {
@@ -5028,6 +5042,7 @@ function drawAssign(j, quiet) {
     run({action: 'owner.assign.save', memberId: $('asmember').value, roles: [...box.querySelectorAll('.asrole:checked')].map(c => c.value), part: $('aspart').value, level: $('aslevel').value, untilMs: /^\d{4}-\d{2}-\d{2}$/.test(dv) ? Date.parse(dv + 'T23:59:00+01:00') : 0});
   };
   box.querySelectorAll('.asremove').forEach(b => { b.onclick = () => run({action: 'owner.assign.remove', memberId: b.dataset.id, level: b.dataset.level}); });
+  box.querySelectorAll('.asinvite').forEach(b => { b.onclick = () => run({action: 'owner.welcome', memberId: b.dataset.id}); });
 }
 /** Reports → Cut-off check (Global Admin): presets, compare, save the result to MEMBER SUMMARY. */
 let CUT = null, CUTRUN = null;
@@ -5449,9 +5464,34 @@ $('verify').onclick = async () => {
     if (!j.ok) return say('m2', j.error || 'Could not sign in.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
     setMe(j); drawTabs(); land(); welcome();
+    if (j.passwordSetNeeded) openPwSet();
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 };
 $('back').onclick = () => show('s1');
+$('pwgo').onclick = async () => {
+  if (!$('mid').value.trim() || !$('pw').value) return say('m3', 'Enter your Member ID or email, and your password.', 'bad');
+  say('m3', 'Checking…');
+  try {
+    const j = await call({action: 'signin.password', memberId: $('mid').value.trim(), password: $('pw').value});
+    $('pw').value = '';
+    if (!j.ok) return say('m3', j.error || 'Could not sign in.', 'bad');
+    token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
+    setMe(j); drawTabs(); land(); welcome();
+  } catch (e) { say('m3', 'Network problem. Try again.', 'bad'); }
+};
+function openPwSet() { $('pwset').style.display = 'flex'; }
+function closePwSet() { $('pwset').style.display = 'none'; $('pw1').value = ''; $('pw2').value = ''; say('m4', ''); }
+$('pwlater').onclick = closePwSet;
+$('pwsave').onclick = async () => {
+  const a = $('pw1').value, b = $('pw2').value;
+  if (a !== b) return say('m4', 'The two passwords do not match.', 'bad');
+  say('m4', 'Saving…');
+  try {
+    const j = await call({action: 'password.set', token, password: a, confirm: b});
+    if (!j.ok) return say('m4', j.error || 'Could not save the password.', 'bad');
+    closePwSet(); toast(j.summary || 'Password saved.', 'ok');
+  } catch (e) { say('m4', 'Network problem. Try again.', 'bad'); }
+};
 // ---- Help and the once-a-day welcome (text is built from the tabs the server gave this person) ----
 const TABHELP = {
   settings: ['Settings', 'Your own settings (calendar view, larger text, page layout), what your roles let you do, and signing out on every device. Admins also find the email settings here.'],
