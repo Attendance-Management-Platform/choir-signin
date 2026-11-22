@@ -2104,8 +2104,15 @@ async function call1(body) {
     return await r.json();
   } finally {
     if (!quiet && --pending === 0) { clearTimeout(busyT); $('busy').classList.add('hide'); }
+    if (pending === 0) clearStuckLoading();
   }
 }
+/** A 'Loading…' line must never stay on screen: once no request is running, any leftover one is cleared (owner, 22 Nov 2026). */
+function clearStuckLoading() {
+  if (pending > 0 || Date.now() < autoUntil) return;
+  document.querySelectorAll('body *').forEach(e => { if (e.childElementCount === 0 && e.textContent.trim() === 'Loading…') e.textContent = ''; });
+}
+setInterval(clearStuckLoading, 4000);
 const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People and access'], records: ['s13', 'Records'], settings: ['s18', 'Settings'], control: ['s21', 'Control room'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process'], changes: ['s16', 'Change log'], members: ['s17', 'Members'], qr: ['s3', 'Show QR code'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'Mark by hand'], absence: ['s6', 'My absence'], mine: ['s19', 'My choir'], requests: ['s7', 'Requests to decide'], rehearsal: ['s8', 'Rehearsals'], help: ['s9', 'Help']};
 const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '', myLevel = '';
