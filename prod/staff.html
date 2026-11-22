@@ -5020,14 +5020,14 @@ function drawAssign(j, quiet) {
     '<label class="lb" style="margin-top:10px">Ends (optional)<input type="date" id="asuntil" class="in"></label>' +
     '<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="assave">Save</button></div>' +
     '<p class="sub" style="margin:12px 0 4px;font-weight:600">Current (' + (j.assignments || []).length + ')</p>' +
-    ((j.assignments || []).length ? (j.assignments || []).map(a => '<div class="mrow"><span class="mtx"><b>' + esc(a.name || a.memberId) + '</b><span>' + lbl(a) + (a.untilMs ? ' · until ' + esc(lagos(a.untilMs)) : '') + '</span></span><button type="button" class="btn line sm asremove" data-id="' + esc(a.memberId) + '">Remove</button></div>').join('') : '<p class="sub">Nobody yet.</p>') +
+    ((j.assignments || []).length ? (j.assignments || []).map(a => '<div class="mrow"><span class="mtx"><b>' + esc(a.name || a.memberId) + '</b><span>' + lbl(a) + (a.untilMs ? ' · until ' + esc(lagos(a.untilMs)) : '') + '</span></span><button type="button" class="btn line sm asremove" data-id="' + esc(a.memberId) + '" data-level="' + esc(a.level) + '">Remove</button></div>').join('') : '<p class="sub">Nobody yet.</p>') +
     '</div>';
   const run = async q => { try { const k = await call(Object.assign({token}, q)); if (k.ok) drawAssign(k); say('m21', k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); } };
   $('assave').onclick = () => {
     const dv = $('asuntil').value || '';
     run({action: 'owner.assign.save', memberId: $('asmember').value, roles: [...box.querySelectorAll('.asrole:checked')].map(c => c.value), part: $('aspart').value, level: $('aslevel').value, untilMs: /^\d{4}-\d{2}-\d{2}$/.test(dv) ? Date.parse(dv + 'T23:59:00+01:00') : 0});
   };
-  box.querySelectorAll('.asremove').forEach(b => { b.onclick = () => run({action: 'owner.assign.remove', memberId: b.dataset.id}); });
+  box.querySelectorAll('.asremove').forEach(b => { b.onclick = () => run({action: 'owner.assign.remove', memberId: b.dataset.id, level: b.dataset.level}); });
 }
 /** Reports → Cut-off check (Global Admin): presets, compare, save the result to MEMBER SUMMARY. */
 let CUT = null, CUTRUN = null;
