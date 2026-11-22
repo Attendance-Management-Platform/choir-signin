@@ -1885,8 +1885,8 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 </div>
 <div id="s19" class="pg hide">
 <p class="sub" style="margin:0 0 12px">Your own place as a choir member: your next rehearsal, your attendance and your details. Only you can see this page.</p>
-<div class="two"><div class="c1"><div id="mynext" class="card pad rise"><div class="ct">My next rehearsal</div><p class="sub">Loading…</p></div><div id="myatt"></div></div>
-<div class="c2"><div id="mydet" class="card pad rise"><div class="ct">My details</div><p class="sub">Loading…</p></div>
+<div class="two"><div class="c1"><div id="mynext" class="card pad rise"><div class="ct">My next rehearsal</div><p class="sub"><span class="wave" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i><i></i></span></p></div><div id="myatt"></div></div>
+<div class="c2"><div id="mydet" class="card pad rise"><div class="ct">My details</div><p class="sub"><span class="wave" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i><i></i></span></p></div>
 <div class="card pad rise" id="mywrong"><div class="ct">Something wrong?</div><p class="sub">You cannot edit these yourself. Ask <span class="mydgo">Desk A</span> to correct your name, email, campus or part.</p>
 <div class="actions"><button id="mydask" class="btn red" type="button"><span>Ask <span class="mydgo">Desk A</span> to correct my details</span></button></div>
 <div id="mydform" class="hide"><label for="mydkind" class="lb">What is wrong?</label><select id="mydkind" class="in"><option value="">Choose one</option><option>Name</option><option>Email</option><option>Campus</option><option>Section</option><option>Other</option></select>
@@ -1956,7 +1956,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div class="mpk"><div class="row"><div><label for="rfc" class="lb">Campus</label><input id="rfc" class="in" autocomplete="off" placeholder="Any campus"></div>
 <div><label for="rfp" class="lb">Part</label><input id="rfp" class="in" autocomplete="off" placeholder="Any part"></div>
 <div class="mw"><label for="rfq" class="lb">Member</label><input id="rfq" class="in" autocomplete="off" maxlength="60" placeholder="Start typing a name or Member ID"></div></div>
-<div class="cnt"><span id="rfcount">Loading members…</span><button type="button" class="btn line sm" id="rfclear">Clear filters</button></div>
+<div class="cnt"><span id="rfcount"><span class="wave" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i><i></i></span></span><button type="button" class="btn line sm" id="rfclear">Clear filters</button></div>
 <div id="rfpick" class="mpick hide"></div></div>
 <label for="rfrh" class="lb">Rehearsal</label><select id="rfrh" class="in"></select>
 <p class="sub" style="margin:4px 0 0">Cancelled rehearsals and ones already published as official are not in this list.</p>
@@ -2057,6 +2057,7 @@ if (!BACKEND_URL) setTimeout(() => { const n = document.getElementById('notconn'
 const $ = id => document.getElementById(id);
 let token = '', timer = null;
 try { token = sessionStorage.getItem('rbcTok') || sessionStorage.getItem('rbcMTok') || ''; } catch (e) {}
+const LOADWAVE = '<span class="wave" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i><i></i></span>';
 let pending = 0, busyT = null, autoUntil = 0;
 const AUTO_READ = /^me$|\.(state|list|live|home|history|rows|preview|official|day|queue|flagged|adminState|attendance|details|noPart|outlook|patterns|build|find)$/;
 let ckRid = '', ckShown = '';
@@ -2106,10 +2107,10 @@ async function call1(body) {
     if (pending === 0) clearStuckLoading();
   }
 }
-/** A 'Loading…' line must never stay on screen: once no request is running, any leftover one is cleared (owner, 22 Nov 2026). */
+/** A loading wave must not stay on screen: once no request is running, any leftover one is removed (owner, 22 Nov 2026). */
 function clearStuckLoading() {
   if (pending > 0 || Date.now() < autoUntil) return;
-  document.querySelectorAll('body *').forEach(e => { if (e.childElementCount === 0 && e.textContent.trim() === 'Loading…') e.textContent = ''; });
+  document.querySelectorAll('.wave').forEach(w => { if (!w.closest('#busy')) w.remove(); });
 }
 setInterval(clearStuckLoading, 4000);
 const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People and access'], records: ['s13', 'Records'], settings: ['s18', 'Settings'], control: ['s21', 'Control room'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process'], changes: ['s16', 'Change log'], members: ['s17', 'Members'], qr: ['s3', 'Show QR code'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'Mark by hand'], absence: ['s6', 'My absence'], mine: ['s19', 'My choir'], requests: ['s7', 'Requests to decide'], rehearsal: ['s8', 'Rehearsals'], help: ['s9', 'Help']};
@@ -2648,7 +2649,7 @@ function anDrill(pk) {
 // ---- Attendance records ----
 async function loadRecords() {
   delete FP.rec; // the filters always start empty when the page is opened
-  say('m13', 'Loading…');
+  say('m13', LOADWAVE);
   try {
     const j = await call({action: 'records.state', token});
     if (j.signedOut) { signedOutNow(); return; }
@@ -2814,7 +2815,7 @@ document.addEventListener('input', ev => {
   } catch (e) { /* keep typing */ } }, 300);
 });
 async function ppLoad(mid) {
-  $('pphits').innerHTML = ''; $('ppbody').innerHTML = '<p class="sub">Loading…</p>';
+  $('pphits').innerHTML = ''; $('ppbody').innerHTML = '<p class="sub">' + LOADWAVE + '</p>';
   try { const j = await call({action: 'records.member', token, memberId: mid});
     if (!j.ok) { $('ppbody').innerHTML = '<p class="sub">' + esc(j.error || 'Not available.') + '</p>'; return; }
     PP.m = j.member; PP.rows = j.rehearsals || []; PP.ch = {}; ppDraw();
@@ -2855,7 +2856,7 @@ function prPageClose(fromPop) { const d = $('prdetail'); if (!d || !d.classList.
 window.addEventListener('popstate', () => { if (!($('pview') && $('pview').classList.contains('on'))) prPageClose(true); });
 document.addEventListener('click', ev => { if (ev.target.closest && ev.target.closest('[data-prclose]')) prPageClose(); });
 async function loadProcess() {
-  say('m15', 'Loading…'); $('prdetail').innerHTML = '';
+  say('m15', LOADWAVE); $('prdetail').innerHTML = '';
   try {
     const j = await call({action: 'process.state', token});
     if (j.signedOut) { signedOutNow(); return; }
@@ -2868,7 +2869,7 @@ async function loadProcess() {
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
 }
 async function prOpen(id, done) {
-  say('m15', 'Loading…');
+  say('m15', LOADWAVE);
   try {
     const j = await call({action: done ? 'process.rows' : 'process.preview', token, rehearsalId: id});
     if (j.signedOut) { signedOutNow(); return; }
@@ -3218,7 +3219,7 @@ const RC = (function () {
 
   async function draw() {
     if (!S.box) return;
-    S.box.innerHTML = head() + '<div class="rc-main"><div class="rc-load">Loading…</div></div>';
+    S.box.innerHTML = head() + '<div class="rc-main"><div class="rc-load">' + LOADWAVE + '</div></div>';
     try {
       const js = await Promise.all(months(S.view, S.at).map(get));
       const bad = js.filter(j => !j || !j.ok)[0];
@@ -3266,7 +3267,7 @@ function calActs(day, es, j, dayView) {
   const setUp = j && j.canSetUp !== undefined ? j.canSetUp === true : has('rehearsal');
   if (!isPast && !rehs.length && setUp) acts.push('<button class="btn red sm" type="button" data-calmake="' + esc(day) + '">Set up a rehearsal on this day</button>');
   // Each rehearsal on this day: "your tasks", worked out by the system for this person and this moment (calendar.day).
-  if (es.some(e => e.type === 'rehearsal')) { acts.push('<div class="rcd" data-rcd="' + esc(day) + '"><div class="rc-sub">Loading your tasks for this day…</div></div>'); setTimeout(() => rcdLoad(day), 0); }
+  if (es.some(e => e.type === 'rehearsal')) { acts.push('<div class="rcd" data-rcd="' + esc(day) + '"><div class="rc-sub">' + LOADWAVE + '</div></div>'); setTimeout(() => rcdLoad(day), 0); }
   if (!isPast && has('absence')) acts.push('<button class="btn line sm" type="button" data-calaway="' + esc(day) + '">Ask for time away from this day</button>');
   return acts.join('') + (acts.length && !isPast && setUp && !rbDeskB() && !rehs.length ? '<div class="rc-sub" style="width:100%">Setting up a rehearsal in place of Desk A needs a reason, and Desk A is told.</div>' : '');
 }
@@ -3681,7 +3682,7 @@ function drawSettingsSystem(sys) {
   drawHealth(sys.health, 'ssyshealth');
 }
 async function loadSettings(quiet) {
-  if (!quiet) { drawSettingsMine(); say('m18', 'Loading…'); loadSafe(); }
+  if (!quiet) { drawSettingsMine(); say('m18', LOADWAVE); loadSafe(); }
   try {
     const j = await call({action: 'settings.state', token});
     if (j.signedOut) { signedOutNow(); return; }
@@ -3732,7 +3733,7 @@ document.addEventListener('click', async ev => {
 async function loadPeople(keepMsg) {
   loadNoPart(); loadHandover(); loadFormHelpers();
   if (!keepMsg) say('m12b', '');
-  say('m12', 'Loading…');
+  say('m12', LOADWAVE);
   try {
     const j = await call({action: 'access.state', token});
     if (j.signedOut) { signedOutNow(); return; }
@@ -3970,7 +3971,7 @@ function rpOvHtml() {
     '<div class="card rpch"><div class="rpchh"><span class="rplb">Each rehearsal</span><span class="sub">% present</span></div><div class="rpbars">' + bars + '</div></div></div>';
 }
 async function loadReports() {
-  say('m11', 'Loading…');
+  say('m11', LOADWAVE);
   try {
     const j = await call({action: 'reports.state', token});
     if (j.signedOut) { signedOutNow(); return; }
@@ -4280,7 +4281,7 @@ function hgridCols() {
 }
 try { new ResizeObserver(() => { clearTimeout(hgridCols.t); hgridCols.t = setTimeout(hgridCols, 60); }).observe($('hgrid')); } catch (e) { window.addEventListener('resize', () => hgridCols()); }
 async function loadHome() {
-  say('m10', 'Loading…');
+  say('m10', LOADWAVE);
   try {
     const j = await call({action: 'home.state', token});
     if (j.signedOut) { signedOutNow(); return; }
@@ -4403,7 +4404,7 @@ document.addEventListener('click', async ev => {
 });
 async function loadRows(quiet) {
   quiet = quiet === true;
-  if (!quiet) say('m4', 'Loading…'); loadRoom(quiet);
+  if (!quiet) say('m4', LOADWAVE); loadRoom(quiet);
   try {
     const j = await call({action: 'validate.list', token, __quiet: quiet});
     if (j.signedOut) { signedOutNow(); return; }
@@ -4487,7 +4488,7 @@ document.addEventListener('click', async ev => {
 document.addEventListener('input', ev => { if (ev.target && ev.target.id === 'rhvenue') rhvDraw(); });
 async function loadRehearsal() {
   try { rhTidy(); } catch (e) { /* the form still works */ }
-  say('m8', 'Loading…');
+  say('m8', LOADWAVE);
   try {
     const j = await call({action: 'rehearsal.state', token});
     if (!RHV.length) rhvLoad();
@@ -4938,7 +4939,7 @@ $('rhsave').onclick = async () => {
 async function gfLive(id, boxId, quiet) {
   const box = $('gflog-' + (boxId || id)); if (!box) return;
   box.dataset.live = id; box.dataset.livebox = boxId || '';
-  if (quiet !== true) box.textContent = 'Loading…';
+  if (quiet !== true) box.innerHTML = LOADWAVE;
   try { const k = await call({action: 'forms.live', token, rehearsalId: id, __quiet: quiet === true});
     if (!k.ok) { box.textContent = k.error || 'Not available.'; return; }
     const full = k.full || [];
@@ -5063,7 +5064,7 @@ function drawSafe(j) {
 }
 /** Control room (Owner only, 21 Nov 2026): switches, and the people who run the system with what each Admin may do. */
 async function loadControl(quiet) {
-  if (quiet !== true) say('m21', 'Loading…');
+  if (quiet !== true) say('m21', LOADWAVE);
   try { const j = await call({action: 'owner.state', token}); if (!j.ok) { say('m21', j.error || 'Could not load.', 'bad'); return; } drawControl(j); loadHealth(); loadAssign(true); if (quiet !== true) say('m21', ''); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); }
 }
 /** Control room → System health (owner, 21 Nov 2026): one line per check, green, amber or red. Read-only. */
@@ -5254,7 +5255,7 @@ async function loadAbsence() {
   // Staff who are not choir members only put in away notices here.
   ['rreq', 'rmine', 'rnext'].forEach(i => { if ($(i)) $(i).classList.toggle('hide', myStaffOnly); });
   if (myStaffOnly) { say('m6', ''); loadAway(); return; }
-  say('m6', 'Loading…'); $('rform').classList.add('hide'); loadAway();
+  say('m6', LOADWAVE); $('rform').classList.add('hide'); loadAway();
   try {
     const j = await call({action: 'absence.state', token});
     if (j.signedOut) { signedOutNow(); return; }
@@ -5310,7 +5311,7 @@ document.addEventListener('click', async ev => {
 });
 async function loadQueue() {
   loadNoPart();
-  say('m7', 'Loading…');
+  say('m7', LOADWAVE);
   try {
     const j = await call({action: 'absence.queue', token});
     if (j.signedOut) { signedOutNow(); return; }
@@ -5525,7 +5526,7 @@ function emptyCard(icon, title, text, btn) {
   const P = {cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>', ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', list: '<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>', wait: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'};
   return '<div class="card emc"><span class="emi ' + esc(icon) + '"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (P[icon] || P.list) + '</svg></span><b>' + esc(title) + '</b><span class="sub">' + esc(text) + '</span>' + (btn || '') + '</div>';
 }
-function say(id, text, cls) { if (Date.now() < autoUntil && text === 'Loading…') return; /* during a quiet refresh, skip only the Loading text; clearing still works */ const e = $(id); e.textContent = text; e.className = 's ' + (cls || ''); if (!text) return; const r = e.getBoundingClientRect(); if ((cls === 'ok' || cls === 'bad') && !(r.height && r.top >= 0 && r.bottom <= innerHeight)) toast(text, cls); }
+function say(id, text, cls) { if (Date.now() < autoUntil && text === LOADWAVE) return; /* during a quiet refresh, skip only the Loading text; clearing still works */ const e = $(id); if (text === LOADWAVE) e.innerHTML = LOADWAVE; else e.textContent = text; e.className = 's ' + (cls || ''); if (!text) return; const r = e.getBoundingClientRect(); if ((cls === 'ok' || cls === 'bad') && !(r.height && r.top >= 0 && r.bottom <= innerHeight)) toast(text, cls); }
 /** A short note pinned at the bottom of the screen you are on (Kinnor): results never land off screen. It closes itself, or with Got it. */
 function toast(text, cls) {
   let t = $('toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
@@ -6069,7 +6070,7 @@ function undoGuideHtml() {
     '<div class="fpchips ugnav">' + secs.map(x => '<button type="button" class="fpchip' + (x === secs[0] ? ' on' : '') + '" data-ugjump="' + esc(x[0]) + '">' + esc(x[0]) + '<b>' + cnt(x[1]) + '</b></button>').join('') + '</div>' + secs.map(sec).join('') + '</div>';
 }
 async function loadChanges() {
-  say('m16', 'Loading…');
+  say('m16', LOADWAVE);
   try {
     const j = await call({action: 'changes.state', token, days: chDays});
     if (j.signedOut) { signedOutNow(); return; }
