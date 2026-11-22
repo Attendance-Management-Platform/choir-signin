@@ -1249,6 +1249,14 @@ body.prpon{overflow:hidden}
 #tabs{transition:transform .25s ease,opacity .25s ease}
 body.navfaint #tabs{opacity:.06}
 body.navhide #tabs{opacity:0;pointer-events:none}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid #E2E0D9;border-top-color:#B6000A;border-radius:50%;animation:spinr .8s linear infinite}
+@keyframes spinr{to{transform:rotate(360deg)}}
+.wave{display:inline-flex;align-items:center;gap:clamp(3px,.5vw,5px);height:clamp(16px,2.2vw,20px);padding:0 clamp(4px,.6vw,6px);border-radius:12px;background:rgba(255,255,255,.85);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.wave i{display:block;width:clamp(4px,.55vw,5px);height:clamp(4px,.55vw,5px);border-radius:50%;background:#B6000A;animation:wv 1s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.12s}.wave i:nth-child(3){animation-delay:.24s}.wave i:nth-child(4){animation-delay:.36s}.wave i:nth-child(5){animation-delay:.48s}
+@keyframes wv{0%,100%{transform:translateY(0);opacity:.35}50%{transform:translateY(-4px);opacity:1}}
+@media (prefers-reduced-motion: reduce){.wave i{animation-duration:2.4s}}
+@media (prefers-reduced-motion: reduce){.spin{animation-duration:2.4s}}
 html:not(.sbshow){scrollbar-color:transparent transparent}
 html:not(.sbshow) ::-webkit-scrollbar-thumb{background:transparent!important}
 html:not(.sbshow) ::-webkit-scrollbar-track{background:transparent!important}
@@ -1724,7 +1732,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <span id="who" class="s" style="min-width:0"></span>
 <button id="out" class="signout" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>Sign out</button></div>
 <div id="ph" class="hide"></div>
-<div id="busy" class="s hide" style="text-align:center">Working…</div>
+<div id="busy" class="hide" role="status" aria-label="Working" style="position:fixed;top:12px;right:14px;z-index:70"><span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>
 
 <div id="s1" class="card">
 <div class="si-t">Sign in</div>
