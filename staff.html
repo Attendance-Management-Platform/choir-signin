@@ -1247,7 +1247,11 @@ body.prpon{overflow:hidden}
 :root[data-theme="dark"] #rhsmake .rhbar .rhsum span{color:#F2C46B!important}:root[data-theme="dark"] #rhsmake .rhseg input{accent-color:#E8E6E1}
 /* Quick fixes (owner, 22 Nov 2026): bottom menu hides on scroll and under panels; the Change box is a centred box on tablets and laptops */
 #tabs{transition:transform .25s ease,opacity .25s ease}
-body.navhide #tabs{transform:translateY(140%);opacity:0;pointer-events:none}
+body.navfaint #tabs{opacity:.06}
+body.navhide #tabs{opacity:0;pointer-events:none}
+html:not(.sbshow){scrollbar-color:transparent transparent}
+html:not(.sbshow) ::-webkit-scrollbar-thumb{background:transparent!important}
+html:not(.sbshow) ::-webkit-scrollbar-track{background:transparent!important}
 body.ppon #tabs,body.prpon #tabs,body:has(#prfix) #tabs{display:none!important}
 @media (min-width:520px) and (max-width:1099px){
   #prfix .prsheet{top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;width:min(480px,92vw)!important;max-height:88vh;border-radius:22px!important;box-shadow:0 24px 60px rgba(0,0,0,.25)!important;transform:translate(-50%,-46%)!important}
@@ -2304,6 +2308,8 @@ function pgClear(id) {
   go(id); window.scrollTo(0, 0);
 }
 document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('[data-pgx]'); if (b) pgClear(b.dataset.pgx); });
+/** After signing in, load the signed-in view the same way a page reload does (the sign-in reply is only part of it). */
+function afterSignIn(j) { setMe(j); drawTabs(); call({action: 'me', token}).then(m => { if (m && m.ok) { setMe(m); drawTabs(); } land(); welcome(); }).catch(() => { land(); welcome(); }); }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); sessionStorage.removeItem('rbcMTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
 function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17','s18','s19','s20','s21']) $(x).classList.toggle('hide', x !== id);
@@ -4556,7 +4562,18 @@ function rhTidy() {
   if (notes.length) { const d = document.createElement('details'); d.className = 'rhhow'; d.innerHTML = '<summary>How it works</summary>'; notes[0].parentNode.insertBefore(d, notes[0]); notes.forEach(n => d.appendChild(n)); }
   const hb = $('rhhelpbox'); if (hb) { const d = document.createElement('details'); d.className = 'rhhow'; d.innerHTML = '<summary>Who gets which form</summary>'; hb.parentNode.insertBefore(d, hb); d.appendChild(hb); }
 }
-/** The bottom menu slides away while you scroll down and comes back when you scroll up or reach the top (owner, 22 Nov 2026). */
+/** Quiet time: the bottom menu fades after 4 seconds with no touch, key or scroll, and comes back on any of them. */
+const IDLE_MS = 5 * 60 * 1000; // automatic sign-out after 5 minutes with no activity (change to 3 or 4 minutes if wanted)
+let lastAct = Date.now();
+['pointerdown', 'keydown', 'scroll', 'touchstart', 'input'].forEach(ev => window.addEventListener(ev, () => { lastAct = Date.now(); document.body.classList.remove('navfaint'); }, {passive: true, capture: true}));
+setInterval(() => { if (token && Date.now() - lastAct >= 4000) document.body.classList.add('navfaint'); }, 1000);
+setInterval(() => { if (!token) return; if (Date.now() - lastAct >= IDLE_MS) { lastAct = Date.now(); try { toast('You were signed out after 5 minutes with no activity.', 'bad'); } catch (e) {} const o = $('out'); if (o) o.click(); else signedOutNow(); } }, 15000);
+/** Scrollbars fade out when nothing is happening, and come back on scroll, touch or pointer movement. */
+(function scrollbarsFade() { const root = document.documentElement; let t = 0;
+  const show = () => { root.classList.add('sbshow'); clearTimeout(t); t = setTimeout(() => root.classList.remove('sbshow'), 1200); };
+  ['scroll', 'pointermove', 'touchstart', 'wheel'].forEach(ev => window.addEventListener(ev, show, {passive: true, capture: true}));
+})();
+/** The bottom menu fades away while you scroll down and comes back when you scroll up or reach the top (owner, 22 Nov 2026). */
 (function navAutoHide() { let last = window.scrollY, t = 0;
   window.addEventListener('scroll', () => { const y = window.scrollY; if (Math.abs(y - last) < 8) return;
     document.body.classList.toggle('navhide', y > last && y > 120); last = y; clearTimeout(t); t = setTimeout(() => document.body.classList.remove('navhide'), 1800); }, {passive: true});
@@ -5520,7 +5537,7 @@ $('verify').onclick = async () => {
     const j = await call({action: 'signin.verify', page: 'portal', memberId: $('mid').value.trim(), code: $('code').value.trim()});
     if (!j.ok) return say('m2', j.error || 'Could not sign in.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
-    setMe(j); drawTabs(); land(); welcome();
+    afterSignIn(j);
     if (j.passwordSetNeeded) openPwSet();
   } catch (e) { say('m2', 'Network problem. Try again.', 'bad'); }
 };
@@ -5534,7 +5551,7 @@ $('pwgo').onclick = async () => {
     $('pw').value = '';
     if (!j.ok) return say('m3', j.error || 'Could not sign in.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
-    setMe(j); drawTabs(); land(); welcome();
+    afterSignIn(j);
   } catch (e) { say('m3', 'Network problem. Try again.', 'bad'); }
 };
 function openPwSet() { $('pwset').style.display = 'flex'; }
@@ -5842,7 +5859,7 @@ async function googleDone(resp) {
     const j = await call({action: 'signin.google', page: 'portal', idToken: resp.credential, memberId: $('mid').value.trim()});
     if (!j.ok) return say('m1', j.error || 'Google sign-in did not work.', 'bad');
     token = j.token; try { sessionStorage.setItem('rbcTok', token); sessionStorage.setItem('rbcMTok', token); } catch (e) {}
-    setMe(j); drawTabs(); land(); welcome();
+    afterSignIn(j);
   } catch (e) { say('m1', 'Network problem. Try again.', 'bad'); }
 }
 if (GOOGLE_CLIENT_ID) {
