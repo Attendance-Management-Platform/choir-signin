@@ -1880,7 +1880,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 
 <div id="s20" class="pg hide"><div id="hub"></div></div>
 
-<div id="s22" class="pg hide"><div id="pulsebox"></div><p id="m22" class="s"></p></div>
+<div id="s22" class="pg hide"><div id="pulsebox"></div><div id="pulsenotes"></div><p id="m22" class="s"></p></div>
 <div id="s21" class="pg hide">
 <div class="two"><div class="c1"><div id="ctlsw"></div></div><div class="c2"><div id="ctlpeople"></div></div></div>
 <p id="m21" class="s"></p>
@@ -4578,7 +4578,7 @@ document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-23-15';
+const PAGE_VERSION = 'v2026-11-23-16';
 document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .rchg{display:none}#rollbox .rtile.rtile-open .rchg,#rollbox .rtile:focus-within .rchg{display:inline-flex}#vbar{background:transparent!important;border:none!important;box-shadow:none!important;padding:0 0 8px!important}#vbar .ct{font-size:15px!important}#vbar .sub{font-size:13px}#rows details.ckgrp{width:100%!important;box-sizing:border-box}#pulsebox table{font-size:13px}@media (max-width:640px){#pulsebox th,#pulsebox td{padding:4px 3px!important}}#rows details.ckgrp.foldflow{display:block!important}#rows details.ckgrp.foldflow>.tblc+.tblc{margin-top:14px}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
@@ -5345,7 +5345,7 @@ async function loadPulse(quiet) {
   try {
     const j = await call({action: 'pulse.overview', token});
     if (!j.ok) { $('pulsebox').innerHTML = '<div class="card pad"><p class="sub">' + esc(j.error || 'Pulse is not open to you.') + '</p></div>'; say('m22', ''); return; }
-    drawPulse(j); say('m22', '');
+    drawPulse(j); say('m22', ''); pnEnsure(); loadNotes();
   } catch (e) { say('m22', 'Network problem. Try again.', 'bad'); }
 }
 function drawPulse(j) {
@@ -5394,6 +5394,65 @@ function drawPulseSettings(j) {
       if (k.ok) drawPulseSettings(k); say('m21', k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
     } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); }
   };
+}
+/** Pulse notes (step 2, 23 Nov 2026): write a note, and the inbox. Notes are text; the numbers on Pulse stay numbers only. */
+let PNOTE = {filter: 'needs', me: {}, init: false};
+const PN_KIND = {question: 'Question', recommendation: 'Recommendation', note: 'Note'}, PN_ABOUT = {season: 'The season', rehearsal: 'A rehearsal', member: 'A member'};
+function pnDate(ms) { return ms ? new Date(Number(ms)).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Lagos'}) : ''; }
+function pnEnsure() {
+  const box = $('pulsenotes'); if (!box || box.__built) return; box.__built = true;
+  box.innerHTML = '<div class="card pad" style="margin-top:12px"><div class="ct">Notes</div><p class="sub" style="margin:4px 0 8px">Write to the admin team, the Owner, or everyone on Pulse. Notes are text; the numbers above stay numbers only. Nobody can delete a note.</p>' +
+    '<details id="pnwritebox"><summary class="btn line sm" style="cursor:pointer">Write a note</summary><div style="margin-top:10px">' +
+    '<label class="lb">What is it about<select id="pnabout" class="in" data-native="1"><option value="season">The season</option><option value="rehearsal">A rehearsal</option><option value="member">A member</option></select></label>' +
+    '<label class="lb" style="margin-top:8px">Detail (optional)<input id="pndetail" class="in" maxlength="80"></label>' +
+    '<label class="lb" style="margin-top:8px">Kind<select id="pnkind" class="in" data-native="1"><option value="question">Question (needs an answer)</option><option value="recommendation">Recommendation</option><option value="note">Note</option></select></label>' +
+    '<fieldset style="border:0;padding:0;margin:8px 0 0"><legend class="lb">Send to</legend>' +
+    '<label class="ctlck"><input type="checkbox" class="pnto" value="admins" checked> Admin team</label> <label class="ctlck"><input type="checkbox" class="pnto" value="owner"> Owner only</label> <label class="ctlck"><input type="checkbox" class="pnto" value="everyone"> Everyone on Pulse</label></fieldset>' +
+    '<label class="lb" style="margin-top:8px">Also to (emails, on the Pulse list)<input id="pnextra" class="in" autocomplete="off"></label>' +
+    '<label class="lb" style="margin-top:8px">Note<textarea id="pntext" class="in" rows="4" maxlength="1000"></textarea></label>' +
+    '<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="pnsend">Send note</button></div></div></details></div>' +
+    '<div class="card pad" style="margin-top:12px"><div class="ct">Inbox</div><label class="lb">Show<select id="pnfilter" class="in" data-native="1"></select></label><div id="pninbox" style="margin-top:10px"></div></div>';
+  $('pnsend').onclick = pnSend;
+  $('pnfilter').onchange = () => { PNOTE.filter = $('pnfilter').value; loadNotes(); };
+  box.onclick = async ev => {
+    const a = ev.target.closest && ev.target.closest('.pnans'), h = ev.target.closest && ev.target.closest('.pnhide');
+    if (a) { const t = (box.querySelector('#pnans-' + a.dataset.id) || {}).value || ''; if (!t.trim()) { say('m22', 'Write the answer first.', 'bad'); return; }
+      try { const k = await call({action: 'pulse.notes.answer', token, id: a.dataset.id, text: t.trim()}); say('m22', k.ok ? (k.summary || 'Answer saved.') : (k.error || 'Could not save the answer.'), k.ok ? 'ok' : 'bad'); if (k.ok) loadNotes(); } catch (e) { say('m22', 'Network problem. Try again.', 'bad'); } }
+    if (h) { try { const k = await call({action: 'owner.pulse.noteHide', token, id: h.dataset.id, hidden: h.dataset.hidden === '1' ? 'true' : 'false'}); say('m22', k.ok ? (k.summary || 'Done.') : (k.error || 'Could not change that note.'), k.ok ? 'ok' : 'bad'); if (k.ok) loadNotes(); } catch (e) { say('m22', 'Network problem. Try again.', 'bad'); } }
+  };
+}
+async function pnSend() {
+  const text = ($('pntext').value || '').trim();
+  if (!text) { say('m22', 'Write the note first.', 'bad'); return; }
+  const to = [...document.querySelectorAll('#pnwritebox .pnto:checked')].map(c => c.value);
+  const extra = ($('pnextra').value || '').split(/[,;\s]+/).map(x => x.trim()).filter(Boolean);
+  try { const k = await call({action: 'pulse.notes.write', token, kind: $('pnkind').value, about: $('pnabout').value, aboutDetail: $('pndetail').value, text: text, to: JSON.stringify(to.concat(extra))});
+    if (k.signedOut) { signedOutNow(); return; }
+    say('m22', k.ok ? (k.summary || 'Note sent.') : (k.error || 'Could not send the note.'), k.ok ? 'ok' : 'bad');
+    if (k.ok) { $('pntext').value = ''; $('pndetail').value = ''; $('pnextra').value = ''; loadNotes(); }
+  } catch (e) { say('m22', 'Network problem. Try again.', 'bad'); }
+}
+async function loadNotes() {
+  const inbox = $('pninbox'); if (!inbox) return;
+  try { const j = await call({action: 'pulse.notes.list', token, filter: PNOTE.filter});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { inbox.innerHTML = '<p class="sub" style="margin:4px 0 0">' + esc(j.error || 'Notes are not open to you.') + '</p>'; return; }
+    PNOTE.me = j.me || {};
+    if (!PNOTE.init) { PNOTE.init = true; if (!PNOTE.me.admin && PNOTE.filter === 'needs') { PNOTE.filter = 'sent'; return loadNotes(); } }
+    const opts = [['needs', 'Needs an answer'], ['sent', 'Sent by me'], ['recs', 'Recommendations'], ['answered', 'Answered']].concat(PNOTE.me.owner ? [['all', 'All notes (Owner)']] : []);
+    const f = $('pnfilter'); f.innerHTML = opts.map(o => '<option value="' + o[0] + '">' + o[1] + '</option>').join('');
+    if (opts.some(o => o[0] === PNOTE.filter)) f.value = PNOTE.filter; else { PNOTE.filter = 'needs'; f.value = 'needs'; }
+    inbox.innerHTML = j.notes.length ? j.notes.map(pnCard).join('') : '<p class="sub" style="margin:4px 0 0">No notes here.</p>';
+  } catch (e) { /* keep what is shown */ }
+}
+function pnCard(n) {
+  const head = esc(PN_KIND[n.kind] || n.kind) + ' · ' + esc(PN_ABOUT[n.about] || n.about) + (n.aboutDetail ? ' (' + esc(n.aboutDetail) + ')' : '') + ' · from ' + esc(n.fromName || n.fromEmail) + ' · ' + esc(pnDate(n.atMs)) + (n.hidden ? ' · HIDDEN' : '');
+  const waiting = n.kind === 'question' && !n.answer && n.waitingDays ? ' · waiting ' + n.waitingDays + ' day' + (n.waitingDays === 1 ? '' : 's') : '';
+  let body = '<div class="sub" style="margin:0">' + head + waiting + '</div><p style="margin:6px 0 0;white-space:pre-wrap">' + esc(n.text) + '</p>';
+  if (n.answer) body += '<p class="sub" style="margin:8px 0 0"><b>Answer</b> (' + esc(n.answeredBy || '') + ', ' + esc(pnDate(n.answeredAtMs)) + '): ' + esc(n.answer) + '</p>';
+  else if (PNOTE.me.admin) body += '<div style="margin-top:8px"><textarea id="pnans-' + esc(n.id) + '" class="in" rows="2" maxlength="1000" placeholder="Write the answer"></textarea> <button type="button" class="btn red sm pnans" data-id="' + esc(n.id) + '">Answer</button></div>';
+  if (PNOTE.me.owner) body += '<div style="margin-top:8px"><button type="button" class="btn line sm pnhide" data-id="' + esc(n.id) + '" data-hidden="' + (n.hidden ? '0' : '1') + '">' + (n.hidden ? 'Show again' : 'Hide') + '</button></div>';
+  return '<div style="border-top:1px solid #eee;padding:10px 0">' + body + '</div>';
 }
 /** Control room → Sign people out (Owner, 23 Nov 2026): one person, or everyone. */
 function drawSignOut(j) {
