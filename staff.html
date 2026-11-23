@@ -4570,11 +4570,11 @@ function rbcCheckInListView_(rows, filters) {
 }
 
 let ckFilt = {status: 'all', campus: ''};
-document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;position:sticky;top:0;z-index:5;padding:6px 0;background:#fff}.ckjump a{padding:6px 12px;border-radius:999px;border:1px solid #E2E0D9;background:#fff;font-size:13px;color:inherit;text-decoration:none}.ckgrp{padding:0;overflow:hidden;margin-bottom:14px}.ckgh{cursor:pointer;padding:14px 18px;list-style:none;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;font-size:16px}</style>');
+document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;position:sticky;top:0;z-index:5;padding:6px 0;background:#fff}.ckjump a{padding:6px 12px;border-radius:999px;border:1px solid #E2E0D9;background:#fff;font-size:13px;color:inherit;text-decoration:none}.ckgrp{padding:0;overflow:hidden;margin-bottom:14px}.ckgrp{margin:0 0 18px;padding:0;box-shadow:none;border:none;background:transparent;overflow:visible}#ckcamp{height:40px;border-radius:999px;padding:0 16px;border:1px solid #E2E0D9;background:#fff;font:inherit;font-size:14px;min-width:200px;max-width:260px}.ckgh{cursor:pointer;padding:14px 18px;list-style:none;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;font-size:16px}</style>');
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-23-8';
+const PAGE_VERSION = 'v2026-11-23-9';
 document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
@@ -4610,9 +4610,10 @@ async function loadRows(quiet) {
       (r.canCorrectLate ? '<button class="btn line sm" type="button" data-act="l" data-late="' + (r.late ? '0' : '1') + '" data-id="' + esc(r.memberId) + '">' + (r.late ? 'Was on time' : 'Mark late') + '</button>' + (r.late && !r.lateAllowed ? '<button class="btn line sm" type="button" data-act="l" data-late="a" data-id="' + esc(r.memberId) + '" title="Late, but the leaders gave permission">Late (allowed)</button>' : '') : '') +
       (r.canUndo ? '<button class="btn line sm" type="button" data-act="u" data-id="' + esc(r.memberId) + '">Undo</button>' : '') + '</div></div>';
     const head = cols => '<div class="g gv th"><div></div><div>Member</div><div>' + cols + '</div><div>Action</div></div>';
-    const ckV = rbcCheckInListView_(j.rows, ckFilt), cc = rbcCheckInListCounts_(j.rows);
+    const ckSrc = ckFilt.status === 'needs' ? j.rows.filter(r => !r.validatedBy) : j.rows;
+    const ckV = rbcCheckInListView_(ckSrc, ckFilt.status === 'needs' ? Object.assign({}, ckFilt, {status: 'all'}) : ckFilt), cc = rbcCheckInListCounts_(j.rows);
     const chip = (k, t, n) => '<button type="button" class="btn ' + (ckFilt.status === k ? 'red' : 'line') + ' sm" data-ckf="' + k + '" aria-pressed="' + (ckFilt.status === k) + '">' + t + ' (' + n + ')</button>';
-    $('ckchips').innerHTML = chip('all', 'All', cc.total) + chip('waiting', 'Waiting', cc.waiting) + chip('flagged', 'Flagged', cc.flagged) + chip('checked', 'Checked', cc.checked) + chip('late', 'Late', cc.late);
+    $('ckchips').innerHTML = chip('all', 'All', cc.total) + chip('needs', 'Needs checking', j.rows.filter(r => !r.validatedBy).length) + chip('late', 'Late', cc.late);
     $('ckcamp').innerHTML = '<option value="">All campuses</option>' + ckV.campusChoices.map(x => '<option value="' + esc(x.key) + '"' + (ckFilt.campus === x.key ? ' selected' : '') + '>' + esc(x.campus) + ' (' + x.count + ')</option>').join('');
     $('ckfilt').classList.toggle('hide', !j.rows.length || j.processed === true);
     const flagged = ckV.rows.filter(r => r.flagged && !r.validatedBy), clean = ckV.rows.filter(r => !r.flagged && !r.validatedBy), done = ckV.rows.filter(r => r.validatedBy);
@@ -4621,7 +4622,7 @@ async function loadRows(quiet) {
     const ckBody = rowsIn => { const f = rowsIn.filter(r => r.flagged && !r.validatedBy), cl = rowsIn.filter(r => !r.flagged && !r.validatedBy), dn = rowsIn.filter(r => r.validatedBy); return sect('Flagged first', 'one by one, or tick several', f, 'What looked odd') + sect('Clear, waiting', 'place and QR all ok', cl, 'Checked') + sect('Checked', 'every checked row can be undone with a reason', dn, 'Status'); };
     let ckHtml;
     if (j.processed) ckHtml = sect('Record of check-ins', 'the day is processed', ckV.rows, 'Status');
-    else if (ckV.groups.length > 1) ckHtml = '<nav class="ckjump" aria-label="Jump to a campus">' + ckV.groups.map(g => '<a href="#' + ckSlug(g.key) + '">' + esc(g.campus) + ' (' + g.count + ')</a>').join('') + '</nav>' + ckV.groups.map(g => '<details class="ckgrp card rise" open id="' + ckSlug(g.key) + '"><summary class="ckgh"><b>' + esc(g.campus) + '</b><span class="s">' + g.counts.waiting + ' waiting · ' + g.counts.flagged + ' flagged · ' + g.counts.checked + ' checked</span></summary>' + ckBody(g.rows) + '</details>').join('');
+    else if (ckV.groups.length > 1) ckHtml = ckV.groups.map(g => '<details class="ckgrp" open id="' + ckSlug(g.key) + '"><summary class="ckgh"><b>' + esc(g.campus) + '</b><span class="s">' + g.counts.waiting + ' waiting · ' + g.counts.flagged + ' flagged · ' + g.counts.checked + ' checked</span></summary>' + ckBody(g.rows) + '</details>').join('');
     else ckHtml = ckBody(ckV.rows);
     if (j.rows.length && !ckV.rows.length) ckHtml += '<div class="card" style="padding:14px">Nothing matches this filter.</div>';
     if (ckV.groups.length > 1 && !j.processed) ckHtml += '<div style="text-align:center"><button class="btn line sm" type="button" data-ckback>Back to top</button></div>';
@@ -5702,7 +5703,7 @@ async function loadRoll() {
         '<div class="tkside">' + (r.state ? '<span class="pill ' + ROLLLAB[r.state][1] + '">' + ROLLLAB[r.state][0] + '</span>' : '') + (r.how && r.state ? '<span class="pill p-pend">' + esc(r.how === 'hand' ? 'by hand' : r.how === 'approved' ? 'approved request' : r.how) + '</span>' : '') + (r.validated ? '<span class="pill p-val">checked</span>' : '') +
         (r.canAbsent ? '<button class="btn line sm" type="button" data-roll="absent" data-id="' + esc(r.memberId) + '">Absent</button>' : '') +
         (r.canExcused ? '<button class="btn line sm" type="button" data-roll="excused" data-id="' + esc(r.memberId) + '">Excused</button>' : '') +
-        (r.canChange ? '<button class="btn line sm" type="button" data-roll="' + (r.state === 'present' ? 'excused' : 'present') + '" data-change="1" data-id="' + esc(r.memberId) + '">' + (r.state === 'present' ? 'Change to Excused' : 'Change to Present') + '</button>' : '') +
+        (r.canChange ? '<button class="btn line sm" type="button" data-roll="present" data-id="' + esc(r.memberId) + '">Mark present</button>' : '') +
         (r.canTakeBack ? '<button class="btn line sm" type="button" data-roll="clear" data-id="' + esc(r.memberId) + '">Take back</button>' : '') + '</div></div>'});
   } catch (e) { box.innerHTML = ''; }
 }
@@ -6180,6 +6181,7 @@ if (token) { const first = n => call({action: 'me', token}).then(j => { if (j.ok
   function bars() {
     var pgs = document.querySelectorAll('.pg');
     for (var i = 0; i < pgs.length; i++) {
+      if (pgs[i].id === 's4') { var ob = pgs[i].querySelector(':scope > .foldall'); if (ob) ob.remove(); continue; }
       var pg = pgs[i], n = pg.id === 's10' ? pg.querySelectorAll('button.hsec.fold[data-hfold]:not([hidden])').length : pg.querySelectorAll('.fold:not(.psecoff .fold):not(.psecoff)').length;
       var b = pg.querySelector(':scope > .foldall');
       if (n < 3) { if (b) b.remove(); continue; }
