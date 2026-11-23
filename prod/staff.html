@@ -1924,10 +1924,11 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <span id="vsum" class="hide"></span>
 <div id="vstats" class="stats rise"></div>
 <div id="fcbox"></div>
-<div id="rows" class="pg" style="gap:18px"></div>
 <div id="vbar" class="card rise hide" style="padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
 <div style="flex:1 1 280px"><div class="ct" style="font-size:17px">Three ways to validate</div><div class="sub" style="margin-top:4px">Validate one by one, tick several and validate them together, or validate all clean at once. &ldquo;All clean&rdquo; leaves out anything flagged. Any validation can be undone with a reason. Nobody validates their own check-in, unless a Global Admin or Assistant gives a reason.</div></div>
 <div class="actions" style="margin:0"><button id="vtick" class="btn line" type="button">Validate ticked (0)</button><button id="vall" class="btn red" type="button">Validate all clean</button></div></div>
+<div id="ckfilt" class="hide" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between"><div id="ckchips" style="display:flex;gap:6px;flex-wrap:wrap"></div><select id="ckcamp" aria-label="Show one campus" style="max-width:220px"></select></div>
+<div id="rows" class="pg" style="gap:18px"></div>
 <p id="m4" class="s"></p>
 </div>
 
@@ -4494,13 +4495,98 @@ document.addEventListener('click', async ev => {
   await loadRoom(); if (typeof loadRows === 'function') await loadRows();
   say('m4', j && j.ok ? (j.summary || 'Saved.') : ((j && j.error) || 'Could not save.'), j && j.ok ? 'ok' : 'bad');
 });
+/* Item 6: check-in list filters and campus choices (pure logic). */
+function rbcCheckInListState_(row) {
+  return row && row.validatedBy ? 'checked' : 'waiting';
+}
+function rbcCheckInListFlagged_(row) {
+  return !!row && (row.flagged === true || (Array.isArray(row.tags) && row.tags.length > 0));
+}
+function rbcCheckInListCampus_(row) {
+  const name = String(row && row.campus != null ? row.campus : '').trim();
+  return name || 'Unassigned campus';
+}
+function rbcCheckInListCounts_(rows) {
+  const c = {total: 0, waiting: 0, checked: 0, flagged: 0, late: 0, lateAllowed: 0};
+  (Array.isArray(rows) ? rows : []).forEach(r => {
+    if (!r) return;
+    c.total++;
+    c[rbcCheckInListState_(r)]++;
+    if (rbcCheckInListFlagged_(r)) c.flagged++;
+    if (r.late === true) { c.late++; if (r.lateAllowed === true) c.lateAllowed++; }
+  });
+  return c;
+}
+/**
+ * Pure. The 'flagged' and 'late' chips are status shortcuts. The boolean
+ * filters may be combined with waiting/checked and a campus.
+ * An unknown filter fails closed (shows no rows).
+ */
+function rbcCheckInFilterRows_(rows, filters) {
+  const f = filters || {};
+  const status = String(f.status || 'all').trim().toLowerCase();
+  if (['all','waiting','checked','flagged','late'].indexOf(status) < 0) return [];
+  const campus = String(f.campus == null ? '' : f.campus).trim().toLowerCase();
+  return (Array.isArray(rows) ? rows : []).filter(r => {
+    if (!r) return false;
+    if ((status === 'waiting' || status === 'checked') && rbcCheckInListState_(r) !== status) return false;
+    if (status === 'flagged' && !rbcCheckInListFlagged_(r)) return false;
+    if (status === 'late' && r.late !== true) return false;
+    if (f.flagged === true && !rbcCheckInListFlagged_(r)) return false;
+    if (f.late === true && r.late !== true) return false;
+    if (campus && rbcCheckInListCampus_(r).toLowerCase() !== campus) return false;
+    return true;
+  });
+}
+/**
+ * Pure. Campus groups appear in alphabetical order; rows within each campus
+ * retain the server order (flagged first, then waiting, then checked).
+ */
+function rbcCheckInGroupByCampus_(rows) {
+  const byCampus = Object.create(null);
+  (Array.isArray(rows) ? rows : []).forEach(r => {
+    if (!r) return;
+    const name = rbcCheckInListCampus_(r), key = name.toLowerCase();
+    if (!byCampus[key]) byCampus[key] = {campus: name, key: key, rows: []};
+    byCampus[key].rows.push(r);
+  });
+  return Object.keys(byCampus)
+    .sort((a,b) => byCampus[a].campus.localeCompare(byCampus[b].campus, 'en-GB'))
+    .map(k => {
+      const g = byCampus[k];
+      return {campus: g.campus, key: g.key, count: g.rows.length, counts: rbcCheckInListCounts_(g.rows), rows: g.rows.slice()};
+    });
+}
+function rbcCheckInListView_(rows, filters) {
+  const all = (Array.isArray(rows) ? rows : []).filter(Boolean);
+  const visible = rbcCheckInFilterRows_(all, filters);
+  const groups = rbcCheckInGroupByCampus_(visible);
+  return {
+    rows: visible, groups: groups,
+    campusChoices: rbcCheckInGroupByCampus_(all).map(g => ({campus:g.campus,key:g.key,count:g.count})),
+    counts: Object.assign(rbcCheckInListCounts_(visible), {available:all.length,campuses:groups.length})
+  };
+}
+
+let ckFilt = {status: 'all', campus: ''};
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
+document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
+const PAGE_VERSION = 'v2026-11-23-6';
+document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}</style>');
+/* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
+(function () {
+  const busy = () => { const a = document.activeElement; return (!!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) || document.querySelectorAll('.pbtick:checked,.ltick:checked,.tick:checked').length > 0; };
+  const check = async () => { try { const r = await fetch(location.pathname + '?vc=' + Date.now(), {cache: 'no-store'}); const m = /PAGE_VERSION = '(v\d[^']*)'/.exec(await r.text()); if (m && m[1] !== PAGE_VERSION && !busy()) location.reload(); } catch (e) { /* offline: keep this version */ } };
+  setInterval(check, 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+})();
 async function loadRows(quiet) {
   quiet = quiet === true;
   if (!quiet) say('m4', LOADWAVE); loadRoom(quiet);
   try {
     const j = await call({action: 'validate.list', token, __quiet: quiet});
     if (j.signedOut) { signedOutNow(); return; }
-    if (!j.ok) { $('vbar').classList.add('hide'); $('vstats').innerHTML = ''; if (/No rehearsal/.test(j.error || '')) { $('rows').innerHTML = emptyCard('cal', 'No rehearsal yet', 'Check-ins show here once a rehearsal is set up and its check-in opens.', myTabs.indexOf('rehearsal') !== -1 ? '<button class="btn sm" type="button" data-taskgo="rehearsal">Open Rehearsals</button>' : ''); return say('m4', ''); } $('rows').innerHTML = ''; return say('m4', /cannot see the check-ins/.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad'); }
+    if (!j.ok) { $('vbar').classList.add('hide'); $('ckfilt').classList.add('hide'); $('vstats').innerHTML = ''; if (/No rehearsal/.test(j.error || '')) { $('rows').innerHTML = emptyCard('cal', 'No rehearsal yet', 'Check-ins show here once a rehearsal is set up and its check-in opens.', myTabs.indexOf('rehearsal') !== -1 ? '<button class="btn sm" type="button" data-taskgo="rehearsal">Open Rehearsals</button>' : ''); return say('m4', ''); } $('rows').innerHTML = ''; return say('m4', /cannot see the check-ins/.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad'); }
     const choices = j.rehearsals || []; ckShown = j.rehearsalId || '';
     $('ckpick').classList.toggle('hide', choices.length < 2);
     $('ckrid').innerHTML = choices.map(x => '<option value="' + esc(x.id) + '"' + (x.id === j.rehearsalId ? ' selected' : '') + '>' + esc(x.id) + ' · ' + esc(new Date(x.startMs).toLocaleDateString('en-GB')) + (x.rolls ? ' · Roll ' + x.roll + ' of ' + x.rolls : '') + (x.finished ? ' (finished)' : '') + (x.test ? ' · TEST' : '') + '</option>').join('');
@@ -4509,7 +4595,7 @@ async function loadRows(quiet) {
     const c = j.counts || {waiting: 0, clean: 0, flagged: 0, validated: 0};
     say('m4', j.published ? esc(j.rehearsalId || 'This rehearsal') + ' has been published, so it is final and no longer listed here. You can see it on Records.' : j.processed ? esc(j.rehearsalId || 'This rehearsal') + ' has been processed. Nothing is waiting to be checked; this list is only a record.' : (j.rows.length ? '' : 'No check-ins yet.'));
     $('vsum').textContent = c.waiting + ' waiting (' + c.clean + ' clean, ' + c.flagged + ' flagged) · ' + c.validated + ' checked';
-    $('vbar').classList.toggle('hide', !j.rows.length || j.processed === true);
+    $('vbar').classList.toggle('hide', !c.waiting || j.processed === true);
     $('vall').textContent = 'Validate all clean (' + c.clean + ')';
     $('vall').disabled = c.clean === 0;
     const tm = r => new Date(r.time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
@@ -4521,9 +4607,14 @@ async function loadRows(quiet) {
       (r.canCorrectLate ? '<button class="btn line sm" type="button" data-act="l" data-late="' + (r.late ? '0' : '1') + '" data-id="' + esc(r.memberId) + '">' + (r.late ? 'Was on time' : 'Mark late') + '</button>' + (r.late && !r.lateAllowed ? '<button class="btn line sm" type="button" data-act="l" data-late="a" data-id="' + esc(r.memberId) + '" title="Late, but the leaders gave permission">Late (allowed)</button>' : '') : '') +
       (r.canUndo ? '<button class="btn line sm" type="button" data-act="u" data-id="' + esc(r.memberId) + '">Undo</button>' : '') + '</div></div>';
     const head = cols => '<div class="g gv th"><div></div><div>Member</div><div>' + cols + '</div><div>Action</div></div>';
-    const flagged = j.rows.filter(r => r.flagged && !r.validatedBy), clean = j.rows.filter(r => !r.flagged && !r.validatedBy), done = j.rows.filter(r => r.validatedBy);
+    const ckV = rbcCheckInListView_(j.rows, ckFilt), cc = rbcCheckInListCounts_(j.rows);
+    const chip = (k, t, n) => '<button type="button" class="btn ' + (ckFilt.status === k ? 'red' : 'line') + ' sm" data-ckf="' + k + '" aria-pressed="' + (ckFilt.status === k) + '">' + t + ' (' + n + ')</button>';
+    $('ckchips').innerHTML = chip('all', 'All', cc.total) + chip('waiting', 'Waiting', cc.waiting) + chip('flagged', 'Flagged', cc.flagged) + chip('checked', 'Checked', cc.checked) + chip('late', 'Late', cc.late);
+    $('ckcamp').innerHTML = '<option value="">All campuses</option>' + ckV.campusChoices.map(x => '<option value="' + esc(x.key) + '"' + (ckFilt.campus === x.key ? ' selected' : '') + '>' + esc(x.campus) + ' (' + x.count + ')</option>').join('');
+    $('ckfilt').classList.toggle('hide', !j.rows.length || j.processed === true);
+    const flagged = ckV.rows.filter(r => r.flagged && !r.validatedBy), clean = ckV.rows.filter(r => !r.flagged && !r.validatedBy), done = ckV.rows.filter(r => r.validatedBy);
     const sect = (title, hint, list, cols) => list.length ? '<div class="card rise tblc"><div class="tblh"><span>' + title + ' (' + list.length + ') <small>· ' + hint + '</small></span></div>' + head(cols) + list.map(rowHtml).join('') + '</div>' : '';
-    $('rows').innerHTML = j.processed ? sect('Record of check-ins', 'the day is processed', j.rows, 'Status') : sect('Flagged first', 'one by one, or tick several', flagged, 'What looked odd') + sect('Clear, waiting', 'place and QR all ok', clean, 'Checked') + sect('Checked', 'every checked row can be undone with a reason', done, 'Status');
+    $('rows').innerHTML = j.processed ? sect('Record of check-ins', 'the day is processed', ckV.rows, 'Status') : sect('Flagged first', 'one by one, or tick several', flagged, 'What looked odd') + sect('Clear, waiting', 'place and QR all ok', clean, 'Checked') + sect('Checked', 'every checked row can be undone with a reason', done, 'Status') + (j.rows.length && !ckV.rows.length ? '<div class="card" style="padding:14px">Nothing matches this filter.</div>' : '');
     const stat = (k, v, col, bg) => '<div class="card stat"' + (bg ? ' style="background:' + bg + ';border-color:#F0E2C9"' : '') + '><div class="k" style="color:' + col + '">' + k + '</div><div class="v" style="color:' + col + '">' + v + '</div></div>';
     $('vstats').innerHTML = stat('Checked in', j.rows.length, '#20775A') + stat('Clean (place and QR ok)', c.clean, '#20775A') + stat('Flagged', c.flagged, '#95621D', '#FFF4DF') + stat('Checked', c.validated, '#2F4F7E');
     const ticks = () => Array.from($('rows').querySelectorAll('.tick:checked')).map(x => x.dataset.id);
@@ -5597,9 +5688,10 @@ async function loadRoll() {
         {k: 'state', label: 'State', type: 'list', get: r => ROLLLAB[r.state || ''][0], all: ['Not marked', 'Present', 'Absent', 'Excused', 'Not in room']}],
       // Big name tiles (owner, 21 Nov 2026): tap the tile to mark Present; Absent, Excused and Take back are small buttons under the name.
       card: r => '<div class="fprow rtile rt-' + esc(r.state || 'none') + (r.canPresent ? ' rt-tap' : '') + '"' + (r.canPresent ? ' data-roll="present" data-id="' + esc(r.memberId) + '" role="button" tabindex="0" aria-label="Mark ' + esc(r.name || r.memberId) + ' present"' : '') + '><div class="rtn"><div class="nm">' + esc(r.name || r.memberId) + '</div><div class="mt">' + (r.campus ? esc(r.campus) : '') + (r.part ? ' · ' + esc(r.part) : '') + ' · ' + esc(r.memberId) + '</div></div>' +
-        '<div class="tkside">' + (r.state ? '<span class="pill ' + ROLLLAB[r.state][1] + '">' + ROLLLAB[r.state][0] + '</span>' : '') + (r.how && r.state ? '<span class="pill p-pend">' + esc(r.how === 'hand' ? 'by hand' : r.how === 'approved' ? 'approved request' : r.how) + '</span>' : '') + (r.validated && r.state === 'present' ? '<span class="pill p-val">checked</span>' : '') +
+        '<div class="tkside">' + (r.state ? '<span class="pill ' + ROLLLAB[r.state][1] + '">' + ROLLLAB[r.state][0] + '</span>' : '') + (r.how && r.state ? '<span class="pill p-pend">' + esc(r.how === 'hand' ? 'by hand' : r.how === 'approved' ? 'approved request' : r.how) + '</span>' : '') + (r.validated ? '<span class="pill p-val">checked</span>' : '') +
         (r.canAbsent ? '<button class="btn line sm" type="button" data-roll="absent" data-id="' + esc(r.memberId) + '">Absent</button>' : '') +
         (r.canExcused ? '<button class="btn line sm" type="button" data-roll="excused" data-id="' + esc(r.memberId) + '">Excused</button>' : '') +
+        (r.canChange ? '<button class="btn line sm" type="button" data-roll="' + (r.state === 'present' ? 'excused' : 'present') + '" data-change="1" data-id="' + esc(r.memberId) + '">' + (r.state === 'present' ? 'Change to Excused' : 'Change to Present') + '</button>' : '') +
         (r.canTakeBack ? '<button class="btn line sm" type="button" data-roll="clear" data-id="' + esc(r.memberId) + '">Take back</button>' : '') + '</div></div>'});
   } catch (e) { box.innerHTML = ''; }
 }
@@ -5608,7 +5700,7 @@ document.addEventListener('click', async ev => {
   const b = ev.target.closest && ev.target.closest('[data-roll]'); if (!b) return;
   b.disabled = true;
   const body = {action: 'roll.mark', token, memberId: b.dataset.id, mark: b.dataset.roll, rehearsalId: (typeof ckRid !== 'undefined' && ckRid) ? ckRid : undefined};
-  if (b.dataset.roll === 'excused') { const why = prompt('Why is this member excused? (10 to 300 characters)'); if (!why) { b.disabled = false; return; } body.reason = why.trim(); }
+  if (b.dataset.roll === 'excused' || b.dataset.change === '1') { const why = prompt(b.dataset.change === '1' ? 'Why is this being changed? (10 to 300 characters)' : 'Why is this member excused? (10 to 300 characters)'); if (!why) { b.disabled = false; return; } body.reason = why.trim(); }
   const j = await call(body);
   if (j && j.signedOut) { signedOutNow(); return; }
   if (j && j.needsReason) { b.disabled = false; return; }
