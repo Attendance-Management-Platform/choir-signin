@@ -4578,7 +4578,7 @@ document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-23-18';
+const PAGE_VERSION = 'v2026-11-23-19';
 document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .rchg{display:none}#rollbox .rtile.rtile-open .rchg,#rollbox .rtile:focus-within .rchg{display:inline-flex}#vbar{background:transparent!important;border:none!important;box-shadow:none!important;padding:0 0 8px!important}#vbar .ct{font-size:15px!important}#vbar .sub{font-size:13px}#rows details.ckgrp{width:100%!important;box-sizing:border-box}#pulsebox table{font-size:13px}@media (max-width:640px){#pulsebox th,#pulsebox td{padding:4px 3px!important}}#rows details.ckgrp.foldflow{display:block!important}#rows details.ckgrp.foldflow>.tblc+.tblc{margin-top:14px}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
@@ -5308,6 +5308,7 @@ function drawControl(j) {
     };
     box.querySelector('.ctlreset').onclick = () => set({action: 'owner.powers', email, reset: true});
   });
+  loadRoles(j);
 }
 /** Control room → Roles and levels (owner, 22 Nov 2026): a role or roles plus a level (Global, Region, Campus) for a member picked from the choir list. */
 async function loadAssign(quiet) {
@@ -5485,6 +5486,41 @@ function undoRow(x) {
   const reason = x.reason ? '<div class="sub" style="margin:2px 0 0">Reason given: ' + esc(x.reason) + '</div>' : '';
   const act = x.canUndo ? '<div style="margin-top:6px"><input id="undo-r-' + esc(x.opId) + '" class="in" maxlength="300" placeholder="Why you are putting it back (10 characters or more)"> <button type="button" class="btn red sm undoGo" data-id="' + esc(x.opId) + '">Undo</button></div>' : '<div class="sub" style="margin:4px 0 0">' + esc(x.why) + '</div>';
   return '<div style="border-top:1px solid #eee;padding:10px 0">' + head + change + reason + act + '</div>';
+}
+/** Control room → Roles (Owner, 23 Nov 2026): starter and custom roles of admin jobs. Giving a role uses the same save as the job boxes. */
+async function loadRoles(j) {
+  let box = $('ctlroles'); if (!box) { box = document.createElement('div'); box.id = 'ctlroles'; box.style.marginTop = '16px'; $('ctlpeople').insertAdjacentElement('afterend', box); }
+  let r; try { r = await call({action: 'owner.roles.list', token}); } catch (e) { return; }
+  if (r.signedOut) { signedOutNow(); return; }
+  if (!r.ok) { box.innerHTML = ''; return; }
+  const groups = []; (r.jobs || []).forEach(p => { let g = groups.filter(x => x.g === p.g)[0]; if (!g) groups.push(g = {g: p.g, items: []}); g.items.push(p); });
+  const boxes = ticked => groups.map(g => '<p class="sub" style="margin:8px 0 2px;font-weight:600">' + esc(g.g) + '</p>' + g.items.map(p => '<label class="ctlck"><input type="checkbox" class="rl-job" value="' + esc(p.k) + '"' + (ticked.indexOf(p.k) !== -1 ? ' checked' : '') + '> ' + esc(p.t) + '</label>').join('')).join('');
+  const editor = role => '<div class="rl-ed" data-id="' + esc(role ? role.id : '') + '" style="border-top:1px solid #eee;padding:10px 0"><label class="lb">Name<input class="in rl-name" maxlength="40" value="' + esc(role ? role.name : '') + '"></label>' + boxes(role ? role.jobs : []) +
+    '<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red sm rl-save">' + (role ? 'Save role' : 'Make role') + '</button>' + (role ? ' <button type="button" class="btn line sm rl-del">Delete role</button>' : '') + '</div></div>';
+  const admins = (j.people || []).filter(x => x.level === 'Admin');
+  const pick = r.presets.concat(r.roles);
+  box.innerHTML = '<div class="card pad"><div class="ct">Roles</div><p class="sub" style="margin:4px 0 8px">A role is a named set of jobs. Giving a role to an Admin sets their jobs to exactly that set, with the same checks and Change log as the job boxes above. Campus and part limits are not part of roles yet.</p>' +
+    '<p class="sub" style="font-weight:600;margin:10px 0 4px">Starter roles (copy one to change it)</p>' +
+    r.presets.map(p => '<div class="mrow" style="flex-wrap:wrap"><span class="mtx"><b>' + esc(p.name) + '</b><span>' + esc(p.jobs.length) + ' job(s)</span></span><button type="button" class="btn line sm rl-copy" data-id="' + esc(p.id) + '">Copy to my roles</button></div>').join('') +
+    '<p class="sub" style="font-weight:600;margin:12px 0 4px">Your roles (' + r.roles.length + ' of ' + r.max + ')</p>' + (r.roles.length ? r.roles.map(editor).join('') : '<p class="sub" style="margin:0">None yet.</p>') +
+    '<details class="gfsec" style="margin-top:12px"><summary><span><b>Make a new role</b><span>Tick the jobs</span></span></summary><div>' + editor(null) + '</div></details>' +
+    (admins.length ? '<p class="sub" style="font-weight:600;margin:12px 0 4px">Give a role to an Admin</p><label class="lb">Admin<select id="rlwho" class="in" data-native="1">' + admins.map(a => '<option value="' + esc(a.email) + '">' + esc(a.name) + '</option>').join('') + '</select></label><label class="lb" style="margin-top:8px">Role<select id="rlpick" class="in" data-native="1">' + pick.map(x => '<option value="' + esc(x.id) + '">' + esc(x.name) + '</option>').join('') + '</select></label><div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="rlgive">Give this role</button></div><p class="sub" style="margin:8px 0 0">Their jobs are set to exactly this role. Change them afterwards with the job boxes above.</p>' : '<p class="sub" style="margin:12px 0 0">No Admins yet to give a role to.</p>') + '</div>';
+  const go = async q => {
+    let k; try { k = await call(Object.assign({token}, q)); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); return; }
+    if (k.signedOut) { signedOutNow(); return; }
+    say('m21', k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+    if (!k.ok) return;
+    const s = await call({action: 'owner.state', token}).catch(() => null);
+    if (s && s.ok) drawControl(s); else loadRoles(j);
+  };
+  box.querySelectorAll('.rl-copy').forEach(b => { b.onclick = () => { const p = r.presets.filter(x => x.id === b.dataset.id)[0]; if (p) go({action: 'owner.roles.save', name: p.name + ' (mine)', jobs: p.jobs}); }; });
+  box.querySelectorAll('.rl-ed').forEach(el => {
+    const s = el.querySelector('.rl-save');
+    if (s) s.onclick = () => go({action: 'owner.roles.save', id: el.dataset.id, name: el.querySelector('.rl-name').value, jobs: [...el.querySelectorAll('.rl-job:checked')].map(c => c.value)});
+    const d = el.querySelector('.rl-del');
+    if (d) d.onclick = () => { if (window.confirm('Delete this role? People who already have its jobs keep them.')) go({action: 'owner.roles.delete', id: el.dataset.id}); };
+  });
+  const gv = $('rlgive'); if (gv) gv.onclick = () => go({action: 'owner.roles.give', email: $('rlwho').value, id: $('rlpick').value});
 }
 /** Reports → Cut-off check (Global Admin): presets, compare, save the result to MEMBER SUMMARY. */
 let CUT = null, CUTRUN = null;
