@@ -3121,6 +3121,18 @@ async function pbSave() {
     if (j.ok) { toast('Done: ' + changes.length + ' changed to ' + st + '.', 'ok'); prOpen($('prdetail').dataset.id, true); }
   } catch (e) { pbMsg('Network problem. Try again.', 'bad'); } finally { $('pbgo').disabled = false; }
 }
+async function pbArrive(mode) {
+  const ids = [].slice.call(document.querySelectorAll('.pbtick:checked')).map(t => t.dataset.pbid), why = ($('pbwhy').value || '').trim();
+  if (!ids.length) return pbMsg('Tick at least one person.', 'bad');
+  if (why.length < 10 || why.length > 300) return pbMsg('Give one reason of 10 to 300 characters.', 'bad');
+  const arrival = mode === 'allowed' ? 'Late (allowed)' : mode === 'late' ? 'Late' : 'On time';
+  pbMsg('Saving…', 'ok');
+  try { const j = await call({action: 'process.arrivalFix', token, rehearsalId: $('prdetail').dataset.id, memberIds: ids, arrival: arrival, reason: why});
+    if (j.signedOut) { signedOutNow(); return; }
+    pbMsg(j.ok ? 'Arrival set for ' + j.changed + (j.failed && j.failed.length ? '. Not changed: ' + j.failed.join('; ') : '.') : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad');
+    if (j.ok) prOpen($('prdetail').dataset.id, true);
+  } catch (e) { pbMsg('Network problem. Try again.', 'bad'); }
+}
 document.addEventListener('change', e => { if (e.target && e.target.classList && e.target.classList.contains('pbtick')) pbUpd(); });
 (function pbBar() {
   const b = document.createElement('div'); b.id = 'pbbar'; b.className = 'hide';
@@ -3176,6 +3188,7 @@ document.addEventListener('change', e => { if (e.target && e.target.classList &&
     '<button class="btn line" type="button" onclick="lbClear()">Clear</button>' +
     '<div id="lbmsg" role="status" style="flex:1 1 100%;font-size:13px"></div>';
   document.body.appendChild(b);
+  b.insertAdjacentHTML('afterbegin', '<div style="flex:1 1 100%;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:13px">Set arrival:</span><button class="btn" type="button" onclick="pbArrive(\'ontime\')">On time</button><button class="btn" type="button" onclick="pbArrive(\'late\')">Late</button><button class="btn" type="button" onclick="pbArrive(\'allowed\')">Late (allowed)</button></div>');
 })();
 
 /** Change one person (owner, 21 Nov 2026): opens a side panel on a computer and a sheet from the bottom on a phone, over the same page. Tap a choice, pick or type a reason, save. */
