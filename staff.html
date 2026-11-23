@@ -1880,6 +1880,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 
 <div id="s20" class="pg hide"><div id="hub"></div></div>
 
+<div id="s22" class="pg hide"><div id="pulsebox"></div><p id="m22" class="s"></p></div>
 <div id="s21" class="pg hide">
 <div class="two"><div class="c1"><div id="ctlsw"></div></div><div class="c2"><div id="ctlpeople"></div></div></div>
 <p id="m21" class="s"></p>
@@ -2115,7 +2116,7 @@ function clearStuckLoading() {
   document.querySelectorAll('.wave').forEach(w => { if (!w.closest('#busy')) w.remove(); });
 }
 setInterval(clearStuckLoading, 4000);
-const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People and access'], records: ['s13', 'Records'], settings: ['s18', 'Settings'], control: ['s21', 'Control room'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process'], changes: ['s16', 'Change log'], members: ['s17', 'Members'], qr: ['s3', 'Show QR code'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'Mark by hand'], absence: ['s6', 'My absence'], mine: ['s19', 'My choir'], requests: ['s7', 'Requests to decide'], rehearsal: ['s8', 'Rehearsals'], help: ['s9', 'Help']};
+const TABDEF = {home: ['s10', 'Home'], reports: ['s11', 'Reports'], people: ['s12', 'People and access'], records: ['s13', 'Records'], settings: ['s18', 'Settings'], control: ['s21', 'Control room'], pulse: ['s22', 'Pulse'], calendar: ['s14', 'Calendar'], process: ['s15', 'Process'], changes: ['s16', 'Change log'], members: ['s17', 'Members'], qr: ['s3', 'Show QR code'], checkins: ['s4', 'Check-ins'], hand: ['s5', 'Mark by hand'], absence: ['s6', 'My absence'], mine: ['s19', 'My choir'], requests: ['s7', 'Requests to decide'], rehearsal: ['s8', 'Rehearsals'], help: ['s9', 'Help']};
 const LANDING = ['home', 'qr', 'rehearsal', 'checkins', 'requests', 'absence'];
 let myTabs = [], myName = '', myRoles = [], welcomed = '', myLevel = '';
 /** The roles to show under your name: Owner, Asst Global Admin or Admin replace the Global Admin names once an Owner is set. */
@@ -2128,6 +2129,7 @@ function setMe(j) { if (j && j.pilot === true && Array.isArray(j.tabs)) j.tabs =
   // The sign-in reply does not carry Safe test or two-admin mode: ask once more (owner, 15 Nov 2026: no yellow strip after signing in).
   if (j.safeTest === undefined && typeof token !== 'undefined' && token) call({action: 'me', token}).then(m => { if (m && m.ok && m.safeTest !== undefined) { setMe(m); drawTabs(); if (typeof psecDraw === 'function') Object.keys(PSEC).forEach(psecDraw); } }).catch(() => {}); if ((j.tabs || []).indexOf('home') === -1 && j.staffOnly !== true && /member\.html$|staff\.html$|\/$/.test(location.pathname)) { location.replace('member.html'); return; } /* one sign-in: a member with no staff role goes to the member page */ myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myLevel = j.level || ''; myBypass = j.bypassTabs || {}; }
 const ICON = {
+  pulse: '<path d="M3 12h4l2-6 4 12 2-6h6"/>',
   control: '<path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   reports: '<path d="M5 20V10M12 20V4M19 20v-7"/>',
   process: '<path d="M9 11l3 3 8-8"/><path d="M4 6h9M4 12h3M4 18h9"/>',
@@ -2148,6 +2150,7 @@ const ICON = {
   settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>'
 };
 const PAGEHEAD = {
+  s22: ['Pulse', 'The Vigil and the season in numbers. Numbers only, no names.'],
   s21: ['Control room', 'Everything that runs the system. Only you, the Owner, see this page. Your own Settings stay personal.'],
   s18: ['Settings', 'How the system looks and works for you, and your access.'],
   s16: ['Change log', 'Every change made in the system, who made it and why.'],
@@ -2191,6 +2194,7 @@ const MAINS = [
   {k: 'att', name: 'Attendance', d: 'After a rehearsal: decide requests, then process and publish.', tabs: ['requests', 'process'], icon: 'process', grp: 'Leading'},
   {k: 'people', name: 'People', d: 'Members, who has access to what, and every change made.', tabs: ['members', 'people', 'changes'], icon: 'people', grp: 'Leading'},
   {k: 'reports', name: 'Reports', d: 'The latest rehearsal, the official register, what to expect next, every member and your own reports.', tabs: ['reports'], icon: 'reports', grp: 'Leading'},
+  {k: 'pulse', name: 'Pulse', d: 'The Vigil and the season in numbers. Numbers only.', tabs: ['pulse'], icon: 'pulse', grp: 'Leading'},
   {k: 'owner', name: 'Control room', d: 'Switches, admins and what each one can do. Only you see this.', tabs: ['control'], icon: 'control', grp: 'Owner', bar: false},
   {k: 'you', name: 'You', d: 'Your settings, and help with the system.', tabs: ['settings', 'help'], icon: 'settings', grp: 'Account', bar: false}];
 let HUB = '', TASKS = [];
@@ -2309,7 +2313,7 @@ function go(v) {
   clearTimeout(timer);
   { const cur = Array.from(document.querySelectorAll('.pg')).filter(x => !x.classList.contains('hide'))[0]; if (!cur || cur.id !== v) filtersReset(); }
   if (v === 's3') return start();
-  show(v); if (v === 's21') loadControl(); if (v === 's18') loadSettings(); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal(); if (v === 's19') loadMine();
+  show(v); if (v === 's21') loadControl(); if (v === 's22') loadPulse(); if (v === 's18') loadSettings(); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal(); if (v === 's19') loadMine();
 }
 /** "Clear this page": empties the boxes and filters on a menu page, closes anything open on it and reloads it fresh. It never deletes saved data. */
 const CLEARABLE = ['s4', 's5', 's6', 's7', 's8', 's11', 's12', 's13', 's15', 's16', 's17'];
@@ -2330,8 +2334,8 @@ document.addEventListener('click', ev => { const b = ev.target.closest && ev.tar
 function afterSignIn(j) { setMe(j); drawTabs(); call({action: 'me', token}).then(m => { if (m && m.ok) { setMe(m); drawTabs(); } land(); welcome(); }).catch(() => { land(); welcome(); }); }
 function land() { const k = LANDING.filter(x => myTabs.indexOf(x) !== -1)[0] || 'absence'; go(TABDEF[k][0]); }
 function signedOutNow() { token = ''; myTabs = []; myRoles = []; try { sessionStorage.removeItem('rbcTok'); sessionStorage.removeItem('rbcMTok'); } catch (e) {} clearTimeout(timer); show('s1'); }
-function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17','s18','s19','s20','s21']) $(x).classList.toggle('hide', x !== id);
-  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17','s18','s19','s20','s21'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
+function show(id) { for (const x of ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17','s18','s19','s20','s21','s22']) $(x).classList.toggle('hide', x !== id);
+  const signed = ['s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14','s15','s16','s17','s18','s19','s20','s21','s22'].indexOf(id) !== -1; document.body.classList.toggle('out', !signed);
   const ph = PAGEHEAD[id]; $('ph').classList.toggle('hide', !ph);
   const dk = Object.keys(TABDEF).filter(k => TABDEF[k][0] === id && myBypass[k])[0];
   const bm = id === 's20' ? null : mainOf(tabOfView(id)), back = bm && bm.k !== 'home' && mainTabs(bm).length > 1 ? '<a href="#" class="hubback" data-hubback="' + bm.k + '">\u2039 Back to ' + esc(bm.name) + '</a>' : '';
@@ -4574,7 +4578,7 @@ document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-23-10';
+const PAGE_VERSION = 'v2026-11-23-11';
 document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .rchg{display:none}#rollbox .rtile.rtile-open .rchg,#rollbox .rtile:focus-within .rchg{display:inline-flex}#vbar{background:transparent!important;border:none!important;box-shadow:none!important;padding:0 0 8px!important}#vbar .ct{font-size:15px!important}#vbar .sub{font-size:13px}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
@@ -5153,7 +5157,7 @@ async function gfLive(id, boxId, quiet) {
  *  Skipped while the page is hidden, something is saving, or a box or date picker is open. */
 const AUTO_DIRTY = {}, AUTO_PAGES = ['s4', 's5', 's6', 's7', 's8', 's10', 's11', 's12', 's14', 's15', 's16', 's17', 's18', 's19', 's21'];
 const AUTO_LOAD = {s5: () => loadRoll(), s6: () => loadAbsence(), s7: () => loadQueue(), s8: () => loadRehearsal(), s10: () => loadHome(), s11: () => loadReports(),
-  s12: () => loadPeople(), s14: () => loadCalendar(), s15: () => loadProcess(), s16: () => loadChanges(), s17: () => Promise.all([loadMembers(), loadNoPart()]), s18: () => loadSettings(true), s19: () => loadMine(), s21: () => loadControl(true)};
+  s12: () => loadPeople(), s14: () => loadCalendar(), s15: () => loadProcess(), s16: () => loadChanges(), s17: () => Promise.all([loadMembers(), loadNoPart()]), s18: () => loadSettings(true), s19: () => loadMine(), s21: () => loadControl(true), s22: () => loadPulse(true)};
 const autoView = () => AUTO_PAGES.filter(x => $(x) && !$(x).classList.contains('hide'))[0] || '';
 const autoPageOf = el => { const pg = el && el.closest && el.closest('[id^="s"]'); let x = pg; while (x && AUTO_PAGES.indexOf(x.id) === -1) x = x.parentElement && x.parentElement.closest('[id^="s"]'); return x ? x.id : ''; };
 const autoMark = e => { const v = autoPageOf(e.target); if (v) AUTO_DIRTY[v] = true; };
@@ -5262,7 +5266,7 @@ function drawSafe(j) {
 /** Control room (Owner only, 21 Nov 2026): switches, and the people who run the system with what each Admin may do. */
 async function loadControl(quiet) {
   if (quiet !== true) say('m21', LOADWAVE);
-  try { const j = await call({action: 'owner.state', token}); if (!j.ok) { say('m21', j.error || 'Could not load.', 'bad'); return; } drawControl(j); loadHealth(); loadAssign(true); if (quiet !== true) say('m21', ''); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); }
+  try { const j = await call({action: 'owner.state', token}); if (!j.ok) { say('m21', j.error || 'Could not load.', 'bad'); return; } drawControl(j); loadHealth(); loadAssign(true); loadPulseSettings(true); if (quiet !== true) say('m21', ''); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); }
 }
 /** Control room → System health (owner, 21 Nov 2026): one line per check, green, amber or red. Read-only. */
 async function loadHealth() {
@@ -5330,6 +5334,65 @@ function drawAssign(j, quiet) {
   };
   box.querySelectorAll('.asremove').forEach(b => { b.onclick = () => run({action: 'owner.assign.remove', memberId: b.dataset.id, level: b.dataset.level}); });
   box.querySelectorAll('.asinvite').forEach(b => { b.onclick = () => run({action: 'owner.welcome', memberId: b.dataset.id}); });
+}
+/** Pulse (step 1, 23 Nov 2026): the Vigil and the season in numbers. Read-only, numbers only, no names. */
+/** The date the picker holds as yyyy-mm-dd (its data-v), else the field's own value, else blank. */
+function pvIso(id) { const el = $(id); const v = String((el && (el.getAttribute('data-v') || el.value)) || ''); return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : ''; }
+function pulseDate(ymd) { try { return new Date(ymd + 'T12:00:00+01:00').toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Lagos'}); } catch (e) { return ymd; } }
+async function loadPulse(quiet) {
+  if (quiet !== true) say('m22', LOADWAVE);
+  try {
+    const j = await call({action: 'pulse.overview', token});
+    if (!j.ok) { $('pulsebox').innerHTML = '<div class="card pad"><p class="sub">' + esc(j.error || 'Pulse is not open to you.') + '</p></div>'; say('m22', ''); return; }
+    drawPulse(j); say('m22', '');
+  } catch (e) { say('m22', 'Network problem. Try again.', 'bad'); }
+}
+function drawPulse(j) {
+  const box = $('pulsebox'); if (!box) return;
+  const v = j.vigil, t = j.todayRoll, pct = j.season.percent;
+  const togo = v.daysToGo > 0 ? v.daysToGo + ' day' + (v.daysToGo === 1 ? '' : 's') + ' to the Vigil' : v.daysToGo === 0 ? 'The Vigil is today' : 'The Vigil was ' + (-v.daysToGo) + ' days ago';
+  const bar = pct == null ? '' : '<div style="height:10px;border-radius:99px;background:#eee;overflow:hidden;margin:8px 0"><div style="height:100%;width:' + pct + '%;background:#20775A"></div></div>';
+  const th = (x, right) => '<th style="text-align:' + (right ? 'right' : 'left') + ';padding:4px 6px">' + x + '</th>';
+  const td = (x, right) => '<td style="text-align:' + (right ? 'right' : 'left') + ';padding:4px 6px">' + x + '</td>';
+  const roll = !t ? '<p class="sub" style="margin:4px 0 0">There is no rehearsal today.</p>' :
+    '<p class="sub" style="margin:4px 0 6px">Rehearsal ' + esc(t.rehearsalId) + '</p><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><tr>' + th('Campus') + th('Part') + th('Expected', 1) + th('Present', 1) + th('Excused', 1) + th('Absent', 1) + th('Not marked', 1) + '</tr>' +
+    t.rows.map(r => '<tr>' + td(esc(r.campus)) + td(esc(r.part || '-')) + td(r.expected, 1) + td(r.present, 1) + td(r.excused, 1) + td(r.absent, 1) + td(r.notMarked, 1) + '</tr>').join('') +
+    '<tr style="font-weight:600">' + td('Total') + td('') + td(t.totals.expected, 1) + td(t.totals.present, 1) + td(t.totals.excused, 1) + td(t.totals.absent, 1) + td(t.totals.notMarked, 1) + '</tr></table></div>';
+  const past = j.byRehearsal.length ? '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><tr>' + th('Date') + th('Present', 1) + th('Excused', 1) + th('Absent', 1) + '</tr>' +
+    j.byRehearsal.map(r => '<tr>' + td(esc(pulseDate(r.date))) + td(r.present, 1) + td(r.excused, 1) + td(r.absent, 1) + '</tr>').join('') + '</table></div>' : '<p class="sub" style="margin:4px 0 0">Nothing held yet.</p>';
+  const soon = j.comingUp.length ? j.comingUp.map(r => '<div class="mrow"><span class="mtx"><b>' + esc(pulseDate(r.date)) + '</b><span>' + (r.daysAway === 1 ? 'Tomorrow' : 'In ' + r.daysAway + ' days') + '</span></span></div>').join('') : '<p class="sub" style="margin:4px 0 0">No more rehearsals on the list.</p>';
+  box.innerHTML = '<div class="card pad"><div class="ct">The Vigil</div><p class="sub" style="margin:4px 0 0">' + esc(pulseDate(v.date)) + '</p><p style="font-size:26px;font-weight:700;margin:8px 0 0">' + esc(togo) + '</p></div>' +
+    '<div class="card pad" style="margin-top:12px"><div class="ct">The season</div><p class="sub" style="margin:4px 0 0">' + (j.season.start ? 'From ' + esc(pulseDate(j.season.start)) + (j.season.end ? ' to ' + esc(pulseDate(j.season.end)) : '') : 'No rehearsals on the list yet') + '</p>' +
+    '<p style="font-size:22px;font-weight:700;margin:8px 0 0">' + (pct == null ? '-' : pct + '%') + ' <span class="sub" style="font-size:14px;font-weight:400">' + j.season.held + ' of ' + j.season.planned + ' rehearsals held</span></p>' + bar + '<p class="sub" style="margin:0">' + esc(j.season.basis) + '</p></div>' +
+    '<div class="card pad" style="margin-top:12px"><div class="ct">Today\'s roll</div>' + roll + '</div>' +
+    '<div class="card pad" style="margin-top:12px"><div class="ct">Rehearsal by rehearsal</div>' + past + '</div>' +
+    '<div class="card pad" style="margin-top:12px"><div class="ct">Coming up</div>' + soon + '</div>' +
+    '<p class="sub" style="margin-top:10px">You see: ' + (j.scope === 'all' ? 'all campuses' : esc(j.scope) + ' only') + '. Numbers only, no names.</p>';
+}
+/** Control room → Pulse (Owner): the Vigil date, the season, and who can see Pulse. */
+async function loadPulseSettings(quiet) {
+  let box = $('ctlpulse'); if (!box) { box = document.createElement('div'); box.id = 'ctlpulse'; box.style.marginTop = '16px'; ($('ctlassign') || $('ctlpeople')).insertAdjacentElement('afterend', box); }
+  try { const j = await call({action: 'owner.pulse.get', token}); if (!j.ok) { box.innerHTML = ''; return; } drawPulseSettings(j); } catch (e) { /* keep what is shown */ }
+}
+function drawPulseSettings(j) {
+  const box = $('ctlpulse'), s = j.settings, camp = j.campuses || [];
+  const scopeOpts = sel => ['all'].concat(camp).map(c => '<option value="' + esc(c) + '"' + (c === sel ? ' selected' : '') + '>' + esc(c === 'all' ? 'All campuses' : c) + '</option>').join('');
+  const rowHtml = v => '<div class="mrow pvrow" style="gap:6px;flex-wrap:wrap"><input class="in pvemail" type="email" value="' + esc(v.email) + '" placeholder="Email" style="flex:1 1 200px"><select class="in pvscope" data-native="1" style="flex:0 1 180px">' + scopeOpts(v.scope) + '</select><button type="button" class="btn line sm pvdel">Remove</button></div>';
+  box.innerHTML = '<div class="card pad"><div class="ct">Pulse</div><p class="sub" style="margin:4px 0 8px">The Vigil and the season in numbers, for the people you let in. Numbers only, no names. Each change is written in the Change log with your name.</p>' +
+    '<label class="lb">Vigil date<input type="date" id="pvvigil" class="in" value="' + esc(s.vigilDate) + '"></label>' +
+    '<label class="lb" style="margin-top:10px">Season start (blank = first rehearsal on the list)<input type="date" id="pvstart" class="in" value="' + esc(s.seasonStart) + '"></label>' +
+    '<label class="lb" style="margin-top:10px">Season end (blank = no end)<input type="date" id="pvend" class="in" value="' + esc(s.seasonEnd) + '"></label>' +
+    '<label class="ctlck" style="margin-top:10px"><input type="checkbox" id="pvcc"' + (s.countCancelled ? ' checked' : '') + '> Count cancelled rehearsals as planned</label>' +
+    '<p class="sub" style="margin:10px 0 4px;font-weight:600">Who can see Pulse</p><div id="pvlist">' + s.viewers.map(rowHtml).join('') + '</div>' +
+    '<div class="gfaddr" style="margin-top:8px"><button type="button" class="btn line sm" id="pvadd">Add a person</button> <button type="button" class="btn red" id="pvsave">Save Pulse</button></div></div>';
+  box.onclick = ev => { const b = ev.target.closest && ev.target.closest('.pvdel'); if (b) b.closest('.pvrow').remove(); };
+  $('pvadd').onclick = () => $('pvlist').insertAdjacentHTML('beforeend', rowHtml({email: '', scope: 'all'}));
+  $('pvsave').onclick = async () => {
+    const viewers = [...box.querySelectorAll('.pvrow')].map(r => ({email: r.querySelector('.pvemail').value.trim(), scope: r.querySelector('.pvscope').value})).filter(x => x.email);
+    try { const k = await call({action: 'owner.pulse.save', token, vigilDate: pvIso('pvvigil'), seasonStart: pvIso('pvstart'), seasonEnd: pvIso('pvend'), countCancelled: $('pvcc').checked ? 'true' : 'false', viewers: JSON.stringify(viewers)});
+      if (k.ok) drawPulseSettings(k); say('m21', k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+    } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); }
+  };
 }
 /** Reports → Cut-off check (Global Admin): presets, compare, save the result to MEMBER SUMMARY. */
 let CUT = null, CUTRUN = null;
