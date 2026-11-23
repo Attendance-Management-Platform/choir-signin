@@ -4569,9 +4569,11 @@ function rbcCheckInListView_(rows, filters) {
 }
 
 let ckFilt = {status: 'all', campus: ''};
+document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;position:sticky;top:0;z-index:5;padding:6px 0;background:#fff}.ckjump a{padding:6px 12px;border-radius:999px;border:1px solid #E2E0D9;background:#fff;font-size:13px;color:inherit;text-decoration:none}.ckgrp{padding:0;overflow:hidden;margin-bottom:14px}.ckgh{cursor:pointer;padding:14px 18px;list-style:none;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;font-size:16px}</style>');
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-23-6';
+const PAGE_VERSION = 'v2026-11-23-7';
 document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
@@ -4614,7 +4616,15 @@ async function loadRows(quiet) {
     $('ckfilt').classList.toggle('hide', !j.rows.length || j.processed === true);
     const flagged = ckV.rows.filter(r => r.flagged && !r.validatedBy), clean = ckV.rows.filter(r => !r.flagged && !r.validatedBy), done = ckV.rows.filter(r => r.validatedBy);
     const sect = (title, hint, list, cols) => list.length ? '<div class="card rise tblc"><div class="tblh"><span>' + title + ' (' + list.length + ') <small>· ' + hint + '</small></span></div>' + head(cols) + list.map(rowHtml).join('') + '</div>' : '';
-    $('rows').innerHTML = j.processed ? sect('Record of check-ins', 'the day is processed', ckV.rows, 'Status') : sect('Flagged first', 'one by one, or tick several', flagged, 'What looked odd') + sect('Clear, waiting', 'place and QR all ok', clean, 'Checked') + sect('Checked', 'every checked row can be undone with a reason', done, 'Status') + (j.rows.length && !ckV.rows.length ? '<div class="card" style="padding:14px">Nothing matches this filter.</div>' : '');
+    const ckSlug = k => 'ck-' + String(k).replace(/[^a-z0-9]+/g, '-');
+    const ckBody = rowsIn => { const f = rowsIn.filter(r => r.flagged && !r.validatedBy), cl = rowsIn.filter(r => !r.flagged && !r.validatedBy), dn = rowsIn.filter(r => r.validatedBy); return sect('Flagged first', 'one by one, or tick several', f, 'What looked odd') + sect('Clear, waiting', 'place and QR all ok', cl, 'Checked') + sect('Checked', 'every checked row can be undone with a reason', dn, 'Status'); };
+    let ckHtml;
+    if (j.processed) ckHtml = sect('Record of check-ins', 'the day is processed', ckV.rows, 'Status');
+    else if (ckV.groups.length > 1) ckHtml = '<nav class="ckjump" aria-label="Jump to a campus">' + ckV.groups.map(g => '<a href="#' + ckSlug(g.key) + '">' + esc(g.campus) + ' (' + g.count + ')</a>').join('') + '</nav>' + ckV.groups.map(g => '<details class="ckgrp card rise" open id="' + ckSlug(g.key) + '"><summary class="ckgh"><b>' + esc(g.campus) + '</b><span class="s">' + g.counts.waiting + ' waiting · ' + g.counts.flagged + ' flagged · ' + g.counts.checked + ' checked</span></summary>' + ckBody(g.rows) + '</details>').join('');
+    else ckHtml = ckBody(ckV.rows);
+    if (j.rows.length && !ckV.rows.length) ckHtml += '<div class="card" style="padding:14px">Nothing matches this filter.</div>';
+    if (ckV.groups.length > 1 && !j.processed) ckHtml += '<div style="text-align:center"><button class="btn line sm" type="button" data-ckback>Back to top</button></div>';
+    $('rows').innerHTML = ckHtml;
     const stat = (k, v, col, bg) => '<div class="card stat"' + (bg ? ' style="background:' + bg + ';border-color:#F0E2C9"' : '') + '><div class="k" style="color:' + col + '">' + k + '</div><div class="v" style="color:' + col + '">' + v + '</div></div>';
     $('vstats').innerHTML = stat('Checked in', j.rows.length, '#20775A') + stat('Clean (place and QR ok)', c.clean, '#20775A') + stat('Flagged', c.flagged, '#95621D', '#FFF4DF') + stat('Checked', c.validated, '#2F4F7E');
     const ticks = () => Array.from($('rows').querySelectorAll('.tick:checked')).map(x => x.dataset.id);
