@@ -3153,12 +3153,13 @@ async function lbSave(mode) {
   if (why.length < 5) return setMsg('Give one reason of at least 5 characters.', 'bad');
   const newLate = mode === 'allowed' ? 'allowed' : mode === 'late';
   let done = 0; const failed = [];
+  const unlock = () => document.querySelectorAll('#lbbar button').forEach(b => { b.disabled = false; });
   document.querySelectorAll('#lbbar button').forEach(b => { b.disabled = true; });
-  for (let i = 0; i < ids.length; i++) {
-    setMsg('Saving ' + (i + 1) + ' of ' + ids.length + '…', 'ok');
-    try { const k = await call({action: 'late.correct', token, memberId: ids[i], newLate: newLate, reason: why}); if (k && k.signedOut) { signedOutNow(); return; } if (k && k.ok) done++; else failed.push(ids[i] + (k && k.error ? ' (' + k.error + ')' : '')); }
-    catch (e) { failed.push(ids[i]); }
-  }
+  setMsg('Saving ' + ids.length + '…', 'ok');
+  try { const k = await call({action: 'late.correctMany', token, memberIds: ids, newLate: newLate, reason: why}); if (k && k.signedOut) { signedOutNow(); return; }
+    if (!k || k.ok !== true) { unlock(); return setMsg((k && k.error) || 'Could not save.', 'bad'); }
+    done = k.done || 0; (k.results || []).forEach(x => { if (!x.ok) failed.push(x.memberId + (x.error ? ' (' + x.error + ')' : '')); }); }
+  catch (e) { unlock(); return setMsg('Network problem. Try again.', 'bad'); }
   document.querySelectorAll('#lbbar button').forEach(b => { b.disabled = false; });
   document.querySelectorAll('.ltick').forEach(t => { t.checked = false; }); lbUpd();
   setMsg(done + ' changed' + (failed.length ? ', ' + failed.length + ' not changed: ' + failed.join(', ') : '') + '.', failed.length ? 'bad' : 'ok');
