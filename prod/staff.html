@@ -1856,6 +1856,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div id="s12" class="pg hide">
 <div class="card pad rise hide npc"><div class="ct">Members without a part</div>
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
+<div class="card pad" id="pguide"><div class="ct">Send the welcome guide</div><p class="sub" style="margin:4px 0 8px">Type the person's email. They get one guide covering all their roles. Each send is written in the Change log.</p><label class="lb">Email<input type="email" id="pgemail" class="in" autocomplete="off"></label><div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="pgsend">Send guide</button></div></div>
 <div id="pundo"></div>
 <div id="paw"></div>
 <div id="phelp"></div>
@@ -3828,7 +3829,7 @@ document.addEventListener('click', async ev => {
   } catch (e) { b.disabled = false; const m = $('mmail'); if (m) { m.textContent = 'Network problem. Try again.'; m.className = 's bad'; } }
 });
 async function loadPeople(keepMsg) {
-  loadNoPart(); loadHandover(); loadFormHelpers();
+  loadNoPart(); loadHandover(); loadFormHelpers(); pguideBind();
   if (!keepMsg) say('m12b', '');
   say('m12', LOADWAVE);
   try {
@@ -4577,7 +4578,7 @@ document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-23-14';
+const PAGE_VERSION = 'v2026-11-23-15';
 document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .rchg{display:none}#rollbox .rtile.rtile-open .rchg,#rollbox .rtile:focus-within .rchg{display:inline-flex}#vbar{background:transparent!important;border:none!important;box-shadow:none!important;padding:0 0 8px!important}#vbar .ct{font-size:15px!important}#vbar .sub{font-size:13px}#rows details.ckgrp{width:100%!important;box-sizing:border-box}#pulsebox table{font-size:13px}@media (max-width:640px){#pulsebox th,#pulsebox td{padding:4px 3px!important}}#rows details.ckgrp.foldflow{display:block!important}#rows details.ckgrp.foldflow>.tblc+.tblc{margin-top:14px}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
@@ -5471,6 +5472,19 @@ function cutShow(k) {
 /** People and access → Hand over jobs · Assistant (as Kinnor): tap the jobs, choose how long, Save. Ends by itself; logged. */
 const HOLONG = {open: 'Until I take it back', rehearsal: 'Just the next rehearsal', days: 'For a number of days'};
 let hoState = null, hoPick = {};
+/** People → Send the welcome guide (23 Nov 2026): by email. Owner, Global Admin, Asst Global Admin, or an Admin ticked for it. */
+function pguideBind() {
+  const b = $('pgsend'); if (!b || b.__bound) return; b.__bound = true;
+  b.onclick = async () => {
+    const em = ($('pgemail').value || '').trim();
+    if (!em) { say('m12', 'Type the email address first.', 'bad'); return; }
+    try { const k = await call({action: 'owner.welcome', token, email: em});
+      if (k.signedOut) { signedOutNow(); return; }
+      say('m12', k.ok ? (k.summary || 'Welcome guide sent.') : (k.error || 'Could not send the guide.'), k.ok ? 'ok' : 'bad');
+      if (k.ok) $('pgemail').value = '';
+    } catch (e) { say('m12', 'Network problem. Try again.', 'bad'); }
+  };
+}
 async function loadHandover() {
   const box = $('phand'); if (!box) return;
   try { const j = await call({action: 'handover.state', token}); if (!j.ok) { box.innerHTML = ''; return; } drawHandover(j); psecDraw('s12'); } catch (e) { /* keep */ }
