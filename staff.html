@@ -1831,7 +1831,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div id="s17" class="pg hide">
 <div class="card pad rise hide npc"><div class="ct">Members without a part</div>
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
-<div id="mbtidy"></div>
+<div id="mbtidy"></div><div id="mbdups"></div>
 <div id="mbaddcard" class="card pad rise"><div class="ct">Add a new member</div>
 <p class="sub" style="margin:0 0 4px">Added straight away, with no request. The Member ID is made for you. A reason is needed, and it is written to the audit log<span class="np">, and Desk A and the Campus Music Director can see it</span>.</p>
 <div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 160px"><label for="mbfn" class="lb">First name</label><input id="mbfn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbmn" class="lb">Middle name (optional)</label><input id="mbmn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbln" class="lb">Last name</label><input id="mbln" class="in" autocomplete="off" maxlength="50"></div></div>
@@ -4579,7 +4579,7 @@ document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-23-17';
+const PAGE_VERSION = 'v2026-11-23-18';
 document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .rchg{display:none}#rollbox .rtile.rtile-open .rchg,#rollbox .rtile:focus-within .rchg{display:inline-flex}#vbar{background:transparent!important;border:none!important;box-shadow:none!important;padding:0 0 8px!important}#vbar .ct{font-size:15px!important}#vbar .sub{font-size:13px}#rows details.ckgrp{width:100%!important;box-sizing:border-box}#pulsebox table{font-size:13px}@media (max-width:640px){#pulsebox th,#pulsebox td{padding:4px 3px!important}}#rows details.ckgrp.foldflow{display:block!important}#rows details.ckgrp.foldflow>.tblc+.tblc{margin-top:14px}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
@@ -6498,11 +6498,43 @@ async function loadMembers() {
     const cur = $('mbc').value;
     $('mbc').innerHTML = mbOpts(MB.campuses, cur, 'Choose a campus') + '<option value="__new__"' + (MB.canAdd ? '' : ' disabled') + '>+ Add a new campus' + (MB.canAdd ? '…' : ' (System Administrator only)') + '</option>';
     $('mbp').innerHTML = mbOpts(MB.parts, $('mbp').value, 'Choose a part');
-    loadDetailReqs(); loadTidy(); loadMbReq();
+    loadDetailReqs(); loadTidy(); loadDups(); loadMbReq();
     const c = j.counts;
     fpPanel('mem', 'mbbox', {title: 'Members', sub: c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet. Use the filters to find someone, then edit their details, deactivate, reactivate or set their membership dates. Each change needs a reason and is recorded; the Campus Music Director and Desk A are told.',
       items: j.members, fields: mbFields, empty: 'There are no members yet.', card: mbCard});
   } catch (e) { say('m17', 'Network problem. Try again.', 'bad'); }
+}
+/** Members → Possible duplicates (Global Admin / Assistant, 23 Nov 2026): pick the record to keep and the one to merge in; check first; merge with a reason. */
+async function loadDups() {
+  const box = $('mbdups'); if (!box) return;
+  try { const j = await call({action: 'member.duplicates', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j || !j.ok || !(j.groups || []).length) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="card pad rise" style="margin-top:16px"><div class="ct">Possible duplicates (' + j.groups.length + ')</div><p class="sub" style="margin:0 0 12px">These records may be the same person (same name, or same email). For each group pick the record to KEEP and the one to MERGE IN, then check. Nothing changes until you press Merge. The merged-in record is deactivated (dated today), its check-ins and membership history move to the kept record, and it is written to the Change log.</p>' +
+      j.groups.map((g, gi) => '<div style="border-top:1px solid #eee;padding:10px 0"><div class="s" style="margin-bottom:6px">Group ' + (gi + 1) + '</div>' +
+        g.map(m => '<div style="margin:6px 0"><label class="ctlck" style="margin-right:12px"><input type="radio" name="dk-' + gi + '" value="' + esc(m.memberId) + '"> Keep</label><label class="ctlck"><input type="radio" name="dg-' + gi + '" value="' + esc(m.memberId) + '"> Merge in</label> <b>' + esc(m.name) + '</b> · ' + esc(m.memberId) + (m.campus ? ' · ' + esc(m.campus) : '') + (m.part ? ' · ' + esc(m.part) : '') + ' · ' + esc(m.status || '') + (m.email ? ' · ' + esc(m.email) : '') + '</div>').join('') +
+        '<div class="gfaddr" style="margin-top:8px"><button type="button" class="btn line sm dkcheck" data-g="' + gi + '">Check this merge</button></div><div class="dkres" data-g="' + gi + '" style="margin-top:8px"></div></div>').join('') + '</div>';
+    box.querySelectorAll('.dkcheck').forEach(b => { b.onclick = () => dupCheck(b.dataset.g); });
+  } catch (e) { box.innerHTML = ''; }
+}
+async function dupCheck(g) {
+  const keep = (document.querySelector('input[name="dk-' + g + '"]:checked') || {}).value, go = (document.querySelector('input[name="dg-' + g + '"]:checked') || {}).value;
+  const out = document.querySelector('.dkres[data-g="' + g + '"]');
+  if (!keep || !go) { out.innerHTML = '<p class="sub" style="margin:0">Pick one to keep and one to merge in.</p>'; return; }
+  if (keep === go) { out.innerHTML = '<p class="sub" style="margin:0;color:#b00">Choose two different records.</p>'; return; }
+  let j; try { j = await call({action: 'member.mergePreview', token, keepId: keep, goId: go}); } catch (e) { out.innerHTML = '<p class="sub" style="margin:0">Network problem. Try again.</p>'; return; }
+  if (j.signedOut) { signedOutNow(); return; }
+  if (!j.ok) { out.innerHTML = '<p class="sub" style="margin:0;color:#b00">' + esc(j.error || 'Cannot merge these two.') + '</p>'; return; }
+  out.innerHTML = '<p class="sub" style="margin:0 0 8px">' + esc(j.summary) + '</p><label class="lb">Reason</label><input class="in dkreason" maxlength="300" placeholder="Why? (10 to 300 characters)"><div class="gfaddr" style="margin-top:8px"><button type="button" class="btn red sm dkgo">Merge ' + esc(go) + ' into ' + esc(keep) + '</button></div>';
+  out.querySelector('.dkgo').onclick = async () => {
+    const r = out.querySelector('.dkreason').value.trim();
+    if (r.length < 10) { say('m17', 'Give a reason of at least 10 characters.', 'bad'); return; }
+    if (!window.confirm('Merge ' + go + ' into ' + keep + '? The merged-in record is deactivated and its check-ins move. Check the Change log afterwards.')) return;
+    let k; try { k = await call({action: 'member.merge', token, keepId: keep, goId: go, reason: r}); } catch (e) { say('m17', 'Network problem. Check the Change log before trying again.', 'bad'); return; }
+    if (k.signedOut) { signedOutNow(); return; }
+    say('m17', k.ok ? (k.summary || 'Merged.') : (k.error || 'Could not merge.'), k.ok ? 'ok' : 'bad');
+    if (k.ok || k.partial) loadMembers();
+  };
 }
 /** Members saved with only a full name: preview the split, then fill the three name columns. */
 async function loadTidy() {
