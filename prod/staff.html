@@ -4578,7 +4578,7 @@ document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-23-16';
+const PAGE_VERSION = 'v2026-11-23-17';
 document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .rchg{display:none}#rollbox .rtile.rtile-open .rchg,#rollbox .rtile:focus-within .rchg{display:inline-flex}#vbar{background:transparent!important;border:none!important;box-shadow:none!important;padding:0 0 8px!important}#vbar .ct{font-size:15px!important}#vbar .sub{font-size:13px}#rows details.ckgrp{width:100%!important;box-sizing:border-box}#pulsebox table{font-size:13px}@media (max-width:640px){#pulsebox th,#pulsebox td{padding:4px 3px!important}}#rows details.ckgrp.foldflow{display:block!important}#rows details.ckgrp.foldflow>.tblc+.tblc{margin-top:14px}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
@@ -5464,6 +5464,27 @@ function drawSignOut(j) {
   const send = async q => { try { const k = await call(Object.assign({token, action: 'owner.signout'}, q)); say('m21', k.ok ? (k.summary || 'Done.') : (k.error || 'Could not sign out.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); } };
   $('soone').onclick = () => { const id = $('sopick').value; if (!id) { say('m21', 'Choose a person first.', 'bad'); return; } send({memberId: id}); };
   $('soall').onclick = () => { if (window.confirm('Sign everyone out, including you?')) send({everyone: 'true'}); };
+  undoEnsure();
+}
+/** Control room → Undo centre (Owner, 23 Nov 2026): recent staff and owner changes; Undo puts back the value a change replaced, with a reason. */
+function undoEnsure() { let box = $('ctlundo'); if (!box) { box = document.createElement('div'); box.id = 'ctlundo'; box.style.marginTop = '16px'; $('ctlsignout').insertAdjacentElement('afterend', box); } loadUndo(); }
+async function loadUndo() {
+  const box = $('ctlundo'); if (!box) return;
+  try { const j = await call({action: 'undoc.list', token});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="card pad"><div class="ct">Undo centre</div><p class="sub" style="margin:4px 0 8px">Changes from the last ' + j.days + ' days. Undo puts back the value the change replaced. Give a reason first; the undo is written to the Change log with that reason. Lines without an Undo button say why.</p>' +
+      (j.items.length ? j.items.map(undoRow).join('') : '<p class="sub" style="margin:4px 0 0">No changes in the last ' + j.days + ' days.</p>') + '</div>';
+    box.querySelectorAll('.undoGo').forEach(b => { b.onclick = async () => { const r = ((box.querySelector('#undo-r-' + b.dataset.id) || {}).value || '').trim();
+      try { const k = await call({action: 'undoc.run', token, opId: b.dataset.id, reason: r}); say('m21', k.ok ? (k.summary || 'Done.') : (k.error || 'Could not undo.'), k.ok ? 'ok' : 'bad'); if (k.ok) loadUndo(); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); } }; });
+  } catch (e) { /* keep what is shown */ }
+}
+function undoRow(x) {
+  const head = '<b>' + esc(x.label) + '</b> · ' + esc(pnDate(x.atMs)) + (x.doneBy ? ' · by ' + esc(x.doneBy) : '');
+  const change = (x.was || x.now) ? '<div class="sub" style="margin:2px 0 0">' + esc(x.was || '(nothing)') + ' → ' + esc(x.now || '(nothing)') + '</div>' : '';
+  const reason = x.reason ? '<div class="sub" style="margin:2px 0 0">Reason given: ' + esc(x.reason) + '</div>' : '';
+  const act = x.canUndo ? '<div style="margin-top:6px"><input id="undo-r-' + esc(x.opId) + '" class="in" maxlength="300" placeholder="Why you are putting it back (10 characters or more)"> <button type="button" class="btn red sm undoGo" data-id="' + esc(x.opId) + '">Undo</button></div>' : '<div class="sub" style="margin:4px 0 0">' + esc(x.why) + '</div>';
+  return '<div style="border-top:1px solid #eee;padding:10px 0">' + head + change + reason + act + '</div>';
 }
 /** Reports → Cut-off check (Global Admin): presets, compare, save the result to MEMBER SUMMARY. */
 let CUT = null, CUTRUN = null;
