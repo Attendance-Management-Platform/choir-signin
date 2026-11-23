@@ -1248,7 +1248,7 @@ body.prpon{overflow:hidden}
 /* Quick fixes (owner, 22 Nov 2026): bottom menu hides on scroll and under panels; the Change box is a centred box on tablets and laptops */
 #tabs{transition:transform .25s ease,opacity .25s ease}
 body.navfaint #tabs{opacity:.06}
-body.navhide #tabs{opacity:0;pointer-events:none}
+@media (max-width:640px){body.navhide #tabs{opacity:0;pointer-events:none}}
 #pwtog{position:absolute!important;top:50%!important;right:10px!important;left:auto!important;bottom:auto!important;transform:translateY(-50%)!important;margin:0!important;width:auto!important;min-width:0!important;height:auto!important;padding:6px!important;background:none!important;border:0!important;box-shadow:none!important;color:var(--mut)!important;display:flex!important;align-items:center!important;z-index:2}
 .spin{display:inline-block;width:18px;height:18px;border:2px solid #E2E0D9;border-top-color:#B6000A;border-radius:50%;animation:spinr .8s linear infinite}
 @keyframes spinr{to{transform:rotate(360deg)}}
@@ -2869,6 +2869,7 @@ async function loadProcess() {
   } catch (e) { say('m15', 'Network problem. Try again.', 'bad'); }
 }
 async function prOpen(id, done) {
+  if (typeof pbClear === 'function') pbClear();
   say('m15', LOADWAVE);
   try {
     const j = await call({action: done ? 'process.rows' : 'process.preview', token, rehearsalId: id});
@@ -2966,7 +2967,7 @@ function prPicker(rowEl, srcRow) {
 function prTable(rows, canFix, ownerFix) {
   // Grouped by campus, then part (owner, 12 Nov 2026): each campus folds open on tap, so the card is not crowded. Searching or filtering opens the groups that match.
   const one = r => '<tr data-st="' + esc(r.status) + '" data-k="' + esc((r.name + ' ' + r.memberId).toLowerCase()) + '" data-c="' + esc(r.campus || '') + '" data-p="' + esc(r.part || '') + '"><td>' + esc(r.name) + '<div class="s">' + esc(r.memberId) + '</div></td><td>' + esc(r.campus) + (r.part ? '<div class="s">' + esc(r.part) + '</div>' : '') + '</td><td><span class="pill ' + (SPILL[r.status] || '') + '">' + esc(r.status) + '</span>' + (r.late ? ' <span class="pill p-pend">Late</span>' : '') + (r.corrected ? ' <span class="s">was ' + esc(r.previous) + '</span>' : '') + '</td><td>' + esc(r.source) + '</td>' +
-    (canFix ? '<td><button class="btn line sm" type="button" data-prfix="' + esc(r.memberId) + '" data-prcur="' + esc(r.status) + '" data-prname="' + esc(r.name) + '">' + (ownerFix ? 'Change' : 'Correct') + '</button></td>' : '') + '</tr>';
+    (canFix ? '<td>' + (ownerFix ? '<input type="checkbox" class="pbtick" data-pbid="' + esc(r.memberId) + '" data-pbname="' + esc(r.name) + '" aria-label="Tick ' + esc(r.name) + '" style="margin-right:8px;width:18px;height:18px">' : '') + '<button class="btn line sm" type="button" data-prfix="' + esc(r.memberId) + '" data-prcur="' + esc(r.status) + '" data-prname="' + esc(r.name) + '">' + (ownerFix ? 'Change' : 'Correct') + '</button></td>' : '') + '</tr>';
   const n = 4 + (canFix ? 1 : 0), byC = {};
   rows.forEach(r => { (byC[r.campus || '(no campus)'] = byC[r.campus || '(no campus)'] || []).push(r); });
   const cnt = list => ['Present', 'Excused', 'Absent'].map(s => { const k = list.filter(r => r.status === s).length; return k ? k + ' ' + s.toLowerCase() : ''; }).filter(Boolean).join(' · ');
@@ -3099,6 +3100,83 @@ document.addEventListener('click', async ev => {
       say('m15', j.ok ? 'Done: ' + j.summary + '.' : (j.error || 'Could not correct.'), j.ok ? 'ok' : 'bad'); if (j.ok) { const o = $('prfix'); if (o) o.remove(); toast('Done: ' + j.summary + '.', 'ok'); prOpen($('prdetail').dataset.id, true); } else ev.target.disabled = false; } catch (e) { ev.target.disabled = false; say('m15', 'Network problem. Try again.', 'bad'); }
   }
 });
+/* Batch on a published day (owner, 23 Nov 2026): tick several people, one status, one reason, one save. Each person still goes through process.ownerFix, so the rules and the audit are the same. */
+function pbUpd() {
+  const n = document.querySelectorAll('.pbtick:checked').length, bar = $('pbbar');
+  if (!bar) return;
+  bar.classList.toggle('hide', n === 0);
+  $('pbn').textContent = n + (n === 1 ? ' person' : ' people') + ' ticked';
+}
+function pbClear() { document.querySelectorAll('.pbtick').forEach(t => { t.checked = false; }); $('pbwhy') && ($('pbwhy').value = ''); $('pbmsg') && ($('pbmsg').textContent = ''); pbUpd(); }
+function pbMsg(t, k) { const m = $('pbmsg'); if (!m) return; m.textContent = t; m.style.color = k === 'bad' ? '#AE2D37' : '#20775A'; }
+async function pbSave() {
+  const ticks = [].slice.call(document.querySelectorAll('.pbtick:checked')), why = ($('pbwhy').value || '').trim();
+  if (!ticks.length) return pbMsg('Tick at least one person.', 'bad');
+  if (why.length < 10 || why.length > 300) return pbMsg('Give one reason of 10 to 300 characters.', 'bad');
+  const st = $('pbst').value, changes = ticks.map(t => ({memberId: t.dataset.pbid, status: st, reason: why}));
+  $('pbgo').disabled = true; pbMsg('Saving…', 'ok');
+  try { const j = await call({action: 'process.ownerFix', token, rehearsalId: $('prdetail').dataset.id, changes: changes});
+    if (j.signedOut) { signedOutNow(); return; }
+    pbMsg(j.ok ? 'Done: ' + j.summary : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad');
+    if (j.ok) { toast('Done: ' + changes.length + ' changed to ' + st + '.', 'ok'); prOpen($('prdetail').dataset.id, true); }
+  } catch (e) { pbMsg('Network problem. Try again.', 'bad'); } finally { $('pbgo').disabled = false; }
+}
+document.addEventListener('change', e => { if (e.target && e.target.classList && e.target.classList.contains('pbtick')) pbUpd(); });
+(function pbBar() {
+  const b = document.createElement('div'); b.id = 'pbbar'; b.className = 'hide';
+  b.setAttribute('style', 'position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;width:min(640px,calc(100% - 24px));background:#fff;border:1px solid #E2E0D9;border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.14);padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center');
+  b.innerHTML = '<b id="pbn" style="flex:1 1 140px">0 people ticked</b>' +
+    '<select id="pbst" class="ppdd" aria-label="Set them to" style="flex:0 0 auto"><option>Present</option><option>Absent</option><option>Excused</option></select>' +
+    '<input id="pbwhy" class="in" placeholder="One reason for all (10 to 300 characters)" style="flex:1 1 220px;min-width:0">' +
+    '<button id="pbgo" class="btn red" type="button" onclick="pbSave()">Save for all</button>' +
+    '<button class="btn line" type="button" onclick="pbClear()">Clear</button>' +
+    '<div id="pbmsg" role="status" style="flex:1 1 100%;font-size:13px"></div>';
+  document.body.appendChild(b);
+})();
+
+/* Batch late or on-time marks on the Validate page (owner, 23 Nov 2026): tick several rows, one reason, one save.
+   Each person still goes through late.correct, so each change is checked and written to the Change log on its own. */
+function lbUpd() {
+  const n = document.querySelectorAll('.ltick:checked').length, bar = $('lbbar');
+  if (!bar) return;
+  bar.classList.toggle('hide', n === 0);
+  $('lbn').textContent = n + (n === 1 ? ' person' : ' people') + ' ticked';
+  $('lbon').textContent = 'Was on time (' + document.querySelectorAll('.ltick:checked[data-late="1"]').length + ')';
+  $('lbla').textContent = 'Mark late (' + document.querySelectorAll('.ltick:checked[data-late="0"]').length + ')';
+}
+function lbClear() { document.querySelectorAll('.ltick').forEach(t => { t.checked = false; }); $('lbwhy') && ($('lbwhy').value = ''); $('lbmsg') && ($('lbmsg').textContent = ''); lbUpd(); }
+async function lbSave(mode) {
+  const ids = [].slice.call(document.querySelectorAll('.ltick:checked')).map(t => t.dataset.id), why = ($('lbwhy').value || '').trim();
+  if (!ids.length) return;
+  const m = $('lbmsg'), setMsg = (t, k) => { m.textContent = t; m.style.color = k === 'bad' ? '#AE2D37' : '#20775A'; };
+  if (why.length < 5) return setMsg('Give one reason of at least 5 characters.', 'bad');
+  const newLate = mode === 'allowed' ? 'allowed' : mode === 'late';
+  let done = 0; const failed = [];
+  document.querySelectorAll('#lbbar button').forEach(b => { b.disabled = true; });
+  for (let i = 0; i < ids.length; i++) {
+    setMsg('Saving ' + (i + 1) + ' of ' + ids.length + '…', 'ok');
+    try { const k = await call({action: 'late.correct', token, memberId: ids[i], newLate: newLate, reason: why}); if (k && k.signedOut) { signedOutNow(); return; } if (k && k.ok) done++; else failed.push(ids[i] + (k && k.error ? ' (' + k.error + ')' : '')); }
+    catch (e) { failed.push(ids[i]); }
+  }
+  document.querySelectorAll('#lbbar button').forEach(b => { b.disabled = false; });
+  document.querySelectorAll('.ltick').forEach(t => { t.checked = false; }); lbUpd();
+  setMsg(done + ' changed' + (failed.length ? ', ' + failed.length + ' not changed: ' + failed.join(', ') : '') + '.', failed.length ? 'bad' : 'ok');
+  if (typeof loadRows === 'function') loadRows();
+}
+document.addEventListener('change', e => { if (e.target && e.target.classList && e.target.classList.contains('ltick')) lbUpd(); });
+(function lbBar() {
+  const b = document.createElement('div'); b.id = 'lbbar'; b.className = 'hide';
+  b.setAttribute('style', 'position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:60;width:min(640px,calc(100% - 24px));background:#fff;border:1px solid #E2E0D9;border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.14);padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center');
+  b.innerHTML = '<b id="lbn" style="flex:1 1 120px">0 people ticked</b>' +
+    '<button id="lbon" class="btn" type="button" onclick="lbSave(\'ontime\')">Was on time</button>' +
+    '<button id="lbla" class="btn" type="button" onclick="lbSave(\'late\')">Mark late</button>' +
+    '<button id="lbal" class="btn" type="button" onclick="lbSave(\'allowed\')">Late (allowed)</button>' +
+    '<input id="lbwhy" class="in" placeholder="One reason for all (at least 5 characters)" style="flex:1 1 200px;min-width:0">' +
+    '<button class="btn line" type="button" onclick="lbClear()">Clear</button>' +
+    '<div id="lbmsg" role="status" style="flex:1 1 100%;font-size:13px"></div>';
+  document.body.appendChild(b);
+})();
+
 /** Change one person (owner, 21 Nov 2026): opens a side panel on a computer and a sheet from the bottom on a phone, over the same page. Tap a choice, pick or type a reason, save. */
 function prFixOpen(btn) {
   const old = $('prfix'); if (old) { const same = old.dataset.id === btn.dataset.prfix; old.remove(); if (same) return; }
@@ -4421,7 +4499,7 @@ async function loadRows(quiet) {
     $('vall').textContent = 'Validate all clean (' + c.clean + ')';
     $('vall').disabled = c.clean === 0;
     const tm = r => new Date(r.time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
-    const rowHtml = r => '<div class="g gv row' + (r.flagged && !r.validatedBy ? ' flag' : '') + '"><div>' + (r.canValidate ? '<input type="checkbox" class="tick" data-id="' + esc(r.memberId) + '" aria-label="Tick ' + esc(r.memberId) + '">' : '') + '</div>' +
+    const rowHtml = r => '<div class="g gv row' + (r.flagged && !r.validatedBy ? ' flag' : '') + '"><div>' + (r.canValidate ? '<input type="checkbox" class="tick" data-id="' + esc(r.memberId) + '" aria-label="Tick ' + esc(r.memberId) + '">' : '') + (r.canCorrectLate ? '<input type="checkbox" class="ltick" data-id="' + esc(r.memberId) + '" data-late="' + (r.late ? '1' : '0') + '" aria-label="Tick ' + esc(r.name || r.memberId) + ' for a late change" style="margin-top:4px">' : '') + '</div>' +
       '<div class="who"><b>' + esc(r.name || r.memberId) + '</b><span class="s">' + esc(r.memberId) + (r.campus ? ' · ' + esc(r.campus) : '') + ' · ' + tm(r) + '</span></div>' +
       '<div>' + ((r.tags || []).map(t => '<span class="pill ' + (/outside|venue/i.test(t) ? 'p-no' : 'p-pend') + '">' + esc(t) + '</span>').join('') || '<span class="pill p-ok">All ok</span>') + (r.validatedBy ? '<span class="pill p-ok">Checked</span>' : '') + '</div>' +
       '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
@@ -4591,8 +4669,10 @@ setInterval(() => { if (!token) return; if (Date.now() - lastAct >= IDLE_MS) { l
 })();
 /** The bottom menu fades away while you scroll down and comes back when you scroll up or reach the top (owner, 22 Nov 2026). */
 (function navAutoHide() { let last = window.scrollY, t = 0;
+  // Phones only (owner, 23 Nov 2026): on laptop and PC the menu stays put, and its Hide menu button does the job.
+  const phone = () => window.matchMedia('(max-width:640px)').matches;
   window.addEventListener('scroll', () => { const y = window.scrollY; if (Math.abs(y - last) < 8) return;
-    document.body.classList.toggle('navhide', y > last && y > 120); last = y; clearTimeout(t); t = setTimeout(() => document.body.classList.remove('navhide'), 1800); }, {passive: true});
+    document.body.classList.toggle('navhide', phone() && y > last && y > 120); last = y; clearTimeout(t); t = setTimeout(() => document.body.classList.remove('navhide'), 1800); }, {passive: true});
 })();
 (function barH() { const set = () => { const b = $('bar'); if (b) document.documentElement.style.setProperty('--barh', (getComputedStyle(b).position === 'sticky' || getComputedStyle(b).position === 'fixed' ? b.offsetHeight : 0) + 'px'); }; window.addEventListener('resize', set); setTimeout(set, 500); setInterval(set, 4000); })();
 function rhPm(ms) { const d = new Date(Number(ms) + 3600000), h = d.getUTCHours(), m = d.getUTCMinutes(); return (h % 12 || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? ' am' : ' pm'); }
