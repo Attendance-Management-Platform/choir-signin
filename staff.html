@@ -1926,7 +1926,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div id="vstats" class="stats rise"></div>
 <div id="fcbox"></div>
 <div id="vbar" class="card rise hide" style="padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
-<div style="flex:1 1 280px"><div class="ct" style="font-size:17px">Three ways to validate</div><div class="sub" style="margin-top:4px">Validate one by one, tick several and validate them together, or validate all clean at once. &ldquo;All clean&rdquo; leaves out anything flagged. Any validation can be undone with a reason. Nobody validates their own check-in, unless a Global Admin or Assistant gives a reason.</div></div>
+<div style="flex:1 1 280px"><div class="ct" style="font-size:17px">Three ways to validate</div><div class="sub" style="margin-top:4px">Tick several to validate together, or validate all clean. Anything flagged is left out. Undo needs a reason. Nobody validates their own check-in unless a Global Admin or Assistant gives a reason.</div></div>
 <div class="actions" style="margin:0"><button id="vtick" class="btn line" type="button">Validate ticked (0)</button><button id="vall" class="btn red" type="button">Validate all clean</button></div></div>
 <div id="ckfilt" class="hide" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between"><div id="ckchips" style="display:flex;gap:6px;flex-wrap:wrap"></div><select id="ckcamp" aria-label="Show one campus" style="max-width:220px"></select></div>
 <div id="rows" class="pg" style="gap:18px"></div>
@@ -4574,8 +4574,8 @@ document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-23-9';
-document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
+const PAGE_VERSION = 'v2026-11-23-10';
+document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .rchg{display:none}#rollbox .rtile.rtile-open .rchg,#rollbox .rtile:focus-within .rchg{display:inline-flex}#vbar{background:transparent!important;border:none!important;box-shadow:none!important;padding:0 0 8px!important}#vbar .ct{font-size:15px!important}#vbar .sub{font-size:13px}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
   const busy = () => { const a = document.activeElement; return (!!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) || document.querySelectorAll('.pbtick:checked,.ltick:checked,.tick:checked').length > 0; };
@@ -5703,12 +5703,13 @@ async function loadRoll() {
         '<div class="tkside">' + (r.state ? '<span class="pill ' + ROLLLAB[r.state][1] + '">' + ROLLLAB[r.state][0] + '</span>' : '') + (r.how && r.state ? '<span class="pill p-pend">' + esc(r.how === 'hand' ? 'by hand' : r.how === 'approved' ? 'approved request' : r.how) + '</span>' : '') + (r.validated ? '<span class="pill p-val">checked</span>' : '') +
         (r.canAbsent ? '<button class="btn line sm" type="button" data-roll="absent" data-id="' + esc(r.memberId) + '">Absent</button>' : '') +
         (r.canExcused ? '<button class="btn line sm" type="button" data-roll="excused" data-id="' + esc(r.memberId) + '">Excused</button>' : '') +
-        (r.canChange ? '<button class="btn line sm" type="button" data-roll="present" data-id="' + esc(r.memberId) + '">Mark present</button>' : '') +
+        (r.canChange ? (r.state === 'absent' ? '<button class="btn line sm" type="button" data-roll="present" data-id="' + esc(r.memberId) + '">Mark present</button>' : '<button class="btn line sm rchg" type="button" data-roll="' + (r.state === 'present' ? 'excused' : 'present') + '" data-change="1" data-id="' + esc(r.memberId) + '">' + (r.state === 'present' ? 'Change to Excused' : 'Change to Present') + '</button>') : '') +
         (r.canTakeBack ? '<button class="btn line sm" type="button" data-roll="clear" data-id="' + esc(r.memberId) + '">Take back</button>' : '') + '</div></div>'});
   } catch (e) { box.innerHTML = ''; }
 }
 document.addEventListener('keydown', ev => { const t = ev.target; if ((ev.key === 'Enter' || ev.key === ' ') && t.classList && t.classList.contains('rt-tap')) { ev.preventDefault(); t.click(); } });
 document.addEventListener('click', async ev => {
+  const tl = ev.target.closest && ev.target.closest('.rtile'); if (tl && !ev.target.closest('button') && tl.querySelector('.rchg')) { tl.classList.toggle('rtile-open'); return; }
   const b = ev.target.closest && ev.target.closest('[data-roll]'); if (!b) return;
   b.disabled = true;
   const body = {action: 'roll.mark', token, memberId: b.dataset.id, mark: b.dataset.roll, rehearsalId: (typeof ckRid !== 'undefined' && ckRid) ? ckRid : undefined};
