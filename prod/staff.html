@@ -4578,7 +4578,7 @@ document.head.insertAdjacentHTML('beforeend', '<style>.ckjump{display:flex;gap:8
 document.addEventListener('click', e => { if (e.target.closest && e.target.closest('[data-ckback]')) window.scrollTo({top: 0, behavior: 'smooth'}); });
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-ckf]'); if (b) { ckFilt = Object.assign({}, ckFilt, {status: b.dataset.ckf}); loadRows(true); } });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'ckcamp') { ckFilt = Object.assign({}, ckFilt, {campus: e.target.value}); loadRows(true); } });
-const PAGE_VERSION = 'v2026-11-24-20';
+const PAGE_VERSION = 'v2026-11-24-21';
 document.head.insertAdjacentHTML('beforeend', '<style>@media (max-width:640px){#pbbar,#lbbar{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;border-radius:18px 18px 0 0!important;padding:12px 14px calc(12px + env(safe-area-inset-bottom))!important}#pbbar>*,#lbbar>*{flex:1 1 100%!important;min-width:0!important}#pbbar button,#lbbar button{min-height:44px}}#rollbox .rtile .tkside{flex-wrap:wrap!important}#rollbox .rtile .tkside .pill{white-space:normal!important;max-width:100%}#rollbox .rtile .rchg{display:none}#rollbox .rtile.rtile-open .rchg,#rollbox .rtile:focus-within .rchg{display:inline-flex}#vbar{background:transparent!important;border:none!important;box-shadow:none!important;padding:0 0 8px!important}#vbar .ct{font-size:15px!important}#vbar .sub{font-size:13px}#rows details.ckgrp{width:100%!important;box-sizing:border-box}#pulsebox table{font-size:13px}@media (max-width:640px){#pulsebox th,#pulsebox td{padding:4px 3px!important}}#rows details.ckgrp.foldflow{display:block!important}#rows details.ckgrp.foldflow>.tblc+.tblc{margin-top:14px}#rollbox .rtile .tkside .btn.sm{white-space:normal!important;height:auto!important;min-height:38px;padding:6px 14px!important;line-height:1.2;max-width:100%}</style>');
 /* Item 2: reload to a newer page when one is published, never while someone is typing or has ticks set. */
 (function () {
@@ -5311,6 +5311,7 @@ function drawControl(j) {
     box.querySelector('.ctlreset').onclick = () => set({action: 'owner.powers', email, reset: true});
   });
   loadRoles(j);
+  loadAccess(j);
 }
 /** Control room → Roles and levels (owner, 22 Nov 2026): a role or roles plus a level (Global, Region, Campus) for a member picked from the choir list. */
 async function loadAssign(quiet) {
@@ -5523,6 +5524,37 @@ async function loadRoles(j) {
     if (d) d.onclick = () => { if (window.confirm('Delete this role? People who already have its jobs keep them.')) go({action: 'owner.roles.delete', id: el.dataset.id}); };
   });
   const gv = $('rlgive'); if (gv) gv.onclick = () => go({action: 'owner.roles.give', email: $('rlwho').value, id: $('rlpick').value, campus: ($('rlcamp') || {}).value || ''});
+}
+/** Control room → Who has access (Owner, 24 Nov 2026): add a person, give or change a role, or switch one off. Uses the same checks as requests. */
+async function loadAccess(j) {
+  let box = $('ctlaccess'); if (!box) { box = document.createElement('div'); box.id = 'ctlaccess'; box.style.marginTop = '16px'; $('ctlpeople').insertAdjacentElement('afterend', box); }
+  let r; try { r = await call({action: 'owner.access.list', token}); } catch (e) { return; }
+  if (r.signedOut) { signedOutNow(); return; }
+  if (!r.ok) { box.innerHTML = ''; return; }
+  const roleOpts = r.roles.map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>').join('');
+  const campOpts = '<option value="">None</option>' + (r.campuses || []).map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+  const rowsHtml = r.rows.length ? r.rows.map(x => '<div class="mrow" style="flex-wrap:wrap"><span class="mtx"><b>' + esc(x.name || x.email) + '</b><span>' + esc(x.email) + ' · ' + esc(x.role) + (x.desk ? ' Desk ' + esc(x.desk) : '') + (x.campus ? ' (' + esc(x.campus) + ')' : '') + ' · ' + esc(x.status) + '</span></span>' +
+    (x.status === 'Active' ? '<button type="button" class="btn line sm ax-end" data-email="' + esc(x.email) + '" data-role="' + esc(x.role) + '" data-campus="' + esc(x.campus) + '" data-desk="' + esc(x.desk) + '">Switch off</button>' : '') + '</div>').join('') : '<p class="sub" style="margin:0">Nobody has access yet.</p>';
+  box.innerHTML = '<div class="card pad"><div class="ct">Who has access</div><p class="sub" style="margin:4px 0 8px">Add a person and give them a role, change a role, or switch one off. Each change is written to SYSTEM ACCESS and the Change log. The same rules apply as for requests (for example, the last System Administrator cannot be switched off).</p>' +
+    rowsHtml +
+    '<details class="gfsec" style="margin-top:12px"><summary><span><b>Add or change a person</b><span>Name, email, role</span></span></summary><div style="margin-top:8px">' +
+    '<label class="lb">Email<input id="axEmail" class="in" type="email" maxlength="120"></label>' +
+    '<label class="lb" style="margin-top:8px">Name<input id="axName" class="in" maxlength="100"></label>' +
+    '<label class="lb" style="margin-top:8px">Role<select id="axRole" class="in" data-native="1">' + roleOpts + '</select></label>' +
+    '<label class="lb" style="margin-top:8px">Campus (for a Campus Music Director)<select id="axCampus" class="in" data-native="1">' + campOpts + '</select></label>' +
+    '<label class="lb" style="margin-top:8px">Desk (for an Admin Team Member)<select id="axDesk" class="in" data-native="1"><option value="">None</option><option value="A">Desk A</option><option value="B">Desk B</option></select></label>' +
+    '<label class="chk" style="margin-top:8px"><input type="checkbox" id="axReplace"> Replace their current role (otherwise the role is added to what they have)</label>' +
+    '<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="axSave">Save</button></div></div></details></div>';
+  const go = async q => {
+    let k; try { k = await call(Object.assign({token}, q)); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); return; }
+    if (k.signedOut) { signedOutNow(); return; }
+    say('m21', k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+    if (!k.ok) return;
+    const s = await call({action: 'owner.state', token}).catch(() => null);
+    if (s && s.ok) drawControl(s); else loadAccess(j);
+  };
+  box.querySelectorAll('.ax-end').forEach(b => { b.onclick = () => { if (window.confirm('Switch this role off for ' + b.dataset.email + '?')) go({action: 'owner.access.do', change: 'end', email: b.dataset.email, role: b.dataset.role, campus: b.dataset.campus, desk: b.dataset.desk}); }; });
+  const save = $('axSave'); if (save) save.onclick = () => go({action: 'owner.access.do', change: $('axReplace').checked ? 'change' : 'grant', email: $('axEmail').value, name: $('axName').value, role: $('axRole').value, campus: $('axCampus').value, desk: $('axDesk').value});
 }
 /** Reports → Cut-off check (Global Admin): presets, compare, save the result to MEMBER SUMMARY. */
 let CUT = null, CUTRUN = null;
