@@ -6594,10 +6594,23 @@ async function loadMembersRaw() {
     $('mbp').innerHTML = mbOpts(MB.parts, $('mbp').value, 'Choose a part');
     loadDetailReqs(); loadTidy(); loadDups(); loadMbReq();
     const c = j.counts;
-    fpPanel('mem', 'mbbox', {title: 'Members', sub: c.active + ' active, ' + c.inactive + ' not active, ' + c.noHistory + ' with no membership history yet. Use the filters to find someone, then edit their details, deactivate, reactivate or set their membership dates. Each change needs a reason and is recorded; the Campus Music Director and Desk A are told.',
-      items: j.members, fields: mbFields, empty: 'There are no members yet.', card: mbCard});
+    window.__mbAll = j.members; window.__mbCounts = c; mbRenderList();
   } catch (e) { say('m17', 'Network problem. Try again.', 'bad'); }
 }
+/** Members list: opens on Active people. Deactivated people sit in the Archive tab, and come back with Reactivate. */
+function mbRenderList() {
+  const all = window.__mbAll || [], c = window.__mbCounts || {};
+  const view = (FP.mem && FP.mem.mbView) || 'Active';
+  const shown = all.filter(m => view === 'Archive' ? m.status !== 'Active' : m.status === 'Active');
+  const nAct = all.filter(m => m.status === 'Active').length, nArc = all.length - nAct;
+  const tabs = '<div class="fpchips" style="margin-bottom:8px"><button type="button" class="fpchip' + (view === 'Active' ? ' on' : '') + '" data-mbview="Active">Active<b>' + nAct + '</b></button><button type="button" class="fpchip' + (view === 'Archive' ? ' on' : '') + '" data-mbview="Archive">Archive<b>' + nArc + '</b></button></div>';
+  fpPanel('mem', 'mbbox', {title: 'Members', sub: (c.active || 0) + ' active. The archive holds ' + nArc + ' deactivated people; search there to bring one back with Reactivate. Use the filters to find someone.',
+    items: shown, fields: mbFields, before: tabs, empty: view === 'Archive' ? 'Nobody is in the archive.' : 'There are no active members.', card: mbCard});
+}
+document.addEventListener('click', ev => {
+  const v = ev.target.closest && ev.target.closest('[data-mbview]'); if (!v) return;
+  FP.mem = FP.mem || {v: {}}; FP.mem.mbView = v.dataset.mbview; mbRenderList();
+});
 /** Members → Possible duplicates (Global Admin / Assistant, 23 Nov 2026): pick the record to keep and the one to merge in; check first; merge with a reason. */
 async function loadDups() {
   const box = $('mbdups'); if (!box) return;
