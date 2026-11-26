@@ -5294,6 +5294,7 @@ function drawControl(j) {
     (j.people || []).map(x => '<div class="mrow" style="flex-wrap:wrap;align-items:flex-start"><span class="mtx"><b>' + esc(x.name) + '</b><span>' + esc(x.level) + (x.level === 'Admin' ? ' · ' + (x.custom ? x.powers.length + ' of ' + (j.powerList || []).length + ' jobs' + (x.untilMs ? ' · until ' + esc(lagos(x.untilMs)) : '') : 'every job (not chosen yet)') : '') + '</span></span><span class="pill ' + (lv[x.level] || '') + '">' + esc(x.level) + '</span>' +
       (x.level === 'Admin' ? '<details class="gfsec" style="flex:1 1 100%;margin-top:8px"><summary><span><b>Choose ' + esc(String(x.name).split(' ')[0]) + '\'s jobs</b><span>Tick what they may do</span></span></summary><div class="gfsecb" data-ctlp="' + esc(x.email) + '">' +
         groups.map(g => '<p class="sub" style="margin:10px 0 2px;font-weight:600">' + esc(g.g) + '</p>' + g.items.map(p => '<label class="ctlck"><input type="checkbox" value="' + esc(p.k) + '"' + ((x.powers || []).indexOf(p.k) !== -1 ? ' checked' : '') + '> ' + esc(p.t) + '</label>').join('')).join('') +
+        '<div class="gfaddr" style="margin-top:8px" data-ctlpresets><span class="sub" style="align-self:center">Start from a preset:</span><button type="button" class="btn line sm" data-preset="Look only">Look only</button><button type="button" class="btn line sm" data-preset="Approve only">Approve only</button><button type="button" class="btn line sm" data-preset="Campus only">Campus only</button></div>' +
         '<label class="lb" style="margin-top:10px">Access to these jobs ends (optional)<input type="date" class="in ctluntil" value="' + (x.untilMs ? new Date(Number(x.untilMs) + 3600000).toISOString().slice(0, 10) : '') + '"></label>' +
         '<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red ctlsave">Save jobs</button><button type="button" class="btn line ctlreset">Back to every job</button></div></div></details>' : '') + '</div>').join('') +
     '<p class="sub" style="margin:10px 0 0">Looking at pages needs no tick. A job that is not ticked is refused, and its menu is hidden.</p></div>';
@@ -5308,6 +5309,9 @@ function drawControl(j) {
       set({action: 'owner.powers', email, powers, untilMs});
     };
     box.querySelector('.ctlreset').onclick = () => set({action: 'owner.powers', email, reset: true});
+    // Presets pre-fill the ticks only; the Owner still presses Save jobs. Mirrors RBC_ADMIN_PRESETS_ in Owner.gs.
+    const PRESETS = {'Look only': [], 'Approve only': ['after.absence', 'people.access'], 'Campus only': ['day.checkins', 'day.needs', 'day.hand', 'members.edit']};
+    box.querySelectorAll('[data-preset]').forEach(b => { b.onclick = () => { const want = PRESETS[b.dataset.preset] || []; box.querySelectorAll('input[type=checkbox]').forEach(c => { c.checked = want.indexOf(c.value) !== -1; }); say('m21', b.dataset.preset + ' ticked. Press Save jobs to keep it.', 'ok'); }; });
   });
   loadRoles(j);
 }
