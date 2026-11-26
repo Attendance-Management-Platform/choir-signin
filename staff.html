@@ -1901,6 +1901,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 </div>
 
 <div id="s10" class="pg hide">
+<div id="hfns"></div>
 <div id="hhero"></div>
 <div class="hcols"><div class="hca">
 <button type="button" class="hsec fold" data-hfold="tasks" id="hft" hidden>Needs you</button><div id="htasks"></div>
@@ -2126,7 +2127,22 @@ let myBypass = {};
 var myStaffOnly = false;
 const PILOT_OFF = ['requests', 'mine', 'absence'];
 var QROFF = false;
-function setMe(j) { if (j && j.pilot === true && Array.isArray(j.tabs)) j.tabs = j.tabs.filter(k => PILOT_OFF.indexOf(k) === -1); safeBar(j.safeTest); document.body.classList.toggle('pilot', j.pilot === true); QROFF = j.qrPaused === true; document.body.classList.toggle('qroff', QROFF); try { if (QROFF && !rhEditing && $('rhsign')) { $('rhsign').value = 'form'; rhSignSync(); } } catch (e) { /* the form is set up later */ }
+let myFns = [];
+const FNLABEL = {'reh.make': 'Make and edit rehearsals', 'reh.cancel': 'Cancel rehearsals', 'day.checkins': 'Check-ins: check and correct sign-ins', 'day.needs': 'Decide Needs checking', 'day.hand': 'Mark by hand', 'after.process': 'Process attendance (and ask to undo it)', 'after.correct': 'Correct after processing', 'after.absence': 'Answer absence requests', 'members.edit': 'Change member details and answer member requests', 'reports.download': 'Download reports', 'people.access': 'Ask for and answer access changes', 'people.guide': 'Send the welcome guide to people', 'owner.control': 'Control room', 'owner.access': 'Access changes on SYSTEM ACCESS', 'owner.roles': 'Roles and levels', 'owner.pulse': 'Pulse viewers', 'owner.powers': 'Choose each Admin\'s jobs'};
+function fnOn(k) { return myFns.indexOf(k) !== -1; }
+/** Home card: the functions this person has. The Owner sees every function; others see only what is ticked for them. */
+function drawFns() {
+  const box = $('hfns'); if (!box) return;
+  if (!myFns.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="card pad"><div class="ct">Your functions (' + myFns.length + ')</div><p class="sub" style="margin:4px 0 8px">' + (myLevel === 'Owner' ? 'As Owner you have every function.' : 'These are the functions ticked for you.') + '</p>' + myFns.map(k => '<div class="mrow"><span class="mtx"><b>' + esc(FNLABEL[k] || k) + '</b></span></div>').join('') + '</div>';
+}
+/** Members: an Admin without the members.edit function does not see the add or edit buttons. Everyone else keeps what they had. */
+function applyFnGates() {
+  if (myLevel !== 'Admin' || fnOn('members.edit')) return;
+  const add = $('mbaddcard'); if (add) add.classList.add('hide');
+  document.querySelectorAll('[data-mbedit]').forEach(b => b.remove());
+}
+function setMe(j) { if (j && Array.isArray(j.functions)) { myFns = j.functions; Promise.resolve().then(drawFns); } if (j && j.pilot === true && Array.isArray(j.tabs)) j.tabs = j.tabs.filter(k => PILOT_OFF.indexOf(k) === -1); safeBar(j.safeTest); document.body.classList.toggle('pilot', j.pilot === true); QROFF = j.qrPaused === true; document.body.classList.toggle('qroff', QROFF); try { if (QROFF && !rhEditing && $('rhsign')) { $('rhsign').value = 'form'; rhSignSync(); } } catch (e) { /* the form is set up later */ }
   // The sign-in reply does not carry Safe test or two-admin mode: ask once more (owner, 15 Nov 2026: no yellow strip after signing in).
   if (j.safeTest === undefined && typeof token !== 'undefined' && token) call({action: 'me', token}).then(m => { if (m && m.ok && m.safeTest !== undefined) { setMe(m); drawTabs(); if (typeof psecDraw === 'function') Object.keys(PSEC).forEach(psecDraw); } }).catch(() => {}); if ((j.tabs || []).indexOf('home') === -1 && j.staffOnly !== true && /member\.html$|staff\.html$|\/$/.test(location.pathname)) { location.replace('member.html'); return; } /* one sign-in: a member with no staff role goes to the member page */ myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myLevel = j.level || ''; myBypass = j.bypassTabs || {}; }
 const ICON = {
@@ -6524,7 +6540,8 @@ function mbCard(m) {
     '<div class="actions" style="margin:6px 0 0">' + (m.status === 'Active' ? '<button class="btn red sm" type="button" data-mbedit="' + esc(m.memberId) + '">Edit details…</button><button class="btn line sm" type="button" data-mb="deactivate" data-id="' + esc(m.memberId) + '">Deactivate…</button>' : '<button class="btn line sm" type="button" data-mb="reactivate" data-id="' + esc(m.memberId) + '">Reactivate…</button>') +
     (MB.history ? '<button class="btn line sm" type="button" data-mb="history" data-id="' + esc(m.memberId) + '">Set dates…</button>' : '') + '</div><div class="mbslot"></div></div>';
 }
-async function loadMembers() {
+async function loadMembers() { const r = await loadMembersRaw(); applyFnGates(); return r; }
+async function loadMembersRaw() {
   try {
     const j = await call({action: 'member.list', token});
     if (j.signedOut) { signedOutNow(); return; }
