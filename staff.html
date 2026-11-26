@@ -4733,7 +4733,7 @@ async function loadRehearsal() {
       (j.canTest && !tr.finished ? '<div class="trmain"><button class="btn ' + (tr.checkInOpen ? 'line' : 'red') + '" type="button" data-trop="' + (tr.checkInOpen ? 'close' : 'open') + '" data-noenter="1">' + (tr.checkInOpen ? 'Close check-in' : 'Open check-in') + '</button></div>' : '')) +
       (tr.form ? gfFormsHtml(tr, j, true) : '') +
       (j.canTest ? '<div class="trfoot"><button class="btn warn" type="button" data-trremove="1" data-noenter="1">Remove the test</button></div>' : '') + '</div>' : '';
-    $('rhstest').innerHTML = trHtml || (j.canTest ? '<div class="card pad"><div class="ct">Test run</div><p class="sub">No test run at the moment. A test run lets you try the Google Form or the QR with helpers before the real day. Nothing on it is counted and nobody is told. It is removed by itself 12 hours after it finishes.</p><div class="actions"><button class="btn red" type="button" data-trmake="1" data-noenter="1">Make a test run</button></div></div>' : '');
+    $('rhstest').innerHTML = trHtml || '';
     $('rhtoday').innerHTML = rhTodayHtml(j, list); $('rhlist').innerHTML = rhUpHtml(j, list);
     // A rehearsal whose time has passed can still have check-in left open. It must be closed before the day can be processed.
     const stuck = list.filter(r => r.checkInOpen && !r.cancelled && !rhLive(r))[0] || null;
