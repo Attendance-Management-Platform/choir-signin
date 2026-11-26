@@ -1833,7 +1833,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
 <div id="mbgrid"></div>
 <div id="mbtidy"></div><div id="mbdups"></div>
-<div id="mbaddcard" class="card pad rise"><div class="ct">Add a new member</div>
+<div id="mbaddcard" class="card pad rise hide"><div class="ct">Add a new member</div>
 <p class="sub" style="margin:0 0 4px">Added straight away, with no request. The Member ID is made for you. A reason is needed, and it is written to the audit log<span class="np">, and Desk A and the Campus Music Director can see it</span>.</p>
 <div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:1 1 160px"><label for="mbfn" class="lb">First name</label><input id="mbfn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbmn" class="lb">Middle name (optional)</label><input id="mbmn" class="in" autocomplete="off" maxlength="50"></div><div style="flex:1 1 160px"><label for="mbln" class="lb">Last name</label><input id="mbln" class="in" autocomplete="off" maxlength="50"></div></div>
 <div style="display:flex;gap:12px;flex-wrap:wrap"><div style="flex:2 1 220px"><label for="mbe" class="lb">Email address</label><input id="mbe" class="in" type="email" autocomplete="off" maxlength="120"></div><div style="flex:1 1 160px"><label for="mbt" class="lb">Phone (optional)</label><input id="mbt" class="in" autocomplete="off" maxlength="40"></div></div>
@@ -6588,7 +6588,7 @@ async function loadMembersRaw() {
       $('mbbox').innerHTML = ''; $('mbtidy').innerHTML = ''; $('mbaddcard').classList.add('hide'); MBLIST = false; { const d = document.querySelector('#ph .d'); if (d) d.textContent = 'Ask for a member to be added, deactivated or reactivated, and correct a member\'s details when they ask. Every change has a reason and is recorded.'; } loadDetailReqs(); loadMbUpdates(); loadMbReq();
       return say('m17', /do not have this page/i.test(j.error || '') ? '' : (j.error || 'Not available.'), 'bad');
     }
-    $('mbaddcard').classList.remove('hide'); MBLIST = true; $('mbupd').innerHTML = '';
+    MBLIST = true; $('mbupd').innerHTML = ''; // the add card stays closed until Add a person is pressed
     MB.campuses = j.campuses || []; MB.parts = j.parts || []; MB.canAdd = !!j.canAddCampus; MB.history = !!j.historyReady; window.__mbm = {}; j.members.forEach(m => { window.__mbm[m.memberId] = m; });
     const cur = $('mbc').value;
     $('mbc').innerHTML = mbOpts(MB.campuses, cur, 'Choose a campus') + '<option value="__new__"' + (MB.canAdd ? '' : ' disabled') + '>+ Add a new campus' + (MB.canAdd ? '…' : ' (System Administrator only)') + '</option>';
@@ -6607,17 +6607,25 @@ function mbGridDraw() {
   const canEdit = myLevel !== 'Admin' || fnOn('members.edit');
   const cards = [
     ['mbbox', 'View members', 'Find a person by name, part, campus or status.', true],
-    ['mbaddcard', 'Add a person', 'New member, with part, campus and contact details.', !!$('mbaddcard') && !$('mbaddcard').classList.contains('hide')],
+    ['mbaddcard', 'Add a person', 'New member, with part, campus and contact details.', canEdit && !!$('mbaddcard'), 'open'],
     ['mbbox', 'Edit details', 'Change a person\'s name, part, campus or contact details.', canEdit],
     ['mbpfix', 'Update a person\'s record', 'Change one person across several published rehearsals, with one reason.', !!$('mbpfix') && myTabs.indexOf('process') !== -1],
     ['mbdups', 'Merge duplicates', 'Join two records for the same person, keeping one history.', dupsShown],
     ['mbbox', 'Deactivate', 'Stop a person appearing on new forms. Reactivate from the same place.', canEdit]
   ].filter(c => c[3]);
   box.innerHTML = '<div class="card pad" style="margin-top:16px"><div class="ct">Members</div><div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:8px">' +
-    cards.map(c => '<button type="button" class="card pad" data-mbgo="' + c[0] + '" style="text-align:left;cursor:pointer"><b style="display:block;margin-bottom:4px">' + esc(c[1]) + '</b><span class="sub" style="margin:0">' + esc(c[2]) + '</span></button>').join('') +
+    cards.map(c => '<button type="button" class="card pad" ' + (c[4] === 'open' ? 'data-mbadd="1" aria-expanded="' + ($(c[0]) && !$(c[0]).classList.contains('hide') ? 'true' : 'false') + '"' : 'data-mbgo="' + c[0] + '"') + ' style="text-align:left;cursor:pointer"><b style="display:block;margin-bottom:4px">' + esc(c[1]) + '</b><span class="sub" style="margin:0">' + esc(c[2]) + '</span></button>').join('') +
     '</div></div>';
 }
 document.addEventListener('click', ev => {
+  const add = ev.target.closest && ev.target.closest('[data-mbadd]');
+  if (add) {
+    ev.preventDefault(); const card = $('mbaddcard'); if (!card) return;
+    const open = card.classList.toggle('hide') === false;
+    mbGridDraw();
+    if (open) card.scrollIntoView({behavior: 'smooth', block: 'start'});
+    return;
+  }
   const g = ev.target.closest && ev.target.closest('[data-mbgo]'); if (!g) return;
   ev.preventDefault(); const el = $(g.dataset.mbgo); if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
 });
