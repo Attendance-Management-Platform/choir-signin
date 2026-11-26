@@ -1810,6 +1810,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div id="s15" class="pg hide">
 <div class="card pad rise"><div class="ct">Process</div>
 <p class="sub" id="prnote"></p>
+<p class="sub" style="margin:6px 0 0"><a href="#" id="prtomem" style="color:var(--red,#A50D1F);font-weight:600">Update a person's record in Members &rarr;</a></p>
 <div id="prchips" class="fpchips"></div>
 <div id="prfind" class="hide" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><input id="prq" class="in" list="prids" placeholder="Search: R104, 2026-09 or a date" style="flex:2 1 200px" autocomplete="off"><datalist id="prids"></datalist>
 <select id="prst" class="in" style="flex:1 1 130px"><option value="">All days</option><option value="up">Upcoming</option><option value="todo">To process</option><option value="done">Processed</option><option value="wait">Not ready</option></select>
@@ -1843,6 +1844,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div id="mbask"></div>
 <div id="mbdet"></div>
 <div id="mbupd"></div>
+<div id="mbpfix"></div>
 <div id="mbbox"></div>
 <p id="m17" class="s"></p>
 </div>
@@ -2338,7 +2340,7 @@ function go(v) {
   clearTimeout(timer);
   { const cur = Array.from(document.querySelectorAll('.pg')).filter(x => !x.classList.contains('hide'))[0]; if (!cur || cur.id !== v) filtersReset(); }
   if (v === 's3') return start();
-  show(v); if (v === 's21') loadControl(); if (v === 's22') loadPulse(); if (v === 's18') loadSettings(); if (v === 's11') loadReports(); if (v === 's12') { setPtab(($('s12').dataset.ptab) || 'access'); loadPeople(); } if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal(); if (v === 's19') loadMine();
+  show(v); if (v === 's21') loadControl(); if (v === 's22') loadPulse(); if (v === 's18') loadSettings(); if (v === 's11') loadReports(); if (v === 's12') { setPtab(($('s12').dataset.ptab) || 'access'); loadPeople(); } if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); pfixDraw(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal(); if (v === 's19') loadMine();
 }
 /** "Clear this page": empties the boxes and filters on a menu page, closes anything open on it and reloads it fresh. It never deletes saved data. */
 const CLEARABLE = ['s4', 's5', 's6', 's7', 's8', 's11', 's12', 's13', 's15', 's16', 's17'];
@@ -3249,6 +3251,63 @@ document.addEventListener('click', ev => {
   if (ev.target.closest && ev.target.closest('[data-prclose]')) { const o = $('prfix'); if (o) o.remove(); }
 });
 document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && $('prfix')) $('prfix').remove(); });
+
+
+// ---- Update a person's record: one person, several published rehearsals, one reason (process.personFix) ----
+let PFIX = null;
+function pfixSay(text, cls) { const m = document.querySelector('#mbpfix .pfixmsg'); if (m) { m.textContent = text; m.className = 's pfixmsg ' + (cls || ''); } }
+function pfixDraw() {
+  const box = $('mbpfix'); if (!box) return;
+  if (myTabs.indexOf('process') === -1) { box.innerHTML = ''; return; } // only the people who may fix published days
+  if (!PFIX) {
+    box.innerHTML = '<div class="card pad rise" style="margin-top:16px"><div class="ct">Update a person\'s record</div>' +
+      '<p class="sub" style="margin:0 0 8px">Find the person, then tick the published rehearsals to change, with one reason.</p>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><input id="pfq" class="in" placeholder="Name (at least 2 letters)" autocomplete="off" maxlength="60" style="flex:1 1 220px"><button id="pffind" class="btn line sm" type="button">Find</button></div>' +
+      '<div id="pfmatch" style="margin-top:8px"></div><p class="s pfixmsg"></p></div>';
+    return;
+  }
+  const rows = PFIX.rehearsals.map(r => '<tr><td><input type="checkbox" data-pfid="' + esc(r.id) + '" data-pfcur="' + esc(r.status) + '" aria-label="Change ' + esc(r.id) + '"></td><td>' + esc(r.id + (r.date ? ' · ' + r.date : '')) + '</td><td>' + esc(r.status) + '</td><td><select class="in" data-pfto="' + esc(r.id) + '" style="max-width:150px">' + ['Present', 'Absent', 'Excused'].map(x => '<option' + (x === r.status ? ' selected' : '') + '>' + x + '</option>').join('') + '</select></td></tr>').join('');
+  box.innerHTML = '<div class="card pad rise" style="margin-top:16px"><div class="ct">Update a person\'s record</div>' +
+    '<p class="sub" style="margin:0 0 10px">' + esc(PFIX.member.name) + (PFIX.member.campus ? ' · ' + esc(PFIX.member.campus) : '') + (PFIX.member.part ? ' · ' + esc(PFIX.member.part) : '') + '. Only the rehearsals you tick change.</p>' +
+    (rows ? '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr><th style="text-align:left">Tick</th><th style="text-align:left">Rehearsal</th><th style="text-align:left">Now</th><th style="text-align:left">Change to</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<p class="sub">No published rehearsals for this person yet.</p>') +
+    '<label class="lb" for="pfreason">Reason</label><input id="pfreason" class="in" maxlength="300" placeholder="Why is this being changed? (10 to 300 characters)" autocomplete="off">' +
+    '<div class="actions"><button id="pfsave" class="btn red" type="button"' + (rows ? '' : ' disabled') + '>Save changes</button><button id="pfclear" class="btn line" type="button">Clear</button></div><p class="s pfixmsg"></p></div>';
+}
+async function pfixOpen(memberId) {
+  const j = await call({action: 'records.member', token, memberId: memberId});
+  if (j.signedOut) { signedOutNow(); return; }
+  if (!j.ok) { PFIX = null; pfixDraw(); pfixSay(j.error || 'Could not open that person.', 'bad'); return; }
+  PFIX = {member: j.member, rehearsals: j.rehearsals || []};
+  pfixDraw();
+}
+document.addEventListener('click', async ev => {
+  const t = ev.target;
+  if (t.id === 'prtomem') { ev.preventDefault(); go(TABDEF.members[0]); return; }
+  if (t.id === 'pffind') {
+    const q = String(($('pfq') || {}).value || '').trim();
+    if (q.length < 2) { pfixSay('Type at least 2 letters of the name.', 'bad'); return; }
+    const j = await call({action: 'records.member', token, q: q});
+    if (j.signedOut) { signedOutNow(); return; }
+    if (!j.ok) { pfixSay(j.error || 'Could not search.', 'bad'); return; }
+    $('pfmatch').innerHTML = (j.matches || []).length ? j.matches.map(m => '<button class="btn line sm" type="button" data-pfpick="' + esc(m.memberId) + '" style="margin:4px 6px 4px 0">' + esc(m.name) + ' · ' + esc(m.campus || '') + '</button>').join('') : '<span class="sub">Nobody found.</span>';
+    return;
+  }
+  const pick = t.closest && t.closest('[data-pfpick]');
+  if (pick) { await pfixOpen(pick.dataset.pfpick); return; }
+  if (t.id === 'pfclear') { PFIX = null; pfixDraw(); return; }
+  if (t.id === 'pfsave') {
+    const reason = String(($('pfreason') || {}).value || '').trim();
+    if (reason.length < 10) { pfixSay('Give a reason of 10 to 300 characters.', 'bad'); return; }
+    const changes = [...document.querySelectorAll('#mbpfix [data-pfid]')].filter(c => c.checked).map(c => ({id: c.dataset.pfid, cur: c.dataset.pfcur, status: document.querySelector('[data-pfto="' + c.dataset.pfid + '"]').value})).filter(x => x.status !== x.cur);
+    if (!changes.length) { pfixSay('Tick a rehearsal and choose a different status.', 'bad'); return; }
+    t.disabled = true;
+    const j = await call({action: 'process.personFix', token, memberId: PFIX.member.memberId, reason: reason, changes: changes.map(x => ({id: x.id, status: x.status}))});
+    t.disabled = false;
+    if (j.signedOut) { signedOutNow(); return; }
+    pfixSay(j.ok ? 'Saved. ' + (j.summary || '') : (j.error || 'Could not save.'), j.ok ? 'ok' : 'bad');
+    if (j.ok) await pfixOpen(PFIX.member.memberId);
+  }
+});
 
 // ---- Calendar ----
 let calMonth = '';
