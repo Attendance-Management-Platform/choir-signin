@@ -1831,6 +1831,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 <div id="s17" class="pg hide">
 <div class="card pad rise hide npc"><div class="ct">Members without a part</div>
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
+<div id="mbgrid"></div>
 <div id="mbtidy"></div><div id="mbdups"></div>
 <div id="mbaddcard" class="card pad rise"><div class="ct">Add a new member</div>
 <p class="sub" style="margin:0 0 4px">Added straight away, with no request. The Member ID is made for you. A reason is needed, and it is written to the audit log<span class="np">, and Desk A and the Campus Music Director can see it</span>.</p>
@@ -6577,7 +6578,7 @@ function mbCard(m) {
     '<div class="actions" style="margin:6px 0 0">' + (m.status === 'Active' ? '<button class="btn red sm" type="button" data-mbedit="' + esc(m.memberId) + '">Edit details…</button><button class="btn line sm" type="button" data-mb="deactivate" data-id="' + esc(m.memberId) + '">Deactivate…</button>' : '<button class="btn line sm" type="button" data-mb="reactivate" data-id="' + esc(m.memberId) + '">Reactivate…</button>') +
     (MB.history ? '<button class="btn line sm" type="button" data-mb="history" data-id="' + esc(m.memberId) + '">Set dates…</button>' : '') + '</div><div class="mbslot"></div></div>';
 }
-async function loadMembers() { const r = await loadMembersRaw(); applyFnGates(); return r; }
+async function loadMembers() { const r = await loadMembersRaw(); applyFnGates(); mbGridDraw(); return r; }
 async function loadMembersRaw() {
   try {
     const j = await call({action: 'member.list', token});
@@ -6598,6 +6599,28 @@ async function loadMembersRaw() {
       items: j.members, fields: mbFields, empty: 'There are no members yet.', card: mbCard});
   } catch (e) { say('m17', 'Network problem. Try again.', 'bad'); }
 }
+/** Members: a row of cards at the top. Each card jumps to its part of this page, and shows only when that part is there for this person. */
+function mbGridDraw() {
+  const box = $('mbgrid'); if (!box) return;
+  if (!MBLIST) { box.innerHTML = ''; return; }
+  const dupsShown = !!($('mbdups') && !$('mbdups').classList.contains('hide'));
+  const canEdit = myLevel !== 'Admin' || fnOn('members.edit');
+  const cards = [
+    ['mbbox', 'View members', 'Find a person by name, part, campus or status.', true],
+    ['mbaddcard', 'Add a person', 'New member, with part, campus and contact details.', !!$('mbaddcard') && !$('mbaddcard').classList.contains('hide')],
+    ['mbbox', 'Edit details', 'Change a person\'s name, part, campus or contact details.', canEdit],
+    ['mbpfix', 'Update a person\'s record', 'Change one person across several published rehearsals, with one reason.', !!$('mbpfix') && myTabs.indexOf('process') !== -1],
+    ['mbdups', 'Merge duplicates', 'Join two records for the same person, keeping one history.', dupsShown],
+    ['mbbox', 'Deactivate', 'Stop a person appearing on new forms. Reactivate from the same place.', canEdit]
+  ].filter(c => c[3]);
+  box.innerHTML = '<div class="card pad" style="margin-top:16px"><div class="ct">Members</div><div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-top:8px">' +
+    cards.map(c => '<button type="button" class="card pad" data-mbgo="' + c[0] + '" style="text-align:left;cursor:pointer"><b style="display:block;margin-bottom:4px">' + esc(c[1]) + '</b><span class="sub" style="margin:0">' + esc(c[2]) + '</span></button>').join('') +
+    '</div></div>';
+}
+document.addEventListener('click', ev => {
+  const g = ev.target.closest && ev.target.closest('[data-mbgo]'); if (!g) return;
+  ev.preventDefault(); const el = $(g.dataset.mbgo); if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
+});
 /** Members → Possible duplicates (Global Admin / Assistant, 23 Nov 2026): pick the record to keep and the one to merge in; check first; merge with a reason. */
 async function loadDups() {
   const box = $('mbdups'); if (!box) return;
