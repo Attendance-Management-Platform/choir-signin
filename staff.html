@@ -2146,6 +2146,9 @@ function applyFnGates() {
   if (myLevel !== 'Admin' || fnOn('members.edit')) return;
   const add = $('mbaddcard'); if (add) add.classList.add('hide');
   document.querySelectorAll('[data-mbedit]').forEach(b => b.remove());
+  // Merge (Possible duplicates) and archive (Deactivate) need the same function.
+  const dups = $('mbdups'); if (dups) dups.classList.add('hide');
+  document.querySelectorAll('[data-mb="deactivate"]').forEach(b => b.remove());
 }
 function setMe(j) { if (j && Array.isArray(j.functions)) { myFns = j.functions; Promise.resolve().then(drawFns); } if (j && j.pilot === true && Array.isArray(j.tabs)) j.tabs = j.tabs.filter(k => PILOT_OFF.indexOf(k) === -1); safeBar(j.safeTest); document.body.classList.toggle('pilot', j.pilot === true); QROFF = j.qrPaused === true; document.body.classList.toggle('qroff', QROFF); try { if (QROFF && !rhEditing && $('rhsign')) { $('rhsign').value = 'form'; rhSignSync(); } } catch (e) { /* the form is set up later */ }
   // The sign-in reply does not carry Safe test or two-admin mode: ask once more (owner, 15 Nov 2026: no yellow strip after signing in).
