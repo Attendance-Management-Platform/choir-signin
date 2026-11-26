@@ -1854,7 +1854,12 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 
 <div id="s13" class="pg hide"></div>
 
-<div id="s12" class="pg hide">
+<div id="s12" class="pg hide" data-ptab="access" data-owner="0">
+<style>#s12[data-ptab="people"] > :not(#ptabs):not(#paPeople):not(#mpeople),#s12[data-ptab="roles"] > :not(#ptabs):not(#paRoles):not(#mpeople){display:none !important}#s12 > #paPeople,#s12 > #paRoles{display:none}#s12[data-ptab="people"] > #paPeople,#s12[data-ptab="roles"] > #paRoles{display:block}#s12[data-owner="0"] .pOwnerOnly{display:none !important}</style>
+<div id="ptabs" class="ptabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px"><button type="button" class="btn line sm" data-ptab="access" aria-pressed="true">Access</button><button type="button" class="btn line sm pOwnerOnly" data-ptab="people" aria-pressed="false">People</button><button type="button" class="btn line sm pOwnerOnly" data-ptab="roles" aria-pressed="false">Roles</button></div>
+<p class="s" id="mpeople"></p>
+<div id="paPeople"><div class="card pad"><div class="ct">People and their jobs</div><p class="sub" style="margin:4px 0 8px">Pick a starting preset or tick each Admin's jobs, then press Save jobs. Only the Owner can change these.</p><div id="paPeopleBox"></div></div></div>
+<div id="paRoles"></div>
 <div class="card pad rise hide npc"><div class="ct">Members without a part</div>
 <p class="sub npsub" style="margin:0 0 6px"></p><div class="nplist"></div><p class="s mnp"></p></div>
 <div class="card pad" id="pguide"><div class="ct">Send the welcome guide</div><p class="sub" style="margin:4px 0 8px">Type the person's email. They get one guide covering all their roles. Each send is written in the Change log.</p><label class="lb">Email<input type="email" id="pgemail" class="in" autocomplete="off"></label><div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="pgsend">Send guide</button></div></div>
@@ -1901,6 +1906,7 @@ body .cth,body .kick{font-size:15px!important;font-weight:600!important;letter-s
 </div>
 
 <div id="s10" class="pg hide">
+<div id="hfns"></div>
 <div id="hhero"></div>
 <div class="hcols"><div class="hca">
 <button type="button" class="hsec fold" data-hfold="tasks" id="hft" hidden>Needs you</button><div id="htasks"></div>
@@ -2126,7 +2132,25 @@ let myBypass = {};
 var myStaffOnly = false;
 const PILOT_OFF = ['requests', 'mine', 'absence'];
 var QROFF = false;
-function setMe(j) { if (j && j.pilot === true && Array.isArray(j.tabs)) j.tabs = j.tabs.filter(k => PILOT_OFF.indexOf(k) === -1); safeBar(j.safeTest); document.body.classList.toggle('pilot', j.pilot === true); QROFF = j.qrPaused === true; document.body.classList.toggle('qroff', QROFF); try { if (QROFF && !rhEditing && $('rhsign')) { $('rhsign').value = 'form'; rhSignSync(); } } catch (e) { /* the form is set up later */ }
+let myFns = [];
+const FNLABEL = {'reh.make': 'Make and edit rehearsals', 'reh.cancel': 'Cancel rehearsals', 'day.checkins': 'Check-ins: check and correct sign-ins', 'day.needs': 'Decide Needs checking', 'day.hand': 'Mark by hand', 'after.process': 'Process attendance (and ask to undo it)', 'after.correct': 'Correct after processing', 'after.absence': 'Answer absence requests', 'members.edit': 'Change member details and answer member requests', 'reports.download': 'Download reports', 'people.access': 'Ask for and answer access changes', 'people.guide': 'Send the welcome guide to people', 'owner.control': 'Control room', 'owner.access': 'Access changes on SYSTEM ACCESS', 'owner.roles': 'Roles and levels', 'owner.pulse': 'Pulse viewers', 'owner.powers': 'Choose each Admin\'s jobs'};
+function fnOn(k) { return myFns.indexOf(k) !== -1; }
+/** Home card: the functions this person has. The Owner sees every function; others see only what is ticked for them. */
+function drawFns() {
+  const box = $('hfns'); if (!box) return;
+  if (!myFns.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="card pad"><div class="ct">Your functions (' + myFns.length + ')</div><p class="sub" style="margin:4px 0 8px">' + (myLevel === 'Owner' ? 'As Owner you have every function.' : 'These are the functions ticked for you.') + '</p>' + myFns.map(k => '<div class="mrow"><span class="mtx"><b>' + esc(FNLABEL[k] || k) + '</b></span></div>').join('') + '</div>';
+}
+/** Members: an Admin without the members.edit function does not see the add or edit buttons. Everyone else keeps what they had. */
+function applyFnGates() {
+  if (myLevel !== 'Admin' || fnOn('members.edit')) return;
+  const add = $('mbaddcard'); if (add) add.classList.add('hide');
+  document.querySelectorAll('[data-mbedit]').forEach(b => b.remove());
+  // Merge (Possible duplicates) and archive (Deactivate) need the same function.
+  const dups = $('mbdups'); if (dups) dups.classList.add('hide');
+  document.querySelectorAll('[data-mb="deactivate"]').forEach(b => b.remove());
+}
+function setMe(j) { if (j && Array.isArray(j.functions)) { myFns = j.functions; Promise.resolve().then(drawFns); } if (j && j.pilot === true && Array.isArray(j.tabs)) j.tabs = j.tabs.filter(k => PILOT_OFF.indexOf(k) === -1); safeBar(j.safeTest); document.body.classList.toggle('pilot', j.pilot === true); QROFF = j.qrPaused === true; document.body.classList.toggle('qroff', QROFF); try { if (QROFF && !rhEditing && $('rhsign')) { $('rhsign').value = 'form'; rhSignSync(); } } catch (e) { /* the form is set up later */ }
   // The sign-in reply does not carry Safe test or two-admin mode: ask once more (owner, 15 Nov 2026: no yellow strip after signing in).
   if (j.safeTest === undefined && typeof token !== 'undefined' && token) call({action: 'me', token}).then(m => { if (m && m.ok && m.safeTest !== undefined) { setMe(m); drawTabs(); if (typeof psecDraw === 'function') Object.keys(PSEC).forEach(psecDraw); } }).catch(() => {}); if ((j.tabs || []).indexOf('home') === -1 && j.staffOnly !== true && /member\.html$|staff\.html$|\/$/.test(location.pathname)) { location.replace('member.html'); return; } /* one sign-in: a member with no staff role goes to the member page */ myStaffOnly = j.staffOnly === true; myTabs = (j.tabs || ['absence']).filter(x => x !== 'help' && x !== 'mine'); if (!myStaffOnly && myTabs.indexOf('absence') !== -1) myTabs.splice(myTabs.indexOf('absence'), 0, 'mine'); myTabs = myTabs.concat('help'); myName = j.name || ''; myRoles = j.roles || []; myLevel = j.level || ''; myBypass = j.bypassTabs || {}; }
 const ICON = {
@@ -2314,7 +2338,7 @@ function go(v) {
   clearTimeout(timer);
   { const cur = Array.from(document.querySelectorAll('.pg')).filter(x => !x.classList.contains('hide'))[0]; if (!cur || cur.id !== v) filtersReset(); }
   if (v === 's3') return start();
-  show(v); if (v === 's21') loadControl(); if (v === 's22') loadPulse(); if (v === 's18') loadSettings(); if (v === 's11') loadReports(); if (v === 's12') loadPeople(); if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal(); if (v === 's19') loadMine();
+  show(v); if (v === 's21') loadControl(); if (v === 's22') loadPulse(); if (v === 's18') loadSettings(); if (v === 's11') loadReports(); if (v === 's12') { setPtab(($('s12').dataset.ptab) || 'access'); loadPeople(); } if (v === 's13') loadRecords(); if (v === 's14') loadCalendar(); if (v === 's15') loadProcess(); if (v === 's16') loadChanges(); if (v === 's17') { say('m17', ''); loadMembers(); loadNoPart(); } if (v === 's10') loadHome(); if (v === 's9') renderHelp(); if (v === 's4') loadRows(); if (v === 's5') { say('m5', ''); loadRoll(); } if (v === 's6') loadAbsence(); if (v === 's7') loadQueue(); if (v === 's8') loadRehearsal(); if (v === 's19') loadMine();
 }
 /** "Clear this page": empties the boxes and filters on a menu page, closes anything open on it and reloads it fresh. It never deletes saved data. */
 const CLEARABLE = ['s4', 's5', 's6', 's7', 's8', 's11', 's12', 's13', 's15', 's16', 's17'];
@@ -5288,28 +5312,60 @@ function drawControl(j) {
     row('allRoles', 'All staff roles', sw.allRoles ? 'Every role on SYSTEM ACCESS is in use.' : 'Pilot: only the Owner, Asst Global Admin and Admins use the staff page.', sw.allRoles) +
     '<div class="mrow" style="flex-wrap:wrap"><span class="mtx"><b>Contact for form mistakes</b><span>Named in the helpers\' email.</span></span><span class="gfaddr" style="flex:1 1 220px"><input id="ctlcontact" class="in" maxlength="80" aria-label="Contact for form mistakes" value="' + esc(sw.formContact || '') + '" placeholder="Faithful (Assistant Global Admin)"><button id="ctlcontactsave" class="btn line" type="button">Save</button></span></div>' +
     '<p class="sub" style="margin:10px 0 0">Safe test stays in Settings for now. More switches come with the next stage.</p></div>';
-  const groups = []; (j.powerList || []).forEach(p => { let g = groups.filter(x => x.g === p.g)[0]; if (!g) groups.push(g = {g: p.g, items: []}); g.items.push(p); });
-  const lv = {Owner: 'p-ok', 'Asst Global Admin': 'p-ok', Admin: 'p-w'};
-  $('ctlpeople').innerHTML = '<div class="card pad"><div class="ct">People who run the system</div><p class="sub" style="margin:4px 0 8px">Owner: everything, locked. Asst Global Admin: everything except the Control room. Admins: only what you tick.</p>' +
-    (j.people || []).map(x => '<div class="mrow" style="flex-wrap:wrap;align-items:flex-start"><span class="mtx"><b>' + esc(x.name) + '</b><span>' + esc(x.level) + (x.level === 'Admin' ? ' · ' + (x.custom ? x.powers.length + ' of ' + (j.powerList || []).length + ' jobs' + (x.untilMs ? ' · until ' + esc(lagos(x.untilMs)) : '') : 'every job (not chosen yet)') : '') + '</span></span><span class="pill ' + (lv[x.level] || '') + '">' + esc(x.level) + '</span>' +
-      (x.level === 'Admin' ? '<details class="gfsec" style="flex:1 1 100%;margin-top:8px"><summary><span><b>Choose ' + esc(String(x.name).split(' ')[0]) + '\'s jobs</b><span>Tick what they may do</span></span></summary><div class="gfsecb" data-ctlp="' + esc(x.email) + '">' +
-        groups.map(g => '<p class="sub" style="margin:10px 0 2px;font-weight:600">' + esc(g.g) + '</p>' + g.items.map(p => '<label class="ctlck"><input type="checkbox" value="' + esc(p.k) + '"' + ((x.powers || []).indexOf(p.k) !== -1 ? ' checked' : '') + '> ' + esc(p.t) + '</label>').join('')).join('') +
-        '<label class="lb" style="margin-top:10px">Access to these jobs ends (optional)<input type="date" class="in ctluntil" value="' + (x.untilMs ? new Date(Number(x.untilMs) + 3600000).toISOString().slice(0, 10) : '') + '"></label>' +
-        '<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red ctlsave">Save jobs</button><button type="button" class="btn line ctlreset">Back to every job</button></div></div></details>' : '') + '</div>').join('') +
-    '<p class="sub" style="margin:10px 0 0">Looking at pages needs no tick. A job that is not ticked is refused, and its menu is hidden.</p></div>';
+  drawPeopleJobs(j, $('ctlpeople'), 'm21', () => loadControl(true));
   const set = async q => { try { const k = await call(Object.assign({token}, q)); if (k.ok) drawControl(k); say('m21', k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); } };
   document.querySelectorAll('#ctlsw .ctlsw').forEach(b => { b.onclick = () => set({action: 'owner.set', key: b.dataset.k, value: b.dataset.v === '1'}); });
   if ($('ctlcontactsave')) $('ctlcontactsave').onclick = () => set({action: 'owner.set', key: 'formContact', value: $('ctlcontact').value});
-  document.querySelectorAll('[data-ctlp]').forEach(box => {
-    const email = box.dataset.ctlp;
-    box.querySelector('.ctlsave').onclick = () => {
-      const powers = [...box.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value), dv = (box.querySelector('.ctluntil') || {}).value || '';
+  loadRoles(j);
+}
+let PTAB_LOADED = false;
+/** People and access (owner, 26 Nov 2026): Access is the page as it was; People and Roles are the Owner's. */
+function setPtab(name) {
+  const pg = $('s12'); if (!pg) return;
+  const owner = myLevel === 'Owner';
+  if (name !== 'access' && !owner) name = 'access';
+  pg.dataset.ptab = name; pg.dataset.owner = owner ? '1' : '0';
+  document.querySelectorAll('#ptabs [data-ptab]').forEach(b => b.setAttribute('aria-pressed', b.dataset.ptab === name ? 'true' : 'false'));
+  if (name === 'people') loadPeopleTab();
+  if (name === 'roles') loadRolesTab();
+}
+document.addEventListener('click', ev => { const b = ev.target.closest && ev.target.closest('#ptabs [data-ptab]'); if (b) setPtab(b.dataset.ptab); });
+async function loadPeopleTab() {
+  const box = $('paPeopleBox'); if (!box) return;
+  box.innerHTML = '<p class="sub">' + LOADWAVE + '</p>';
+  try { const j = await call({action: 'owner.state', token}); if (j.signedOut) { signedOutNow(); return; } if (!j.ok) { box.innerHTML = ''; say('mpeople', j.error || 'Could not load.', 'bad'); return; } drawPeopleJobs(j, box, 'mpeople', loadPeopleTab); }
+  catch (e) { box.innerHTML = ''; say('mpeople', 'Network problem. Try again.', 'bad'); }
+}
+async function loadRolesTab() {
+  const box = $('paRoles'); if (!box) return;
+  try { const j = await call({action: 'owner.state', token}); if (j.signedOut) { signedOutNow(); return; } if (!j.ok) { say('mpeople', j.error || 'Could not load.', 'bad'); return; } loadRoles(j, box); }
+  catch (e) { say('mpeople', 'Network problem. Try again.', 'bad'); }
+}
+function drawPeopleJobs(j, box, msgId, reload) {
+  const set = async q => { try { const k = await call(Object.assign({token}, q)); if (k.signedOut) { signedOutNow(); return; } say(msgId, k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad'); if (k.ok) reload(); } catch (e) { say(msgId, 'Network problem. Try again.', 'bad'); } };
+  const groups = []; (j.powerList || []).forEach(p => { let g = groups.filter(x => x.g === p.g)[0]; if (!g) groups.push(g = {g: p.g, items: []}); g.items.push(p); });
+  const lv = {Owner: 'p-ok', 'Asst Global Admin': 'p-ok', Admin: 'p-w'};
+  box.innerHTML = '<div class="card pad"><div class="ct">People who run the system</div><p class="sub" style="margin:4px 0 8px">Owner: everything, locked. Asst Global Admin: everything except the Control room. Admins: only what you tick.</p>' +
+    (j.people || []).map(x => '<div class="mrow" style="flex-wrap:wrap;align-items:flex-start"><span class="mtx"><b>' + esc(x.name) + '</b><span>' + esc(x.level) + (x.level === 'Admin' ? ' · ' + (x.custom ? x.powers.length + ' of ' + (j.powerList || []).length + ' jobs' + (x.untilMs ? ' · until ' + esc(lagos(x.untilMs)) : '') : 'every job (not chosen yet)') : '') + '</span></span><span class="pill ' + (lv[x.level] || '') + '">' + esc(x.level) + '</span>' +
+      (x.level === 'Admin' ? '<details class="gfsec" style="flex:1 1 100%;margin-top:8px"><summary><span><b>Choose ' + esc(String(x.name).split(' ')[0]) + '\'s jobs</b><span>Tick what they may do</span></span></summary><div class="gfsecb" data-ctlp="' + esc(x.email) + '">' +
+        groups.map(g => '<p class="sub" style="margin:10px 0 2px;font-weight:600">' + esc(g.g) + '</p>' + g.items.map(p => '<label class="ctlck"><input type="checkbox" value="' + esc(p.k) + '"' + ((x.powers || []).indexOf(p.k) !== -1 ? ' checked' : '') + '> ' + esc(p.t) + '</label>').join('')).join('') +
+        '<div class="gfaddr" style="margin-top:8px" data-ctlpresets><span class="sub" style="align-self:center">Start from a preset:</span><button type="button" class="btn line sm" data-preset="Look only">Look only</button><button type="button" class="btn line sm" data-preset="Approve only">Approve only</button><button type="button" class="btn line sm" data-preset="Campus only">Campus only</button></div>' +
+        '<label class="lb" style="margin-top:10px">Access to these jobs ends (optional)<input type="date" class="in ctluntil" value="' + (x.untilMs ? new Date(Number(x.untilMs) + 3600000).toISOString().slice(0, 10) : '') + '"></label>' +
+        '<div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red ctlsave">Save jobs</button><button type="button" class="btn line ctlreset">Back to every job</button></div></div></details>' : '') + '</div>').join('') +
+    '<p class="sub" style="margin:10px 0 0">Looking at pages needs no tick. A job that is not ticked is refused, and its menu is hidden.</p></div>';
+
+  box.querySelectorAll('[data-ctlp]').forEach(card => {
+    const email = card.dataset.ctlp;
+    card.querySelector('.ctlsave').onclick = () => {
+      const powers = [...card.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value), dv = (card.querySelector('.ctluntil') || {}).value || '';
       const untilMs = /^\d{4}-\d{2}-\d{2}$/.test(dv) ? Date.parse(dv + 'T23:59:00+01:00') : 0;
       set({action: 'owner.powers', email, powers, untilMs});
     };
-    box.querySelector('.ctlreset').onclick = () => set({action: 'owner.powers', email, reset: true});
+    card.querySelector('.ctlreset').onclick = () => set({action: 'owner.powers', email, reset: true});
+    // Presets pre-fill the ticks only; the Owner still presses Save jobs. Mirrors RBC_ADMIN_PRESETS_ in Owner.gs.
+    const PRESETS = {'Look only': [], 'Approve only': ['after.absence', 'people.access'], 'Campus only': ['day.checkins', 'day.needs', 'day.hand', 'members.edit']};
+    card.querySelectorAll('[data-preset]').forEach(b => { b.onclick = () => { const want = PRESETS[b.dataset.preset] || []; card.querySelectorAll('input[type=checkbox]').forEach(c => { c.checked = want.indexOf(c.value) !== -1; }); say(msgId, b.dataset.preset + ' ticked. Press Save jobs to keep it.', 'ok'); }; });
   });
-  loadRoles(j);
 }
 /** Control room → Roles and levels (owner, 22 Nov 2026): a role or roles plus a level (Global, Region, Campus) for a member picked from the choir list. */
 async function loadAssign(quiet) {
@@ -5489,8 +5545,9 @@ function undoRow(x) {
   return '<div style="border-top:1px solid #eee;padding:10px 0">' + head + change + reason + act + '</div>';
 }
 /** Control room → Roles (Owner, 23 Nov 2026): starter and custom roles of admin jobs. Giving a role uses the same save as the job boxes. */
-async function loadRoles(j) {
-  let box = $('ctlroles'); if (!box) { box = document.createElement('div'); box.id = 'ctlroles'; box.style.marginTop = '16px'; $('ctlpeople').insertAdjacentElement('afterend', box); }
+async function loadRoles(j, target) {
+  const roleMsg = target ? 'mpeople' : 'm21';
+  let box = target || $('ctlroles'); if (!box) { box = document.createElement('div'); box.id = 'ctlroles'; box.style.marginTop = '16px'; $('ctlpeople').insertAdjacentElement('afterend', box); }
   let r; try { r = await call({action: 'owner.roles.list', token}); } catch (e) { return; }
   if (r.signedOut) { signedOutNow(); return; }
   if (!r.ok) { box.innerHTML = ''; return; }
@@ -5507,12 +5564,12 @@ async function loadRoles(j) {
     '<details class="gfsec" style="margin-top:12px"><summary><span><b>Make a new role</b><span>Tick the jobs</span></span></summary><div>' + editor(null) + '</div></details>' +
     (admins.length ? '<p class="sub" style="font-weight:600;margin:12px 0 4px">Give a role to an Admin</p><label class="lb">Admin<select id="rlwho" class="in" data-native="1">' + admins.map(a => '<option value="' + esc(a.email) + '">' + esc(a.name) + '</option>').join('') + '</select></label><label class="lb" style="margin-top:8px">Role<select id="rlpick" class="in" data-native="1">' + pick.map(x => '<option value="' + esc(x.id) + '">' + esc(x.name) + '</option>').join('') + '</select></label><div class="gfaddr" style="margin-top:10px"><button type="button" class="btn red" id="rlgive">Give this role</button></div><p class="sub" style="margin:8px 0 0">Their jobs are set to exactly this role. Change them afterwards with the job boxes above.</p>' : '<p class="sub" style="margin:12px 0 0">No Admins yet to give a role to.</p>') + '</div>';
   const go = async q => {
-    let k; try { k = await call(Object.assign({token}, q)); } catch (e) { say('m21', 'Network problem. Try again.', 'bad'); return; }
+    let k; try { k = await call(Object.assign({token}, q)); } catch (e) { say(roleMsg, 'Network problem. Try again.', 'bad'); return; }
     if (k.signedOut) { signedOutNow(); return; }
-    say('m21', k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
+    say(roleMsg, k.ok ? (k.summary || 'Saved.') : (k.error || 'Could not save.'), k.ok ? 'ok' : 'bad');
     if (!k.ok) return;
     const s = await call({action: 'owner.state', token}).catch(() => null);
-    if (s && s.ok) drawControl(s); else loadRoles(j);
+    if (s && s.ok) { drawControl(s); if (target) loadRolesTab(); } else loadRoles(j, target);
   };
   box.querySelectorAll('.rl-copy').forEach(b => { b.onclick = () => { const p = r.presets.filter(x => x.id === b.dataset.id)[0]; if (p) go({action: 'owner.roles.save', name: p.name + ' (mine)', jobs: p.jobs}); }; });
   box.querySelectorAll('.rl-ed').forEach(el => {
@@ -6520,7 +6577,8 @@ function mbCard(m) {
     '<div class="actions" style="margin:6px 0 0">' + (m.status === 'Active' ? '<button class="btn red sm" type="button" data-mbedit="' + esc(m.memberId) + '">Edit details…</button><button class="btn line sm" type="button" data-mb="deactivate" data-id="' + esc(m.memberId) + '">Deactivate…</button>' : '<button class="btn line sm" type="button" data-mb="reactivate" data-id="' + esc(m.memberId) + '">Reactivate…</button>') +
     (MB.history ? '<button class="btn line sm" type="button" data-mb="history" data-id="' + esc(m.memberId) + '">Set dates…</button>' : '') + '</div><div class="mbslot"></div></div>';
 }
-async function loadMembers() {
+async function loadMembers() { const r = await loadMembersRaw(); applyFnGates(); return r; }
+async function loadMembersRaw() {
   try {
     const j = await call({action: 'member.list', token});
     if (j.signedOut) { signedOutNow(); return; }
